@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+	<base href="/">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+	<meta name="Content-Language" content="it" />
+	<meta name="robots" content="noindex,nofollow" />
+	<title>TodoMvc</title>
+	<link rel="stylesheet" href="css/main.min.css" />
+	<link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
+</head>
+
+<body class="page--todomvc">
+	<main app-component>
+		<div class="group--form">
+			<input type="text" class="control--text" placeholder="todo..." (input)="onInput($event)" (keyup)="$event.keyCode == 13 && onAddItem($event)" />
+			<button type="button" class="btn--add" [class]="{ disabled: !input.value }" (click)="onAddItem($event)"><i class="icon--add"></i></button>
+		</div>
+		<ul class="list">
+			<li class="list__item" todo-item-component [item]="item" *for="let item of items" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
+				<button type="button" class="btn--toggle" [style]="{ color: color }" (click)="onToggle(item)">
+					<i class="icon--check" *if="item.done"></i>
+					<i class="icon--circle" *if="!item.done"></i>
+				</button>
+				<div class="title" [style]="{ color: color }" [innerHTML]="item.name"></div>
+				<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+				<button type="button" class="btn--remove" [style]="{ color: color }" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+			</li>
+		</ul>
+		<!--
+		<div *for="let item of items">
+			<div>{{index}} {{count}} {{first}} {{last}} {{even}} {{odd}}</div>
+			<div>{{item | json}}</div>
+		</div>
+		-->
+		<div class="footer">
+			<a href="https://twitter.com/actarian" target="_blank" class="btn--twitter">
+				<i class="icon--twitter"></i>
+			</a>
+			<a href="https://github.com/actarian/rxcomp" target="_blank" class="btn--github">
+				<i class="icon--github"></i>
+			</a>
+		</div>
+	</main>
+	<script nomodule src="https://polyfill.io/v3/polyfill.min.js?features=es6" crossorigin="anonymous"></script>
+	<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
+	<script src="js/main.js"></script>
+</body>
+
+</html>

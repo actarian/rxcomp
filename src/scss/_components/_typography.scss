@@ -1,0 +1,59 @@
+body {
+	font-family: $font-primary;
+	font-weight: $font-light;
+	line-height: $line-height;
+	background: $background;
+	color: $foreground;
+
+	@include media-breakpoint-up(sm) {
+		font-size: $font-size;
+	}
+
+	@include media-breakpoint-down(xs) {
+		font-size: $font-size-xs;
+	}
+}
+
+b,
+strong {
+	font-weight: $font-semibold;
+}
+
+.h1,
+.h2,
+.h3,
+.h4,
+.h5 {
+	font-family: $font-primary;
+	font-weight: $font-semibold;
+}
+
+.h1 {
+	font-size: 4rem;
+	line-height: 1;
+	margin-bottom: 40px;
+}
+
+.h2 {
+	font-size: 3.5rem;
+	line-height: 1;
+	margin-bottom: 30px;
+}
+
+.h3 {
+	font-size: 3rem;
+	margin-bottom: 20px;
+}
+
+.h4 {
+	font-size: 2.5rem;
+	margin-bottom: 10px;
+}
+
+.h5 {
+	font-size: 2rem;
+}
+
+.h6 {
+	font-size: 1.5rem;
+}

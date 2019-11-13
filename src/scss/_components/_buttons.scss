@@ -1,0 +1,137 @@
+a,
+button,
+[ng-reflect-router-link],
+.btn {
+	display: inline-block;
+	padding: 0;
+	border: none;
+	outline: none;
+	background: none;
+	appearance: none;
+	cursor: pointer;
+	transition: ease-in-out 350ms;
+	transition-property: background-color, color, border, opacity;
+
+	&,
+	&:active,
+	&:focus,
+	&:hover,
+	&:visited {
+		color: inherit;
+		text-decoration: none;
+		outline: none;
+	}
+
+	/*
+	&:hover {
+		box-shadow: 0 10px 10px -5px rgba(0, 0, 0, 0.15);
+	}
+	*/
+
+	&[disabled] {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+}
+
+.btn--primary {
+	display: inline-block;
+
+	&:hover,
+	&:focus {
+
+		span {
+			color: #fff;
+			border-color: $foreground-primary;
+			background: $foreground-primary;
+			transition: all ease-in-out .2s;
+		}
+	}
+
+	span {
+		display: inline-block;
+		padding: 15px 50px;
+		font-size: 13px;
+		font-weight: $font-regular;
+		color: $foreground-primary;
+		border: 2px solid $foreground-primary;
+		border-radius: 500px;
+		transition: all ease-in-out .2s;
+		font-family: $font-primary;
+	}
+
+	b {
+		font-weight: $font-semibold;
+		text-transform: uppercase;
+	}
+
+	.section--negative & {
+		span {
+			color: $foreground-negative;
+			border-color: $foreground-negative;
+		}
+
+		&,
+		&:active,
+		&:focus,
+		&:hover,
+		&:visited {
+			span {
+				color: $foreground-negative;
+				border-color: $foreground-negative;
+			}
+		}
+	}
+
+	@include media-breakpoint-down(xs) {
+		display: block;
+	}
+}
+
+.btn--secondary {
+	display: inline-block;
+
+	span {
+		display: inline-block;
+		padding: 15px 50px;
+		text-transform: uppercase;
+		font-size: 13px;
+		font-weight: $font-semibold;
+		color: #fff;
+		background: $foreground-primary;
+		border-radius: 50px;
+		font-family: $font-primary;
+	}
+
+	&,
+	&:active,
+	&:focus,
+	&:hover,
+	&:visited {
+		span {
+			color: #fff;
+		}
+	}
+
+	.section--negative & {
+		span {
+			color: $foreground-negative;
+			border-color: $foreground-negative;
+		}
+
+		&,
+		&:active,
+		&:focus,
+		&:hover,
+		&:visited {
+			span {
+				color: $foreground-negative;
+				border-color: $foreground-negative;
+			}
+		}
+	}
+
+	@include media-breakpoint-down(xs) {
+		display: block;
+	}
+}

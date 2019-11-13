@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+	<base href="/">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+	<meta name="Content-Language" content="it" />
+	<meta name="robots" content="noindex,nofollow" />
+	<title>TodoMvc</title>
+	<link rel="stylesheet" href="css/main.css" />
+	<link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
+</head>
+
+<body class="page--test">
+	<main app-component>
+		<div todo-item-component [input]="items" (click)="onTodoItemClicked($event)">{{input.length}}</div>
+		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)">{{id + ' ' + input.value}}</div>
+		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" innerHTML="{{id + ' ' + input.value}}"></div>
+		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" [innerHTML]="id + ' ' + input.value"></div>
+		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" [innerHTML]="input | json"></div>
+		<div todo-item-component [input]="now" (click)="onTodoItemClicked($event)" [innerHTML]="input | date : 'it-IT' : { dateStyle: 'short' }"></div>
+		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" [innerHTML]="id + ' ' + input.value" *if="model.value"></div>
+		<div todo-item-component *for="let item in items" (click)="onTodoItemClicked($event)" [innerHTML]="title"></div>
+	</main>
+	<!--
+	<script nomodule src="https://polyfill.io/v3/polyfill.min.js?features=es6" crossorigin="anonymous"></script>
+	-->
+	<!--
+	<script src="js/vendors.js"></script>
+	-->
+	<script src="js/main.js"></script>
+</body>
+
+</html>

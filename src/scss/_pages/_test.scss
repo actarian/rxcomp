@@ -1,0 +1,44 @@
+.page--test {
+
+	main {
+		margin: 50px auto;
+		max-width: 400px;
+	}
+
+	[component] {
+		background: rgba(255, 0, 0, 0.1);
+		padding: 4px 10px;
+		margin-bottom: 1px;
+		font-size: 14px;
+	}
+
+	[todo-item-component] {
+		padding: 6px 10px;
+		margin-bottom: 3px;
+		border-radius: 3px;
+		font-size: 14px;
+		text-align: center;
+		color: white;
+	}
+
+	.section--index {
+		position: relative;
+		display: flex;
+		width: 100vw;
+		height: 100vh;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.menu--nav {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		text-align: center;
+	}
+
+	img {
+		max-width: 100%;
+	}
+
+}
