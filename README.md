@@ -16,7 +16,7 @@ ___
 * Modules
 * Components ```inputs```, ```outputs```, ```template```
 * Structures ```ForStructure```, ```IfStructure```
-* Directives ```ClassDirective```, ```EventDirective```, ```StyleDirective```
+* Directives ```ClassDirective```, ```EventDirective```, ```InnerHtmlDirective```, ```StyleDirective```
 * Pipes ```JsonPipe```
 * Declarative Syntax
 * OnPush Strategy
@@ -55,7 +55,7 @@ For CDN, you can use unpkg
 The global namespace for RxComp is `rxcomp`
 
 ```javascript
-import { ClassDirective, Component, EventDirective, ForStructure, IfStructure, JsonPipe, Module, StyleDirective } from 'rxcomp';
+import { ClassDirective, Component, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from 'rxcomp';
 ```
 ___
 
@@ -77,7 +77,7 @@ ___
 ## Bootstrapping Module
 
 ```javascript
-import { ClassDirective, EventDirective, ForStructure, IfStructure, JsonPipe, Module, StyleDirective } from 'rxcomp';
+import { ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from 'rxcomp';
 
 Module.use$({
 	factories: [
@@ -85,6 +85,7 @@ Module.use$({
 		EventDirective,
 		ForStructure,
 		IfStructure,
+		InnerHtmlDirective, 
 		StyleDirective,
 	],
 	pipes: [
@@ -156,12 +157,7 @@ onInit() {
 onState(state) {	
 }
 
-onParse() {
-
-}
-
 onDestroy() {
-
 }
 ```
 ___

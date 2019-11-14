@@ -2973,47 +2973,6 @@ button,
   -webkit-animation: slide-in-blurred-top 1.5s 1s cubic-bezier(0.23, 1, 0.32, 1) infinite both;
           animation: slide-in-blurred-top 1.5s 1s cubic-bezier(0.23, 1, 0.32, 1) infinite both; }
 
-.page--test main {
-  margin: 50px auto;
-  max-width: 400px; }
-
-.page--test [component] {
-  background: rgba(255, 0, 0, 0.1);
-  padding: 4px 10px;
-  margin-bottom: 1px;
-  font-size: 14px; }
-
-.page--test [todo-item-component] {
-  padding: 6px 10px;
-  margin-bottom: 3px;
-  border-radius: 3px;
-  font-size: 14px;
-  text-align: center;
-  color: white; }
-
-.page--test .section--index {
-  position: relative;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center; }
-
-.page--test .menu--nav {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  text-align: center; }
-
-.page--test img {
-  max-width: 100%; }
-
 .page--todomvc {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -3072,6 +3031,7 @@ button,
       -webkit-box-align: center;
           -ms-flex-align: center;
               align-items: center;
+      min-height: 15px;
       margin: 0;
       padding: 20px 0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.15); }

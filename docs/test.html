@@ -9,28 +9,43 @@
 	<meta name="Content-Language" content="it" />
 	<meta name="robots" content="noindex,nofollow" />
 	<title>TodoMvc</title>
-	<link rel="stylesheet" href="css/main.css" />
+	<link rel="stylesheet" href="css/main.min.css" />
 	<link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
 </head>
 
-<body class="page--test">
-	<main app-component>
-		<div todo-item-component [input]="items" (click)="onTodoItemClicked($event)">{{input.length}}</div>
-		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)">{{id + ' ' + input.value}}</div>
-		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" innerHTML="{{id + ' ' + input.value}}"></div>
-		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" [innerHTML]="id + ' ' + input.value"></div>
-		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" [innerHTML]="input | json"></div>
-		<div todo-item-component [input]="now" (click)="onTodoItemClicked($event)" [innerHTML]="input | date : 'it-IT' : { dateStyle: 'short' }"></div>
-		<div todo-item-component [input]="model" (click)="onTodoItemClicked($event)" [innerHTML]="id + ' ' + input.value" *if="model.value"></div>
-		<div todo-item-component *for="let item in items" (click)="onTodoItemClicked($event)" [innerHTML]="title"></div>
+<body class="page--todomvc">
+	<main test-component>
+		<ul class="list">
+			<li class="list__item">
+				<span *for="let [key, value] of items">[key {{key}}, value {{value}}], </span>
+			</li>
+			<li class="list__item">
+				<span *for="let [key, value] of object">[key {{key}}, value {{value}}], </span>
+			</li>
+			<li class="list__item" *for="let item of items">
+				[{{item}}] {{{index}}, {{count}}, {{first}}, {{last}}, {{even}}, {{odd}}}
+			</li>
+			<li class="list__item">{{object.a + ' ' + object.b}}</li>
+			<li class="list__item" innerHTML="{{object.a}}"></li>
+			<li class="list__item" innerHTML="{{object.a + ' ' + object.b}}"></li>
+			<li class="list__item" [innerHTML]="object.a"></li>
+			<li class="list__item" [innerHTML]="object.a + ' ' + object.b"></li>
+			<li class="list__item" [innerHTML]="object | json"></li>
+			<li class="list__item" [innerHTML]="date | date : 'it-IT' : { dateStyle: 'short' }"></li>
+			<li class="list__item" *if="object.a">true</li>
+		</ul>
+		<div class="footer">
+			<a href="https://twitter.com/actarian" target="_blank" class="btn--twitter">
+				<i class="icon--twitter"></i>
+			</a>
+			<a href="https://github.com/actarian/rxcomp" target="_blank" class="btn--github">
+				<i class="icon--github"></i>
+			</a>
+		</div>
 	</main>
-	<!--
 	<script nomodule src="https://polyfill.io/v3/polyfill.min.js?features=es6" crossorigin="anonymous"></script>
-	-->
-	<!--
-	<script src="js/vendors.js"></script>
-	-->
-	<script src="js/main.js"></script>
+	<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
+	<script src="js/test.js"></script>
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-import { ClassDirective, EventDirective, ForStructure, IfStructure, JsonPipe, Module, StyleDirective } from '../../lib/rxcomp';
+import { ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from '../../lib/rxcomp';
 import AppComponent from './app.component';
 import DatePipe from './date/date.pipe';
 import TodoItemComponent from './todo-item/todo-item.component';
@@ -9,6 +9,7 @@ Module.use$({
 		EventDirective,
 		ForStructure,
 		IfStructure,
+		InnerHtmlDirective,
 		StyleDirective,
 		TodoItemComponent,
 	],

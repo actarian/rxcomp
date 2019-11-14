@@ -1,6 +1,6 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('rxjs'), require('rxjs/operators')) :
-  typeof define === 'function' && define.amd ? define('main', ['rxjs', 'rxjs/operators'], factory) :
+  typeof define === 'function' && define.amd ? define('test', ['rxjs', 'rxjs/operators'], factory) :
   (global = global || self, factory(global.rxjs, global.rxjs.operators));
 }(this, (function (rxjs, operators) { 'use strict';
 
@@ -1235,248 +1235,6 @@
     selector: "[[style]]"
   };
 
-  var LocalStorageService =
-  /*#__PURE__*/
-  function () {
-    function LocalStorageService() {}
-
-    LocalStorageService.delete = function _delete(name) {
-      if (this.isLocalStorageSupported()) {
-        window.localStorage.removeItem(name);
-      }
-    };
-
-    LocalStorageService.exist = function exist(name) {
-      if (this.isLocalStorageSupported()) {
-        return window.localStorage[name] !== undefined;
-      }
-    };
-
-    LocalStorageService.get = function get(name) {
-      var value = null;
-
-      if (this.isLocalStorageSupported() && window.localStorage[name] !== undefined) {
-        try {
-          value = JSON.parse(window.localStorage[name]);
-        } catch (e) {
-          console.log('LocalStorageService.get.error parsing', name, e);
-        }
-      }
-
-      return value;
-    };
-
-    LocalStorageService.set = function set(name, value) {
-      if (this.isLocalStorageSupported()) {
-        try {
-          var cache = [];
-          var json = JSON.stringify(value, function (key, value) {
-            if (typeof value === 'object' && value !== null) {
-              if (cache.indexOf(value) !== -1) {
-                // Circular reference found, discard key
-                return;
-              }
-
-              cache.push(value);
-            }
-
-            return value;
-          });
-          window.localStorage.setItem(name, json);
-        } catch (e) {
-          console.log('LocalStorageService.set.error serializing', name, value, e);
-        }
-      }
-    };
-
-    LocalStorageService.isLocalStorageSupported = function isLocalStorageSupported() {
-      if (this.supported) {
-        return true;
-      }
-
-      var supported = false;
-
-      try {
-        supported = 'localStorage' in window && window.localStorage !== null;
-
-        if (supported) {
-          window.localStorage.setItem('test', '1');
-          window.localStorage.removeItem('test');
-        } else {
-          supported = false;
-        }
-      } catch (e) {
-        supported = false;
-      }
-
-      this.supported = supported;
-      return supported;
-    };
-
-    return LocalStorageService;
-  }();
-
-  var StoreService =
-  /*#__PURE__*/
-  function () {
-    function StoreService() {}
-
-    StoreService.set = function set(items) {
-      LocalStorageService.set('items', items);
-      return this.get$().next(items);
-    };
-
-    StoreService.get$ = function get$() {
-      if (this.store$) {
-        return this.store$;
-      }
-
-      var items = LocalStorageService.get('items');
-
-      if (!items) {
-        items = [{
-          id: 3,
-          name: 'cookies',
-          date: new Date(Date.now())
-        }, {
-          id: 2,
-          name: 'pizza',
-          date: new Date(2019, 3, 22, 12)
-        }, {
-          id: 1,
-          name: 'bread',
-          date: new Date(2019, 0, 6, 12)
-        }];
-        LocalStorageService.set('items', items);
-      }
-
-      return this.store$ = new rxjs.BehaviorSubject(items);
-    };
-
-    StoreService.add$ = function add$(patch) {
-      var item = Object.assign({
-        id: Date.now(),
-        date: new Date(Date.now())
-      }, patch);
-      var items = this.store$.getValue();
-      items.unshift(item);
-      this.set(items);
-      return rxjs.of(item);
-    };
-
-    StoreService.patch$ = function patch$(patch) {
-      var items = this.store$.getValue();
-      var item = items.find(function (x) {
-        return x.id === patch.id;
-      });
-
-      if (item) {
-        Object.assign(item, patch);
-        this.set(items);
-      }
-
-      return rxjs.of(item);
-    };
-
-    StoreService.delete$ = function delete$(item) {
-      var items = this.store$.getValue();
-      var index = items.indexOf(item);
-
-      if (index !== -1) {
-        items.splice(index, 1);
-        this.set(items);
-      }
-
-      return rxjs.of(item);
-    };
-
-    return StoreService;
-  }();
-
-  var AppComponent =
-  /*#__PURE__*/
-  function (_Component) {
-    _inheritsLoose(AppComponent, _Component);
-
-    function AppComponent() {
-      return _Component.apply(this, arguments) || this;
-    }
-
-    var _proto = AppComponent.prototype;
-
-    _proto.onInit = function onInit() {
-      var _this = this;
-
-      var context = Module.getContext(this);
-      this.input = context.node.querySelector('.control--text');
-      this.items = [];
-      this.store$ = StoreService.get$();
-      this.store$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (items) {
-        // console.log('AppComponent.store$', items);
-        _this.items = items;
-
-        _this.pushState();
-      });
-      /*
-      this.input$().pipe(
-      	takeUntil(this.unsubscribe$)
-      ).subscribe(input => {
-      	// console.log(input);
-      	this.input = input;
-      });
-      */
-      // console.log('AppComponent', Object.keys(this).join(','));
-    }
-    /*
-    input$() {
-    	const context = Module.getContext(this);
-    	const input = context.node.querySelector('.control--text');
-    	return fromEvent(input, 'input').pipe(
-    		map(event => input.value),
-    		auditTime(200),
-    		distinctUntilChanged()
-    	);
-    }
-    */
-    ;
-
-    _proto.onInput = function onInput($event) {
-      // console.log('AppComponent.onInput', $event, this);
-      this.pushState();
-    };
-
-    _proto.onAddItem = function onAddItem($event) {
-      var _this2 = this;
-
-      if (this.input.value) {
-        StoreService.add$({
-          name: this.input.value
-        }).subscribe(function (item) {
-          // console.log('AppComponent.onAddItem', item);
-          _this2.input.value = null;
-        });
-      }
-    };
-
-    _proto.onToggleItem = function onToggleItem(item) {
-      StoreService.patch$({
-        id: item.id,
-        done: !item.done
-      }).subscribe(function (item) {// console.log('AppComponent.onToggleItem', item);
-      });
-    };
-
-    _proto.onRemoveItem = function onRemoveItem(item) {
-      StoreService.delete$(item).subscribe(function (item) {// console.log('AppComponent.onRemoveItem', item);
-      });
-    };
-
-    return AppComponent;
-  }(Component);
-  AppComponent.meta = {
-    selector: '[app-component]'
-  };
-
   var DatePipe =
   /*#__PURE__*/
   function () {
@@ -1503,74 +1261,39 @@
     name: 'date'
   };
 
-  var colors = [{
-    hex: '#073B4C'
-  }, {
-    hex: '#EF476F'
-  }, {
-    hex: '#1CCC9D'
-  }, {
-    hex: '#118AB2'
-  }, {
-    hex: '#EFC156'
-  }];
-  function color(index, alpha) {
-    return hexToRgb(colors[index % colors.length].hex, alpha);
-  }
-  function hexToRgb(hex, a) {
-    var r = parseInt(hex.slice(1, 3), 16);
-    var g = parseInt(hex.slice(3, 5), 16);
-    var b = parseInt(hex.slice(5, 7), 16);
-
-    if (a) {
-      return "rgba(" + r + "," + g + "," + b + "," + a + ")";
-    } else {
-      return "rgb(" + r + "," + g + "," + b + ")";
-    }
-  }
-
-  var TodoItemComponent =
+  var TestComponent =
   /*#__PURE__*/
   function (_Component) {
-    _inheritsLoose(TodoItemComponent, _Component);
+    _inheritsLoose(TestComponent, _Component);
 
-    function TodoItemComponent() {
+    function TestComponent() {
       return _Component.apply(this, arguments) || this;
     }
 
-    var _proto = TodoItemComponent.prototype;
+    var _proto = TestComponent.prototype;
 
-    _proto.onState = function onState(state) {
-      // console.log('onState', state);
-      this.backgroundColor = color(this.item.id, 0.15);
-      this.color = color(this.item.id);
+    _proto.onInit = function onInit() {
+      this.items = [1, 2, 3, 4];
+      this.object = {
+        a: 1,
+        b: 2,
+        c: 3,
+        d: 4
+      };
+      this.date = new Date();
     };
 
-    _proto.onToggle = function onToggle($event) {
-      // console.log('onToggle', $event);
-      this.toggle.next($event);
-    };
-
-    _proto.onRemove = function onRemove($event) {
-      // console.log('onRemove', $event);
-      this.remove.next($event);
-    };
-
-    return TodoItemComponent;
+    return TestComponent;
   }(Component);
-  TodoItemComponent.meta = {
-    selector: '[todo-item-component]',
-    inputs: ['item'],
-    outputs: ['toggle', 'remove'],
-    template:
-    /* html */
-    "\n\t\t<button type=\"button\" class=\"btn--toggle\" [style]=\"{ color: color }\" (click)=\"onToggle(item)\">\n\t\t\t<i class=\"icon--check\" *if=\"item.done\"></i>\n\t\t\t<i class=\"icon--circle\" *if=\"!item.done\"></i>\n\t\t</button>\n\t\t<div class=\"title\" [style]=\"{ color: color }\" [innerHTML]=\"item.name\"></div>\n\t\t<div class=\"date\" [style]=\"{ background: backgroundColor, color: color }\" [innerHTML]=\"item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }\"></div>\n\t\t<button type=\"button\" class=\"btn--remove\" [style]=\"{ color: color }\" (click)=\"onRemove(item)\"><i class=\"icon--remove\"></i></button>\n\t"
-  };
 
+  TestComponent.meta = {
+    selector: '[test-component]'
+  };
   Module.use$({
-    factories: [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective, TodoItemComponent],
+    debug: true,
+    factories: [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective],
     pipes: [DatePipe, JsonPipe],
-    bootstrap: AppComponent
+    bootstrap: TestComponent
   }).subscribe(function (createdInstances) {// console.log('createdInstances', createdInstances);
   });
 

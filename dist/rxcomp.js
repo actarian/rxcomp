@@ -62,7 +62,13 @@
 
       this.pipes = pipes;
       var bootstrap = options.bootstrap;
-      this.root = this.makeInstance(document.querySelector(bootstrap.meta.selector), bootstrap);
+      this.node = document.querySelector(bootstrap.meta.selector);
+
+      if (!this.node) {
+        throw "missing node " + bootstrap.meta.selector;
+      }
+
+      this.root = this.makeInstance(this.node, bootstrap, bootstrap.meta.selector, window);
       this.selectors = Module.unwrapSelectors(options.factories);
     }
 
@@ -71,7 +77,7 @@
     _proto.use$ = function use$() {
       var _this = this;
 
-      return rxjs.of(Module.querySelectorsAll(document, this.selectors, [])).pipe(operators.filter(function (matches) {
+      return rxjs.of(Module.querySelectorsAll(this.node, this.selectors, [])).pipe(operators.filter(function (matches) {
         return matches.length > 0;
       }), operators.map(function (matches) {
         return matches.map(function (match) {
@@ -197,7 +203,8 @@
 
       // console.log('node', node.childNodes.length, node);
       var parse_eval_ = function parse_eval_() {
-        var expression = arguments.length <= 1 ? undefined : arguments[1]; // console.log('expression', expression);
+        var expression = arguments.length <= 1 ? undefined : arguments[1];
+        console.log('expression', expression);
 
         var parse_func_ = _this4.makeFunction(expression);
 
@@ -205,50 +212,37 @@
       };
 
       var parse_replace_ = function parse_replace_(text) {
-        return text.replace(new RegExp('\{{2}(.*?)\}{2}(?!})', 'g'), parse_eval_);
+        console.log(text);
+        return text.replace(/{{2}(?!{)(.*?)}{2}/g, parse_eval_);
       };
-
+      /*
       if (node.hasAttribute('[innerHTML]')) {
-        var innerHTML = "{{" + node.getAttribute('[innerHTML]') + "}}";
-        node.innerHTML = parse_replace_(innerHTML);
+      	const innerHTML = `{{${node.getAttribute('[innerHTML]')}}}`;
+      	node.innerHTML = parse_replace_(innerHTML);
       } else if (node.hasAttribute('innerHTML')) {
-        var _innerHTML = node.getAttribute('innerHTML');
-
-        node.innerHTML = parse_replace_(_innerHTML);
+      	const innerHTML = node.getAttribute('innerHTML');
+      	node.innerHTML = parse_replace_(innerHTML);
       } else {
-        for (var i = 0; i < node.childNodes.length; i++) {
-          var child = node.childNodes[i]; // console.log('node', child, child.nodeType);
+      	}
+      */
 
-          if (child.nodeType === 1) {
-            // if (!has_scope_(child)) {
-            // if (!child.hasAttribute(`instance`)) {
-            this.parse(child, instance); // }
-          } else if (child.nodeType === 3) {
-            // console.log(child);
-            var text = child.nodeValue;
-            var replacedText = parse_replace_(text);
 
-            if (text !== replacedText) {
-              node.setAttribute('innerHTML', text);
-              var textNode = document.createTextNode(replacedText);
-              node.replaceChild(textNode, child);
-            }
+      for (var i = 0; i < node.childNodes.length; i++) {
+        var child = node.childNodes[i];
+
+        if (child.nodeType === 1) {
+          this.parse(child, instance);
+        } else if (child.nodeType === 3) {
+          var text = child.nodeValue;
+          var replacedText = parse_replace_(text);
+
+          if (text !== replacedText) {
+            // node.setAttribute('innerHTML', text);
+            var textNode = document.createTextNode(replacedText);
+            node.replaceChild(textNode, child);
           }
         }
       }
-
-      if (typeof instance.onParse === 'function') {
-        scope.onParse();
-      }
-      /*
-      const scope = this.getScope(node);
-      if (scope) {
-      	if (typeof instance.onParse === 'function') {
-      		scope.onParse();
-      	}
-      }
-      */
-
     };
 
     _proto.resolve = function resolve(expressionFunc, state, payload) {
@@ -388,12 +382,14 @@
           }
 
           return "pipes." + name + ".transform(" + expression + "," + params.join(',') + ")";
-        }, expression); // console.log('expression', expression);
-
+        }, expression);
+        console.log('expression', expression);
         var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\tconst pipes = module.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
         return expression_func;
       } else {
-        var _expression_func = new Function(this.options.debug ? "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\tlet value;\n\t\t\t\t\ttry {\n\t\t\t\t\t\tvalue = " + expression + ";\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\tconsole.error(e);\n\t\t\t\t\t\tvalue = '<span style=\"color:red;\">' + e.message + ' in expression ' + expression + '</span>';\n\t\t\t\t\t}\n\t\t\t\t\treturn value;\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}" : "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+        console.log('expression', expression);
+
+        var _expression_func = new Function(this.options.debug ? "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\tlet value;\n\t\t\t\t\ttry {\n\t\t\t\t\t\tvalue = " + expression + ";\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\tvalue = e.message;\n\t\t\t\t\t\t// console.error(e.message);\n\t\t\t\t\t\t// '<span style=\"color:red;\">' + e.message + ' in expression ' + expression + '</span>';\n\t\t\t\t\t}\n\t\t\t\t\treturn value;\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}" : "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
 
         return _expression_func;
       }
@@ -854,24 +850,36 @@
   function (_Context) {
     _inheritsLoose(ForItem, _Context);
 
-    function ForItem($key, $value, index, array, parentInstance) {
-      var _Context$call;
-
+    function ForItem(key, $key, value, $value, index, count, parentInstance) {
       var _this;
 
-      _this = _Context.call(this, parentInstance, (_Context$call = {}, _Context$call[$key] = {
-        get: function get() {
-          return this.$value;
-        },
-        set: function set(value) {
-          this.$value = value;
-        }
-      }, _Context$call)) || this;
-      _this.$key = $key;
-      _this.$value = $value;
-      _this.index = index;
-      _this.count = array.length; // console.log(this);
+      console.log(key, $key, value, $value);
+      _this = _Context.call(this, parentInstance) || this;
+      /*
+      super(parentInstance, {
+      	[key]: {
+      		get: function() {
+      			return this.$key;
+      		},
+      		set: function(key) {
+      			this.$key = key;
+      		}
+      	},
+      	[value]: {
+      		get: function() {
+      			return this.$value;
+      		},
+      		set: function(value) {
+      			this.$value = value;
+      		}
+      	}
+      });
+      */
 
+      _this[key] = $key;
+      _this[value] = $value;
+      _this.index = index;
+      _this.count = count;
       return _this;
     }
 
@@ -927,22 +935,9 @@
       forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
       var expression = node.getAttribute('*for');
       node.removeAttribute('*for');
-
-      if (expression === null) {
-        throw 'invalid for';
-      }
-
-      if (expression.trim().indexOf('let') !== 0) {
-        throw 'invalid for';
-      }
-
-      expression = expression.substr(3);
-      expression = expression.split(' of ');
-      var key = expression[0].trim();
-      var data = expression[1].trim();
-      this.forFunction = module.makeFunction(data);
-      this.key = key;
-      this.items = []; // console.log('expression', expression);
+      var tokens = this.tokens = this.getExpressionTokens(expression);
+      this.forFunction = module.makeFunction(tokens.iterable);
+      this.instances = [];
     };
 
     _proto.onState = function onState(state) {
@@ -950,20 +945,25 @@
       var module = context.module;
       var node = context.node; // resolve
 
-      var items = module.resolve(this.forFunction, state, this) || [];
-      var total = items.length;
-      var previous = this.items.length;
+      var tokens = this.tokens;
+      var result = module.resolve(this.forFunction, state, this) || [];
+      var isArray = Array.isArray(result);
+      var array = isArray ? result : Object.keys(result);
+      var total = array.length;
+      var previous = this.instances.length;
       var nextSibling = this.forbegin.nextSibling;
 
       for (var i = 0; i < Math.max(previous, total); i++) {
         if (i < total) {
-          var item = items[i];
+          var key = isArray ? i : array[i];
+          var value = isArray ? array[key] : result[key];
 
           if (i < previous) {
             // update
             var clonedNode = nextSibling;
-            var instance = this.items[i];
-            instance[this.key] = item;
+            var instance = this.instances[i];
+            instance[tokens.key] = key;
+            instance[tokens.value] = value;
             instance.pushState();
             module.parse(clonedNode, instance);
             nextSibling = nextSibling.nextSibling;
@@ -973,18 +973,18 @@
 
             this.forend.parentNode.insertBefore(_clonedNode, this.forend);
 
-            var _instance = new ForItem(this.key, item, i, items, context.parentInstance);
+            var _instance = new ForItem(tokens.key, key, tokens.value, value, i, total, context.parentInstance);
 
-            var instances = module.compile(_clonedNode, _instance);
+            module.compile(_clonedNode, _instance);
             module.parse(_clonedNode, _instance);
             nextSibling = _clonedNode.nextSibling;
-            this.items.push(_instance);
+            this.instances.push(_instance);
           }
         } else {
           // remove
-          var _item = this.items[i];
+          var _instance2 = this.instances[i];
 
-          var _context = Module.getContext(_item);
+          var _context = Module.getContext(_instance2);
 
           var _node = _context.node;
 
@@ -994,27 +994,73 @@
         }
       }
 
-      this.items.length = items.length;
+      this.instances.length = array.length;
+      console.log(this.instances, tokens);
+    };
+
+    _proto.getExpressionTokens = function getExpressionTokens(expression) {
+      if (expression === null) {
+        throw 'invalid for';
+      }
+
+      if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
+        throw 'invalid for';
+      }
+
+      var expressions = expression.split(';').map(function (x) {
+        return x.trim();
+      }).filter(function (x) {
+        return x !== '';
+      });
+      var forExpressions = expressions[0].split(' of ').map(function (x) {
+        return x.trim();
+      });
+      var value = forExpressions[0].replace(/\s*let\s*/, '');
+      var iterable = forExpressions[1];
+      var key = 'index';
+      var keyValueMatches = value.match(/\[(.+)\s*,\s*(.+)\]/);
+
+      if (keyValueMatches) {
+        key = keyValueMatches[1];
+        value = keyValueMatches[2];
+      }
+
+      if (expressions.length > 1) {
+        var indexExpressions = expressions[1].split(/\s*let\s*|\s*=\s*index/).map(function (x) {
+          return x.trim();
+        });
+
+        if (indexExpressions.length === 3) {
+          key = indexExpressions[1];
+        }
+      }
+
+      return {
+        key: key,
+        value: value,
+        iterable: iterable
+      };
     }
     /*
     onState_unoptimized(state) {
     	const context = Module.getContext(this);
     	const module = context.module;
     	const node = context.node;
+    	const tokens = this.tokens;
     	while (this.forbegin.nextSibling !== this.forend) {
     		const nextSibling = this.forbegin.nextSibling;
     		this.forbegin.parentNode.removeChild(nextSibling);
     		module.remove(nextSibling);
     	}
-    	const items = module.resolve(this.forFunction, state, this).map((value, index, items) => {
-    		const item = new ForItem(this.key, value, index, items, this.parent);
+    	const array = module.resolve(this.forFunction, state, this).map((value, index, array) => {
+    		const item = new ForItem(tokens.key, index, tokens.value, value, array, this.parent);
     		const clonedNode = node.cloneNode(true);
     		this.forend.parentNode.insertBefore(clonedNode, this.forend);
     		const instances = module.compile(clonedNode, item);
     		module.parse(clonedNode, item);
     		return item;
     	});
-    	// console.log('ForStructure.onState', items);
+    	// console.log('ForStructure.onState', array);
     }
     */
     ;
@@ -1078,6 +1124,42 @@
     selector: '[*if]'
   };
 
+  var InnerHtmlDirective =
+  /*#__PURE__*/
+  function (_Directive) {
+    _inheritsLoose(InnerHtmlDirective, _Directive);
+
+    function InnerHtmlDirective() {
+      return _Directive.apply(this, arguments) || this;
+    }
+
+    var _proto = InnerHtmlDirective.prototype;
+
+    _proto.onInit = function onInit() {
+      var context = Module.getContext(this);
+      var module = context.module;
+      var node = context.node;
+      var selector = context.selector;
+      var expression = node.getAttribute(selector);
+      this.innerHtmlFunction = module.makeFunction(expression);
+      console.log('InnerHtmlDirective.onInit', expression, selector);
+    };
+
+    _proto.onState = function onState(state) {
+      var context = Module.getContext(this);
+      var module = context.module;
+      var node = context.node;
+      var innerHTML = module.resolve(this.innerHtmlFunction, state, this); // node.innerHTML = innerHTML;
+
+      console.log('InnerHtmlDirective.onState', state, innerHTML);
+    };
+
+    return InnerHtmlDirective;
+  }(Directive);
+  InnerHtmlDirective.meta = {
+    selector: "[[innerHTML]],[innerHTML]"
+  };
+
   var JsonPipe =
   /*#__PURE__*/
   function () {
@@ -1134,6 +1216,7 @@
   exports.EventDirective = EventDirective;
   exports.ForStructure = ForStructure;
   exports.IfStructure = IfStructure;
+  exports.InnerHtmlDirective = InnerHtmlDirective;
   exports.JsonPipe = JsonPipe;
   exports.Module = Module;
   exports.Structure = Structure;
