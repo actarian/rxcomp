@@ -26,6 +26,45 @@
     subClass.__proto__ = superClass;
   }
 
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  function isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    if (Reflect.construct.sham) return false;
+    if (typeof Proxy === "function") return true;
+
+    try {
+      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function _construct(Parent, args, Class) {
+    if (isNativeReflectConstruct()) {
+      _construct = Reflect.construct;
+    } else {
+      _construct = function _construct(Parent, args, Class) {
+        var a = [null];
+        a.push.apply(a, args);
+        var Constructor = Function.bind.apply(Parent, a);
+        var instance = new Constructor();
+        if (Class) _setPrototypeOf(instance, Class.prototype);
+        return instance;
+      };
+    }
+
+    return _construct.apply(null, arguments);
+  }
+
   var Directive = function Directive() {};
   Directive.meta = {
     selector: '[(directive)]'
@@ -36,8 +75,88 @@
     selector: '[component]'
   };
 
+  var Context =
+  /*#__PURE__*/
+  function (_Component) {
+    _inheritsLoose(Context, _Component);
+
+    function Context(parent, descriptors) {
+      var _this;
+
+      _this = _Component.call(this) || this;
+      var parentPrototypeDescriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf(parent));
+      delete parentPrototypeDescriptors.constructor;
+      Object.keys(parentPrototypeDescriptors).forEach(function (key) {
+        console.log('1', key);
+        var descriptor = parentPrototypeDescriptors[key];
+
+        if (typeof descriptor.value == "function") {
+          descriptor.value = function () {
+            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+
+            parent[key].apply(parent, args);
+          };
+        }
+      }); // console.log('parentPrototypeDescriptors', parentPrototypeDescriptors);
+
+      var parentDescriptors = Object.getOwnPropertyDescriptors(parent);
+      Object.keys(parentDescriptors).forEach(function (key) {
+        switch (key) {
+          case '$id':
+          case 'state$':
+          case 'unsubscribe$':
+          case 'pushState':
+            break;
+
+          default:
+            console.log('2', key);
+            var descriptor = parentDescriptors[key];
+
+            if (typeof descriptor.value == "function") {
+              descriptor.value = function () {
+                for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                  args[_key2] = arguments[_key2];
+                }
+
+                parent[key].apply(parent, args);
+              };
+            }
+
+        }
+      });
+      /*
+      // console.log('parentDescriptors', parentDescriptors);
+      Object.defineProperties(this, Object.assign(parentPrototypeDescriptors, parentDescriptors, {
+      	state$: {
+      		value: new BehaviorSubject(this),
+      		writable: false,
+      		enumerable: false,
+      	},
+      	unsubscribe$: {
+      		value: new Subject(),
+      		writable: false,
+      		enumerable: false,
+      	}
+      }, descriptors));
+      */
+
+      return _this;
+    }
+    /*
+    pushState() {
+    	this.state$.next(this);
+    }
+    */
+
+
+    return Context;
+  }(Component);
+
   var ID = 0;
   var CONTEXTS = {};
+  var NODES = {};
 
   var Module =
   /*#__PURE__*/
@@ -82,23 +201,45 @@
       }), operators.map(function (matches) {
         return matches.map(function (match) {
           return _this.makeInstance(match.node, match.factory, match.selector);
+        }).filter(function (x) {
+          return x;
+        });
+      }), operators.tap(function (instances) {
+        return instances.forEach(function (instance) {
+          // parse component text nodes
+          var context = Module.getContext(instance);
+          var isComponent = context.factory.prototype instanceof Component;
+
+          if (isComponent) {
+            _this.parse(context.node, instance);
+          }
         });
       }), operators.shareReplay(1));
     };
 
-    _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance) {
+    _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
+      var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
+      console.log('Module.makeContext', context, context.instance, context.node);
+      return context;
+    };
+
+    _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args) {
       var _this2 = this;
 
-      if (node.parentNode) {
+      if (parentInstance || node.parentNode) {
         var isComponent = factory.prototype instanceof Component;
-        var meta = factory.meta;
+        var meta = factory.meta; // collect parentInstance scope
+
         parentInstance = parentInstance || this.getParentScope(node.parentNode);
 
         if (!parentInstance) {
           return;
-        }
+        } // creating factory instance
 
-        var instance = new factory();
+
+        var instance = _construct(factory, args || []); // injecting state$ and unsubscribe$ subjects
+
+
         Object.defineProperties(instance, {
           state$: {
             value: new rxjs.BehaviorSubject(instance),
@@ -110,55 +251,54 @@
             writable: false,
             enumerable: false
           }
-        });
+        }); // injecting instance pushState method
+
+        var moduleRef = this;
 
         instance.pushState = function () {
-          this.state$.next(this);
-        };
+          if (isComponent) {
+            moduleRef.parse(node, instance);
+          }
 
-        var context = Module.setContext(this, instance, parentInstance, node, factory, selector);
+          this.state$.next(this);
+        }; // creating instance context
+
+
+        var context = Module.makeContext(this, instance, parentInstance, node, factory, selector); // creating component input and outputs
 
         if (isComponent) {
           context.inputs = this.makeInputs(meta, instance);
           context.outputs = this.makeOutputs(meta, instance);
-        }
+        } // calling onInit event
+
 
         if (typeof instance.onInit === 'function') {
           instance.onInit();
-        }
+        } // subscribe to parent state
+
 
         if (parentInstance.state$) {
           parentInstance.state$.pipe( // filter(() => node.parentNode),
           operators.takeUntil(instance.unsubscribe$)).subscribe(function (state) {
+            // resolve component input outputs
             if (isComponent) {
               _this2.resolveInputsOutputs(instance, state);
-            }
+            } // calling onState event with parentInstance
+
 
             if (typeof instance.onState === 'function') {
               // console.log('onState', instance.constructor.meta.selector, state);
               instance.onState(state);
-              /*
-              const context = Module.getContext(instance);
-              this.parse(context.node, instance);
-              */
-            }
+            } // push instance state for subscribers
+
 
             instance.pushState();
-
-            if (isComponent) {
-              _this2.parse(node, instance);
-            }
           });
         }
         /*
-        if (instance.state$) {
-        	instance.state$.pipe(
-        		takeUntil(instance.unsubscribe$)
-        	).subscribe(state => {
-        		if (isComponent) {
-        			this.parse(node, instance);
-        		}
-        	});
+        // parse component text nodes
+        if (isComponent) {
+        	this.parse(node, instance);
         }
         */
 
@@ -189,27 +329,22 @@
         }
       });
       ids.forEach(function (id) {
-        return delete CONTEXTS[id];
+        return Module.deleteContext(id);
       }); // console.log('Module.remove', ids);
 
       return node;
     };
 
-    _proto.compile = function compile(node, parent) {
+    _proto.compile = function compile(node, context) {
       var _this3 = this;
 
-      if (parent) {
-        var $id = ++ID;
-        parent.$id = $id;
-        var context = Module.setContext(this, parent, parent.parentInstance, node, parent.constructor);
-      }
-
+      console.log('Module.compile', context);
       var matches = Module.querySelectorsAll(node, this.selectors, []);
       var instances = matches.map(function (match) {
-        var instance = _this3.makeInstance(match.node, match.factory, match.selector, parent);
+        var instance = _this3.makeInstance(match.node, match.factory, match.selector, context ? context.instance : undefined);
 
         if (match.factory.prototype instanceof Component) {
-          parent = undefined; // !!!
+          context = undefined; // !!!
         }
 
         return instance;
@@ -219,22 +354,24 @@
       return instances;
     };
 
-    _proto.parse = function parse(node, instance) {
+    _proto.evaluate = function evaluate(text, instance) {
       var _this4 = this;
 
-      // console.log('node', node.childNodes.length, node);
       var parse_eval_ = function parse_eval_() {
         var expression = arguments.length <= 1 ? undefined : arguments[1]; // console.log('expression', expression);
 
         var parse_func_ = _this4.makeFunction(expression);
 
         return _this4.resolve(parse_func_, instance, instance);
-      };
+      }; // console.log(text);
 
-      var parse_replace_ = function parse_replace_(text) {
-        // console.log(text);
-        return text.replace(/{{2}(?!{)(.*?)}{2}/g, parse_eval_);
-      };
+
+      return text.replace(/\{{2}(?!\{)(.*?\}*)\}{2}/g, parse_eval_);
+    };
+
+    _proto.parse = function parse(node, instance) {
+      // console.log('node', node.childNodes.length, node);
+
       /*
       if (node.hasAttribute('[innerHTML]')) {
       	const innerHTML = `{{${node.getAttribute('[innerHTML]')}}}`;
@@ -243,11 +380,10 @@
       	const innerHTML = node.getAttribute('innerHTML');
       	node.innerHTML = parse_replace_(innerHTML);
       } else {
-      	}
+      	// childNodes
+      }
       */
       // console.log(node, instance);
-
-
       for (var i = 0; i < node.childNodes.length; i++) {
         var child = node.childNodes[i];
 
@@ -255,9 +391,10 @@
           this.parse(child, instance);
         } else if (child.nodeType === 3) {
           var text = child.nodeValue;
-          var replacedText = parse_replace_(text);
+          var replacedText = this.evaluate(text, instance);
 
           if (text !== replacedText) {
+            // !!! save in var
             // node.setAttribute('innerHTML', text);
             var textNode = document.createTextNode(replacedText);
             node.replaceChild(textNode, child);
@@ -326,8 +463,11 @@
         return window;
       }
 
-      var instance = Module.getComponentInstanceByNode(node);
-      return instance;
+      var context = Module.getContextByNode(node);
+
+      if (context) {
+        return context.instance;
+      }
     };
 
     _proto.getParentScope = function getParentScope(node) {
@@ -398,7 +538,7 @@
         return expression_func;
       } else {
         // console.log('expression', expression);
-        var _expression_func = new Function(this.options.debug ? "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\tlet value;\n\t\t\t\t\ttry {\n\t\t\t\t\t\tvalue = " + expression + ";\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\tvalue = '!!!' + e.message;\n\t\t\t\t\t}\n\t\t\t\t\treturn value;\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}" : "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+        var _expression_func = new Function(this.options.debug ? "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\tlet value;\n\t\t\t\t\ttry {\n\t\t\t\t\t\tvalue = " + expression + ";\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\tconsole.error('" + expression.replace(/\'/g, '"') + "', this);\n\t\t\t\t\t\tvalue = e.message;\n\t\t\t\t\t}\n\t\t\t\t\treturn value;\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}" : "with(this) {\n\t\t\t\treturn (function (" + params.join(',') + ") {\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
 
         return _expression_func;
       }
@@ -425,13 +565,7 @@
       output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
       instance[name] = output$;
       return outputFunction;
-    } //
-    ;
-
-    _proto.contexts_ = function contexts_() {
-      return CONTEXTS;
-    } //
-    ;
+    };
 
     Module.getPipesSegments = function getPipesSegments(expression) {
       var segments = [];
@@ -686,13 +820,12 @@
     };
 
     Module.getContext = function getContext(instance) {
-      return CONTEXTS[instance.$id];
+      return CONTEXTS[instance.rxcompId];
     };
 
-    Module.setContext = function setContext(module, instance, parentInstance, node, factory, selector) {
-      var $id = ++ID;
-      instance.$id = $id;
-      return CONTEXTS[$id] = {
+    Module.makeContext = function makeContext(module, instance, parentInstance, node, factory, selector) {
+      instance.rxcompId = ++ID;
+      var context = {
         module: module,
         instance: instance,
         parentInstance: parentInstance,
@@ -700,17 +833,66 @@
         factory: factory,
         selector: selector
       };
+      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || ++ID;
+      var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+      nodeContexts.push(context);
+      return CONTEXTS[instance.rxcompId] = context;
     };
 
-    Module.getComponentInstanceByNode = function getComponentInstanceByNode(node) {
-      var id = Object.keys(CONTEXTS).find(function (id) {
-        return CONTEXTS[id].node === node && CONTEXTS[id].factory.prototype instanceof Component;
-      });
+    Module.deleteContext = function deleteContext(id) {
+      var context = CONTEXTS[id];
+      var nodeContexts = NODES[context.node.dataset.id];
+      var index = nodeContexts.indexOf(context);
 
-      if (id) {
-        var context = CONTEXTS[id];
-        return context.instance;
+      if (index !== -1) {
+        nodeContexts.splice(index, 1);
       }
+
+      delete CONTEXTS[id];
+    };
+
+    Module.getContextByNode = function getContextByNode(node) {
+      var context;
+      var nodeContexts = NODES[node.dataset.rxcompId];
+
+      if (nodeContexts) {
+        context = nodeContexts.reduce(function (previous, current) {
+          if (current.node === node && current.factory.prototype instanceof Component) {
+            if (previous && current.factory.prototype instanceof Context) {
+              return previous;
+            } else {
+              return current;
+            }
+          } else {
+            return previous;
+          }
+        }, null);
+      }
+
+      return context;
+      /*
+      const context = Object.keys(CONTEXTS).reduce((previous, id) => {
+      	const current = CONTEXTS[id];
+      	if (current.node === node && current.factory.prototype instanceof Component) {
+      		if (previous && current.factory.prototype instanceof Context) {
+      			return previous;
+      		} else {
+      			return current;
+      		}
+      	} else {
+      		return previous;
+      	}
+      }, null);
+      	return context;
+      */
+
+      /*
+      let id = Object.keys(CONTEXTS).find(id => CONTEXTS[id].node === node && CONTEXTS[id].factory.prototype instanceof Component);
+      if (id) {
+      	const context = CONTEXTS[id];
+      	return context;
+      }
+      */
     };
 
     return Module;
@@ -802,74 +984,12 @@
     selector: '[(directive)]'
   };
 
-  var Context =
-  /*#__PURE__*/
-  function () {
-    function Context(parent, descriptors) {
-      var parentPrototypeDescriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf(parent));
-      delete parentPrototypeDescriptors.constructor;
-      Object.keys(parentPrototypeDescriptors).forEach(function (key) {
-        var descriptor = parentPrototypeDescriptors[key];
-
-        if (typeof descriptor.value == "function") {
-          descriptor.value = function () {
-            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
-            }
-
-            parent[key].apply(parent, args);
-          };
-        }
-      }); // console.log('parentPrototypeDescriptors', parentPrototypeDescriptors);
-
-      var parentDescriptors = Object.getOwnPropertyDescriptors(parent);
-      Object.keys(parentDescriptors).forEach(function (key) {
-        var descriptor = parentDescriptors[key];
-
-        if (typeof descriptor.value == "function") {
-          descriptor.value = function () {
-            for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-              args[_key2] = arguments[_key2];
-            }
-
-            parent[key].apply(parent, args);
-          };
-        }
-      }); // console.log('parentDescriptors', parentDescriptors);
-
-      Object.defineProperties(this, Object.assign(parentPrototypeDescriptors, parentDescriptors, {
-        state$: {
-          value: new rxjs.BehaviorSubject(this),
-          writable: false,
-          enumerable: false
-        },
-        unsubscribe$: {
-          value: new rxjs.Subject(),
-          writable: false,
-          enumerable: false
-        }
-      }, descriptors));
-      /*
-      this.pushState = () => {
-      	this.state$.next(this);
-      };
-      */
-    }
-
-    var _proto = Context.prototype;
-
-    _proto.pushState = function pushState() {
-      this.state$.next(this);
-    };
-
-    return Context;
-  }();
-
   var ForItem =
   /*#__PURE__*/
   function (_Context) {
     _inheritsLoose(ForItem, _Context);
 
+    // !!! try with payload options { key, $key, value, $value, index, count } or use onInit()
     function ForItem(key, $key, value, $value, index, count, parentInstance) {
       var _this;
 
@@ -986,10 +1106,17 @@
             var _clonedNode = node.cloneNode(true);
 
             this.forend.parentNode.insertBefore(_clonedNode, this.forend);
+            var args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 
-            var _instance = new ForItem(tokens.key, key, tokens.value, value, i, total, context.parentInstance);
+            var _instance = module.makeInstance(_clonedNode, ForItem, context.selector, context.parentInstance, args);
 
-            module.compile(_clonedNode, _instance);
+            var forItemContext = Module.getContext(_instance); // const instance = new ForItem(tokens.key, key, tokens.value, value, i, total, context.parentInstance);
+            // const forItemContext = module.makeContext(instance, context.parentInstance, clonedNode, context.selector);
+
+            var instances = module.compile(_clonedNode, forItemContext);
+            console.log(instances.length, instances.filter(function (x) {
+              return x.constructor instanceof Component;
+            }).length);
             module.parse(_clonedNode, _instance);
             nextSibling = _clonedNode.nextSibling;
             this.instances.push(_instance);
@@ -1150,7 +1277,6 @@
 
     _proto.onInit = function onInit() {
       var context = Module.getContext(this);
-      var module = context.module;
       var node = context.node;
       var selector = context.selector;
       var key = selector.replace(/\[(.+)\]/, function () {
@@ -1162,21 +1288,19 @@
         throw "invalid " + key;
       }
 
-      if (key === 'innerHTML') {
-        expression = expression.replace(/{{(.+)}}/, function () {
-          return arguments.length <= 1 ? undefined : arguments[1];
-        });
+      if (key === '[innerHTML]') {
+        expression = "{{" + expression + "}}";
       }
 
-      this.innerHtmlFunction = module.makeFunction(expression); // console.log('InnerHtmlDirective.onInit', node, expression, selector);
+      this.innerHtmlExpression = expression;
+      console.log('InnerHtmlDirective.onInit', node, expression, key);
     };
 
     _proto.onState = function onState(state) {
       var context = Module.getContext(this);
-      var module = context.module;
+      var innerHTML = context.module.evaluate(this.innerHtmlExpression, state);
       var node = context.node;
-      var innerHTML = module.resolve(this.innerHtmlFunction, state, this);
-      node.innerHTML = String(innerHTML); // console.log('InnerHtmlDirective.onState', state, innerHTML);
+      node.innerHTML = innerHTML; // console.log('InnerHtmlDirective.onState', innerHTML);
     };
 
     return InnerHtmlDirective;
