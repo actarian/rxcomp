@@ -15,12 +15,14 @@
 
 <body class="page--todomvc">
 	<main test-component>
+		<div>{{object | json}}</div>
+		<div>{{items | json}}</div>
 		<ul class="list">
 			<li class="list__item">
-				<span *for="let [key, value] of items" [innerHTML]="'[key ' + key + ', value ' + value + '], "></span>
+				<span *for="let [key, value] of items" [innerHTML]="'[key ' + key + ', value ' + value + ']'"></span>
 			</li>
 			<li class="list__item">
-				<span *for="let [key, value] of object" innerHTML="[key {{key}}, value {{value}}], "></span>
+				<span *for="let [key, value] of object" innerHTML="[key {{key}}, value {{value}}]"></span>
 			</li>
 			<li class="list__item" *for="let item of items">
 				[{{item}}] {{{index}}, {{count}}, {{first}}, {{last}}, {{even}}, {{odd}}}

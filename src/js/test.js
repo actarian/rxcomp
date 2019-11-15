@@ -4,8 +4,8 @@ import DatePipe from './date/date.pipe';
 class TestComponent extends Component {
 
 	onInit() {
-		this.items = [1, 2, 3, 4];
-		this.object = { a: 1, b: 2, c: 3, d: 4 };
+		this.items = [1, 2];
+		this.object = { a: 1, b: 2 };
 		this.date = new Date();
 	}
 

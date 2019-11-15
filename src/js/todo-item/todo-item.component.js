@@ -1,4 +1,4 @@
-import Component from '../../../lib/component/component';
+import { Component } from '../../../lib/rxcomp';
 import { color } from '../colors/colors';
 
 export default class TodoItemComponent extends Component {
