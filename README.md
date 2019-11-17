@@ -2,11 +2,11 @@
 
 [![Licence](https://img.shields.io/github/license/actarian/rxcomp.svg)](https://github.com/actarian/rxcomp)
 
-[RxComp](https://github.com/actarian/rxcomp) is a reactive component library built on top of [RxJs](https://github.com/ReactiveX/rxjs) that mimic the [Angular](https://angular.io/guide/practical-observable-usage) declarative syntax. 
+[RxComp](https://github.com/actarian/rxcomp) is a reactive component library built on top of [RxJs](https://github.com/ReactiveX/rxjs) that mimics the [Angular](https://angular.io/guide/practical-observable-usage) declarative syntax. 
 
 If you like Angular declarative syntax but you just want go Vanilla, RxComp library come in useful.
 
-Minified bundle size  `14Kb`  
+Minified bundle size  `16Kb`  
 RxJS dependancy bundle size  `26Kb`  
  
 > [TodoMvc demo app](https://actarian.github.io/rxcomp/)
@@ -55,7 +55,17 @@ For CDN, you can use unpkg
 The global namespace for RxComp is `rxcomp`
 
 ```javascript
-import { ClassDirective, Component, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from 'rxcomp';
+import { 
+	ClassDirective, 
+	Component, 
+	EventDirective, 
+	ForStructure, 
+	IfStructure, 
+	InnerHtmlDirective, 
+	JsonPipe, 
+	Module, 
+	StyleDirective 
+} from 'rxcomp';
 ```
 ___
 

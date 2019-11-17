@@ -1,14 +1,18 @@
 {
 	"author": "Luca Zampetti <lzampetti@gmail.com>",
+	"name": "rxcomp",
 	"description": "rxcomp",
 	"version": "1.0.0-alpha",
 	"license": "MIT",
-	"name": "rxcomp",
+	"main": "dist/rxcomp.js",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/actarian/rxcomp.git"
 	},
-	"main": "dist/rxcomp.js",
+	"scripts": {
+		"start": "gulp",
+		"build": "gulp build --target dist"
+	},
 	"browserslist": {
 		"development": [
 			"last 1 version"
@@ -17,10 +21,6 @@
 			"last 2 version",
 			"ie 11"
 		]
-	},
-	"scripts": {
-		"start": "gulp",
-		"build": "gulp build --target dist"
 	},
 	"dependencies": {
 		"rxjs": "~6.5.3"
