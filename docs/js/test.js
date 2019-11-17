@@ -77,7 +77,7 @@
 
   var Component = function Component() {};
 
-  var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onState', 'onDestroy', 'pushState', 'state$', 'unsubscribe$'];
+  var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
   var Context =
   /*#__PURE__*/
@@ -95,7 +95,7 @@
 
       /*
       const subjects = {
-      	state$: {
+      	changes$: {
       		value: new BehaviorSubject(this),
       		writable: false,
       		enumerable: false,
@@ -114,8 +114,8 @@
       return _this;
     }
     /*
-    pushState() {
-    	this.state$.next(this);
+    pushChanges() {
+    	this.changes$.next(this);
     }
     */
 
@@ -192,37 +192,13 @@
         }, -1);
         return ai - bi;
       });
+      options.factories.unshift(bootstrap);
       this.selectors = Module.unwrapSelectors(options.factories);
-      this.root = this.makeInstance(this.node, bootstrap, bootstrap.meta.selector, window);
+      this.nodes$ = new rxjs.Subject();
+      this.unsubscribe$ = new rxjs.Subject(); // this.root = this.makeInstance(this.node, bootstrap, bootstrap.meta.selector, window);
     }
 
     var _proto = Module.prototype;
-
-    _proto.use$ = function use$() {
-      var _this = this;
-
-      return rxjs.of(Module.querySelectorsAll(this.node, this.selectors, [])).pipe(operators.filter(function (matches) {
-        return matches.length > 0;
-      }), operators.map(function (matches) {
-        return matches.map(function (match) {
-          return _this.makeInstance(match.node, match.factory, match.selector);
-        }).filter(function (x) {
-          return x;
-        });
-      }), operators.tap(function (instances) {
-        _this.root.pushState();
-      }
-      /*instances.forEach(instance => {
-      	// parse component text nodes
-      	const context = Module.getContext(instance);
-      	const isComponent = context.factory.prototype instanceof Component;
-      	if (isComponent) {
-      		this.parse(context.node, instance);
-      	}
-      	this.parse(this.node, this.root);
-      })*/
-      ), operators.shareReplay(1));
-    };
 
     _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
       var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector); // console.log('Module.makeContext', context, context.instance, context.node);
@@ -231,7 +207,7 @@
     };
 
     _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args) {
-      var _this2 = this;
+      var _this = this;
 
       if (parentInstance || node.parentNode) {
         var isComponent = factory.prototype instanceof Component;
@@ -244,11 +220,11 @@
         } // creating factory instance
 
 
-        var instance = _construct(factory, args || []); // injecting state$ and unsubscribe$ subjects
+        var instance = _construct(factory, args || []); // injecting changes$ and unsubscribe$ subjects
 
 
         Object.defineProperties(instance, {
-          state$: {
+          changes$: {
             value: new rxjs.BehaviorSubject(instance),
             writable: false,
             enumerable: false
@@ -258,20 +234,31 @@
             writable: false,
             enumerable: false
           }
-        }); // injecting instance pushState method
+        }); // injecting instance pushChanges method
 
-        var moduleRef = this;
+        var module = this;
 
-        instance.pushState = function () {
+        instance.pushChanges = function () {
+          /*
           if (isComponent) {
-            moduleRef.parse(node, instance);
+          	module.parse(node, instance);
           }
+          */
 
-          this.state$.next(this); // parse component text nodes
+          /*
+          console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
+          */
+          this.changes$.next(this); // parse component text nodes
 
           if (isComponent) {
-            // console.log('instance', instance);
-            moduleRef.parse(node, instance);
+            // console.log('Module.parse', instance.constructor.name);
+            module.parse(node, instance);
+          } // calling onView event
+
+
+          if (typeof instance.onView === 'function') {
+            // console.log('onView', instance.constructor.name);
+            instance.onView();
           }
         }; // creating instance context
 
@@ -286,25 +273,26 @@
 
         if (typeof instance.onInit === 'function') {
           instance.onInit();
-        } // subscribe to parent state
+        } // subscribe to parent changes
 
 
-        if (parentInstance.state$) {
-          parentInstance.state$.pipe( // filter(() => node.parentNode),
-          operators.takeUntil(instance.unsubscribe$)).subscribe(function (state) {
+        if (parentInstance.changes$) {
+          parentInstance.changes$.pipe( // filter(() => node.parentNode),
+          operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
             // resolve component input outputs
             if (isComponent && meta) {
-              _this2.resolveInputsOutputs(instance, state);
-            } // calling onState event with parentInstance
+              _this.resolveInputsOutputs(instance, changes);
+            } // calling onChanges event with parentInstance
 
 
-            if (typeof instance.onState === 'function') {
-              // console.log('onState', instance.constructor.meta.selector, state);
-              instance.onState(state);
-            } // push instance state for subscribers
+            if (typeof instance.onChanges === 'function') {
+              // console.log('onChanges', instance.constructor.name);
+              // console.log('onChanges', instance.constructor.meta.selector, changes);
+              instance.onChanges(changes);
+            } // push instance changes for subscribers
 
 
-            instance.pushState();
+            instance.pushChanges();
           });
         }
         /*
@@ -336,7 +324,7 @@
       expression = transforms.shift().trim();
       expression = this.transformOptionalChaining(expression); // console.log(pipes, transforms, expression);
       // console.log(transforms.length, params);
-      // keyword 'this' represents state from func.apply(state, instance)
+      // keyword 'this' represents changes from func.apply(changes, instance)
 
       if (transforms.length) {
         expression = transforms.reduce(function (expression, transform, i) {
@@ -369,7 +357,7 @@
     };
 
     _proto.makeOutput = function makeOutput(instance, name) {
-      var _this3 = this;
+      var _this2 = this;
 
       var context = Module.getContext(instance);
       var node = context.node;
@@ -377,7 +365,7 @@
       var expression = node.getAttribute("(" + name + ")");
       var outputFunction = this.makeFunction(expression, ['$event']);
       var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
-        _this3.resolve(outputFunction, parentInstance, event);
+        _this2.resolve(outputFunction, parentInstance, event);
       }));
       output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
       instance[name] = output$;
@@ -412,35 +400,22 @@
       return node;
     };
 
-    _proto.compile = function compile(node, context) {
-      var _this4 = this;
-
-      // console.log('Module.compile', context);
-      var matches = Module.querySelectorsAll(node, this.selectors, []);
-      var instances = matches.map(function (match) {
-        var instance = _this4.makeInstance(match.node, match.factory, match.selector, context ? context.instance : undefined);
-
-        if (match.factory.prototype instanceof Component) {
-          context = undefined; // !!!
-        }
-
-        return instance;
-      }).filter(function (x) {
-        return x !== undefined;
-      });
-      return instances;
+    _proto.destroy = function destroy() {
+      this.remove(this.node);
+      this.unsubscribe$.next();
+      this.unsubscribe$.complete();
     };
 
     _proto.evaluate = function evaluate(text, instance) {
-      var _this5 = this;
+      var _this3 = this;
 
       var parse_eval_ = function parse_eval_() {
         var expression = arguments.length <= 1 ? undefined : arguments[1]; // console.log('expression', expression);
 
         try {
-          var parse_func_ = _this5.makeFunction(expression);
+          var parse_func_ = _this3.makeFunction(expression);
 
-          return _this5.resolve(parse_func_, instance, instance);
+          return _this3.resolve(parse_func_, instance, instance);
         } catch (e) {
           console.error(e);
           return e.message;
@@ -452,38 +427,22 @@
     };
 
     _proto.parse = function parse(node, instance) {
-      // console.log('node', node.childNodes.length, node);
-
-      /*
-      if (node.hasAttribute('[innerHTML]')) {
-      	const innerHTML = `{{${node.getAttribute('[innerHTML]')}}}`;
-      	node.innerHTML = parse_replace_(innerHTML);
-      } else if (node.hasAttribute('innerHTML')) {
-      	const innerHTML = node.getAttribute('innerHTML');
-      	node.innerHTML = parse_replace_(innerHTML);
-      } else {
-      	// childNodes
-      }
-      */
-      // console.log(node, instance);
+      // console.log('parse', instance.constructor.name, node);
       for (var i = 0; i < node.childNodes.length; i++) {
         var child = node.childNodes[i];
 
         if (child.nodeType === 1) {
           var context = Module.getContextByNode(child);
 
-          if (context) {
-            return;
+          if (!context) {
+            this.parse(child, instance);
           }
-
-          this.parse(child, instance);
         } else if (child.nodeType === 3) {
-          var text = child.nodeValue;
-          var replacedText = this.evaluate(text, instance);
+          var expression = child.nodeExpression || child.nodeValue;
+          var replacedText = this.evaluate(expression, instance); // console.log(instance.constructor.name, expression, replacedText);
 
-          if (text !== replacedText) {
-            // !!! save in var
-            // node.setAttribute('innerHTML', text);
+          if (expression !== replacedText) {
+            child.nodeExpression = child.nodeExpression || expression;
             var textNode = document.createTextNode(replacedText);
             node.replaceChild(textNode, child);
           }
@@ -491,18 +450,18 @@
       }
     };
 
-    _proto.resolve = function resolve(expressionFunc, state, payload) {
-      return expressionFunc.apply(state, [payload, this]);
+    _proto.resolve = function resolve(expressionFunc, changes, payload) {
+      return expressionFunc.apply(changes, [payload, this]);
     };
 
     _proto.makeInputs = function makeInputs(meta, instance) {
-      var _this6 = this;
+      var _this4 = this;
 
       var inputs = {};
 
       if (meta.inputs) {
         meta.inputs.forEach(function (key, i) {
-          return inputs[key] = _this6.makeInput(instance, key);
+          return inputs[key] = _this4.makeInput(instance, key);
         });
       }
 
@@ -510,21 +469,21 @@
     };
 
     _proto.makeOutputs = function makeOutputs(meta, instance) {
-      var _this7 = this;
+      var _this5 = this;
 
       var outputs = {};
 
       if (meta.outputs) {
         meta.outputs.forEach(function (key, i) {
-          return outputs[key] = _this7.makeOutput(instance, key);
+          return outputs[key] = _this5.makeOutput(instance, key);
         });
       }
 
       return outputs;
     };
 
-    _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, state) {
-      var _this8 = this;
+    _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
+      var _this6 = this;
 
       var context = Module.getContext(instance);
       var parentInstance = context.parentInstance;
@@ -532,7 +491,7 @@
       Object.keys(inputs).forEach(function (key) {
         var inputFunction = inputs[key];
 
-        var value = _this8.resolve(inputFunction, parentInstance, instance);
+        var value = _this6.resolve(inputFunction, parentInstance, instance);
 
         instance[key] = value;
       });
@@ -559,10 +518,10 @@
     };
 
     _proto.getParentInstance = function getParentInstance(node) {
-      var _this9 = this;
+      var _this7 = this;
 
       return Module.traverseUp(node, function (node) {
-        return _this9.getInstance(node);
+        return _this7.getInstance(node);
       });
     };
 
@@ -585,6 +544,34 @@
         return previous || '';
       });
       return expression;
+    };
+
+    _proto.compile = function compile(node, parentInstance) {
+      var _this8 = this;
+
+      var instances = Module.querySelectorsAll(node, this.selectors, []).map(function (match) {
+        var instance = _this8.makeInstance(match.node, match.factory, match.selector, parentInstance);
+
+        if (match.factory.prototype instanceof Component) {
+          parentInstance = undefined;
+        }
+
+        return instance;
+      }).filter(function (x) {
+        return x;
+      }); // console.log('compile', instances, node, parentInstance);
+
+      return instances;
+    };
+
+    Module.use = function use(options) {
+      var module = new Module(options);
+      var instances = module.compile(module.node, window);
+      var instance = instances[0]; // if (instance instanceof module.options.bootstrap) {
+
+      instance.pushChanges(); // }
+
+      return module;
     };
 
     Module.getPipesSegments = function getPipesSegments(expression) {
@@ -819,26 +806,6 @@
       return this.traverseNext(node.nextSibling, callback, i + 1);
     };
 
-    Module.use$ = function use$(options) {
-      /*
-      if (!options.factories) {
-      	options.factories = [
-      		ClassDirective,
-      		EventDirective,
-      		IfStructure,
-      		ForStructure,
-      		StyleDirective
-      	];
-      }
-      if (!options.pipes) {
-      	options.pipes = [
-      		JsonPipe
-      	];
-      }
-      */
-      return new Module(options).use$();
-    };
-
     Module.getContext = function getContext(instance) {
       return CONTEXTS[instance.rxcompId];
     };
@@ -941,18 +908,18 @@
       // console.log('ClassDirective.onInit', this.classList, expression);
     };
 
-    _proto.onState = function onState(state) {
+    _proto.onChanges = function onChanges(changes) {
       var context = Module.getContext(this);
       var module = context.module;
       var node = context.node;
-      var classList = module.resolve(this.classFunction, state, this);
+      var classList = module.resolve(this.classFunction, changes, this);
       Object.keys(classList).forEach(function (key) {
         if (classList[key]) {
           node.classList.add(key);
         } else {
           node.classList.remove(key);
         }
-      }); // console.log('ClassDirective.onState', classList);
+      }); // console.log('ClassDirective.onChanges', classList);
     };
 
     return ClassDirective;
@@ -1092,13 +1059,13 @@
       this.instances = [];
     };
 
-    _proto.onState = function onState(state) {
+    _proto.onChanges = function onChanges(changes) {
       var context = Module.getContext(this);
       var module = context.module;
       var node = context.node; // resolve
 
       var tokens = this.tokens;
-      var result = module.resolve(this.forFunction, state, this) || [];
+      var result = module.resolve(this.forFunction, changes, this) || [];
       var isArray = Array.isArray(result);
       var array = isArray ? result : Object.keys(result);
       var total = array.length;
@@ -1112,29 +1079,25 @@
 
           if (i < previous) {
             // update
-            var clonedNode = nextSibling;
+            // const clonedNode = nextSibling;
             var instance = this.instances[i];
             instance[tokens.key] = key;
-            instance[tokens.value] = value; // instance.pushState();
+            instance[tokens.value] = value; // module.parse(clonedNode, instance);
 
-            module.parse(clonedNode, instance);
             nextSibling = nextSibling.nextSibling;
           } else {
             // create
-            var _clonedNode = node.cloneNode(true);
-
-            this.forend.parentNode.insertBefore(_clonedNode, this.forend);
+            var clonedNode = node.cloneNode(true);
+            this.forend.parentNode.insertBefore(clonedNode, this.forend);
             var args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 
-            var _instance = module.makeInstance(_clonedNode, ForItem, context.selector, context.parentInstance, args);
+            var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 
-            var forItemContext = Module.getContext(_instance); // const instance = new ForItem(tokens.key, key, tokens.value, value, i, total, context.parentInstance);
-            // const forItemContext = module.makeContext(instance, context.parentInstance, clonedNode, context.selector);
+            var forItemContext = Module.getContext(_instance); // console.log(clonedNode, forItemContext.instance.constructor.name);
 
-            var instances = module.compile(_clonedNode, forItemContext); // console.log(instances.length, instances.filter(x => x.constructor instanceof Component).length);
+            module.compile(clonedNode, forItemContext.instance); // module.parse(clonedNode, instance);
 
-            module.parse(_clonedNode, _instance);
-            nextSibling = _clonedNode.nextSibling;
+            nextSibling = clonedNode.nextSibling;
             this.instances.push(_instance);
           }
         } else {
@@ -1196,30 +1159,7 @@
         value: value,
         iterable: iterable
       };
-    }
-    /*
-    onState_unoptimized(state) {
-    	const context = Module.getContext(this);
-    	const module = context.module;
-    	const node = context.node;
-    	const tokens = this.tokens;
-    	while (this.forbegin.nextSibling !== this.forend) {
-    		const nextSibling = this.forbegin.nextSibling;
-    		this.forbegin.parentNode.removeChild(nextSibling);
-    		module.remove(nextSibling);
-    	}
-    	const array = module.resolve(this.forFunction, state, this).map((value, index, array) => {
-    		const item = new ForItem(tokens.key, index, tokens.value, value, array, this.parent);
-    		const clonedNode = node.cloneNode(true);
-    		this.forend.parentNode.insertBefore(clonedNode, this.forend);
-    		const instances = module.compile(clonedNode, item);
-    		module.parse(clonedNode, item);
-    		return item;
-    	});
-    	// console.log('ForStructure.onState', array);
-    }
-    */
-    ;
+    };
 
     return ForStructure;
   }(Structure);
@@ -1254,17 +1194,16 @@
       this.clonedNode = clonedNode; // console.log('expression', expression);
     };
 
-    _proto.onState = function onState(state) {
+    _proto.onChanges = function onChanges(changes) {
       var context = Module.getContext(this);
-      var module = context.module; // console.log('IfStructure.onState', state, this.expression);
+      var module = context.module; // console.log('IfStructure.onChanges', changes, this.expression);
 
-      var value = module.resolve(this.ifFunction, state, this);
+      var value = module.resolve(this.ifFunction, changes, this);
 
       if (value) {
         if (!this.clonedNode.parentNode) {
           this.ifend.parentNode.insertBefore(this.clonedNode, this.ifend);
           module.compile(this.clonedNode);
-          module.parse(this.clonedNode, state);
         }
       } else {
         if (this.clonedNode.parentNode) {
@@ -1311,12 +1250,12 @@
       this.innerHtmlExpression = expression; // console.log('InnerHtmlDirective.onInit', node, expression, key);
     };
 
-    _proto.onState = function onState(state) {
-      // console.log('InnerHtmlDirective.onState', this.innerHtmlExpression);
+    _proto.onChanges = function onChanges(changes) {
       var context = Module.getContext(this);
-      var innerHTML = context.module.evaluate(this.innerHtmlExpression, state);
+      var innerHTML = context.module.evaluate(this.innerHtmlExpression, changes); // console.log('InnerHtmlDirective.onChanges', this.innerHtmlExpression, innerHTML);
+
       var node = context.node;
-      node.innerHTML = innerHTML; // console.log('InnerHtmlDirective.onState', innerHTML);
+      node.innerHTML = innerHTML;
     };
 
     return InnerHtmlDirective;
@@ -1359,14 +1298,14 @@
       this.styleFunction = module.makeFunction(expression); // console.log('StyleDirective.onInit', expression);
     };
 
-    _proto.onState = function onState(state) {
+    _proto.onChanges = function onChanges(changes) {
       var context = Module.getContext(this);
       var module = context.module;
       var node = context.node;
-      var style = module.resolve(this.styleFunction, state, this);
+      var style = module.resolve(this.styleFunction, changes, this);
       Object.keys(style).forEach(function (key) {
         node.style[key] = style[key];
-      }); // console.log('StyleDirective.onState', state, style);
+      }); // console.log('StyleDirective.onChanges', changes, style);
     };
 
     return StyleDirective;
@@ -1414,6 +1353,7 @@
     var _proto = TestComponent.prototype;
 
     _proto.onInit = function onInit() {
+      // console.log('TestComponent.onInit');
       this.items = [1, 2];
       this.object = {
         a: 1,
@@ -1428,12 +1368,11 @@
   TestComponent.meta = {
     selector: '[test-component]'
   };
-  Module.use$({
+  Module.use({
     debug: true,
     factories: [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective],
     pipes: [DatePipe, JsonPipe],
     bootstrap: TestComponent
-  }).subscribe(function (createdInstances) {// console.log('createdInstances', createdInstances);
   });
 
 })));

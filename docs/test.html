@@ -13,10 +13,11 @@
 	<link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
 </head>
 
-<body class="page--todomvc">
+<body class="page--test">
 	<main test-component>
 		<div>{{object | json}}</div>
 		<div>{{items | json}}</div>
+		<div [class]="{ active: object.a == 1 }">class</div>
 		<ul class="list">
 			<li class="list__item">
 				<span *for="let [key, value] of items" [innerHTML]="'[key ' + key + ', value ' + value + ']'"></span>
@@ -27,7 +28,6 @@
 			<li class="list__item" *for="let item of items">
 				[{{item}}] {{{index}}, {{count}}, {{first}}, {{last}}, {{even}}, {{odd}}}
 			</li>
-			<li class="list__item">{{object.a + ' ' + object.b}}</li>
 			<li class="list__item" innerHTML="{{object.a}}"></li>
 			<li class="list__item" innerHTML="{{object.a + ' ' + object.b}}"></li>
 			<li class="list__item" [innerHTML]="object.a"></li>
@@ -35,6 +35,7 @@
 			<li class="list__item" [innerHTML]="object | json"></li>
 			<li class="list__item" [innerHTML]="date | date : 'it-IT' : { dateStyle: 'short' }"></li>
 			<li class="list__item" *if="object.a">true</li>
+			<li class="list__item">{{object.a + ' ' + object.b}}</li>
 		</ul>
 		<div class="footer">
 			<a href="https://twitter.com/actarian" target="_blank" class="btn--twitter">

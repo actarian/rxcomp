@@ -49,7 +49,7 @@ ___
 For CDN, you can use unpkg
 
 ```html
-<script src="https://unpkg.com/actarian/rxcomp@1.0.0-beta/dist/rxcomp.min.js"></script>
+<script src="https://unpkg.com/actarian/rxcomp@1.0.0-alpha/dist/rxcomp.min.js"></script>
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -79,7 +79,7 @@ ___
 ```javascript
 import { ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from 'rxcomp';
 
-Module.use$({
+Module.use({
 	factories: [
 		ClassDirective,
 		EventDirective,
@@ -92,7 +92,7 @@ Module.use$({
 		JsonPipe,
 	],
 	bootstrap: AppComponent,
-}).subscribe(createdInstances => { });
+});
 ```
 ___
 
@@ -101,8 +101,8 @@ ___
 ```javascript
 export default class TodoItemComponent extends Component {
 
-	onState(state) {
-		this.color = color(this.item.id);
+	onChanges(changes) {
+		this.color = color(changes.item.id);
 	}
 
 	onToggle($event) {
@@ -154,7 +154,10 @@ ___
 onInit() {
 } 
 
-onState(state) {	
+onChanges(changes) {	
+}
+
+onView() {	
 }
 
 onDestroy() {
@@ -208,6 +211,6 @@ Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
 
 ---
 
-### 1.0.0-beta
+### 1.0.0-alpha
 
 * Initial release of RxComp library

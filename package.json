@@ -1,14 +1,14 @@
 {
 	"author": "Luca Zampetti <lzampetti@gmail.com>",
 	"description": "rxcomp",
-	"version": "1.0.0-beta",
+	"version": "1.0.0-alpha",
 	"license": "MIT",
 	"name": "rxcomp",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/actarian/rxcomp.git"
 	},
-	"main": "lib/rxcomp.js",
+	"main": "dist/rxcomp.js",
 	"browserslist": {
 		"development": [
 			"last 1 version"
@@ -19,7 +19,8 @@
 		]
 	},
 	"scripts": {
-		"start": "gulp"
+		"start": "gulp",
+		"build": "gulp build --target dist"
 	},
 	"dependencies": {
 		"rxjs": "~6.5.3"
@@ -53,7 +54,6 @@
 		"gulp-sass": "~4.0.2",
 		"gulp-terser": "~1.2.0",
 		"gulp-webserver": "~0.9.1",
-		"html-webpack-plugin": "~3.2.0",
 		"rollup": "^1.26.3",
 		"rollup-plugin-babel": "^4.3.3",
 		"rollup-plugin-node-resolve": "^5.2.0",
@@ -62,9 +62,6 @@
 		"tsify": "~4.0.1",
 		"tslint": "~5.20.0",
 		"typescript": "~3.6.4",
-		"webpack": "~4.41.2",
-		"webpack-cli": "~3.3.10",
-		"webpack-dev-server": "~3.9.0",
 		"yargs": "~14.2.0"
 	}
 }

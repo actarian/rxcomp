@@ -3,7 +3,7 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
-## [1.0.0-beta] - 2019-11-20
+## [1.0.0-alpha] - 2019-11-20
 ### Added
 - Initial release of RxComp library
 
