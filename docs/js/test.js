@@ -92,8 +92,8 @@
       }
 
       _this = _Component.call(this) || this;
-      descriptors = Context.filterDescriptors(instance, instance, descriptors);
-      descriptors = Context.filterDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
+      descriptors = Context.mergeDescriptors(instance, instance, descriptors);
+      descriptors = Context.mergeDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
       /*
       const subjects = {
       	changes$: {
@@ -113,16 +113,15 @@
       return _this;
     }
 
-    Context.filterDescriptors = function filterDescriptors(source, instance, descriptors) {
+    Context.mergeDescriptors = function mergeDescriptors(source, instance, descriptors) {
       if (descriptors === void 0) {
         descriptors = {};
       }
 
-      var properties = Object.getOwnPropertyNames(source); // console.log('filterDescriptors', JSON.stringify(properties));
-
+      var properties = Object.getOwnPropertyNames(source);
       properties.forEach(function (key) {
         if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
-          // console.log('Context.filterDescriptors', key, source[key]);
+          // console.log('Context.mergeDescriptors', key, source[key]);
           var descriptor = Object.getOwnPropertyDescriptor(source, key);
 
           if (typeof descriptor.value == "function") {
@@ -137,8 +136,7 @@
 
           descriptors[key] = descriptor;
         }
-      }); // console.log(filteredDescriptors);
-
+      });
       return descriptors;
     };
 
@@ -175,9 +173,10 @@
 
       this.pipes = pipes;
       var bootstrap = options.bootstrap;
-      this.node = document.querySelector(bootstrap.meta.selector);
+      var node = this.node = document.querySelector(bootstrap.meta.selector);
+      this.nodeInnerHTML = node.innerHTML;
 
-      if (!this.node) {
+      if (!node) {
         throw "missing node " + bootstrap.meta.selector;
       }
 
@@ -192,8 +191,10 @@
       });
       options.factories.unshift(bootstrap);
       this.selectors = Module.unwrapSelectors(options.factories);
-      this.nodes$ = new rxjs.Subject();
-      this.unsubscribe$ = new rxjs.Subject(); // this.root = this.makeInstance(this.node, bootstrap, bootstrap.meta.selector, window);
+      var instances = this.compile(node, window);
+      var instance = instances[0]; // if (instance instanceof module.options.bootstrap) {
+
+      instance.pushChanges(); // }
     }
 
     var _proto = Module.prototype;
@@ -374,10 +375,8 @@
     _proto.remove = function remove(node) {
       var ids = [];
       Module.traverseDown(node, function (node) {
-        for (var _i = 0, _Object$entries = Object.entries(CONTEXTS); _i < _Object$entries.length; _i++) {
-          var _Object$entries$_i = _Object$entries[_i],
-              id = _Object$entries$_i[0],
-              context = _Object$entries$_i[1];
+        Object.keys(CONTEXTS).forEach(function (id) {
+          var context = CONTEXTS[id];
 
           if (context.node === node) {
             var instance = context.instance;
@@ -388,9 +387,10 @@
               instance.onDestroy();
             }
 
+            delete node.dataset.rxcompId;
             ids.push(id);
           }
-        }
+        });
       });
       ids.forEach(function (id) {
         return Module.deleteContext(id);
@@ -401,8 +401,7 @@
 
     _proto.destroy = function destroy() {
       this.remove(this.node);
-      this.unsubscribe$.next();
-      this.unsubscribe$.complete();
+      this.node.innerHTML = this.nodeInnerHTML;
     };
 
     _proto.evaluate = function evaluate(text, instance) {
@@ -419,8 +418,7 @@
           console.error(e);
           return e.message;
         }
-      }; // console.log(text);
-
+      };
 
       return text.replace(/\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g, parse_eval_); // return text.replace(/\{{2}((([^{}])|(\{[^{}]+?\}))*?)\}{2}/g, parse_eval_);
     };
@@ -565,11 +563,6 @@
 
     Module.use = function use(options) {
       var module = new Module(options);
-      var instances = module.compile(module.node, window);
-      var instance = instances[0]; // if (instance instanceof module.options.bootstrap) {
-
-      instance.pushChanges(); // }
-
       return module;
     };
 
@@ -827,7 +820,7 @@
 
     Module.deleteContext = function deleteContext(id) {
       var context = CONTEXTS[id];
-      var nodeContexts = NODES[context.node.dataset.id];
+      var nodeContexts = NODES[context.node.dataset.rxcompId];
 
       if (nodeContexts) {
         var index = nodeContexts.indexOf(context);
@@ -1367,11 +1360,51 @@
   TestComponent.meta = {
     selector: '[test-component]'
   };
-  Module.use({
-    debug: true,
+
+  var Test2Component =
+  /*#__PURE__*/
+  function (_Component2) {
+    _inheritsLoose(Test2Component, _Component2);
+
+    function Test2Component() {
+      return _Component2.apply(this, arguments) || this;
+    }
+
+    var _proto2 = Test2Component.prototype;
+
+    _proto2.onInit = function onInit() {
+      // console.log('TestComponent.onInit');
+      this.items = [2, 3];
+      this.object = {
+        a: 2,
+        b: 3
+      };
+      this.date = new Date();
+    };
+
+    return Test2Component;
+  }(Component);
+
+  Test2Component.meta = {
+    selector: '[test-component]'
+  };
+  var module = Module.use({
     factories: [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective],
     pipes: [DatePipe, JsonPipe],
     bootstrap: TestComponent
   });
+
+  function init() {
+    module.destroy();
+    Module.use({
+      factories: [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective],
+      pipes: [DatePipe, JsonPipe],
+      bootstrap: Test2Component
+    });
+  }
+
+  setTimeout(function () {
+    init();
+  }, 5000);
 
 })));

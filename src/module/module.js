@@ -26,8 +26,9 @@ export default class Module {
 		}
 		this.pipes = pipes;
 		const bootstrap = options.bootstrap;
-		this.node = document.querySelector(bootstrap.meta.selector);
-		if (!this.node) {
+		const node = this.node = document.querySelector(bootstrap.meta.selector);
+		this.nodeInnerHTML = node.innerHTML;
+		if (!node) {
 			throw (`missing node ${bootstrap.meta.selector}`);
 		}
 		options.factories.sort((a, b) => {
@@ -37,9 +38,11 @@ export default class Module {
 		});
 		options.factories.unshift(bootstrap);
 		this.selectors = Module.unwrapSelectors(options.factories);
-		this.nodes$ = new Subject();
-		this.unsubscribe$ = new Subject();
-		// this.root = this.makeInstance(this.node, bootstrap, bootstrap.meta.selector, window);
+		const instances = this.compile(node, window);
+		const instance = instances[0];
+		// if (instance instanceof module.options.bootstrap) {
+		instance.pushChanges();
+		// }
 	}
 
 	makeContext(instance, parentInstance, node, selector) {
@@ -206,7 +209,8 @@ export default class Module {
 	remove(node) {
 		const ids = [];
 		Module.traverseDown(node, (node) => {
-			for (let [id, context] of Object.entries(CONTEXTS)) {
+			Object.keys(CONTEXTS).forEach(id => {
+				const context = CONTEXTS[id];
 				if (context.node === node) {
 					const instance = context.instance;
 					instance.unsubscribe$.next();
@@ -214,9 +218,10 @@ export default class Module {
 					if (typeof instance.onDestroy === 'function') {
 						instance.onDestroy();
 					}
+					delete node.dataset.rxcompId;
 					ids.push(id);
 				}
-			}
+			});
 		});
 		ids.forEach(id => Module.deleteContext(id));
 		// console.log('Module.remove', ids);
@@ -225,8 +230,7 @@ export default class Module {
 
 	destroy() {
 		this.remove(this.node);
-		this.unsubscribe$.next();
-		this.unsubscribe$.complete();
+		this.node.innerHTML = this.nodeInnerHTML;
 	}
 
 	evaluate(text, instance) {
@@ -352,11 +356,6 @@ export default class Module {
 
 	static use(options) {
 		const module = new Module(options);
-		const instances = module.compile(module.node, window);
-		const instance = instances[0];
-		// if (instance instanceof module.options.bootstrap) {
-		instance.pushChanges();
-		// }
 		return module;
 	}
 
@@ -542,7 +541,7 @@ export default class Module {
 
 	static deleteContext(id) {
 		const context = CONTEXTS[id];
-		const nodeContexts = NODES[context.node.dataset.id];
+		const nodeContexts = NODES[context.node.dataset.rxcompId];
 		if (nodeContexts) {
 			const index = nodeContexts.indexOf(context);
 			if (index !== -1) {
