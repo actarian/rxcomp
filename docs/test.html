@@ -15,7 +15,7 @@
 
 <body class="page--test">
 	<main test-component>
-		<div>{{object | json}}</div>
+		<div>{{{ a: { b: 1 } } | json}}</div>
 		<div>{{items | json}}</div>
 		<div [class]="{ active: object.a == 1 }">class</div>
 		<ul class="list">

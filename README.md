@@ -6,7 +6,7 @@
 
 If you like Angular declarative syntax but you just want go Vanilla, RxComp library come in useful.
 
-RxComp bundle size `4.7Kb` gzipped, `15.8Kb` minified.  
+RxComp bundle size `4.7Kb` gzipped, `15Kb` minified.  
 RxJS dependancy bundle size `26Kb` gzipped, `345.5Kb` minified.  
  
 > [TodoMvc demo app](https://actarian.github.io/rxcomp-todomvc/)
@@ -49,7 +49,7 @@ ___
 For CDN, you can use unpkg
 
 ```html
-<script src="https://unpkg.com/rxcomp@1.0.0-alpha/dist/rxcomp.min.js"></script>
+<script src="https://unpkg.com/rxcomp@1.0.0-alpha.1/dist/rxcomp.min.js"></script>
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -221,6 +221,6 @@ Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
 
 ---
 
-### 1.0.0-alpha
+### 1.0.0-alpha.1
 
 * Initial release of RxComp library

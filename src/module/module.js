@@ -159,19 +159,7 @@ export default class Module {
 				return `$$pipes.${name}.transform(${expression},${params.join(',')})`;
 			}, expression);
 			// console.log('expression', expression);
-			const expression_func = new Function(this.options.debug ? `with(this) {
-				return (function (${args}, $$module) {
-					const $$pipes = $$module.pipes;
-					let $$$;
-					try {
-						$$$ = ${expression};
-					} catch(e) {
-						// console.error('${expression.replace(/\'/g,'"')}', this);
-						$$$ = e.message;
-					}
-					return $$$;
-				}.bind(this)).apply(this, arguments);
-			}` : `with(this) {
+			const expression_func = new Function(`with(this) {
 				return (function (${args}, $$module) {
 					const $$pipes = $$module.pipes;
 					return ${expression};
@@ -180,20 +168,9 @@ export default class Module {
 			return expression_func;
 		} else {
 			// console.log('expression', args, expression);
-			const expression_func = new Function(this.options.debug ? `with(this) {
+			// console.log('${expression.replace(/\'/g,'"')}', this);
+			const expression_func = new Function(`with(this) {
 				return (function (${args}, $$module) {
-					// console.log('${expression.replace(/\'/g,'"')}', this);
-					let $$$;
-					try {
-						$$$ = ${expression};
-					} catch(e) {
-						// console.error('${expression.replace(/\'/g,'"')}', this);
-						$$$ = e.message;
-					}
-					return $$$;
-				}.bind(this)).apply(this, arguments);
-			}` : `with(this) {
-				return (function (${args}, module) {
 					return ${expression};
 				}.bind(this)).apply(this, arguments);
 			}`);
@@ -264,8 +241,8 @@ export default class Module {
 				return e.message;
 			}
 		};
-		// console.log(text);
-		return text.replace(/\{{2}((([^{}])|(\{[^{}]+?\}))*?)\}{2}/g, parse_eval_);
+		return text.replace(/\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g, parse_eval_);
+		// return text.replace(/\{{2}((([^{}])|(\{[^{}]+?\}))*?)\}{2}/g, parse_eval_);
 	}
 
 	parse(node, instance) {

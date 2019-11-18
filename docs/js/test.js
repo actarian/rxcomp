@@ -87,12 +87,13 @@
     function Context(instance, descriptors) {
       var _this;
 
-      _this = _Component.call(this) || this; // const instancePrototypeDescriptors = {};
+      if (descriptors === void 0) {
+        descriptors = {};
+      }
 
-      var instancePrototypeDescriptors = Context.filterDescriptors(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(instance)), instance); // console.log('instancePrototypeDescriptors', instancePrototypeDescriptors);
-
-      var instanceDescriptors = Context.filterDescriptors(Object.getOwnPropertyDescriptors(instance), instance); // console.log('instanceDescriptors', instanceDescriptors);
-
+      _this = _Component.call(this) || this;
+      descriptors = Context.filterDescriptors(instance, instance, descriptors);
+      descriptors = Context.filterDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
       /*
       const subjects = {
       	changes$: {
@@ -106,26 +107,23 @@
       		enumerable: false,
       	}
       };
-      Object.defineProperties(this, Object.assign(instancePrototypeDescriptors, instanceDescriptors, subjects, descriptors || {}));
       */
-      // console.log(instancePrototypeDescriptors, instanceDescriptors);
 
-      Object.defineProperties(_assertThisInitialized(_this), Object.assign(instancePrototypeDescriptors, instanceDescriptors));
+      Object.defineProperties(_assertThisInitialized(_this), descriptors);
       return _this;
     }
-    /*
-    pushChanges() {
-    	this.changes$.next(this);
-    }
-    */
 
+    Context.filterDescriptors = function filterDescriptors(source, instance, descriptors) {
+      if (descriptors === void 0) {
+        descriptors = {};
+      }
 
-    Context.filterDescriptors = function filterDescriptors(descriptors, instance) {
-      var filteredDescriptors = {};
-      Object.keys(descriptors).forEach(function (key) {
-        if (RESERVED_PROPERTIES.indexOf(key) === -1) {
-          // console.log('Context.filterDescriptors', key);
-          var descriptor = descriptors[key];
+      var properties = Object.getOwnPropertyNames(source); // console.log('filterDescriptors', JSON.stringify(properties));
+
+      properties.forEach(function (key) {
+        if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
+          // console.log('Context.filterDescriptors', key, source[key]);
+          var descriptor = Object.getOwnPropertyDescriptor(source, key);
 
           if (typeof descriptor.value == "function") {
             descriptor.value = function () {
@@ -137,11 +135,11 @@
             };
           }
 
-          filteredDescriptors[key] = descriptor;
+          descriptors[key] = descriptor;
         }
       }); // console.log(filteredDescriptors);
 
-      return filteredDescriptors;
+      return descriptors;
     };
 
     return Context;
@@ -339,11 +337,12 @@
           return "$$pipes." + name + ".transform(" + expression + "," + params.join(',') + ")";
         }, expression); // console.log('expression', expression);
 
-        var expression_func = new Function(this.options.debug ? "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.pipes;\n\t\t\t\t\tlet $$$;\n\t\t\t\t\ttry {\n\t\t\t\t\t\t$$$ = " + expression + ";\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\t// console.error('" + expression.replace(/\'/g, '"') + "', this);\n\t\t\t\t\t\t$$$ = e.message;\n\t\t\t\t\t}\n\t\t\t\t\treturn $$$;\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}" : "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+        var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
         return expression_func;
       } else {
         // console.log('expression', args, expression);
-        var _expression_func = new Function(this.options.debug ? "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\t// console.log('" + expression.replace(/\'/g, '"') + "', this);\n\t\t\t\t\tlet $$$;\n\t\t\t\t\ttry {\n\t\t\t\t\t\t$$$ = " + expression + ";\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\t// console.error('" + expression.replace(/\'/g, '"') + "', this);\n\t\t\t\t\t\t$$$ = e.message;\n\t\t\t\t\t}\n\t\t\t\t\treturn $$$;\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}" : "with(this) {\n\t\t\t\treturn (function (" + args + ", module) {\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+        // console.log('${expression.replace(/\'/g,'"')}', this);
+        var _expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
 
         return _expression_func;
       }
@@ -423,7 +422,7 @@
       }; // console.log(text);
 
 
-      return text.replace(/\{{2}((([^{}])|(\{[^{}]+?\}))*?)\}{2}/g, parse_eval_);
+      return text.replace(/\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g, parse_eval_); // return text.replace(/\{{2}((([^{}])|(\{[^{}]+?\}))*?)\}{2}/g, parse_eval_);
     };
 
     _proto.parse = function parse(node, instance) {

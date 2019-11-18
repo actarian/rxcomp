@@ -5,13 +5,10 @@ const RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', '
 
 export default class Context extends Component {
 
-	constructor(instance, descriptors) {
+	constructor(instance, descriptors = {}) {
 		super();
-		// const instancePrototypeDescriptors = {};
-		const instancePrototypeDescriptors = Context.filterDescriptors(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(instance)), instance);
-		// console.log('instancePrototypeDescriptors', instancePrototypeDescriptors);
-		const instanceDescriptors = Context.filterDescriptors(Object.getOwnPropertyDescriptors(instance), instance);
-		// console.log('instanceDescriptors', instanceDescriptors);
+		descriptors = Context.mergeDescriptors(instance, instance, descriptors);
+		descriptors = Context.mergeDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
 		/*
 		const subjects = {
 			changes$: {
@@ -25,34 +22,25 @@ export default class Context extends Component {
 				enumerable: false,
 			}
 		};
-		Object.defineProperties(this, Object.assign(instancePrototypeDescriptors, instanceDescriptors, subjects, descriptors || {}));
 		*/
-		// console.log(instancePrototypeDescriptors, instanceDescriptors);
-		Object.defineProperties(this, Object.assign(instancePrototypeDescriptors, instanceDescriptors));
+		Object.defineProperties(this, descriptors);
 	}
 
-	/*
-	pushChanges() {
-		this.changes$.next(this);
-	}
-	*/
-
-	static filterDescriptors(descriptors, instance) {
-		const filteredDescriptors = {};
-		Object.keys(descriptors).forEach(key => {
-			if (RESERVED_PROPERTIES.indexOf(key) === -1) {
-				// console.log('Context.filterDescriptors', key);
-				const descriptor = descriptors[key];
+	static mergeDescriptors(source, instance, descriptors = {}) {
+		const properties = Object.getOwnPropertyNames(source);
+		properties.forEach(key => {
+			if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
+				// console.log('Context.mergeDescriptors', key, source[key]);
+				const descriptor = Object.getOwnPropertyDescriptor(source, key);
 				if (typeof descriptor.value == "function") {
 					descriptor.value = (...args) => {
 						instance[key].apply(instance, args);
 					};
 				}
-				filteredDescriptors[key] = descriptor;
+				descriptors[key] = descriptor;
 			}
 		});
-		// console.log(filteredDescriptors);
-		return filteredDescriptors;;
+		return descriptors;
 	}
 
 }
