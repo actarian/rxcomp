@@ -6,7 +6,7 @@
 
 If you like Angular declarative syntax but you just want go Vanilla, RxComp library come in useful.
 
-RxComp bundle size `4.7Kb` gzipped, `15Kb` minified.  
+RxComp bundle size `4.8Kb` gzipped, `15Kb` minified.  
 RxJS dependancy bundle size `26Kb` gzipped, `345.5Kb` minified.  
  
 > [TodoMvc demo app](https://actarian.github.io/rxcomp-todomvc/)
@@ -84,7 +84,7 @@ npm install rxjs --save
 
 ___
 
-## Bootstrapping Module
+### Bootstrapping Module
 
 ```javascript
 import { ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from 'rxcomp';
@@ -106,7 +106,7 @@ Module.use({
 ```
 ___
 
-## Define Component Class
+### Define Component Class
 
 ```javascript
 export default class TodoItemComponent extends Component {
@@ -143,7 +143,7 @@ TodoItemComponent.meta = {
 ```
 ___
 
-## Declarative Syntax
+### Declarative Syntax
 
 ```html
 <li class="list__item" todo-item-component [item]="item" *for="let item of items" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
@@ -158,7 +158,7 @@ ___
 ```
 ___
 
-## LifeCycle Hooks
+### LifeCycle Hooks
 
 ```javascript
 onInit() {
@@ -173,6 +173,9 @@ onView() {
 onDestroy() {
 }
 ```
+___
+### Browser Compatibility
+RxComp supports all browsers that are [ES5-compliant](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported).
 ___
 ## Contributing
 
