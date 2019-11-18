@@ -6,18 +6,18 @@
 
 If you like Angular declarative syntax but you just want go Vanilla, RxComp library come in useful.
 
-Minified bundle size  `16Kb`  
-RxJS dependancy bundle size  `26Kb`  
+RxComp bundle size `4.7Kb` gzipped, `15.8Kb` minified.  
+RxJS dependancy bundle size `26Kb` gzipped, `345.5Kb` minified.  
  
-> [TodoMvc demo app](https://actarian.github.io/rxcomp/)
+> [TodoMvc demo app](https://actarian.github.io/rxcomp-todomvc/)
 ___
 
 ### What is included
 * Modules
-* Components ```inputs```, ```outputs```, ```template```
-* Structures ```ForStructure```, ```IfStructure```
-* Directives ```ClassDirective```, ```EventDirective```, ```InnerHtmlDirective```, ```StyleDirective```
-* Pipes ```JsonPipe```
+* Components *```inputs```, ```outputs```, ```template```*
+* Structures *```ForStructure```, ```IfStructure```*
+* Directives *```ClassDirective```, ```EventDirective```, ```InnerHtmlDirective```, ```StyleDirective```*
+* Pipes *```JsonPipe```*
 * Declarative Syntax
 * OnPush Strategy
 * Automatic Subscription / Unsubscription
@@ -26,7 +26,7 @@ ___
 
 ___
 
-### What is not included
+### What is NOT included
 * Two-Way Data Binding
 * Dependency Injection
 * Routing
