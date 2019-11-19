@@ -19,20 +19,20 @@ ___
 * Directives *```ClassDirective```, ```EventDirective```, ```InnerHtmlDirective```, ```StyleDirective```*
 * Pipes *```JsonPipe```*
 * Declarative Syntax
-* OnPush Strategy
+* OnPush Strategy via *```pushChanges```* method
 * Automatic Subscription / Unsubscription
 * Optional Chaining
-* Templates
+* Component Template
 
 ___
 
 ### What is NOT included
-* Two-Way Data Binding
-* Dependency Injection
-* Routing
-* Form Validation
-* Reactive Forms
-* Server Side Rendering
+* ~~Two-Way Data Binding~~
+* ~~Dependency Injection~~
+* ~~Routing~~
+* ~~Form Validation~~
+* ~~Reactive Forms~~
+* ~~Server Side Rendering~~
 
 ___
 
@@ -106,7 +106,7 @@ Module.use({
 ```
 ___
 
-### Define Component Class
+### Component Definition
 
 ```javascript
 export default class TodoItemComponent extends Component {

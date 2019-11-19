@@ -8,7 +8,6 @@
 			}, {
 				"input": "todomvc/js/main.js",
 				"output": "docs/js/main.js",
-				"module": true,
 				"rollup": {
 					"format": "umd",
 					"globals": {
@@ -21,7 +20,6 @@
 			}, {
 				"input": "todomvc/js/test.js",
 				"output": "docs/js/test.js",
-				"module": true,
 				"rollup": {
 					"format": "umd",
 					"globals": {
@@ -38,7 +36,6 @@
 			"compile": [{
 				"input": "src/rxcomp.js",
 				"output": "dist/rxcomp.js",
-				"module": true,
 				"rollup": {
 					"format": "umd",
 					"globals": {

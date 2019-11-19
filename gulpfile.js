@@ -72,6 +72,10 @@ function compileJs(done) {
 	const items = getCompilers('.js');
 	const tasks = [];
 	items.forEach(item => {
+		tasks.push(function itemTask(done) {
+			return compileRollupJs(item);
+		});
+		/*
 		if (item.module) {
 			item.module = Array.isArray(item.module) ? item.module : ['umd']; // ['systemJs', 'es6', 'es5'];
 			item.module.forEach(x => {
@@ -103,136 +107,20 @@ function compileJs(done) {
 				return compileBrowserJs(item);
 			});
 		}
+		*/
 	});
 	return tasks.length ? parallel(...tasks)(done) : done();
-}
-
-function compileSystemJs(item) {
-	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
-		.pipe(plumber())
-		.pipe(babel({
-			'plugins': ['@babel/plugin-transform-modules-systemjs'],
-			'presets': [['@babel/preset-env', {
-				'targets': {
-					'esmodules': true
-				},
-				loose: true,
-			}]],
-		}))
-		.pipe(rename(path.join(path.dirname(item.output), 'systemJs', path.basename(item.output))))
-		.pipe(tfsCheckout())
-		.pipe(dest('.', { sourcemaps: '.' }))
-		// .pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
-		// .pipe(filter('**/*.js'))
-		.on('end', () => logger.log('compile', item.output));
-	// .pipe(gulpif(item.minify, terser()))
-	// .pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-	// .pipe(tfsCheckout(!item.minify))
-	// .pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
-	// .pipe(filter('**/*.js'));
-}
-
-function compileEs6Js(item) {
-	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
-		.pipe(plumber())
-		.pipe(babel({
-			'presets': [['@babel/preset-env', {
-				'targets': {
-					'esmodules': true
-				},
-				loose: true,
-			}]],
-		}))
-		.pipe(rename(path.join(path.dirname(item.output), 'es6', path.basename(item.output, '.js') + '.es.js')))
-		.pipe(tfsCheckout())
-		.pipe(dest('.', { sourcemaps: '.' }))
-		// .pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
-		// .pipe(filter('**/*.js'))
-		.on('end', () => logger.log('compile', item.output));
-	// .pipe(gulpif(item.minify, terser()))
-	// .pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-	// .pipe(tfsCheckout(!item.minify))
-	// .pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
-	// .pipe(filter('**/*.js'));
-}
-
-function compileEs5Js(item) {
-	// !! missing: must include treeshaked dependancies
-	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
-		.pipe(plumber())
-		.pipe(babel())
-		.pipe(rename(path.join(path.dirname(item.output), 'bundle', path.basename(item.output))))
-		.pipe(tfsCheckout())
-		.pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
-		.pipe(filter('**/*.js'))
-		.on('end', () => logger.log('compile', item.output))
-		.pipe(gulpif(item.minify, terser()))
-		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-		.pipe(tfsCheckout(!item.minify))
-		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
-		.pipe(filter('**/*.js'));
-}
-
-function compileBrowserJs(item) {
-	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
-		.pipe(plumber())
-		.pipe(through2.obj((file, enc, next) => {
-				browserify({
-						basedir: '.',
-						cache: {},
-						entries: [file.path],
-						packageCache: {}
-					})
-					.transform('babelify', {
-						global: true,
-						presets: [
-							['@babel/preset-env', {
-								targets: {
-									chrome: '58',
-									// ie: '11'
-								},
-								loose: true,
-							}],
-						],
-						extensions: ['.js'],
-						// ignore: ['node_modules'],
-					})
-					// .plugin(commonShake, { /* options */ })
-					.bundle((error, response) => {
-						if (error) {
-							logger.error('compile:js', error);
-						} else {
-							logger.log('browserify.bundle.success', item.output);
-							file.contents = response;
-							next(null, file);
-						}
-					})
-					.on('error', (error) => {
-						logger.error('compile:js', error.toString());
-					});
-			}
-			/*, (done) => {
-				logger.log('through2.done', error);
-			}*/
-		))
-		.pipe(rename(item.output))
-		.pipe(tfsCheckout())
-		.pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
-		.pipe(filter('**/*.js'))
-		.on('end', () => logger.log('compile', item.output))
-		.pipe(gulpif(item.minify, terser()))
-		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-		.pipe(tfsCheckout(!item.minify))
-		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
-		.pipe(filter('**/*.js'));
 }
 
 function compileRollupJs(item) {
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(plumber())
 		.pipe(rollup({
-			plugins: [rollupBabel({
-					presets: [[babelPresetEnv, { modules: false, loose: true }]],
+			plugins: [
+				rollupBabel({
+					presets: [
+						[babelPresetEnv, { modules: false, loose: true }]
+					],
 					exclude: 'node_modules/**' // only transpile our source code
 					// babelrc: false,
 				}),
@@ -244,12 +132,11 @@ function compileRollupJs(item) {
 					}
 					}),
 				*/
-				]
+			]
 		}, Object.assign({
 			file: item.output,
 			name: path.basename(item.output, '.js'),
-			sourcemap: false, // item.minify,
-		}, {
+			sourcemap: false, // !!! item.minify,
 			format: 'umd',
 			globals: {},
 			external: []
