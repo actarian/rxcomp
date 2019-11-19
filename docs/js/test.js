@@ -1,3 +1,9 @@
+/**
+ * @license rxcomp v1.0.0-alpha.3
+ * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
+ * License: MIT
+ */
+
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('rxjs'), require('rxjs/operators')) :
   typeof define === 'function' && define.amd ? define('test', ['rxjs', 'rxjs/operators'], factory) :

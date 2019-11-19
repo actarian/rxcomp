@@ -4,18 +4,17 @@ const fs = require('fs'),
 	babel = require('gulp-babel'),
 	babelPresetEnv = require('@babel/preset-env'),
 	browserify = require('browserify'),
-	commonShake = require('common-shakeify'),
 	concat = require('gulp-concat'),
 	concatutil = require('gulp-concat-util'),
 	cssmin = require('gulp-cssmin'),
 	filter = require('gulp-filter'),
 	gulpif = require('gulp-if'),
 	html2js = require('gulp-html2js'),
+	license = require('rollup-plugin-license'),
 	plumber = require('gulp-plumber'),
 	rename = require('gulp-rename'),
 	rollup = require('gulp-better-rollup'),
 	rollupBabel = require('rollup-plugin-babel'),
-	rollupResolve = require('rollup-plugin-node-resolve'),
 	scss = require('gulp-sass'),
 	terser = require('gulp-terser'),
 	through2 = require('through2'),
@@ -124,14 +123,11 @@ function compileRollupJs(item) {
 					exclude: 'node_modules/**' // only transpile our source code
 					// babelrc: false,
 				}),
-				/*
-				rollupResolve({
-					// pass custom options to the resolve plugin
-					customResolveOptions: {
-						moduleDirectory: 'node_modules'
-					}
-					}),
-				*/
+				license({
+					banner: `@license <%= pkg.name %> v<%= pkg.version %>
+					(c) <%= moment().format('YYYY') %> <%= pkg.author %>
+					License: <%= pkg.license %>`,
+				}),
 			]
 		}, Object.assign({
 			file: item.output,

@@ -1,3 +1,9 @@
+/**
+ * @license rxcomp v1.0.0-alpha.3
+ * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
+ * License: MIT
+ */
+
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('rxjs'), require('rxjs/operators')) :
   typeof define === 'function' && define.amd ? define('main', ['rxjs', 'rxjs/operators'], factory) :
@@ -1483,42 +1489,24 @@
     _proto.onInit = function onInit() {
       var _this = this;
 
-      var context = Module.getContext(this);
-      this.input = context.node.querySelector('.control--text');
-      this.items = [];
+      // context
+      var context = Module.getContext(this); // input
+
+      this.input = context.node.querySelector('.control--text'); // items
+
+      this.items = []; // store service
+
       this.store$ = StoreService.get$();
       this.store$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (items) {
-        // console.log('AppComponent.store$', items);
-        _this.items = items;
+        _this.items = items; // onpush change detection strategy
 
         _this.pushChanges();
       });
-      /*
-      this.input$().pipe(
-      	takeUntil(this.unsubscribe$)
-      ).subscribe(input => {
-      	// console.log(input);
-      	this.input = input;
-      });
-      */
-      // console.log('AppComponent', Object.keys(this).join(','));
     };
 
     _proto.onView = function onView() {
       var context = Module.getContext(this); // console.log('AppComponent.onView', context.node);
-    }
-    /*
-    input$() {
-    	const context = Module.getContext(this);
-    	const input = context.node.querySelector('.control--text');
-    	return fromEvent(input, 'input').pipe(
-    		map(event => input.value),
-    		auditTime(200),
-    		distinctUntilChanged()
-    	);
-    }
-    */
-    ;
+    };
 
     _proto.onInput = function onInput($event) {
       // console.log('AppComponent.onInput', $event, this);

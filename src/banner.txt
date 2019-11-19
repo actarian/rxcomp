@@ -1,7 +1,0 @@
-
-
-/**
- * @license RxComp v0.0.0-PLACEHOLDER
- * (c) 2019 Luca Zampetti
- * License: MIT
- */

@@ -1,7 +1,3 @@
-/*
-import { fromEvent } from 'rxjs';
-import { auditTime, distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
-*/
 import { takeUntil } from 'rxjs/operators';
 import { Component, Module } from '../../src/rxcomp';
 import StoreService from './store/store.service';
@@ -9,44 +5,27 @@ import StoreService from './store/store.service';
 export default class AppComponent extends Component {
 
 	onInit() {
+		// context
 		const context = Module.getContext(this);
+		// input
 		this.input = context.node.querySelector('.control--text');
+		// items
 		this.items = [];
+		// store service
 		this.store$ = StoreService.get$();
 		this.store$.pipe(
 			takeUntil(this.unsubscribe$)
 		).subscribe(items => {
-			// console.log('AppComponent.store$', items);
 			this.items = items;
+			// onpush change detection strategy
 			this.pushChanges();
 		});
-		/*
-		this.input$().pipe(
-			takeUntil(this.unsubscribe$)
-		).subscribe(input => {
-			// console.log(input);
-			this.input = input;
-		});
-		*/
-		// console.log('AppComponent', Object.keys(this).join(','));
 	}
 
 	onView() {
 		const context = Module.getContext(this);
 		// console.log('AppComponent.onView', context.node);
 	}
-
-	/*
-	input$() {
-		const context = Module.getContext(this);
-		const input = context.node.querySelector('.control--text');
-		return fromEvent(input, 'input').pipe(
-			map(event => input.value),
-			auditTime(200),
-			distinctUntilChanged()
-		);
-	}
-	*/
 
 	onInput($event) {
 		// console.log('AppComponent.onInput', $event, this);
