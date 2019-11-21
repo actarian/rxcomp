@@ -154,7 +154,7 @@
   var ID = 0;
   var CONTEXTS = {};
   var NODES = {};
-  var ORDER = [Structure, Directive, Component];
+  var ORDER = [Structure, Component, Directive];
 
   var Module =
   /*#__PURE__*/
@@ -218,7 +218,7 @@
         var isComponent = factory.prototype instanceof Component;
         var meta = factory.meta; // collect parentInstance scope
 
-        parentInstance = parentInstance || this.getParentInstance(node.parentNode);
+        parentInstance = parentInstance || this.getParentInstance(node);
 
         if (!parentInstance) {
           return;
@@ -858,29 +858,6 @@
       }
 
       return context;
-      /*
-      const context = Object.keys(CONTEXTS).reduce((previous, id) => {
-      	const current = CONTEXTS[id];
-      	if (current.node === node && current.factory.prototype instanceof Component) {
-      		if (previous && current.factory.prototype instanceof Context) {
-      			return previous;
-      		} else {
-      			return current;
-      		}
-      	} else {
-      		return previous;
-      	}
-      }, null);
-      	return context;
-      */
-
-      /*
-      let id = Object.keys(CONTEXTS).find(id => CONTEXTS[id].node === node && CONTEXTS[id].factory.prototype instanceof Component);
-      if (id) {
-      	const context = CONTEXTS[id];
-      	return context;
-      }
-      */
     };
 
     return Module;
@@ -1302,7 +1279,7 @@
       var node = context.node;
       var style = module.resolve(this.styleFunction, changes, this);
       Object.keys(style).forEach(function (key) {
-        node.style[key] = style[key];
+        node.style.setProperty(key, style[key]);
       }); // console.log('StyleDirective.onChanges', changes, style);
     };
 
