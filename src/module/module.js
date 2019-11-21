@@ -8,7 +8,7 @@ import Structure from '../core/structure';
 let ID = 0;
 const CONTEXTS = {};
 const NODES = {};
-const ORDER = [Structure, Component, Directive];
+const ORDER = [Structure, Directive, Component];
 
 export default class Module {
 

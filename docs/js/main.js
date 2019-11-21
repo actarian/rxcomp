@@ -154,7 +154,7 @@
   var ID = 0;
   var CONTEXTS = {};
   var NODES = {};
-  var ORDER = [Structure, Component, Directive];
+  var ORDER = [Structure, Directive, Component];
 
   var Module =
   /*#__PURE__*/
@@ -1630,10 +1630,17 @@
   TodoItemComponent.meta = {
     selector: '[todo-item-component]',
     inputs: ['item'],
-    outputs: ['toggle', 'remove'],
-    template:
-    /* html */
-    "\n\t\t<button type=\"button\" class=\"btn--toggle\" [style]=\"{ color: color }\" (click)=\"onToggle(item)\">\n\t\t\t<i class=\"icon--check\" *if=\"item.done\"></i>\n\t\t\t<i class=\"icon--circle\" *if=\"!item.done\"></i>\n\t\t</button>\n\t\t<div class=\"title\" [style]=\"{ color: color }\" [innerHTML]=\"item.name\"></div>\n\t\t<div class=\"date\" [style]=\"{ background: backgroundColor, color: color }\" [innerHTML]=\"item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }\"></div>\n\t\t<button type=\"button\" class=\"btn--remove\" [style]=\"{ color: color }\" (click)=\"onRemove(item)\"><i class=\"icon--remove\"></i></button>\n\t"
+    outputs: ['toggle', 'remove']
+    /* template: // html // `
+    	<button type="button" class="btn--toggle" [style]="{ color: color }" (click)="onToggle(item)">
+    		<i class="icon--check" *if="item.done"></i>
+    		<i class="icon--circle" *if="!item.done"></i>
+    		<div class="title" [innerHTML]="item.name"></div>
+    	</button>
+    	<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+    	<button type="button" class="btn--remove" [style]="{ color: color }" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+    `, */
+
   };
 
   Module.use({

@@ -154,7 +154,7 @@
   var ID = 0;
   var CONTEXTS = {};
   var NODES = {};
-  var ORDER = [Structure, Component, Directive];
+  var ORDER = [Structure, Directive, Component];
 
   var Module =
   /*#__PURE__*/

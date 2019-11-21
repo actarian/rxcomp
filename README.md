@@ -49,7 +49,7 @@ ___
 For CDN, you can use unpkg
 
 ```html
-<script src="https://unpkg.com/rxcomp@1.0.0-alpha.3/dist/rxcomp.min.js"></script>
+<script src="https://unpkg.com/rxcomp@1.0.0-alpha.4/dist/rxcomp.min.js"></script>
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -224,6 +224,6 @@ Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
 
 ---
 
-### 1.0.0-alpha.3
+### 1.0.0-alpha.4
 
 * Initial release of RxComp library

@@ -2983,7 +2983,10 @@ button,
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  background: #cad2d7; }
+  background: #dcedf3;
+  background: -webkit-gradient(linear, left top, left bottom, from(#dcedf3), color-stop(99%, #def7f0));
+  background: linear-gradient(to bottom, #dcedf3 0%, #def7f0 99%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dcedf3', endColorstr='#def7f0', GradientType=0); }
   .page--todomvc main {
     width: 100%;
     padding: 40px;
@@ -2992,32 +2995,34 @@ button,
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    margin: 0;
-    padding: 20px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.15); }
+    margin: 20px 0;
+    padding: 8px 12px;
+    border: 2px solid rgba(17, 138, 178, 0.2);
+    border-radius: 8px; }
   .page--todomvc .control--text {
     width: 100%;
     margin: 0;
     padding: 0;
-    font-size: 21px;
+    font-size: 20px;
     background: none;
     border: none;
-    outline: none; }
+    outline: none;
+    color: #118ab2; }
     .page--todomvc .control--text::-webkit-input-placeholder {
-      font-size: 21px;
-      color: rgba(0, 0, 0, 0.5); }
+      font-size: 20px;
+      color: rgba(17, 138, 178, 0.2); }
     .page--todomvc .control--text::-moz-placeholder {
-      font-size: 21px;
-      color: rgba(0, 0, 0, 0.5); }
+      font-size: 20px;
+      color: rgba(17, 138, 178, 0.2); }
     .page--todomvc .control--text:-ms-input-placeholder {
-      font-size: 21px;
-      color: rgba(0, 0, 0, 0.5); }
+      font-size: 20px;
+      color: rgba(17, 138, 178, 0.2); }
     .page--todomvc .control--text::-ms-input-placeholder {
-      font-size: 21px;
-      color: rgba(0, 0, 0, 0.5); }
+      font-size: 20px;
+      color: rgba(17, 138, 178, 0.2); }
     .page--todomvc .control--text::placeholder {
-      font-size: 21px;
-      color: rgba(0, 0, 0, 0.5); }
+      font-size: 20px;
+      color: rgba(17, 138, 178, 0.2); }
   .page--todomvc .list {
     margin: 0;
     padding: 0;
@@ -3035,12 +3040,6 @@ button,
       margin: 0;
       padding: 20px 0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.15); }
-      .page--todomvc .list > .list__item > .title {
-        -webkit-box-flex: 1;
-            -ms-flex: 1 1 auto;
-                flex: 1 1 auto;
-        margin: 0 10px;
-        color: rgba(0, 0, 0, 0.5); }
       .page--todomvc .list > .list__item > .date {
         -webkit-box-flex: 0;
             -ms-flex: 0 1 100px;
@@ -3052,6 +3051,51 @@ button,
         line-height: 1;
         text-align: center;
         color: #fff; }
+  .page--todomvc .btn--toggle {
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center; }
+    .page--todomvc .btn--toggle > i {
+      font-size: 14px;
+      height: 14px;
+      line-height: 1; }
+    .page--todomvc .btn--toggle > .title {
+      margin: 0 10px;
+      font-size: 16px;
+      line-height: 1; }
+  .page--todomvc .btn--remove > i {
+    font-size: 11px;
+    height: 11px;
+    line-height: 1; }
+  .page--todomvc .btn--add {
+    color: #118ab2;
+    font-size: 12px; }
+    .page--todomvc .btn--add.disabled {
+      pointer-events: none;
+      color: rgba(17, 138, 178, 0.2); }
+  .page--todomvc .footer {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    margin: 0; }
+    .page--todomvc .footer a {
+      margin-right: 15px; }
+      .page--todomvc .footer a i {
+        font-size: 24px;
+        color: rgba(17, 138, 178, 0.4);
+        -webkit-transition: ease-in-out color 300ms;
+        transition: ease-in-out color 300ms; }
+      .page--todomvc .footer a:hover i {
+        color: #118ab2; }
   @media (min-width: 768px) {
     .page--todomvc main {
       display: -webkit-box;
@@ -3074,36 +3118,17 @@ button,
       overflow-y: auto; } }
   @media (max-width: 767.98px) {
     .page--todomvc main {
-      min-height: 100vh; }
+      height: 100vh;
+      height: -webkit-fill-available;
+      height: -moz-available;
+      height: fill-available;
+      padding: 20px 15px; }
     .page--todomvc .list {
-      height: calc(100vh - 200px);
-      overflow-y: auto; } }
-  .page--todomvc svg {
-    fill: #666666;
-    width: 16px;
-    height: 16px; }
-  .page--todomvc button {
-    color: #666666;
-    font-size: 12px; }
-    .page--todomvc button.disabled {
-      pointer-events: none;
-      opacity: 0.2; }
-  .page--todomvc .footer {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: center;
-        -ms-flex-pack: center;
-            justify-content: center;
-    margin: 0; }
-    .page--todomvc .footer i {
-      color: #666666;
-      font-size: 24px; }
-    .page--todomvc .footer a {
-      margin-right: 15px; }
-    .page--todomvc .footer svg {
-      width: 24px;
-      height: 24px; }
+      height: calc(100% - 155px);
+      margin-bottom: 0;
+      overflow-y: auto; }
+    .page--todomvc .footer {
+      padding: 25px 0; } }
 
 .page--test {
   display: -webkit-box;
@@ -3115,7 +3140,10 @@ button,
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  background: #cad2d7; }
+  background: #dcedf3;
+  background: -webkit-gradient(linear, left top, left bottom, from(#dcedf3), color-stop(99%, #def7f0));
+  background: linear-gradient(to bottom, #dcedf3 0%, #def7f0 99%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dcedf3', endColorstr='#def7f0', GradientType=0); }
   .page--test main {
     width: 100%;
     padding: 40px;

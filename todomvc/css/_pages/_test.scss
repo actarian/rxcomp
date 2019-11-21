@@ -2,7 +2,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #cad2d7;
+	background: #dcedf3;
+	background: linear-gradient(to bottom, #dcedf3 0%, #def7f0 99%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dcedf3', endColorstr='#def7f0', GradientType=0);
 
 	main {
 		width: 100%;
