@@ -1,7 +1,6 @@
 @import 'shared';
 
-body,
-.tau {
+body {
 	--font-primary: #{$font-primary};
 	--font-secondary: #{$font-secondary};
 	--font-size: #{$font-size};
@@ -18,20 +17,17 @@ body,
 	--bullet-size: #{$bullet-size};
 }
 
-@import 'tau';
-
-body,
-.tau {
+body {
 	--background: #{$background};
 	--background-negative: #{$background-negative};
 	--background-primary: #{$background-primary};
-	--background-secondary: #{$background-secondary};
-	--background-tertiary: #{$background-tertiary};
+	// --background-secondary: #{$background-secondary};
+	// --background-tertiary: #{$background-tertiary};
 	--foreground: #{$foreground};
 	--foreground-negative: #{$foreground-negative};
 	--foreground-primary: #{$foreground-primary};
-	--foreground-secondary: #{$foreground-secondary};
-	--foreground-tertiary: #{$foreground-tertiary};
+	// --foreground-secondary: #{$foreground-secondary};
+	// --foreground-tertiary: #{$foreground-tertiary};
 	--border: #{$border};
 }
 

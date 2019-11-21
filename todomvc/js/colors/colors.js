@@ -1,9 +1,8 @@
 export const colors = [
-	{ hex: '#073B4C' },
-	{ hex: '#EF476F' },
-	{ hex: '#1CCC9D' },
-	{ hex: '#118AB2' },
-	{ hex: '#EFC156' },
+	{ hex: '#ffffff', background: '#ffffff', foreground: '#003adc', accent: '#212121' },
+	{ hex: '#212121', background: '#212121', foreground: '#ffffff', accent: '#003adc' },
+	{ hex: '#ffffff', background: '#ffffff', foreground: '#212121', accent: '#003adc' },
+	{ hex: '#003adc', background: '#003adc', foreground: '#ffffff', accent: '#212121' },
 ];
 
 export function hexToInt(hex) {
@@ -21,6 +20,18 @@ export function randomColor() {
 
 export function color(index, alpha) {
 	return hexToRgb(colors[index % colors.length].hex, alpha);
+}
+
+export function background(index, alpha) {
+	return hexToRgb(colors[index % colors.length].background, alpha);
+}
+
+export function foreground(index, alpha) {
+	return hexToRgb(colors[index % colors.length].foreground, alpha);
+}
+
+export function accent(index, alpha) {
+	return hexToRgb(colors[index % colors.length].accent, alpha);
 }
 
 let index = -1;

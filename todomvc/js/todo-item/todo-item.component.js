@@ -1,13 +1,20 @@
 import { Component } from '../../../src/rxcomp';
-import { color } from '../colors/colors';
+import { accent, background, foreground } from '../colors/colors';
 
 export default class TodoItemComponent extends Component {
 
+	// onInit() {}
+
 	onChanges(changes) {
 		// console.log('onChanges', changes);
-		this.backgroundColor = color(this.item.id, 0.15);
-		this.color = color(this.item.id);
+		this.background = background(this.item.id);
+		this.foreground = foreground(this.item.id);
+		this.accent = accent(this.item.id);
 	}
+
+	// onView() {}
+
+	// onDestroy() {}
 
 	onToggle($event) {
 		// console.log('onToggle', $event);
@@ -25,13 +32,16 @@ TodoItemComponent.meta = {
 	selector: '[todo-item-component]',
 	inputs: ['item'],
 	outputs: ['toggle', 'remove'],
-	/* template: // html // `
-		<button type="button" class="btn--toggle" [style]="{ color: color }" (click)="onToggle(item)">
-			<i class="icon--check" *if="item.done"></i>
-			<i class="icon--circle" *if="!item.done"></i>
-			<div class="title" [innerHTML]="item.name"></div>
-		</button>
-		<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-		<button type="button" class="btn--remove" [style]="{ color: color }" (click)="onRemove(item)"><i class="icon--remove"></i></button>
-	`, */
+	// template syntax example
+	/*
+	template: // html // `
+		<button type="button" class="btn--toggle" (click)="onToggle(item)">
+            <i class="icon--check" *if="item.done"></i>
+            <i class="icon--circle" *if="!item.done"></i>
+            <div class="title" [innerHTML]="item.name"></div>
+        </button>
+        <div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+        <button type="button" class="btn--remove" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+	`,
+	*/
 };

@@ -18,7 +18,7 @@ export default class StyleDirective extends Directive {
 		const node = context.node;
 		const style = module.resolve(this.styleFunction, changes, this);
 		Object.keys(style).forEach(key => {
-			node.style[key] = style[key];
+			node.style.setProperty(key, style[key]);
 		});
 		// console.log('StyleDirective.onChanges', changes, style);
 	}

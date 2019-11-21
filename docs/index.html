@@ -15,22 +15,8 @@
 
 <body class="page--todomvc">
 	<main app-component>
-		<div class="group--form">
-			<input type="text" class="control--text" placeholder="todo..." (input)="onInput($event)" (keyup)="$event.keyCode == 13 && onAddItem($event)" />
-			<button type="button" class="btn--add" [class]="{ disabled: !input.value }" (click)="onAddItem($event)"><i class="icon--add"></i></button>
-		</div>
-		<ul class="list">
-			<li class="list__item" *for="let item of items" todo-item-component [item]="item" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
-				<button type="button" class="btn--toggle" [style]="{ color: color }" (click)="onToggle(item)">
-					<i class="icon--check" *if="item.done"></i>
-					<i class="icon--circle" *if="!item.done"></i>
-					<div class="title" [innerHTML]="item.name"></div>
-				</button>
-				<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-				<button type="button" class="btn--remove" [style]="{ color: color }" (click)="onRemove(item)"><i class="icon--remove"></i></button>
-			</li>
-		</ul>
-		<div class="footer">
+		<div class="header">
+			<a href="https://github.com/actarian/rxcomp" target="_blank" class="brand">RxComp</a>
 			<a href="https://twitter.com/actarian" target="_blank" class="btn--twitter">
 				<i class="icon--twitter"></i>
 			</a>
@@ -38,6 +24,21 @@
 				<i class="icon--github"></i>
 			</a>
 		</div>
+		<div class="group--form">
+			<input type="text" class="control--text" placeholder="todo..." (input)="onInput($event)" (keyup)="$event.keyCode == 13 && onAddItem($event)" />
+			<button type="button" class="btn--add" [class]="{ disabled: !input.value }" (click)="onAddItem($event)"><i class="icon--add"></i></button>
+		</div>
+		<ul class="list">
+			<li class="list__item" *for="let item of items" [class]="{ done: item.done }" [style]="{ background: background, color: foreground, '--accent': accent }" todo-item-component [item]="item" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
+				<button type="button" class="btn--toggle" (click)="onToggle(item)">
+					<div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+					<div class="title" [innerHTML]="item.name"></div>
+				</button>
+				<button type="button" class="btn--remove" (click)="onRemove(item)">
+					<i class="icon--remove"></i>
+				</button>
+			</li>
+		</ul>
 	</main>
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign"></script>
 	<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>

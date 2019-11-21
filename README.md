@@ -130,13 +130,13 @@ TodoItemComponent.meta = {
 	inputs: ['item'],
 	outputs: ['toggle', 'remove'],
 	template: /* html */ `
-		<button type="button" class="btn--toggle" [style]="{ color: color }" (click)="onToggle(item)">
-			<i class="icon--check" *if="item.done"></i>
-			<i class="icon--circle" *if="!item.done"></i>
+		<button type="button" class="btn--toggle" (click)="onToggle(item)">
+			<div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+			<div class="title" [innerHTML]="item.name"></div>
 		</button>
-		<div class="title" [style]="{ color: color }" [innerHTML]="item.name"></div>
-		<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-		<button type="button" class="btn--remove" [style]="{ color: color }" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+		<button type="button" class="btn--remove" (click)="onRemove(item)">
+			<i class="icon--remove"></i>
+		</button>
 	`,
 };
 
@@ -146,14 +146,14 @@ ___
 ### Declarative Syntax
 
 ```html
-<li class="list__item" todo-item-component [item]="item" *for="let item of items" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
-	<button type="button" class="btn--toggle" [style]="{ color: color }" (click)="onToggle(item)">
-		<i class="icon--check" *if="item.done"></i>
-		<i class="icon--circle" *if="!item.done"></i>
+<li class="list__item" *for="let item of items" [class]="{ done: item.done }" [style]="{ background: background, color: foreground, '--accent': accent }" todo-item-component [item]="item" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
+	<button type="button" class="btn--toggle" (click)="onToggle(item)">
+		<div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+		<div class="title" [innerHTML]="item.name"></div>
 	</button>
-	<div class="title" [style]="{ color: color }" [innerHTML]="item.name"></div>
-	<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-	<button type="button" class="btn--remove" [style]="{ color: color }" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+	<button type="button" class="btn--remove" (click)="onRemove(item)">
+		<i class="icon--remove"></i>
+	</button>
 </li>
 ```
 ___

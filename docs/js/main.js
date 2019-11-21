@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.3
+ * @license rxcomp v1.0.0-alpha.4
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -154,7 +154,7 @@
   var ID = 0;
   var CONTEXTS = {};
   var NODES = {};
-  var ORDER = [Structure, Directive, Component];
+  var ORDER = [Structure, Component, Directive];
 
   var Module =
   /*#__PURE__*/
@@ -218,7 +218,7 @@
         var isComponent = factory.prototype instanceof Component;
         var meta = factory.meta; // collect parentInstance scope
 
-        parentInstance = parentInstance || this.getParentInstance(node.parentNode);
+        parentInstance = parentInstance || this.getParentInstance(node);
 
         if (!parentInstance) {
           return;
@@ -858,29 +858,6 @@
       }
 
       return context;
-      /*
-      const context = Object.keys(CONTEXTS).reduce((previous, id) => {
-      	const current = CONTEXTS[id];
-      	if (current.node === node && current.factory.prototype instanceof Component) {
-      		if (previous && current.factory.prototype instanceof Context) {
-      			return previous;
-      		} else {
-      			return current;
-      		}
-      	} else {
-      		return previous;
-      	}
-      }, null);
-      	return context;
-      */
-
-      /*
-      let id = Object.keys(CONTEXTS).find(id => CONTEXTS[id].node === node && CONTEXTS[id].factory.prototype instanceof Component);
-      if (id) {
-      	const context = CONTEXTS[id];
-      	return context;
-      }
-      */
     };
 
     return Module;
@@ -1302,7 +1279,7 @@
       var node = context.node;
       var style = module.resolve(this.styleFunction, changes, this);
       Object.keys(style).forEach(function (key) {
-        node.style[key] = style[key];
+        node.style.setProperty(key, style[key]);
       }); // console.log('StyleDirective.onChanges', changes, style);
     };
 
@@ -1412,17 +1389,25 @@
 
       if (!items) {
         items = [{
-          id: 3,
-          name: 'cookies',
+          id: 5,
+          name: 'Cookies',
           date: new Date(Date.now())
         }, {
-          id: 2,
-          name: 'pizza',
+          id: 4,
+          name: 'Pizza',
+          date: new Date(2019, 4, 4, 12)
+        }, {
+          id: 3,
+          name: 'Pasta',
           date: new Date(2019, 3, 22, 12)
         }, {
-          id: 1,
-          name: 'bread',
+          id: 2,
+          name: 'Bread',
           date: new Date(2019, 0, 6, 12)
+        }, {
+          id: 1,
+          name: 'Ham',
+          date: new Date(2018, 11, 30, 12)
         }];
         LocalStorageService.set('items', items);
       }
@@ -1573,18 +1558,34 @@
   };
 
   var colors = [{
-    hex: '#073B4C'
+    hex: '#ffffff',
+    background: '#ffffff',
+    foreground: '#003adc',
+    accent: '#212121'
   }, {
-    hex: '#EF476F'
+    hex: '#212121',
+    background: '#212121',
+    foreground: '#ffffff',
+    accent: '#003adc'
   }, {
-    hex: '#1CCC9D'
+    hex: '#ffffff',
+    background: '#ffffff',
+    foreground: '#212121',
+    accent: '#003adc'
   }, {
-    hex: '#118AB2'
-  }, {
-    hex: '#EFC156'
+    hex: '#003adc',
+    background: '#003adc',
+    foreground: '#ffffff',
+    accent: '#212121'
   }];
-  function color(index, alpha) {
-    return hexToRgb(colors[index % colors.length].hex, alpha);
+  function background(index, alpha) {
+    return hexToRgb(colors[index % colors.length].background, alpha);
+  }
+  function foreground(index, alpha) {
+    return hexToRgb(colors[index % colors.length].foreground, alpha);
+  }
+  function accent(index, alpha) {
+    return hexToRgb(colors[index % colors.length].accent, alpha);
   }
   function hexToRgb(hex, a) {
     var r = parseInt(hex.slice(1, 3), 16);
@@ -1609,11 +1610,15 @@
 
     var _proto = TodoItemComponent.prototype;
 
+    // onInit() {}
     _proto.onChanges = function onChanges(changes) {
       // console.log('onChanges', changes);
-      this.backgroundColor = color(this.item.id, 0.15);
-      this.color = color(this.item.id);
-    };
+      this.background = background(this.item.id);
+      this.foreground = foreground(this.item.id);
+      this.accent = accent(this.item.id);
+    } // onView() {}
+    // onDestroy() {}
+    ;
 
     _proto.onToggle = function onToggle($event) {
       // console.log('onToggle', $event);
@@ -1630,16 +1635,19 @@
   TodoItemComponent.meta = {
     selector: '[todo-item-component]',
     inputs: ['item'],
-    outputs: ['toggle', 'remove']
-    /* template: // html // `
-    	<button type="button" class="btn--toggle" [style]="{ color: color }" (click)="onToggle(item)">
-    		<i class="icon--check" *if="item.done"></i>
-    		<i class="icon--circle" *if="!item.done"></i>
-    		<div class="title" [innerHTML]="item.name"></div>
-    	</button>
-    	<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-    	<button type="button" class="btn--remove" [style]="{ color: color }" (click)="onRemove(item)"><i class="icon--remove"></i></button>
-    `, */
+    outputs: ['toggle', 'remove'] // template syntax example
+
+    /*
+    template: // html // `
+    	<button type="button" class="btn--toggle" (click)="onToggle(item)">
+               <i class="icon--check" *if="item.done"></i>
+               <i class="icon--circle" *if="!item.done"></i>
+               <div class="title" [innerHTML]="item.name"></div>
+           </button>
+           <div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+           <button type="button" class="btn--remove" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+    `,
+    */
 
   };
 

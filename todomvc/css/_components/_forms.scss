@@ -1,0 +1,26 @@
+.group--form {
+	display: flex;
+	padding: 10px 20px;
+}
+
+.control--text {
+	width: 100%;
+	margin: 0;
+	padding: 0 20px 0 0;
+	font-size: 28px;
+	font-weight: 800;
+	background: none;
+	border: none;
+	outline: none;
+	color: $foreground;
+
+	&::placeholder {
+		font-size: 28px;
+		font-weight: 800;
+		color: rgba($foreground, 0.2);
+	}
+}
+
+::placeholder {
+	font-family: $font-primary;
+}

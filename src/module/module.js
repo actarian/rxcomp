@@ -8,7 +8,7 @@ import Structure from '../core/structure';
 let ID = 0;
 const CONTEXTS = {};
 const NODES = {};
-const ORDER = [Structure, Directive, Component];
+const ORDER = [Structure, Component, Directive];
 
 export default class Module {
 
@@ -56,7 +56,7 @@ export default class Module {
 			const isComponent = factory.prototype instanceof Component;
 			const meta = factory.meta;
 			// collect parentInstance scope
-			parentInstance = parentInstance || this.getParentInstance(node.parentNode);
+			parentInstance = parentInstance || this.getParentInstance(node);
 			if (!parentInstance) {
 				return;
 			}
@@ -568,28 +568,6 @@ export default class Module {
 			}, null);
 		}
 		return context;
-		/*
-		const context = Object.keys(CONTEXTS).reduce((previous, id) => {
-			const current = CONTEXTS[id];
-			if (current.node === node && current.factory.prototype instanceof Component) {
-				if (previous && current.factory.prototype instanceof Context) {
-					return previous;
-				} else {
-					return current;
-				}
-			} else {
-				return previous;
-			}
-		}, null);
-			return context;
-		*/
-		/*
-		let id = Object.keys(CONTEXTS).find(id => CONTEXTS[id].node === node && CONTEXTS[id].factory.prototype instanceof Component);
-		if (id) {
-			const context = CONTEXTS[id];
-			return context;
-		}
-		*/
 	}
 
 }
