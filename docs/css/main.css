@@ -329,6 +329,7 @@ button,
     padding: 20px; }
     .page--todomvc .list__item .title {
       position: relative;
+      margin-top: 10px;
       font-size: 28px;
       font-weight: 800;
       line-height: 1;
@@ -351,14 +352,13 @@ button,
     .page--todomvc .list__item.done .title:after {
       width: 170px; }
     .page--todomvc .list__item .date {
-      margin-bottom: 7px;
       font-size: 10px;
       font-weight: 800;
       line-height: 1;
       text-align: left;
       white-space: nowrap;
       text-transform: uppercase;
-      color: var(--accent); }
+      text-indent: 1px; }
   .page--todomvc .btn--toggle {
     -webkit-box-flex: 1;
         -ms-flex: 1 1 auto;

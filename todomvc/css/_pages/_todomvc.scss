@@ -63,6 +63,7 @@
 
 		.title {
 			position: relative;
+			margin-top: 10px;
 			font-size: 28px;
 			font-weight: 800;
 			line-height: 1;
@@ -97,14 +98,14 @@
 		}
 
 		.date {
-			margin-bottom: 7px;
 			font-size: 10px;
 			font-weight: 800;
 			line-height: 1;
 			text-align: left;
 			white-space: nowrap;
 			text-transform: uppercase;
-			color: var(--accent);
+			text-indent: 1px;
+			// color: var(--accent);
 		}
 
 	}
