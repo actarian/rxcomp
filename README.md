@@ -56,15 +56,15 @@ The global namespace for RxComp is `rxcomp`
 
 ```javascript
 import { 
-	ClassDirective, 
-	Component, 
-	EventDirective, 
-	ForStructure, 
-	IfStructure, 
-	InnerHtmlDirective, 
-	JsonPipe, 
-	Module, 
-	StyleDirective 
+    ClassDirective, 
+    Component, 
+    EventDirective, 
+    ForStructure, 
+    IfStructure, 
+    InnerHtmlDirective, 
+    JsonPipe, 
+    Module, 
+    StyleDirective 
 } from 'rxcomp';
 ```
 ___
@@ -90,18 +90,18 @@ ___
 import { ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from 'rxcomp';
 
 Module.use({
-	factories: [
-		ClassDirective,
-		EventDirective,
-		ForStructure,
-		IfStructure,
-		InnerHtmlDirective, 
-		StyleDirective,
-	],
-	pipes: [
-		JsonPipe,
-	],
-	bootstrap: AppComponent,
+    factories: [
+        ClassDirective,
+        EventDirective,
+        ForStructure,
+        IfStructure,
+        InnerHtmlDirective, 
+        StyleDirective,
+    ],
+    pipes: [
+        JsonPipe,
+    ],
+    bootstrap: AppComponent,
 });
 ```
 ___
@@ -111,33 +111,33 @@ ___
 ```javascript
 export default class TodoItemComponent extends Component {
 
-	onChanges(changes) {
-		this.color = color(changes.item.id);
-	}
+    onChanges(changes) {
+        this.color = color(changes.item.id);
+    }
 
-	onToggle($event) {
-		this.toggle.next($event);
-	}
+    onToggle($event) {
+        this.toggle.next($event);
+    }
 
-	onRemove($event) {
-		this.remove.next($event);
-	}
+    onRemove($event) {
+        this.remove.next($event);
+    }
 
 }
 
 TodoItemComponent.meta = {
-	selector: '[todo-item-component]',
-	inputs: ['item'],
-	outputs: ['toggle', 'remove'],
-	template: /* html */ `
-		<button type="button" class="btn--toggle" (click)="onToggle(item)">
-			<div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-			<div class="title" [innerHTML]="item.name"></div>
-		</button>
-		<button type="button" class="btn--remove" (click)="onRemove(item)">
-			<i class="icon--remove"></i>
-		</button>
-	`,
+    selector: '[todo-item-component]',
+    inputs: ['item'],
+    outputs: ['toggle', 'remove'],
+    template: /* html */ `
+        <button type="button" class="btn--toggle" (click)="onToggle(item)">
+            <div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+            <div class="title" [innerHTML]="item.name"></div>
+        </button>
+        <button type="button" class="btn--remove" (click)="onRemove(item)">
+            <i class="icon--remove"></i>
+        </button>
+    `,
 };
 
 ```
@@ -147,13 +147,13 @@ ___
 
 ```html
 <li class="list__item" *for="let item of items" [class]="{ done: item.done }" [style]="{ background: background, color: foreground, '--accent': accent }" todo-item-component [item]="item" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
-	<button type="button" class="btn--toggle" (click)="onToggle(item)">
-		<div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-		<div class="title" [innerHTML]="item.name"></div>
-	</button>
-	<button type="button" class="btn--remove" (click)="onRemove(item)">
-		<i class="icon--remove"></i>
-	</button>
+    <button type="button" class="btn--toggle" (click)="onToggle(item)">
+        <div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+        <div class="title" [innerHTML]="item.name"></div>
+    </button>
+    <button type="button" class="btn--remove" (click)="onRemove(item)">
+        <i class="icon--remove"></i>
+    </button>
 </li>
 ```
 ___
