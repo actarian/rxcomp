@@ -21,7 +21,6 @@ export default class EventDirective extends Directive {
 			event$.pipe(
 				takeUntil(this.unsubscribe$)
 			).subscribe(event => {
-				// console.log(parentInstance);
 				module.resolve(outputFunction, parentInstance, event);
 			});
 		} else {

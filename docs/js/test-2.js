@@ -5,10 +5,10 @@
  */
 
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('rxjs/operators')) :
-  typeof define === 'function' && define.amd ? define('rxcomp', ['exports', 'rxjs', 'rxjs/operators'], factory) :
-  (global = global || self, factory(global.rxcomp = {}, global.rxjs, global.rxjs.operators));
-}(this, (function (exports, rxjs, operators) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('rxjs'), require('rxjs/operators')) :
+  typeof define === 'function' && define.amd ? define('test-2', ['rxjs', 'rxjs/operators'], factory) :
+  (global = global || self, factory(global.rxjs, global.rxjs.operators));
+}(this, (function (rxjs, operators) { 'use strict';
 
   function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -1303,19 +1303,57 @@
     selector: "[[style]]"
   };
 
-  exports.ClassDirective = ClassDirective;
-  exports.Component = Component;
-  exports.Context = Context;
-  exports.Directive = Directive;
-  exports.EventDirective = EventDirective;
-  exports.ForStructure = ForStructure;
-  exports.IfStructure = IfStructure;
-  exports.InnerHtmlDirective = InnerHtmlDirective;
-  exports.JsonPipe = JsonPipe;
-  exports.Module = Module;
-  exports.Structure = Structure;
-  exports.StyleDirective = StyleDirective;
+  var AppComponent =
+  /*#__PURE__*/
+  function (_Component) {
+    _inheritsLoose(AppComponent, _Component);
 
-  Object.defineProperty(exports, '__esModule', { value: true });
+    function AppComponent() {
+      return _Component.apply(this, arguments) || this;
+    }
+
+    var _proto = AppComponent.prototype;
+
+    _proto.onInit = function onInit() {
+      var _this = this;
+
+      this.items = [1, 2, 3, 4];
+      return rxjs.interval(50).pipe(operators.take(1000), operators.takeUntil(this.unsubscribe$)).subscribe(function (items) {
+        _this.items = new Array(1 + Math.floor(Math.random() * 9)).fill(0).map(function (x, i) {
+          return i + 1;
+        });
+
+        _this.pushChanges();
+      });
+    };
+
+    return AppComponent;
+  }(Component);
+
+  AppComponent.meta = {
+    selector: '[app-component]'
+  }; // pipe
+
+  var ExamplePipe =
+  /*#__PURE__*/
+  function () {
+    function ExamplePipe() {}
+
+    ExamplePipe.transform = function transform(value) {
+      return value * 2;
+    };
+
+    return ExamplePipe;
+  }();
+
+  ExamplePipe.meta = {
+    name: 'example'
+  }; // module
+
+  Module.use({
+    factories: [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective],
+    pipes: [JsonPipe, ExamplePipe],
+    bootstrap: AppComponent
+  });
 
 })));

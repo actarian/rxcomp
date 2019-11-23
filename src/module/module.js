@@ -9,6 +9,7 @@ let ID = 0;
 const CONTEXTS = {};
 const NODES = {};
 const ORDER = [Structure, Component, Directive];
+const REMOVED_IDS = [];
 
 export default class Module {
 
@@ -75,22 +76,16 @@ export default class Module {
 					enumerable: false,
 				}
 			});
+			let initialized;
 			// injecting instance pushChanges method
 			const module = this;
 			instance.pushChanges = function() {
-				/*
-				if (isComponent) {
-					module.parse(node, instance);
-				}
-				*/
-				/*
-				console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
-				*/
+				// console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
 				this.changes$.next(this);
 				// parse component text nodes
 				if (isComponent) {
 					// console.log('Module.parse', instance.constructor.name);
-					module.parse(node, instance);
+					initialized ? module.parse(node, instance) : setTimeout(function() { module.parse(node, instance); });
 				}
 				// calling onView event
 				if (typeof instance.onView === 'function') {
@@ -109,10 +104,12 @@ export default class Module {
 			if (typeof instance.onInit === 'function') {
 				instance.onInit();
 			}
+			initialized = true;
 			// subscribe to parent changes
 			if (parentInstance.changes$) {
 				parentInstance.changes$.pipe(
 					// filter(() => node.parentNode),
+					// debounceTime(1),
 					takeUntil(instance.unsubscribe$)
 				).subscribe(changes => {
 					// resolve component input outputs
@@ -207,9 +204,8 @@ export default class Module {
 	}
 
 	remove(node) {
-		const ids = [];
 		Module.traverseDown(node, (node) => {
-			Object.keys(CONTEXTS).forEach(id => {
+			for (let id in CONTEXTS) {
 				const context = CONTEXTS[id];
 				if (context.node === node) {
 					const instance = context.instance;
@@ -219,12 +215,14 @@ export default class Module {
 						instance.onDestroy();
 					}
 					delete node.dataset.rxcompId;
-					ids.push(id);
+					REMOVED_IDS.push(id);
 				}
-			});
+			}
 		});
-		ids.forEach(id => Module.deleteContext(id));
-		// console.log('Module.remove', ids);
+		// console.log('Module.remove', REMOVED_IDS);
+		while (REMOVED_IDS.length) {
+			Module.deleteContext(REMOVED_IDS.shift());
+		}
 		return node;
 	}
 
@@ -295,18 +293,18 @@ export default class Module {
 		const context = Module.getContext(instance);
 		const parentInstance = context.parentInstance;
 		const inputs = context.inputs;
-		Object.keys(inputs).forEach(key => {
+		for (let key in inputs) {
 			const inputFunction = inputs[key];
 			const value = this.resolve(inputFunction, parentInstance, instance);
 			instance[key] = value;
-		});
+		}
 		/*
 		const outputs = context.outputs;
-		Object.keys(outputs).forEach(key => {
+		for (let key in outputs) {
 			const inpuoutputFunctiontFunction = outputs[key];
 			const value = this.resolve(outputFunction, parentInstance, null);
 			// console.log(`setted -> ${key}`, value);
-		});
+		}
 		*/
 	}
 
@@ -448,8 +446,8 @@ export default class Module {
 	}
 
 	static matchSelectors(node, selectors, results) {
-		selectors.forEach(selector => {
-			const match = selector(node);
+		for (let i = 0; i < selectors.length; i++) {
+			const match = selectors[i](node);
 			if (match) {
 				const factory = match.factory;
 				if (factory.prototype instanceof Component && factory.meta.template) {
@@ -457,7 +455,7 @@ export default class Module {
 				}
 				results.push(match);
 			}
-		});
+		}
 		return results;
 	}
 

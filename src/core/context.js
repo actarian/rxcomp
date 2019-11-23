@@ -28,7 +28,8 @@ export default class Context extends Component {
 
 	static mergeDescriptors(source, instance, descriptors = {}) {
 		const properties = Object.getOwnPropertyNames(source);
-		properties.forEach(key => {
+		while (properties.length) {
+			let key = properties.shift();
 			if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
 				// console.log('Context.mergeDescriptors', key, source[key]);
 				const descriptor = Object.getOwnPropertyDescriptor(source, key);
@@ -39,7 +40,7 @@ export default class Context extends Component {
 				}
 				descriptors[key] = descriptor;
 			}
-		});
+		}
 		return descriptors;
 	}
 

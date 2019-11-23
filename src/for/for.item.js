@@ -1,5 +1,4 @@
 import Context from '../core/context';
-// import Component from '../component/component';
 
 export default class ForItem extends Context {
 
@@ -41,5 +40,11 @@ export default class ForItem extends Context {
 	get even() { return this.index % 2 === 0; }
 
 	get odd() { return !this.even; }
+
+	/*
+	onDestroy() {
+		console.log('onDestroy');
+	}
+	*/
 
 }

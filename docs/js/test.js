@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.4
+ * @license rxcomp v1.0.0-alpha.5
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -125,7 +125,10 @@
       }
 
       var properties = Object.getOwnPropertyNames(source);
-      properties.forEach(function (key) {
+
+      var _loop = function _loop() {
+        var key = properties.shift();
+
         if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
           // console.log('Context.mergeDescriptors', key, source[key]);
           var descriptor = Object.getOwnPropertyDescriptor(source, key);
@@ -142,7 +145,12 @@
 
           descriptors[key] = descriptor;
         }
-      });
+      };
+
+      while (properties.length) {
+        _loop();
+      }
+
       return descriptors;
     };
 
@@ -155,6 +163,7 @@
   var CONTEXTS = {};
   var NODES = {};
   var ORDER = [Structure, Component, Directive];
+  var REMOVED_IDS = [];
 
   var Module =
   /*#__PURE__*/
@@ -239,25 +248,20 @@
             writable: false,
             enumerable: false
           }
-        }); // injecting instance pushChanges method
+        });
+        var initialized; // injecting instance pushChanges method
 
         var module = this;
 
         instance.pushChanges = function () {
-          /*
-          if (isComponent) {
-          	module.parse(node, instance);
-          }
-          */
-
-          /*
-          console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
-          */
+          // console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
           this.changes$.next(this); // parse component text nodes
 
           if (isComponent) {
             // console.log('Module.parse', instance.constructor.name);
-            module.parse(node, instance);
+            initialized ? module.parse(node, instance) : setTimeout(function () {
+              module.parse(node, instance);
+            });
           } // calling onView event
 
 
@@ -278,11 +282,13 @@
 
         if (typeof instance.onInit === 'function') {
           instance.onInit();
-        } // subscribe to parent changes
+        }
 
+        initialized = true; // subscribe to parent changes
 
         if (parentInstance.changes$) {
           parentInstance.changes$.pipe( // filter(() => node.parentNode),
+          // debounceTime(1),
           operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
             // resolve component input outputs
             if (isComponent && meta) {
@@ -379,9 +385,8 @@
     };
 
     _proto.remove = function remove(node) {
-      var ids = [];
       Module.traverseDown(node, function (node) {
-        Object.keys(CONTEXTS).forEach(function (id) {
+        for (var id in CONTEXTS) {
           var context = CONTEXTS[id];
 
           if (context.node === node) {
@@ -394,13 +399,14 @@
             }
 
             delete node.dataset.rxcompId;
-            ids.push(id);
+            REMOVED_IDS.push(id);
           }
-        });
-      });
-      ids.forEach(function (id) {
-        return Module.deleteContext(id);
-      }); // console.log('Module.remove', ids);
+        }
+      }); // console.log('Module.remove', REMOVED_IDS);
+
+      while (REMOVED_IDS.length) {
+        Module.deleteContext(REMOVED_IDS.shift());
+      }
 
       return node;
     };
@@ -486,26 +492,24 @@
     };
 
     _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
-      var _this6 = this;
-
       var context = Module.getContext(instance);
       var parentInstance = context.parentInstance;
       var inputs = context.inputs;
-      Object.keys(inputs).forEach(function (key) {
+
+      for (var key in inputs) {
         var inputFunction = inputs[key];
-
-        var value = _this6.resolve(inputFunction, parentInstance, instance);
-
+        var value = this.resolve(inputFunction, parentInstance, instance);
         instance[key] = value;
-      });
+      }
       /*
       const outputs = context.outputs;
-      Object.keys(outputs).forEach(key => {
+      for (let key in outputs) {
       	const inpuoutputFunctiontFunction = outputs[key];
       	const value = this.resolve(outputFunction, parentInstance, null);
       	// console.log(`setted -> ${key}`, value);
-      });
+      }
       */
+
     };
 
     _proto.getInstance = function getInstance(node) {
@@ -521,10 +525,10 @@
     };
 
     _proto.getParentInstance = function getParentInstance(node) {
-      var _this7 = this;
+      var _this6 = this;
 
       return Module.traverseUp(node, function (node) {
-        return _this7.getInstance(node);
+        return _this6.getInstance(node);
       });
     };
 
@@ -550,10 +554,10 @@
     };
 
     _proto.compile = function compile(node, parentInstance) {
-      var _this8 = this;
+      var _this7 = this;
 
       var instances = Module.querySelectorsAll(node, this.selectors, []).map(function (match) {
-        var instance = _this8.makeInstance(match.node, match.factory, match.selector, parentInstance);
+        var instance = _this7.makeInstance(match.node, match.factory, match.selector, parentInstance);
 
         if (match.factory.prototype instanceof Component) {
           parentInstance = undefined;
@@ -690,8 +694,8 @@
     };
 
     Module.matchSelectors = function matchSelectors(node, selectors, results) {
-      selectors.forEach(function (selector) {
-        var match = selector(node);
+      for (var i = 0; i < selectors.length; i++) {
+        var match = selectors[i](node);
 
         if (match) {
           var factory = match.factory;
@@ -702,7 +706,8 @@
 
           results.push(match);
         }
-      });
+      }
+
       return results;
     };
 
@@ -879,8 +884,7 @@
       var module = context.module;
       var node = context.node;
       var expression = node.getAttribute('[class]');
-      this.classFunction = module.makeFunction(expression); // this.classList = [...node.classList.keys()];
-      // console.log('ClassDirective.onInit', this.classList, expression);
+      this.classFunction = module.makeFunction(expression); // console.log('ClassDirective.onInit', this.classList, expression);
     };
 
     _proto.onChanges = function onChanges(changes) {
@@ -888,13 +892,11 @@
       var module = context.module;
       var node = context.node;
       var classList = module.resolve(this.classFunction, changes, this);
-      Object.keys(classList).forEach(function (key) {
-        if (classList[key]) {
-          node.classList.add(key);
-        } else {
-          node.classList.remove(key);
-        }
-      }); // console.log('ClassDirective.onChanges', classList);
+
+      for (var key in classList) {
+        classList[key] ? node.classList.add(key) : node.classList.remove(key);
+      } // console.log('ClassDirective.onChanges', classList);
+
     };
 
     return ClassDirective;
@@ -929,7 +931,6 @@
       if (expression) {
         var outputFunction = module.makeFunction(expression, ['$event']);
         event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
-          // console.log(parentInstance);
           module.resolve(outputFunction, parentInstance, event);
         });
       } else {
@@ -1003,6 +1004,12 @@
       get: function get() {
         return !this.even;
       }
+      /*
+      onDestroy() {
+      	console.log('onDestroy');
+      }
+      */
+
     }]);
 
     return ForItem;
@@ -1044,8 +1051,7 @@
       var isArray = Array.isArray(result);
       var array = isArray ? result : Object.keys(result);
       var total = array.length;
-      var previous = this.instances.length;
-      var nextSibling = this.forbegin.nextSibling;
+      var previous = this.instances.length; // let nextSibling = this.forbegin.nextSibling;
 
       for (var i = 0; i < Math.max(previous, total); i++) {
         if (i < total) {
@@ -1054,25 +1060,31 @@
 
           if (i < previous) {
             // update
-            // const clonedNode = nextSibling;
             var instance = this.instances[i];
             instance[tokens.key] = key;
-            instance[tokens.value] = value; // module.parse(clonedNode, instance);
-
-            nextSibling = nextSibling.nextSibling;
+            instance[tokens.value] = value;
+            /*
+            if (!nextSibling) {
+            	const context = Module.getContext(instance);
+            	const node = context.node;
+            	this.forend.parentNode.insertBefore(node, this.forend);
+            } else {
+            	nextSibling = nextSibling.nextSibling;
+            }
+            */
           } else {
             // create
             var clonedNode = node.cloneNode(true);
+            delete clonedNode.dataset.rxcompId;
             this.forend.parentNode.insertBefore(clonedNode, this.forend);
             var args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 
             var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 
-            var forItemContext = Module.getContext(_instance); // console.log(clonedNode, forItemContext.instance.constructor.name);
+            var forItemContext = Module.getContext(_instance); // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
 
-            module.compile(clonedNode, forItemContext.instance); // module.parse(clonedNode, instance);
+            module.compile(clonedNode, forItemContext.instance); // nextSibling = clonedNode.nextSibling;
 
-            nextSibling = clonedNode.nextSibling;
             this.instances.push(_instance);
           }
         } else {
@@ -1089,7 +1101,7 @@
         }
       }
 
-      this.instances.length = array.length; // console.log(this.instances, tokens);
+      this.instances.length = array.length; // console.log('ForStructure', this.instances, tokens);
     };
 
     _proto.getExpressionTokens = function getExpressionTokens(expression) {
@@ -1166,7 +1178,7 @@
       this.ifFunction = module.makeFunction(expression);
       var clonedNode = node.cloneNode(true);
       clonedNode.removeAttribute('*if');
-      this.clonedNode = clonedNode; // console.log('expression', expression);
+      this.clonedNode = clonedNode; // console.log('IfStructure.expression', expression);
     };
 
     _proto.onChanges = function onChanges(changes) {
@@ -1278,9 +1290,11 @@
       var module = context.module;
       var node = context.node;
       var style = module.resolve(this.styleFunction, changes, this);
-      Object.keys(style).forEach(function (key) {
+
+      for (var key in style) {
         node.style.setProperty(key, style[key]);
-      }); // console.log('StyleDirective.onChanges', changes, style);
+      } // console.log('StyleDirective.onChanges', changes, style);
+
     };
 
     return StyleDirective;

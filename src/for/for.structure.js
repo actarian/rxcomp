@@ -30,30 +30,36 @@ export default class ForStructure extends Structure {
 		const array = isArray ? result : Object.keys(result);
 		const total = array.length;
 		const previous = this.instances.length;
-		let nextSibling = this.forbegin.nextSibling;
+		// let nextSibling = this.forbegin.nextSibling;
 		for (let i = 0; i < Math.max(previous, total); i++) {
 			if (i < total) {
 				const key = isArray ? i : array[i];
 				const value = isArray ? array[key] : result[key];
 				if (i < previous) {
 					// update
-					// const clonedNode = nextSibling;
 					const instance = this.instances[i];
 					instance[tokens.key] = key;
 					instance[tokens.value] = value;
-					// module.parse(clonedNode, instance);
-					nextSibling = nextSibling.nextSibling;
+					/*
+					if (!nextSibling) {
+						const context = Module.getContext(instance);
+						const node = context.node;
+						this.forend.parentNode.insertBefore(node, this.forend);
+					} else {
+						nextSibling = nextSibling.nextSibling;
+					}
+					*/
 				} else {
 					// create
 					const clonedNode = node.cloneNode(true);
+					delete clonedNode.dataset.rxcompId;
 					this.forend.parentNode.insertBefore(clonedNode, this.forend);
 					const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 					const forItemContext = Module.getContext(instance);
-					// console.log(clonedNode, forItemContext.instance.constructor.name);
+					// console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
 					module.compile(clonedNode, forItemContext.instance);
-					// module.parse(clonedNode, instance);
-					nextSibling = clonedNode.nextSibling;
+					// nextSibling = clonedNode.nextSibling;
 					this.instances.push(instance);
 				}
 			} else {
@@ -66,7 +72,7 @@ export default class ForStructure extends Structure {
 			}
 		}
 		this.instances.length = array.length;
-		// console.log(this.instances, tokens);
+		// console.log('ForStructure', this.instances, tokens);
 	}
 
 	getExpressionTokens(expression) {

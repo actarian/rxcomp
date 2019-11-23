@@ -29,6 +29,18 @@
 					"external": ["rxjs"]
 				},
 				"minify": true
+			}, {
+				"input": "todomvc/js/test-2.js",
+				"output": "docs/js/test-2.js",
+				"rollup": {
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
+				},
+				"minify": true
 			}],
 			"bundle": []
 		},

@@ -2,55 +2,75 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #dcedf3;
-	background: linear-gradient(to bottom, #dcedf3 0%, #def7f0 99%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dcedf3', endColorstr='#def7f0', GradientType=0);
 
 	main {
 		width: 100%;
-		padding: 40px;
-		background: white;
-		font-size: 13px;
-		line-height: 1.5;
+		padding: 0;
+	}
 
-		div {
-			margin-bottom: 1.5em;
+	.header {
+		flex: 0 0 75px;
+		display: flex;
+		align-items: center;
+		padding: 20px;
+
+		.brand {
+			font-size: 13px;
+			font-weight: 900;
+			flex: 1 1 auto;
+		}
+
+		.btn--twitter,
+		.btn--github {
+			font-size: 20px;
+			margin-left: 10px;
+
+			i {
+				color: $foreground;
+				transition: ease-in-out color 300ms;
+			}
+
+			&:hover {
+				i {
+					color: $foreground-primary;
+				}
+			}
 		}
 	}
 
 	.list {
+		flex: 1 1 auto;
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		margin: 0 -30px 40px -30px;
-		padding: 0 30px;
+	}
 
-		&>.list__item {
-			display: flex;
-			align-items: center;
-			min-height: 15px;
-			margin: 0;
-			padding: 20px 0;
-			border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+	.list__item {
+		flex: 0 0 50px;
+		display: flex;
+		align-items: center;
+		min-height: 15px;
+		margin: 0;
+		padding: 20px 15px;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 
-			&>.title {
-				flex: 1 1 auto;
-				margin: 0 10px;
-				color: rgba(0, 0, 0, 0.5);
-			}
-
-			&>.date {
-				flex: 0 1 100px;
-				margin: 0 20px 0 10px;
-				padding: 6px 10px 4px 10px;
-				border-radius: 12px;
-				font-size: 12px;
-				line-height: 1;
-				text-align: center;
-				color: #fff;
-			}
-
+		&>.title {
+			flex: 1 1 auto;
+			margin: 0 10px;
+			color: rgba(0, 0, 0, 0.5);
 		}
+
+		&>.date {
+			flex: 0 1 100px;
+			margin: 0 20px 0 10px;
+			padding: 6px 10px 4px 10px;
+			border-radius: 12px;
+			font-size: 12px;
+			line-height: 1;
+			text-align: center;
+			color: #fff;
+		}
+
 	}
 
 	@include media-breakpoint-up(sm) {
@@ -66,7 +86,6 @@
 
 		.list {
 			flex: 1 1 auto;
-			max-height: calc(100% - 140px);
 			overflow-y: auto;
 		}
 
@@ -79,7 +98,6 @@
 		}
 
 		.list {
-			height: calc(100vh - 200px);
 			overflow-y: auto;
 		}
 
@@ -119,6 +137,43 @@
 			width: 24px;
 			height: 24px;
 		}
+	}
+
+	@include media-breakpoint-up(sm) {
+		background: #e0e0e0;
+
+		main {
+			display: flex;
+			flex-direction: column;
+			max-width: 375px;
+			height: 70vh;
+			border-radius: 3px;
+			box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+			background: white;
+		}
+
+		.list {
+			flex: 1 1 auto;
+			overflow-y: auto;
+		}
+
+	}
+
+	@include media-breakpoint-down(xs) {
+		background: white;
+
+		main {
+			min-height: 100vh;
+		}
+
+		.list {
+			overflow-y: auto;
+		}
+
+		.footer {
+			padding: 25px 0;
+		}
+
 	}
 
 }

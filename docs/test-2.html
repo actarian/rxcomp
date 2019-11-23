@@ -14,7 +14,7 @@
 </head>
 
 <body class="page--test">
-	<main test-component>
+	<main app-component>
 		<div class="header">
 			<a href="https://github.com/actarian/rxcomp" target="_blank" class="brand">RxComp</a>
 			<a href="https://twitter.com/actarian" target="_blank" class="btn--twitter">
@@ -24,32 +24,11 @@
 				<i class="icon--github"></i>
 			</a>
 		</div>
-		<ul class="list">
-			<li class="list__item">{{{ a: { b: 1 } } | json}}</li>
-			<li class="list__item">{{items | json}}</li>
-			<li class="list__item" [class]="{ active: object.a == 1 }">class</li>
-			<li class="list__item">
-				<span *for="let [key, value] of items" [innerHTML]="'[key ' + key + ', value ' + value + ']'"></span>
-			</li>
-			<li class="list__item">
-				<span *for="let [key, value] of object" innerHTML="[key {{key}}, value {{value}}]"></span>
-			</li>
-			<li class="list__item" *for="let item of items">
-				[{{item}}] {{{index}}, {{count}}, {{first}}, {{last}}, {{even}}, {{odd}}}
-			</li>
-			<li class="list__item" innerHTML="{{object.a}}"></li>
-			<li class="list__item" innerHTML="{{object.a + ' ' + object.b}}"></li>
-			<li class="list__item" [innerHTML]="object.a"></li>
-			<li class="list__item" [innerHTML]="object.a + ' ' + object.b"></li>
-			<li class="list__item" [innerHTML]="object | json"></li>
-			<li class="list__item" [innerHTML]="date | date : 'it-IT' : { dateStyle: 'short' }"></li>
-			<li class="list__item" *if="object.a">true</li>
-			<li class="list__item">{{object.a + ' ' + object.b}}</li>
-		</ul>
+		<div class="list__item" *for="let item of items" [style]="{ opacity: item / 10 }" (click)="alert(item)">{{item | example}}</div>
 	</main>
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign"></script>
 	<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
-	<script src="js/test.js"></script>
+	<script src="js/test-2.js"></script>
 </body>
 
 </html>

@@ -17,7 +17,7 @@ export default class IfStructure extends Structure {
 		const clonedNode = node.cloneNode(true);
 		clonedNode.removeAttribute('*if');
 		this.clonedNode = clonedNode;
-		// console.log('expression', expression);
+		// console.log('IfStructure.expression', expression);
 	}
 
 	onChanges(changes) {
