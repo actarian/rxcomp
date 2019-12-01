@@ -1,4 +1,6 @@
-export default class DatePipe {
+import { Pipe } from "../../../src/rxcomp";
+
+export default class DatePipe extends Pipe {
 
 	static transform(value, locale = 'it-IT-u-ca-gregory', options = {
 		dateStyle: 'short',

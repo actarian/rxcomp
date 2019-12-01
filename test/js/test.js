@@ -1,4 +1,4 @@
-import { ClassDirective, Component, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from '../../src/rxcomp';
+import { Browser, Component, CoreModule, Module } from '../../src/rxcomp';
 import DatePipe from './date/date.pipe';
 
 class TestComponent extends Component {
@@ -11,7 +11,6 @@ class TestComponent extends Component {
 	}
 
 }
-
 TestComponent.meta = {
 	selector: '[test-component]',
 };
@@ -26,45 +25,37 @@ class Test2Component extends Component {
 	}
 
 }
-
 Test2Component.meta = {
 	selector: '[test-component]',
 };
 
-const module = Module.use({
-	factories: [
-		ClassDirective,
-		EventDirective,
-		ForStructure,
-		IfStructure,
-		InnerHtmlDirective,
-		StyleDirective,
+class AppModule extends Module {}
+AppModule.meta = {
+	imports: [
+		CoreModule
 	],
-	pipes: [
+	declarations: [
 		DatePipe,
-		JsonPipe,
 	],
 	bootstrap: TestComponent,
-});
+};
+
+class App2Module extends Module {}
+App2Module.meta = {
+	imports: [
+		CoreModule
+	],
+	declarations: [
+		DatePipe,
+	],
+	bootstrap: Test2Component,
+};
+
+let module = Browser.bootstrap(AppModule);
 
 function init() {
 	module.destroy();
-
-	Module.use({
-		factories: [
-			ClassDirective,
-			EventDirective,
-			ForStructure,
-			IfStructure,
-			InnerHtmlDirective,
-			StyleDirective,
-		],
-		pipes: [
-			DatePipe,
-			JsonPipe,
-		],
-		bootstrap: Test2Component,
-	});
+	module = Browser.bootstrap(App2Module);
 }
 
 setTimeout(() => {

@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.5
+ * @license rxcomp v1.0.0-alpha.6
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -157,71 +157,38 @@
     return Context;
   }(Component);
 
-  var Structure = function Structure() {};
-
   var ID = 0;
   var CONTEXTS = {};
   var NODES = {};
-  var ORDER = [Structure, Component, Directive];
   var REMOVED_IDS = [];
 
   var Module =
   /*#__PURE__*/
   function () {
-    function Module(options) {
-      if (!options) {
-        throw 'missing options';
-      }
-
-      if (!options.bootstrap) {
-        throw 'missing bootstrap';
-      }
-
-      this.options = options;
-      var pipes = {};
-
-      if (options.pipes) {
-        options.pipes.forEach(function (x) {
-          return pipes[x.meta.name] = x;
-        });
-      }
-
-      this.pipes = pipes;
-      var bootstrap = options.bootstrap;
-      var node = this.node = document.querySelector(bootstrap.meta.selector);
-      this.nodeInnerHTML = node.innerHTML;
-
-      if (!node) {
-        throw "missing node " + bootstrap.meta.selector;
-      }
-
-      options.factories.sort(function (a, b) {
-        var ai = ORDER.reduce(function (p, c, i) {
-          return a.prototype instanceof c ? i : p;
-        }, -1);
-        var bi = ORDER.reduce(function (p, c, i) {
-          return b.prototype instanceof c ? i : p;
-        }, -1);
-        return ai - bi;
-      });
-      options.factories.unshift(bootstrap);
-      this.selectors = Module.unwrapSelectors(options.factories);
-      var instances = this.compile(node, window);
-      var instance = instances[0]; // if (instance instanceof module.options.bootstrap) {
-
-      instance.pushChanges(); // }
-    }
+    function Module() {}
 
     var _proto = Module.prototype;
 
-    _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
-      var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector); // console.log('Module.makeContext', context, context.instance, context.node);
+    _proto.compile = function compile(node, parentInstance) {
+      var _this = this;
 
-      return context;
+      var instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(function (match) {
+        var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+
+        if (match.factory.prototype instanceof Component) {
+          parentInstance = undefined;
+        }
+
+        return instance;
+      }).filter(function (x) {
+        return x;
+      }); // console.log('compile', instances, node, parentInstance);
+
+      return instances;
     };
 
     _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args) {
-      var _this = this;
+      var _this2 = this;
 
       if (parentInstance || node.parentNode) {
         var isComponent = factory.prototype instanceof Component;
@@ -234,8 +201,10 @@
         } // creating factory instance
 
 
-        var instance = _construct(factory, args || []); // injecting changes$ and unsubscribe$ subjects
+        var instance = _construct(factory, args || []); // creating instance context
 
+
+        var context = Module.makeContext(this, instance, parentInstance, node, factory, selector); // injecting changes$ and unsubscribe$ subjects
 
         Object.defineProperties(instance, {
           changes$: {
@@ -269,12 +238,11 @@
             // console.log('onView', instance.constructor.name);
             instance.onView();
           }
-        }; // creating instance context
+        }; // creating component input and outputs
+        // if (isComponent && meta) {
 
 
-        var context = Module.makeContext(this, instance, parentInstance, node, factory, selector); // creating component input and outputs
-
-        if (isComponent && meta) {
+        if (meta) {
           context.inputs = this.makeInputs(meta, instance);
           context.outputs = this.makeOutputs(meta, instance);
         } // calling onInit event
@@ -291,8 +259,9 @@
           // debounceTime(1),
           operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
             // resolve component input outputs
-            if (isComponent && meta) {
-              _this.resolveInputsOutputs(instance, changes);
+            // if (isComponent && meta) {
+            if (meta) {
+              _this2.resolveInputsOutputs(instance, changes);
             } // calling onChanges event with parentInstance
 
 
@@ -318,6 +287,12 @@
       }
     };
 
+    _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
+      var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector); // console.log('Module.makeContext', context, context.instance, context.node);
+
+      return context;
+    };
+
     _proto.makeFunction = function makeFunction(expression, params) {
       if (params === void 0) {
         params = ['$instance'];
@@ -330,7 +305,7 @@
       }
 
       var args = params.join(',');
-      var pipes = this.pipes;
+      var pipes = this.meta.pipes;
       var transforms = Module.getPipesSegments(expression);
       expression = transforms.shift().trim();
       expression = this.transformOptionalChaining(expression); // console.log(pipes, transforms, expression);
@@ -344,13 +319,13 @@
           var pipe = pipes[name];
 
           if (!pipe || typeof pipe.transform !== 'function') {
-            throw "missing pipe " + name;
+            throw "missing pipe '" + name + "'";
           }
 
           return "$$pipes." + name + ".transform(" + expression + "," + params.join(',') + ")";
         }, expression); // console.log('expression', expression);
 
-        var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+        var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
         return expression_func;
       } else {
         // console.log('expression', args, expression);
@@ -362,26 +337,46 @@
     };
 
     _proto.makeInput = function makeInput(instance, name) {
-      var context = Module.getContext(instance);
+      var context = getContext(instance);
       var node = context.node;
       var expression = node.getAttribute("[" + name + "]");
       return this.makeFunction(expression);
     };
 
     _proto.makeOutput = function makeOutput(instance, name) {
-      var _this2 = this;
+      var _this3 = this;
 
-      var context = Module.getContext(instance);
+      var context = getContext(instance);
       var node = context.node;
       var parentInstance = context.parentInstance;
       var expression = node.getAttribute("(" + name + ")");
       var outputFunction = this.makeFunction(expression, ['$event']);
       var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
-        _this2.resolve(outputFunction, parentInstance, event);
+        _this3.resolve(outputFunction, parentInstance, event);
       }));
       output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
       instance[name] = output$;
       return outputFunction;
+    };
+
+    _proto.getInstance = function getInstance(node) {
+      if (node === document) {
+        return window;
+      }
+
+      var context = getContextByNode(node);
+
+      if (context) {
+        return context.instance;
+      }
+    };
+
+    _proto.getParentInstance = function getParentInstance(node) {
+      var _this4 = this;
+
+      return Module.traverseUp(node, function (node) {
+        return _this4.getInstance(node);
+      });
     };
 
     _proto.remove = function remove(node) {
@@ -412,20 +407,20 @@
     };
 
     _proto.destroy = function destroy() {
-      this.remove(this.node);
-      this.node.innerHTML = this.nodeInnerHTML;
+      this.remove(this.meta.node);
+      this.meta.node.innerHTML = this.meta.nodeInnerHTML;
     };
 
     _proto.evaluate = function evaluate(text, instance) {
-      var _this3 = this;
+      var _this5 = this;
 
       var parse_eval_ = function parse_eval_() {
         var expression = arguments.length <= 1 ? undefined : arguments[1]; // console.log('expression', expression);
 
         try {
-          var parse_func_ = _this3.makeFunction(expression);
+          var parse_func_ = _this5.makeFunction(expression);
 
-          return _this3.resolve(parse_func_, instance, instance);
+          return _this5.resolve(parse_func_, instance, instance);
         } catch (e) {
           console.error(e);
           return e.message;
@@ -441,7 +436,7 @@
         var child = node.childNodes[i];
 
         if (child.nodeType === 1) {
-          var context = Module.getContextByNode(child);
+          var context = getContextByNode(child);
 
           if (!context) {
             this.parse(child, instance);
@@ -464,13 +459,13 @@
     };
 
     _proto.makeInputs = function makeInputs(meta, instance) {
-      var _this4 = this;
+      var _this6 = this;
 
       var inputs = {};
 
       if (meta.inputs) {
         meta.inputs.forEach(function (key, i) {
-          return inputs[key] = _this4.makeInput(instance, key);
+          return inputs[key] = _this6.makeInput(instance, key);
         });
       }
 
@@ -478,13 +473,13 @@
     };
 
     _proto.makeOutputs = function makeOutputs(meta, instance) {
-      var _this5 = this;
+      var _this7 = this;
 
       var outputs = {};
 
       if (meta.outputs) {
         meta.outputs.forEach(function (key, i) {
-          return outputs[key] = _this5.makeOutput(instance, key);
+          return outputs[key] = _this7.makeOutput(instance, key);
         });
       }
 
@@ -492,7 +487,7 @@
     };
 
     _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
-      var context = Module.getContext(instance);
+      var context = getContext(instance);
       var parentInstance = context.parentInstance;
       var inputs = context.inputs;
 
@@ -510,26 +505,6 @@
       }
       */
 
-    };
-
-    _proto.getInstance = function getInstance(node) {
-      if (node === document) {
-        return window;
-      }
-
-      var context = Module.getContextByNode(node);
-
-      if (context) {
-        return context.instance;
-      }
-    };
-
-    _proto.getParentInstance = function getParentInstance(node) {
-      var _this6 = this;
-
-      return Module.traverseUp(node, function (node) {
-        return _this6.getInstance(node);
-      });
     };
 
     _proto.transformOptionalChaining = function transformOptionalChaining(expression) {
@@ -551,29 +526,6 @@
         return previous || '';
       });
       return expression;
-    };
-
-    _proto.compile = function compile(node, parentInstance) {
-      var _this7 = this;
-
-      var instances = Module.querySelectorsAll(node, this.selectors, []).map(function (match) {
-        var instance = _this7.makeInstance(match.node, match.factory, match.selector, parentInstance);
-
-        if (match.factory.prototype instanceof Component) {
-          parentInstance = undefined;
-        }
-
-        return instance;
-      }).filter(function (x) {
-        return x;
-      }); // console.log('compile', instances, node, parentInstance);
-
-      return instances;
-    };
-
-    Module.use = function use(options) {
-      var module = new Module(options);
-      return module;
     };
 
     Module.getPipesSegments = function getPipesSegments(expression) {
@@ -650,47 +602,6 @@
       }
 
       return segments;
-    };
-
-    Module.unwrapSelectors = function unwrapSelectors(factories) {
-      var selectors = [];
-      factories.forEach(function (factory) {
-        factory.meta.selector.split(',').forEach(function (selector) {
-          selector = selector.trim();
-
-          if (selector.indexOf('.') === 0) {
-            var className = selector.replace(/\./g, '');
-            selectors.push(function (node) {
-              var match = node.classList.has(className);
-              return match ? {
-                node: node,
-                factory: factory,
-                selector: selector
-              } : false;
-            });
-          } else if (selector.match(/\[(.+)\]/)) {
-            var attribute = selector.substr(1, selector.length - 2);
-            selectors.push(function (node) {
-              var match = node.hasAttribute(attribute);
-              return match ? {
-                node: node,
-                factory: factory,
-                selector: selector
-              } : false;
-            });
-          } else {
-            selectors.push(function (node) {
-              var match = node.nodeName.toLowerCase() === selector.toLowerCase();
-              return match ? {
-                node: node,
-                factory: factory,
-                selector: selector
-              } : false;
-            });
-          }
-        });
-      });
-      return selectors;
     };
 
     Module.matchSelectors = function matchSelectors(node, selectors, results) {
@@ -809,10 +720,6 @@
       return this.traverseNext(node.nextSibling, callback, i + 1);
     };
 
-    Module.getContext = function getContext(instance) {
-      return CONTEXTS[instance.rxcompId];
-    };
-
     Module.makeContext = function makeContext(module, instance, parentInstance, node, factory, selector) {
       instance.rxcompId = ++ID;
       var context = {
@@ -844,29 +751,31 @@
       delete CONTEXTS[id];
     };
 
-    Module.getContextByNode = function getContextByNode(node) {
-      var context;
-      var nodeContexts = NODES[node.dataset.rxcompId];
-
-      if (nodeContexts) {
-        context = nodeContexts.reduce(function (previous, current) {
-          if (current.node === node && current.factory.prototype instanceof Component) {
-            if (previous && current.factory.prototype instanceof Context) {
-              return previous;
-            } else {
-              return current;
-            }
-          } else {
-            return previous;
-          }
-        }, null);
-      }
-
-      return context;
-    };
-
     return Module;
   }();
+  function getContext(instance) {
+    return CONTEXTS[instance.rxcompId];
+  }
+  function getContextByNode(node) {
+    var context;
+    var nodeContexts = NODES[node.dataset.rxcompId];
+
+    if (nodeContexts) {
+      context = nodeContexts.reduce(function (previous, current) {
+        if (current.node === node && current.factory.prototype instanceof Component) {
+          if (previous && current.factory.prototype instanceof Context) {
+            return previous;
+          } else {
+            return current;
+          }
+        } else {
+          return previous;
+        }
+      }, null);
+    }
+
+    return context;
+  }
 
   var ClassDirective =
   /*#__PURE__*/
@@ -880,7 +789,7 @@
     var _proto = ClassDirective.prototype;
 
     _proto.onInit = function onInit() {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node;
       var expression = node.getAttribute('[class]');
@@ -888,7 +797,7 @@
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node;
       var classList = module.resolve(this.classFunction, changes, this);
@@ -919,7 +828,7 @@
     var _proto = EventDirective.prototype;
 
     _proto.onInit = function onInit() {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node;
       var selector = context.selector;
@@ -944,6 +853,8 @@
   EventDirective.meta = {
     selector: "[(" + EVENTS.join(')],[(') + ")]"
   };
+
+  var Structure = function Structure() {};
 
   var ForItem =
   /*#__PURE__*/
@@ -1027,7 +938,7 @@
     var _proto = ForStructure.prototype;
 
     _proto.onInit = function onInit() {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node;
       var forbegin = this.forbegin = document.createComment("*for begin");
@@ -1042,7 +953,7 @@
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node; // resolve
 
@@ -1065,7 +976,7 @@
             instance[tokens.value] = value;
             /*
             if (!nextSibling) {
-            	const context = Module.getContext(instance);
+            	const context = getContext(instance);
             	const node = context.node;
             	this.forend.parentNode.insertBefore(node, this.forend);
             } else {
@@ -1081,7 +992,7 @@
 
             var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 
-            var forItemContext = Module.getContext(_instance); // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
+            var forItemContext = getContext(_instance); // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
 
             module.compile(clonedNode, forItemContext.instance); // nextSibling = clonedNode.nextSibling;
 
@@ -1091,7 +1002,7 @@
           // remove
           var _instance2 = this.instances[i];
 
-          var _context = Module.getContext(_instance2);
+          var _context = getContext(_instance2);
 
           var _node = _context.node;
 
@@ -1166,7 +1077,7 @@
     var _proto = IfStructure.prototype;
 
     _proto.onInit = function onInit() {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node;
       var ifbegin = this.ifbegin = document.createComment("*if begin");
@@ -1182,7 +1093,7 @@
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module; // console.log('IfStructure.onChanges', changes, this.expression);
 
       var value = module.resolve(this.ifFunction, changes, this);
@@ -1218,7 +1129,7 @@
     var _proto = InnerHtmlDirective.prototype;
 
     _proto.onInit = function onInit() {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var node = context.node;
       var selector = context.selector;
       var key = selector.replace(/\[(.+)\]/, function () {
@@ -1238,7 +1149,7 @@
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var innerHTML = context.module.evaluate(this.innerHtmlExpression, changes); // console.log('InnerHtmlDirective.onChanges', this.innerHtmlExpression, innerHTML);
 
       var node = context.node;
@@ -1251,17 +1162,33 @@
     selector: "[[innerHTML]],[innerHTML]"
   };
 
-  var JsonPipe =
+  var Pipe =
   /*#__PURE__*/
   function () {
-    function JsonPipe() {}
+    function Pipe() {}
+
+    Pipe.transform = function transform(value) {
+      return value;
+    };
+
+    return Pipe;
+  }();
+
+  var JsonPipe =
+  /*#__PURE__*/
+  function (_Pipe) {
+    _inheritsLoose(JsonPipe, _Pipe);
+
+    function JsonPipe() {
+      return _Pipe.apply(this, arguments) || this;
+    }
 
     JsonPipe.transform = function transform(value) {
       return JSON.stringify(value);
     };
 
     return JsonPipe;
-  }();
+  }(Pipe);
   JsonPipe.meta = {
     name: 'json'
   };
@@ -1278,7 +1205,7 @@
     var _proto = StyleDirective.prototype;
 
     _proto.onInit = function onInit() {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node;
       var expression = node.getAttribute('[style]');
@@ -1286,7 +1213,7 @@
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = Module.getContext(this);
+      var context = getContext(this);
       var module = context.module;
       var node = context.node;
       var style = module.resolve(this.styleFunction, changes, this);
@@ -1303,9 +1230,187 @@
     selector: "[[style]]"
   };
 
+  var CoreModule =
+  /*#__PURE__*/
+  function (_Module) {
+    _inheritsLoose(CoreModule, _Module);
+
+    function CoreModule() {
+      return _Module.apply(this, arguments) || this;
+    }
+
+    return CoreModule;
+  }(Module);
+  var factories = [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective, JsonPipe];
+  var pipes = [JsonPipe];
+  CoreModule.meta = {
+    declarations: [].concat(factories, pipes),
+    exports: [].concat(factories, pipes)
+  };
+
+  var ORDER = [Structure, Component, Directive];
+
+  var Platform =
+  /*#__PURE__*/
+  function () {
+    function Platform() {}
+
+    Platform.bootstrap = function bootstrap(moduleFactory) {
+      var meta = this.resolveMeta(moduleFactory);
+      var bootstrap = meta.bootstrap;
+
+      if (!bootstrap) {
+        throw 'missing bootstrap';
+      }
+
+      var node = meta.node = this.querySelector(bootstrap.meta.selector);
+
+      if (!node) {
+        throw "missing node " + bootstrap.meta.selector;
+      }
+
+      meta.nodeInnerHTML = node.innerHTML;
+      var pipes = meta.pipes = this.resolvePipes(meta);
+      var factories = meta.factories = this.resolveFactories(meta);
+      this.sortFactories(factories);
+      factories.unshift(bootstrap);
+      var selectors = meta.selectors = this.unwrapSelectors(factories);
+      var module = new moduleFactory();
+      module.meta = meta;
+      var instances = module.compile(node, window);
+      var root = instances[0]; // if (root instanceof module.meta.bootstrap) {
+
+      root.pushChanges(); // }
+
+      return module;
+    };
+
+    Platform.querySelector = function querySelector(selector) {
+      return document.querySelector(selector);
+    };
+
+    Platform.resolveMeta = function resolveMeta(moduleFactory) {
+      var _this = this;
+
+      var meta = Object.assign({
+        imports: [],
+        declarations: [],
+        pipes: [],
+        exports: []
+      }, moduleFactory.meta);
+      meta.imports = meta.imports.map(function (moduleFactory) {
+        return _this.resolveMeta(moduleFactory);
+      });
+      return meta;
+    };
+
+    Platform.resolvePipes = function resolvePipes(meta, exported) {
+      var _this2 = this;
+
+      var importedPipes = meta.imports.map(function (meta) {
+        return _this2.resolvePipes(meta, true);
+      });
+      var pipes = {};
+      var pipeList = (exported ? meta.exports : meta.declarations).filter(function (x) {
+        return x.prototype instanceof Pipe;
+      });
+      pipeList.forEach(function (pipeFactory) {
+        return pipes[pipeFactory.meta.name] = pipeFactory;
+      });
+      return Object.assign.apply(Object, [{}].concat(importedPipes, [pipes]));
+    };
+
+    Platform.resolveFactories = function resolveFactories(meta, exported) {
+      var _this3 = this,
+          _Array$prototype$conc;
+
+      var importedFactories = meta.imports.map(function (meta) {
+        return _this3.resolveFactories(meta, true);
+      });
+      var factoryList = (exported ? meta.exports : meta.declarations).filter(function (x) {
+        return x.prototype instanceof Structure || x.prototype instanceof Component || x.prototype instanceof Directive;
+      });
+      return (_Array$prototype$conc = Array.prototype.concat).call.apply(_Array$prototype$conc, [factoryList].concat(importedFactories));
+    };
+
+    Platform.sortFactories = function sortFactories(factories) {
+      factories.sort(function (a, b) {
+        var ai = ORDER.reduce(function (p, c, i) {
+          return a.prototype instanceof c ? i : p;
+        }, -1);
+        var bi = ORDER.reduce(function (p, c, i) {
+          return b.prototype instanceof c ? i : p;
+        }, -1);
+        return ai - bi;
+      });
+    };
+
+    Platform.unwrapSelectors = function unwrapSelectors(factories) {
+      var selectors = [];
+      factories.forEach(function (factory) {
+        factory.meta.selector.split(',').forEach(function (selector) {
+          selector = selector.trim();
+
+          if (selector.indexOf('.') === 0) {
+            var className = selector.replace(/\./g, '');
+            selectors.push(function (node) {
+              var match = node.classList.has(className);
+              return match ? {
+                node: node,
+                factory: factory,
+                selector: selector
+              } : false;
+            });
+          } else if (selector.match(/\[(.+)\]/)) {
+            var attribute = selector.substr(1, selector.length - 2);
+            selectors.push(function (node) {
+              var match = node.hasAttribute(attribute);
+              return match ? {
+                node: node,
+                factory: factory,
+                selector: selector
+              } : false;
+            });
+          } else {
+            selectors.push(function (node) {
+              var match = node.nodeName.toLowerCase() === selector.toLowerCase();
+              return match ? {
+                node: node,
+                factory: factory,
+                selector: selector
+              } : false;
+            });
+          }
+        });
+      });
+      return selectors;
+    };
+
+    Platform.isBrowser = function isBrowser() {
+      return window;
+    } // static isServer() {}
+    ;
+
+    return Platform;
+  }();
+
+  var Browser =
+  /*#__PURE__*/
+  function (_Platform) {
+    _inheritsLoose(Browser, _Platform);
+
+    function Browser() {
+      return _Platform.apply(this, arguments) || this;
+    }
+
+    return Browser;
+  }(Platform);
+
+  exports.Browser = Browser;
   exports.ClassDirective = ClassDirective;
   exports.Component = Component;
   exports.Context = Context;
+  exports.CoreModule = CoreModule;
   exports.Directive = Directive;
   exports.EventDirective = EventDirective;
   exports.ForStructure = ForStructure;
@@ -1313,8 +1418,12 @@
   exports.InnerHtmlDirective = InnerHtmlDirective;
   exports.JsonPipe = JsonPipe;
   exports.Module = Module;
+  exports.Pipe = Pipe;
+  exports.Platform = Platform;
   exports.Structure = Structure;
   exports.StyleDirective = StyleDirective;
+  exports.getContext = getContext;
+  exports.getContextByNode = getContextByNode;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

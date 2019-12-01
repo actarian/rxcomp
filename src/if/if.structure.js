@@ -1,10 +1,10 @@
 import Structure from '../core/structure';
-import Module from '../module/module';
+import { getContext } from '../module/module';
 
 export default class IfStructure extends Structure {
 
 	onInit() {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const module = context.module;
 		const node = context.node;
 		const ifbegin = this.ifbegin = document.createComment(`*if begin`);
@@ -21,7 +21,7 @@ export default class IfStructure extends Structure {
 	}
 
 	onChanges(changes) {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const module = context.module;
 		// console.log('IfStructure.onChanges', changes, this.expression);
 		const value = module.resolve(this.ifFunction, changes, this);

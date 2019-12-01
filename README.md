@@ -14,7 +14,7 @@ RxJS dependancy bundle size `26Kb` gzipped, `345.5Kb` minified.
 ___
 
 ### What is included
-* Modules
+* Modules *```imports```, ```exports```*
 * Components *```inputs```, ```outputs```, ```template```*
 * Structures *```ForStructure```, ```IfStructure```*
 * Directives *```ClassDirective```, ```EventDirective```, ```InnerHtmlDirective```, ```StyleDirective```*
@@ -50,23 +50,13 @@ ___
 For CDN, you can use unpkg
 
 ```html
-<script src="https://unpkg.com/rxcomp@1.0.0-alpha.5/dist/rxcomp.min.js"></script>
+<script src="https://unpkg.com/rxcomp@1.0.0-alpha.6/dist/rxcomp.min.js"></script>
 ```
 
 The global namespace for RxComp is `rxcomp`
 
 ```javascript
-import { 
-    ClassDirective, 
-    Component, 
-    EventDirective, 
-    ForStructure, 
-    IfStructure, 
-    InnerHtmlDirective, 
-    JsonPipe, 
-    Module, 
-    StyleDirective 
-} from 'rxcomp';
+import { CoreModule, Module } from 'rxcomp';
 ```
 ___
 
@@ -88,22 +78,20 @@ ___
 ### Bootstrapping Module
 
 ```javascript
-import { ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from 'rxcomp';
+import { CoreModule, Module } from 'rxcomp';
 
-Module.use({
-    factories: [
-        ClassDirective,
-        EventDirective,
-        ForStructure,
-        IfStructure,
-        InnerHtmlDirective, 
-        StyleDirective,
-    ],
-    pipes: [
-        JsonPipe,
-    ],
-    bootstrap: AppComponent,
-});
+export default class AppModule extends Module {}
+
+AppModule.meta = {
+	imports: [
+		CoreModule
+	],
+	declarations: [
+		TodoItemComponent,
+		DatePipe,
+	],
+	bootstrap: AppComponent,
+};
 ```
 ___
 
@@ -222,6 +210,11 @@ ___
 
 ## Release Notes
 Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
+
+---
+
+### 1.0.0-alpha.6
+* Added Module import / export  
 
 ---
 

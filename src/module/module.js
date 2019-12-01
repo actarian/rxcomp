@@ -2,54 +2,24 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
-import Directive from '../core/directive';
-import Structure from '../core/structure';
 
 let ID = 0;
 const CONTEXTS = {};
 const NODES = {};
-const ORDER = [Structure, Component, Directive];
 const REMOVED_IDS = [];
 
 export default class Module {
 
-	constructor(options) {
-		if (!options) {
-			throw ('missing options');
-		}
-		if (!options.bootstrap) {
-			throw ('missing bootstrap');
-		}
-		this.options = options;
-		const pipes = {};
-		if (options.pipes) {
-			options.pipes.forEach(x => pipes[x.meta.name] = x);
-		}
-		this.pipes = pipes;
-		const bootstrap = options.bootstrap;
-		const node = this.node = document.querySelector(bootstrap.meta.selector);
-		this.nodeInnerHTML = node.innerHTML;
-		if (!node) {
-			throw (`missing node ${bootstrap.meta.selector}`);
-		}
-		options.factories.sort((a, b) => {
-			const ai = ORDER.reduce((p, c, i) => a.prototype instanceof c ? i : p, -1);
-			const bi = ORDER.reduce((p, c, i) => b.prototype instanceof c ? i : p, -1);
-			return ai - bi;
-		});
-		options.factories.unshift(bootstrap);
-		this.selectors = Module.unwrapSelectors(options.factories);
-		const instances = this.compile(node, window);
-		const instance = instances[0];
-		// if (instance instanceof module.options.bootstrap) {
-		instance.pushChanges();
-		// }
-	}
-
-	makeContext(instance, parentInstance, node, selector) {
-		const context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
-		// console.log('Module.makeContext', context, context.instance, context.node);
-		return context;
+	compile(node, parentInstance) {
+		const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(match => {
+			const instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+			if (match.factory.prototype instanceof Component) {
+				parentInstance = undefined;
+			}
+			return instance;
+		}).filter(x => x);
+		// console.log('compile', instances, node, parentInstance);
+		return instances;
 	}
 
 	makeInstance(node, factory, selector, parentInstance, args) {
@@ -63,6 +33,8 @@ export default class Module {
 			}
 			// creating factory instance
 			const instance = new factory(...(args || []));
+			// creating instance context
+			const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 			// injecting changes$ and unsubscribe$ subjects
 			Object.defineProperties(instance, {
 				changes$: {
@@ -93,10 +65,9 @@ export default class Module {
 					instance.onView();
 				}
 			};
-			// creating instance context
-			const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 			// creating component input and outputs
-			if (isComponent && meta) {
+			// if (isComponent && meta) {
+			if (meta) {
 				context.inputs = this.makeInputs(meta, instance);
 				context.outputs = this.makeOutputs(meta, instance);
 			}
@@ -113,7 +84,8 @@ export default class Module {
 					takeUntil(instance.unsubscribe$)
 				).subscribe(changes => {
 					// resolve component input outputs
-					if (isComponent && meta) {
+					// if (isComponent && meta) {
+					if (meta) {
 						this.resolveInputsOutputs(instance, changes);
 					}
 					// calling onChanges event with parentInstance
@@ -136,12 +108,18 @@ export default class Module {
 		}
 	}
 
+	makeContext(instance, parentInstance, node, selector) {
+		const context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
+		// console.log('Module.makeContext', context, context.instance, context.node);
+		return context;
+	}
+
 	makeFunction(expression, params = ['$instance']) {
 		if (!expression) {
 			return () => { return null; };
 		}
 		const args = params.join(',');
-		const pipes = this.pipes;
+		const pipes = this.meta.pipes;
 		const transforms = Module.getPipesSegments(expression);
 		expression = transforms.shift().trim();
 		expression = this.transformOptionalChaining(expression);
@@ -154,14 +132,14 @@ export default class Module {
 				const name = params.shift().trim();
 				const pipe = pipes[name];
 				if (!pipe || typeof pipe.transform !== 'function') {
-					throw (`missing pipe ${name}`);
+					throw (`missing pipe '${name}'`);
 				}
 				return `$$pipes.${name}.transform(${expression},${params.join(',')})`;
 			}, expression);
 			// console.log('expression', expression);
 			const expression_func = new Function(`with(this) {
 				return (function (${args}, $$module) {
-					const $$pipes = $$module.pipes;
+					const $$pipes = $$module.meta.pipes;
 					return ${expression};
 				}.bind(this)).apply(this, arguments);
 			}`);
@@ -179,14 +157,14 @@ export default class Module {
 	}
 
 	makeInput(instance, name) {
-		const context = Module.getContext(instance);
+		const context = getContext(instance);
 		const node = context.node;
 		const expression = node.getAttribute(`[${name}]`);
 		return this.makeFunction(expression);
 	}
 
 	makeOutput(instance, name) {
-		const context = Module.getContext(instance);
+		const context = getContext(instance);
 		const node = context.node;
 		const parentInstance = context.parentInstance;
 		const expression = node.getAttribute(`(${name})`);
@@ -201,6 +179,22 @@ export default class Module {
 		).subscribe();
 		instance[name] = output$;
 		return outputFunction;
+	}
+
+	getInstance(node) {
+		if (node === document) {
+			return window;
+		}
+		const context = getContextByNode(node);
+		if (context) {
+			return context.instance;
+		}
+	}
+
+	getParentInstance(node) {
+		return Module.traverseUp(node, (node) => {
+			return this.getInstance(node);
+		});
 	}
 
 	remove(node) {
@@ -227,8 +221,8 @@ export default class Module {
 	}
 
 	destroy() {
-		this.remove(this.node);
-		this.node.innerHTML = this.nodeInnerHTML;
+		this.remove(this.meta.node);
+		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
 	}
 
 	evaluate(text, instance) {
@@ -252,7 +246,7 @@ export default class Module {
 		for (let i = 0; i < node.childNodes.length; i++) {
 			const child = node.childNodes[i];
 			if (child.nodeType === 1) {
-				const context = Module.getContextByNode(child);
+				const context = getContextByNode(child);
 				if (!context) {
 					this.parse(child, instance);
 				}
@@ -290,7 +284,7 @@ export default class Module {
 	}
 
 	resolveInputsOutputs(instance, changes) {
-		const context = Module.getContext(instance);
+		const context = getContext(instance);
 		const parentInstance = context.parentInstance;
 		const inputs = context.inputs;
 		for (let key in inputs) {
@@ -308,22 +302,6 @@ export default class Module {
 		*/
 	}
 
-	getInstance(node) {
-		if (node === document) {
-			return window;
-		}
-		const context = Module.getContextByNode(node);
-		if (context) {
-			return context.instance;
-		}
-	}
-
-	getParentInstance(node) {
-		return Module.traverseUp(node, (node) => {
-			return this.getInstance(node);
-		});
-	}
-
 	transformOptionalChaining(expression) {
 		const regex = /(\w+(\?\.))+([\.|\w]+)/g;
 		let previous;
@@ -338,23 +316,6 @@ export default class Module {
 			return previous || '';
 		});
 		return expression;
-	}
-
-	compile(node, parentInstance) {
-		const instances = Module.querySelectorsAll(node, this.selectors, []).map(match => {
-			const instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
-			if (match.factory.prototype instanceof Component) {
-				parentInstance = undefined;
-			}
-			return instance;
-		}).filter(x => x);
-		// console.log('compile', instances, node, parentInstance);
-		return instances;
-	}
-
-	static use(options) {
-		const module = new Module(options);
-		return module;
 	}
 
 	static getPipesSegments(expression) {
@@ -415,34 +376,6 @@ export default class Module {
 			segments.push(word);
 		}
 		return segments;
-	}
-
-	static unwrapSelectors(factories) {
-		const selectors = [];
-		factories.forEach(factory => {
-			factory.meta.selector.split(',').forEach(selector => {
-				selector = selector.trim();
-				if (selector.indexOf('.') === 0) {
-					const className = selector.replace(/\./g, '');
-					selectors.push((node) => {
-						const match = node.classList.has(className);
-						return match ? { node, factory, selector } : false;
-					});
-				} else if (selector.match(/\[(.+)\]/)) {
-					const attribute = selector.substr(1, selector.length - 2);
-					selectors.push((node) => {
-						const match = node.hasAttribute(attribute);
-						return match ? { node, factory, selector } : false;
-					});
-				} else {
-					selectors.push((node) => {
-						const match = node.nodeName.toLowerCase() === selector.toLowerCase();
-						return match ? { node, factory, selector } : false;
-					});
-				}
-			});
-		});
-		return selectors;
 	}
 
 	static matchSelectors(node, selectors, results) {
@@ -524,10 +457,6 @@ export default class Module {
 		return this.traverseNext(node.nextSibling, callback, i + 1);
 	}
 
-	static getContext(instance) {
-		return CONTEXTS[instance.rxcompId];
-	}
-
 	static makeContext(module, instance, parentInstance, node, factory, selector) {
 		instance.rxcompId = ++ID;
 		const context = { module, instance, parentInstance, node, factory, selector };
@@ -549,23 +478,27 @@ export default class Module {
 		delete CONTEXTS[id];
 	}
 
-	static getContextByNode(node) {
-		let context;
-		const nodeContexts = NODES[node.dataset.rxcompId];
-		if (nodeContexts) {
-			context = nodeContexts.reduce((previous, current) => {
-				if (current.node === node && current.factory.prototype instanceof Component) {
-					if (previous && current.factory.prototype instanceof Context) {
-						return previous;
-					} else {
-						return current;
-					}
-				} else {
-					return previous;
-				}
-			}, null);
-		}
-		return context;
-	}
+}
 
+export function getContext(instance) {
+	return CONTEXTS[instance.rxcompId];
+}
+
+export function getContextByNode(node) {
+	let context;
+	const nodeContexts = NODES[node.dataset.rxcompId];
+	if (nodeContexts) {
+		context = nodeContexts.reduce((previous, current) => {
+			if (current.node === node && current.factory.prototype instanceof Component) {
+				if (previous && current.factory.prototype instanceof Context) {
+					return previous;
+				} else {
+					return current;
+				}
+			} else {
+				return previous;
+			}
+		}, null);
+	}
+	return context;
 }

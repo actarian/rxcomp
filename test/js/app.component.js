@@ -1,12 +1,12 @@
 import { takeUntil } from 'rxjs/operators';
-import { Component, Module } from '../../src/rxcomp';
+import { Component, getContext } from '../../src/rxcomp';
 import StoreService from './store/store.service';
 
 export default class AppComponent extends Component {
 
 	onInit() {
 		// context
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		// input
 		this.input = context.node.querySelector('.control--text');
 		// items
@@ -20,11 +20,6 @@ export default class AppComponent extends Component {
 			// onpush change detection strategy
 			this.pushChanges();
 		});
-	}
-
-	onView() {
-		const context = Module.getContext(this);
-		// console.log('AppComponent.onView', context.node);
 	}
 
 	onInput($event) {

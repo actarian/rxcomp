@@ -1,10 +1,10 @@
 import Directive from '../core/directive';
-import Module from '../module/module';
+import { getContext } from '../module/module';
 
 export default class StyleDirective extends Directive {
 
 	onInit() {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const module = context.module;
 		const node = context.node;
 		const expression = node.getAttribute('[style]');
@@ -13,7 +13,7 @@ export default class StyleDirective extends Directive {
 	}
 
 	onChanges(changes) {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const module = context.module;
 		const node = context.node;
 		const style = module.resolve(this.styleFunction, changes, this);

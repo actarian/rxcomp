@@ -2,11 +2,11 @@
 	"targets": {
 		"browser": {
 			"compile": [{
-				"input": "todomvc/css/main.scss",
+				"input": "test/css/main.scss",
 				"output": "docs/css/main.css",
 				"minify": true
 			}, {
-				"input": "todomvc/js/main.js",
+				"input": "test/js/main.js",
 				"output": "docs/js/main.js",
 				"rollup": {
 					"format": "umd",
@@ -18,7 +18,7 @@
 				},
 				"minify": true
 			}, {
-				"input": "todomvc/js/test.js",
+				"input": "test/js/test.js",
 				"output": "docs/js/test.js",
 				"rollup": {
 					"format": "umd",
@@ -30,7 +30,7 @@
 				},
 				"minify": true
 			}, {
-				"input": "todomvc/js/test-2.js",
+				"input": "test/js/test-2.js",
 				"output": "docs/js/test-2.js",
 				"rollup": {
 					"format": "umd",

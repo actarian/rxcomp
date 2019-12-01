@@ -1,10 +1,10 @@
 import Directive from '../core/directive';
-import Module from '../module/module';
+import { getContext } from '../module/module';
 
 export default class InnerHtmlDirective extends Directive {
 
 	onInit() {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const node = context.node;
 		const selector = context.selector;
 		const key = selector.replace(/\[(.+)\]/, (...matches) => {
@@ -22,7 +22,7 @@ export default class InnerHtmlDirective extends Directive {
 	}
 
 	onChanges(changes) {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const innerHTML = context.module.evaluate(this.innerHtmlExpression, changes);
 		// console.log('InnerHtmlDirective.onChanges', this.innerHtmlExpression, innerHTML);
 		const node = context.node;

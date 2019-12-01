@@ -1,6 +1,6 @@
 import { interval } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
-import { ClassDirective, Component, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, JsonPipe, Module, StyleDirective } from '../../src/rxcomp';
+import { Browser, Component, CoreModule, Module, Pipe } from '../../src/rxcomp';
 
 // component
 class AppComponent extends Component {
@@ -20,7 +20,7 @@ AppComponent.meta = {
 };
 
 // pipe
-class ExamplePipe {
+class ExamplePipe extends Pipe {
 	static transform(value) {
 		return value * 2;
 	}
@@ -29,19 +29,15 @@ ExamplePipe.meta = {
 	name: 'example',
 };
 
-// module
-Module.use({
-	factories: [
-		ClassDirective,
-		EventDirective,
-		ForStructure,
-		IfStructure,
-		InnerHtmlDirective,
-		StyleDirective,
+class AppModule extends Module {}
+AppModule.meta = {
+	imports: [
+		CoreModule
 	],
-	pipes: [
-		JsonPipe,
+	declarations: [
 		ExamplePipe,
 	],
 	bootstrap: AppComponent,
-});
+};
+
+const module = Browser.bootstrap(AppModule);

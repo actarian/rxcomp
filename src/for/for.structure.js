@@ -1,11 +1,11 @@
 import Structure from '../core/structure';
-import Module from '../module/module';
+import { getContext } from '../module/module';
 import ForItem from './for.item';
 
 export default class ForStructure extends Structure {
 
 	onInit() {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const module = context.module;
 		const node = context.node;
 		const forbegin = this.forbegin = document.createComment(`*for begin`);
@@ -20,7 +20,7 @@ export default class ForStructure extends Structure {
 	}
 
 	onChanges(changes) {
-		const context = Module.getContext(this);
+		const context = getContext(this);
 		const module = context.module;
 		const node = context.node;
 		// resolve
@@ -42,7 +42,7 @@ export default class ForStructure extends Structure {
 					instance[tokens.value] = value;
 					/*
 					if (!nextSibling) {
-						const context = Module.getContext(instance);
+						const context = getContext(instance);
 						const node = context.node;
 						this.forend.parentNode.insertBefore(node, this.forend);
 					} else {
@@ -56,7 +56,7 @@ export default class ForStructure extends Structure {
 					this.forend.parentNode.insertBefore(clonedNode, this.forend);
 					const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
-					const forItemContext = Module.getContext(instance);
+					const forItemContext = getContext(instance);
 					// console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
 					module.compile(clonedNode, forItemContext.instance);
 					// nextSibling = clonedNode.nextSibling;
@@ -65,7 +65,7 @@ export default class ForStructure extends Structure {
 			} else {
 				// remove
 				const instance = this.instances[i];
-				const context = Module.getContext(instance);
+				const context = getContext(instance);
 				const node = context.node;
 				node.parentNode.removeChild(node);
 				module.remove(node);
