@@ -6,7 +6,7 @@
 
 If you like Angular declarative syntax but you just want go Vanilla, RxComp library come in useful.
 
-RxComp bundle size `4.8Kb` gzipped, `15Kb` minified.  
+RxComp bundle size `5Kb` gzipped, `15Kb` minified.  
 RxJS dependancy bundle size `26Kb` gzipped, `345.5Kb` minified.  
  
 > [TodoMvc demo](https://actarian.github.io/rxcomp-todomvc/)  
