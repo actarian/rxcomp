@@ -156,18 +156,25 @@ export default class Module {
 		}
 	}
 
-	makeInput(instance, name) {
-		const context = getContext(instance);
-		const node = context.node;
-		const expression = node.getAttribute(`[${name}]`);
-		return this.makeFunction(expression);
+	makeInput(instance, key) {
+		const { node } = getContext(instance);
+		let input, expression = null;
+		if (node.hasAttribute(key)) {
+			expression = `'${node.getAttribute(key)}'`;
+		} else if (node.hasAttribute(`[${key}]`)) {
+			expression = node.getAttribute(`[${key}]`);
+		}
+		if (expression !== null) {
+			input = this.makeFunction(expression);
+		}
+		return input;
 	}
 
-	makeOutput(instance, name) {
+	makeOutput(instance, key) {
 		const context = getContext(instance);
 		const node = context.node;
 		const parentInstance = context.parentInstance;
-		const expression = node.getAttribute(`(${name})`);
+		const expression = node.getAttribute(`(${key})`);
 		const outputFunction = this.makeFunction(expression, ['$event']);
 		const output$ = new Subject().pipe(
 			tap((event) => {
@@ -177,7 +184,7 @@ export default class Module {
 		output$.pipe(
 			takeUntil(instance.unsubscribe$)
 		).subscribe();
-		instance[name] = output$;
+		instance[key] = output$;
 		return outputFunction;
 	}
 
@@ -270,10 +277,15 @@ export default class Module {
 	makeInputs(meta, instance) {
 		const inputs = {};
 		if (meta.inputs) {
-			meta.inputs.forEach((key, i) => inputs[key] = this.makeInput(instance, key));
+			meta.inputs.forEach((key, i) => {
+				const input = this.makeInput(instance, key);
+				if (input) {
+					inputs[key] = input;
+				}
+			});
 		}
 		return inputs;
-	}
+	};
 
 	makeOutputs(meta, instance) {
 		const outputs = {};
