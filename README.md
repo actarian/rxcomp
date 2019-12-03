@@ -213,6 +213,11 @@ Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
 
 ---
 
+### 1.0.0-alpha.7
+* Fixing Component scope  
+
+---
+
 ### 1.0.0-alpha.6
 * Added Module import / export  
 

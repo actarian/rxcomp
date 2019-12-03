@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-alpha.7] - 2019-12-03
+### Fixing
+- Component scope
+
+---
+
 ## [1.0.0-alpha.6] - 2019-12-01
 ### Added
 - Module import / export
