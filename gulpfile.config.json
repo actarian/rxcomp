@@ -18,8 +18,8 @@
 				},
 				"minify": true
 			}, {
-				"input": "test/js/test.js",
-				"output": "docs/js/test.js",
+				"input": "test/js/test.for.js",
+				"output": "docs/js/test.for.js",
 				"rollup": {
 					"format": "umd",
 					"globals": {
@@ -30,8 +30,20 @@
 				},
 				"minify": true
 			}, {
-				"input": "test/js/test-2.js",
-				"output": "docs/js/test-2.js",
+				"input": "test/js/test.parsing.js",
+				"output": "docs/js/test.parsing.js",
+				"rollup": {
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
+				},
+				"minify": true
+			}, {
+				"input": "test/js/test.scope.js",
+				"output": "docs/js/test.scope.js",
 				"rollup": {
 					"format": "umd",
 					"globals": {

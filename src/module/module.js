@@ -500,17 +500,22 @@ export function getContextByNode(node) {
 	let context;
 	const nodeContexts = NODES[node.dataset.rxcompId];
 	if (nodeContexts) {
+		/*
+		const same = nodeContexts.reduce((p, c) => {
+			return p && c.node === node;
+		}, true);
+		console.log('same', same);
+		*/
 		context = nodeContexts.reduce((previous, current) => {
-			if (current.node === node && current.factory.prototype instanceof Component) {
-				if (previous && current.factory.prototype instanceof Context) {
-					return previous;
-				} else {
-					return current;
-				}
+			if (current.factory.prototype instanceof Component) {
+				return current;
+			} else if (current.factory.prototype instanceof Context) {
+				return previous ? previous : current;
 			} else {
 				return previous;
 			}
 		}, null);
+		console.log(context);
 	}
 	return context;
 }

@@ -6,7 +6,7 @@
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('rxjs'), require('rxjs/operators')) :
-  typeof define === 'function' && define.amd ? define('test', ['rxjs', 'rxjs/operators'], factory) :
+  typeof define === 'function' && define.amd ? define('test.for', ['rxjs', 'rxjs/operators'], factory) :
   (global = global || self, factory(global.rxjs, global.rxjs.operators));
 }(this, (function (rxjs, operators) { 'use strict';
 
@@ -336,26 +336,39 @@
       }
     };
 
-    _proto.makeInput = function makeInput(instance, name) {
-      var context = getContext(instance);
-      var node = context.node;
-      var expression = node.getAttribute("[" + name + "]");
-      return this.makeFunction(expression);
+    _proto.makeInput = function makeInput(instance, key) {
+      var _getContext = getContext(instance),
+          node = _getContext.node;
+
+      var input,
+          expression = null;
+
+      if (node.hasAttribute(key)) {
+        expression = "'" + node.getAttribute(key) + "'";
+      } else if (node.hasAttribute("[" + key + "]")) {
+        expression = node.getAttribute("[" + key + "]");
+      }
+
+      if (expression !== null) {
+        input = this.makeFunction(expression);
+      }
+
+      return input;
     };
 
-    _proto.makeOutput = function makeOutput(instance, name) {
+    _proto.makeOutput = function makeOutput(instance, key) {
       var _this3 = this;
 
       var context = getContext(instance);
       var node = context.node;
       var parentInstance = context.parentInstance;
-      var expression = node.getAttribute("(" + name + ")");
+      var expression = node.getAttribute("(" + key + ")");
       var outputFunction = this.makeFunction(expression, ['$event']);
       var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
         _this3.resolve(outputFunction, parentInstance, event);
       }));
       output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
-      instance[name] = output$;
+      instance[key] = output$;
       return outputFunction;
     };
 
@@ -465,7 +478,11 @@
 
       if (meta.inputs) {
         meta.inputs.forEach(function (key, i) {
-          return inputs[key] = _this6.makeInput(instance, key);
+          var input = _this6.makeInput(instance, key);
+
+          if (input) {
+            inputs[key] = input;
+          }
         });
       }
 
@@ -761,17 +778,22 @@
     var nodeContexts = NODES[node.dataset.rxcompId];
 
     if (nodeContexts) {
+      /*
+      const same = nodeContexts.reduce((p, c) => {
+      	return p && c.node === node;
+      }, true);
+      console.log('same', same);
+      */
       context = nodeContexts.reduce(function (previous, current) {
-        if (current.node === node && current.factory.prototype instanceof Component) {
-          if (previous && current.factory.prototype instanceof Context) {
-            return previous;
-          } else {
-            return current;
-          }
+        if (current.factory.prototype instanceof Component) {
+          return current;
+        } else if (current.factory.prototype instanceof Context) {
+          return previous ? previous : current;
         } else {
           return previous;
         }
       }, null);
+      console.log(context);
     }
 
     return context;
@@ -1436,91 +1458,55 @@
     return Browser;
   }(Platform);
 
-  var DatePipe =
-  /*#__PURE__*/
-  function (_Pipe) {
-    _inheritsLoose(DatePipe, _Pipe);
-
-    function DatePipe() {
-      return _Pipe.apply(this, arguments) || this;
-    }
-
-    DatePipe.transform = function transform(value, locale, options) {
-      if (locale === void 0) {
-        locale = 'it-IT-u-ca-gregory';
-      }
-
-      if (options === void 0) {
-        options = {
-          dateStyle: 'short',
-          timeStyle: 'short'
-        };
-      }
-
-      var localeDateString = new Date(value).toLocaleDateString(locale, options);
-      return localeDateString;
-    };
-
-    return DatePipe;
-  }(Pipe);
-  DatePipe.meta = {
-    name: 'date'
-  };
-
-  var TestComponent =
+  var AppComponent =
   /*#__PURE__*/
   function (_Component) {
-    _inheritsLoose(TestComponent, _Component);
+    _inheritsLoose(AppComponent, _Component);
 
-    function TestComponent() {
+    function AppComponent() {
       return _Component.apply(this, arguments) || this;
     }
 
-    var _proto = TestComponent.prototype;
+    var _proto = AppComponent.prototype;
 
     _proto.onInit = function onInit() {
-      // console.log('TestComponent.onInit');
-      this.items = [1, 2];
-      this.object = {
-        a: 1,
-        b: 2
-      };
-      this.date = new Date();
+      var _this = this;
+
+      this.items = [1, 2, 3, 4];
+      return rxjs.interval(50).pipe(operators.take(1000), operators.takeUntil(this.unsubscribe$)).subscribe(function (items) {
+        _this.items = new Array(1 + Math.floor(Math.random() * 9)).fill(0).map(function (x, i) {
+          return i + 1;
+        });
+
+        _this.pushChanges();
+      });
     };
 
-    return TestComponent;
+    return AppComponent;
   }(Component);
 
-  TestComponent.meta = {
-    selector: '[test-component]'
-  };
+  AppComponent.meta = {
+    selector: '[app-component]'
+  }; // pipe
 
-  var Test2Component =
+  var ExamplePipe =
   /*#__PURE__*/
-  function (_Component2) {
-    _inheritsLoose(Test2Component, _Component2);
+  function (_Pipe) {
+    _inheritsLoose(ExamplePipe, _Pipe);
 
-    function Test2Component() {
-      return _Component2.apply(this, arguments) || this;
+    function ExamplePipe() {
+      return _Pipe.apply(this, arguments) || this;
     }
 
-    var _proto2 = Test2Component.prototype;
-
-    _proto2.onInit = function onInit() {
-      // console.log('TestComponent.onInit');
-      this.items = [2, 3];
-      this.object = {
-        a: 2,
-        b: 3
-      };
-      this.date = new Date();
+    ExamplePipe.transform = function transform(value) {
+      return value * 2;
     };
 
-    return Test2Component;
-  }(Component);
+    return ExamplePipe;
+  }(Pipe);
 
-  Test2Component.meta = {
-    selector: '[test-component]'
+  ExamplePipe.meta = {
+    name: 'example'
   };
 
   var AppModule =
@@ -1537,36 +1523,9 @@
 
   AppModule.meta = {
     imports: [CoreModule],
-    declarations: [DatePipe],
-    bootstrap: TestComponent
-  };
-
-  var App2Module =
-  /*#__PURE__*/
-  function (_Module2) {
-    _inheritsLoose(App2Module, _Module2);
-
-    function App2Module() {
-      return _Module2.apply(this, arguments) || this;
-    }
-
-    return App2Module;
-  }(Module);
-
-  App2Module.meta = {
-    imports: [CoreModule],
-    declarations: [DatePipe],
-    bootstrap: Test2Component
+    declarations: [ExamplePipe],
+    bootstrap: AppComponent
   };
   var module = Browser.bootstrap(AppModule);
-
-  function init() {
-    module.destroy();
-    module = Browser.bootstrap(App2Module);
-  }
-
-  setTimeout(function () {
-    init();
-  }, 5000);
 
 })));

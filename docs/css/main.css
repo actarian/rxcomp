@@ -469,7 +469,8 @@ button,
     min-height: 15px;
     margin: 0;
     padding: 20px 15px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.15); }
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    cursor: pointer; }
     .page--test .list__item > .title {
       -webkit-box-flex: 1;
           -ms-flex: 1 1 auto;
