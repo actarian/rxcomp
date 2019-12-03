@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.6
+ * @license rxcomp v1.0.0-alpha.7
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -172,11 +172,16 @@
     _proto.compile = function compile(node, parentInstance) {
       var _this = this;
 
+      var componentNode;
       var instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(function (match) {
+        if (componentNode && componentNode !== match.node) {
+          parentInstance = undefined;
+        }
+
         var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 
         if (match.factory.prototype instanceof Component) {
-          parentInstance = undefined;
+          componentNode = match.node;
         }
 
         return instance;
@@ -194,7 +199,7 @@
         var isComponent = factory.prototype instanceof Component;
         var meta = factory.meta; // collect parentInstance scope
 
-        parentInstance = parentInstance || this.getParentInstance(node);
+        parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 
         if (!parentInstance) {
           return;
@@ -747,7 +752,7 @@
         factory: factory,
         selector: selector
       };
-      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || ++ID;
+      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || instance.rxcompId;
       var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
       nodeContexts.push(context);
       return CONTEXTS[instance.rxcompId] = context;
@@ -792,8 +797,7 @@
         } else {
           return previous;
         }
-      }, null);
-      console.log(context);
+      }, null); // console.log(node.dataset.rxcompId, context);
     }
 
     return context;
@@ -862,6 +866,7 @@
       if (expression) {
         var outputFunction = module.makeFunction(expression, ['$event']);
         event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+          // console.log(parentInstance);
           module.resolve(outputFunction, parentInstance, event);
         });
       } else {
@@ -1489,19 +1494,19 @@
     name: 'date'
   };
 
-  var TestComponent =
+  var RootComponent =
   /*#__PURE__*/
   function (_Component) {
-    _inheritsLoose(TestComponent, _Component);
+    _inheritsLoose(RootComponent, _Component);
 
-    function TestComponent() {
+    function RootComponent() {
       return _Component.apply(this, arguments) || this;
     }
 
-    var _proto = TestComponent.prototype;
+    var _proto = RootComponent.prototype;
 
     _proto.onInit = function onInit() {
-      // console.log('TestComponent.onInit');
+      // console.log('RootComponent.onInit');
       this.items = [1, 2];
       this.object = {
         a: 1,
@@ -1510,26 +1515,26 @@
       this.date = new Date();
     };
 
-    return TestComponent;
+    return RootComponent;
   }(Component);
 
-  TestComponent.meta = {
-    selector: '[test-component]'
+  RootComponent.meta = {
+    selector: '[root-component]'
   };
 
-  var Test2Component =
+  var Root2Component =
   /*#__PURE__*/
   function (_Component2) {
-    _inheritsLoose(Test2Component, _Component2);
+    _inheritsLoose(Root2Component, _Component2);
 
-    function Test2Component() {
+    function Root2Component() {
       return _Component2.apply(this, arguments) || this;
     }
 
-    var _proto2 = Test2Component.prototype;
+    var _proto2 = Root2Component.prototype;
 
     _proto2.onInit = function onInit() {
-      // console.log('TestComponent.onInit');
+      // console.log('RootComponent.onInit');
       this.items = [2, 3];
       this.object = {
         a: 2,
@@ -1538,11 +1543,11 @@
       this.date = new Date();
     };
 
-    return Test2Component;
+    return Root2Component;
   }(Component);
 
-  Test2Component.meta = {
-    selector: '[test-component]'
+  Root2Component.meta = {
+    selector: '[root-component]'
   };
 
   var AppModule =
@@ -1560,7 +1565,7 @@
   AppModule.meta = {
     imports: [CoreModule],
     declarations: [DatePipe],
-    bootstrap: TestComponent
+    bootstrap: RootComponent
   };
 
   var App2Module =
@@ -1578,7 +1583,7 @@
   App2Module.meta = {
     imports: [CoreModule],
     declarations: [DatePipe],
-    bootstrap: Test2Component
+    bootstrap: Root2Component
   };
   var module = Browser.bootstrap(AppModule);
 

@@ -3,7 +3,7 @@ import { take, takeUntil } from 'rxjs/operators';
 import { Browser, Component, CoreModule, Module, Pipe } from '../../src/rxcomp';
 
 // component
-class AppComponent extends Component {
+class RootComponent extends Component {
 	onInit() {
 		this.items = [1, 2, 3, 4];
 		return interval(50).pipe(
@@ -15,8 +15,8 @@ class AppComponent extends Component {
 		});
 	}
 }
-AppComponent.meta = {
-	selector: '[app-component]',
+RootComponent.meta = {
+	selector: '[root-component]',
 };
 
 // pipe
@@ -37,7 +37,7 @@ AppModule.meta = {
 	declarations: [
 		ExamplePipe,
 	],
-	bootstrap: AppComponent,
+	bootstrap: RootComponent,
 };
 
 const module = Browser.bootstrap(AppModule);

@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.6
+ * @license rxcomp v1.0.0-alpha.7
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -172,11 +172,16 @@
     _proto.compile = function compile(node, parentInstance) {
       var _this = this;
 
+      var componentNode;
       var instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(function (match) {
+        if (componentNode && componentNode !== match.node) {
+          parentInstance = undefined;
+        }
+
         var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 
         if (match.factory.prototype instanceof Component) {
-          parentInstance = undefined;
+          componentNode = match.node;
         }
 
         return instance;
@@ -194,7 +199,7 @@
         var isComponent = factory.prototype instanceof Component;
         var meta = factory.meta; // collect parentInstance scope
 
-        parentInstance = parentInstance || this.getParentInstance(node);
+        parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 
         if (!parentInstance) {
           return;
@@ -747,7 +752,7 @@
         factory: factory,
         selector: selector
       };
-      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || ++ID;
+      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || instance.rxcompId;
       var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
       nodeContexts.push(context);
       return CONTEXTS[instance.rxcompId] = context;
@@ -792,8 +797,7 @@
         } else {
           return previous;
         }
-      }, null);
-      console.log(context);
+      }, null); // console.log(node.dataset.rxcompId, context);
     }
 
     return context;
@@ -862,6 +866,7 @@
       if (expression) {
         var outputFunction = module.makeFunction(expression, ['$event']);
         event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+          // console.log(parentInstance);
           module.resolve(outputFunction, parentInstance, event);
         });
       } else {
@@ -1458,30 +1463,31 @@
     return Browser;
   }(Platform);
 
-  var TestComponent =
+  var RootComponent =
   /*#__PURE__*/
   function (_Component) {
-    _inheritsLoose(TestComponent, _Component);
+    _inheritsLoose(RootComponent, _Component);
 
-    function TestComponent() {
+    function RootComponent() {
       return _Component.apply(this, arguments) || this;
     }
 
-    var _proto = TestComponent.prototype;
+    var _proto = RootComponent.prototype;
 
     _proto.onInit = function onInit() {
+      this.background = '#b9dbff';
       this.items = [1, 2, 3];
     };
 
     _proto.onItem = function onItem(item) {
-      console.log('item', item);
+      console.log('RootComponent.item', item);
     };
 
-    return TestComponent;
+    return RootComponent;
   }(Component);
 
-  TestComponent.meta = {
-    selector: '[test-component]'
+  RootComponent.meta = {
+    selector: '[root-component]'
   };
 
   var SubComponent =
@@ -1496,7 +1502,12 @@
     var _proto2 = SubComponent.prototype;
 
     _proto2.onInit = function onInit() {
-      this.background = 'red';
+      this.background = '#ffb9b9';
+    };
+
+    _proto2.onToggle = function onToggle() {
+      // console.log(this.item);
+      this.toggle.next(this.item);
     };
 
     return SubComponent;
@@ -1505,7 +1516,8 @@
   SubComponent.meta = {
     selector: '[sub-component]',
     inputs: ['item'],
-    template: "<div [innerHTML]=\"item\"></div>"
+    outputs: ['toggle'],
+    template: "<div [style]=\"{ 'background-color': background }\" (click)=\"onToggle()\" [innerHTML]=\"item\"></div>"
   };
 
   var AppModule =
@@ -1523,7 +1535,7 @@
   AppModule.meta = {
     imports: [CoreModule],
     declarations: [SubComponent],
-    bootstrap: TestComponent
+    bootstrap: RootComponent
   };
   Browser.bootstrap(AppModule);
 

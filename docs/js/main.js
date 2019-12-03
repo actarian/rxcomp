@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.6
+ * @license rxcomp v1.0.0-alpha.7
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -172,11 +172,16 @@
     _proto.compile = function compile(node, parentInstance) {
       var _this = this;
 
+      var componentNode;
       var instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(function (match) {
+        if (componentNode && componentNode !== match.node) {
+          parentInstance = undefined;
+        }
+
         var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 
         if (match.factory.prototype instanceof Component) {
-          parentInstance = undefined;
+          componentNode = match.node;
         }
 
         return instance;
@@ -194,7 +199,7 @@
         var isComponent = factory.prototype instanceof Component;
         var meta = factory.meta; // collect parentInstance scope
 
-        parentInstance = parentInstance || this.getParentInstance(node);
+        parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 
         if (!parentInstance) {
           return;
@@ -747,7 +752,7 @@
         factory: factory,
         selector: selector
       };
-      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || ++ID;
+      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || instance.rxcompId;
       var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
       nodeContexts.push(context);
       return CONTEXTS[instance.rxcompId] = context;
@@ -792,8 +797,7 @@
         } else {
           return previous;
         }
-      }, null);
-      console.log(context);
+      }, null); // console.log(node.dataset.rxcompId, context);
     }
 
     return context;
@@ -862,6 +866,7 @@
       if (expression) {
         var outputFunction = module.makeFunction(expression, ['$event']);
         event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+          // console.log(parentInstance);
           module.resolve(outputFunction, parentInstance, event);
         });
       } else {
@@ -1808,13 +1813,15 @@
 
     /*
     template: // html // `
-    	<button type="button" class="btn--toggle" (click)="onToggle(item)">
-               <i class="icon--check" *if="item.done"></i>
-               <i class="icon--circle" *if="!item.done"></i>
-               <div class="title" [innerHTML]="item.name"></div>
-           </button>
-           <div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-           <button type="button" class="btn--remove" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+    	<div class="content" [style]="{ background: background, color: foreground, '--accent': accent }">
+    		<button type="button" class="btn--toggle" (click)="onToggle(item)">
+    			<i class="icon--check" *if="item.done"></i>
+    			<i class="icon--circle" *if="!item.done"></i>
+    			<div class="title" [innerHTML]="item.name"></div>
+    		</button>
+    		<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+    		<button type="button" class="btn--remove" (click)="onRemove(item)"><i class="icon--remove"></i></button>
+    	</div>
     `,
     */
 

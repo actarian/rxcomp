@@ -1,26 +1,32 @@
 import { Browser, Component, CoreModule, Module } from '../../src/rxcomp';
 
-class TestComponent extends Component {
+class RootComponent extends Component {
 	onInit() {
+		this.background = '#b9dbff';
 		this.items = [1, 2, 3];
 	}
 	onItem(item) {
-		console.log('item', item);
+		console.log('RootComponent.item', item);
 	}
 }
-TestComponent.meta = {
-	selector: '[test-component]',
+RootComponent.meta = {
+	selector: '[root-component]',
 };
 
 class SubComponent extends Component {
 	onInit() {
-		this.background = 'red';
+		this.background = '#ffb9b9';
+	}
+	onToggle() {
+		// console.log(this.item);
+		this.toggle.next(this.item);
 	}
 }
 SubComponent.meta = {
 	selector: '[sub-component]',
 	inputs: ['item'],
-	template: `<div [innerHTML]="item"></div>`
+	outputs: ['toggle'],
+	template: `<div [style]="{ 'background-color': background }" (click)="onToggle()" [innerHTML]="item"></div>`
 };
 
 class AppModule extends Module {}
@@ -29,7 +35,7 @@ AppModule.meta = {
 		CoreModule
 	],
 	declarations: [SubComponent],
-	bootstrap: TestComponent,
+	bootstrap: RootComponent,
 };
 
 Browser.bootstrap(AppModule);

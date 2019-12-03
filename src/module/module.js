@@ -11,10 +11,14 @@ const REMOVED_IDS = [];
 export default class Module {
 
 	compile(node, parentInstance) {
+		let componentNode;
 		const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(match => {
+			if (componentNode && componentNode !== match.node) {
+				parentInstance = undefined;
+			}
 			const instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 			if (match.factory.prototype instanceof Component) {
-				parentInstance = undefined;
+				componentNode = match.node;
 			}
 			return instance;
 		}).filter(x => x);
@@ -27,7 +31,7 @@ export default class Module {
 			const isComponent = factory.prototype instanceof Component;
 			const meta = factory.meta;
 			// collect parentInstance scope
-			parentInstance = parentInstance || this.getParentInstance(node);
+			parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 			if (!parentInstance) {
 				return;
 			}
@@ -472,7 +476,7 @@ export default class Module {
 	static makeContext(module, instance, parentInstance, node, factory, selector) {
 		instance.rxcompId = ++ID;
 		const context = { module, instance, parentInstance, node, factory, selector };
-		const rxcompNodeId = node.dataset.rxcompId = (node.dataset.rxcompId || ++ID);
+		const rxcompNodeId = node.dataset.rxcompId = (node.dataset.rxcompId || instance.rxcompId);
 		const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
 		nodeContexts.push(context);
 		return CONTEXTS[instance.rxcompId] = context;
@@ -515,7 +519,7 @@ export function getContextByNode(node) {
 				return previous;
 			}
 		}, null);
-		console.log(context);
+		// console.log(node.dataset.rxcompId, context);
 	}
 	return context;
 }

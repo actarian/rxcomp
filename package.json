@@ -2,7 +2,7 @@
 	"author": "Luca Zampetti <lzampetti@gmail.com>",
 	"name": "rxcomp",
 	"description": "rxcomp",
-	"version": "1.0.0-alpha.6",
+	"version": "1.0.0-alpha.7",
 	"license": "MIT",
 	"main": "dist/rxcomp.js",
 	"repository": {

@@ -1,32 +1,32 @@
 import { Browser, Component, CoreModule, Module } from '../../src/rxcomp';
 import DatePipe from './date/date.pipe';
 
-class TestComponent extends Component {
+class RootComponent extends Component {
 
 	onInit() {
-		// console.log('TestComponent.onInit');
+		// console.log('RootComponent.onInit');
 		this.items = [1, 2];
 		this.object = { a: 1, b: 2 };
 		this.date = new Date();
 	}
 
 }
-TestComponent.meta = {
-	selector: '[test-component]',
+RootComponent.meta = {
+	selector: '[root-component]',
 };
 
-class Test2Component extends Component {
+class Root2Component extends Component {
 
 	onInit() {
-		// console.log('TestComponent.onInit');
+		// console.log('RootComponent.onInit');
 		this.items = [2, 3];
 		this.object = { a: 2, b: 3 };
 		this.date = new Date();
 	}
 
 }
-Test2Component.meta = {
-	selector: '[test-component]',
+Root2Component.meta = {
+	selector: '[root-component]',
 };
 
 class AppModule extends Module {}
@@ -37,7 +37,7 @@ AppModule.meta = {
 	declarations: [
 		DatePipe,
 	],
-	bootstrap: TestComponent,
+	bootstrap: RootComponent,
 };
 
 class App2Module extends Module {}
@@ -48,7 +48,7 @@ App2Module.meta = {
 	declarations: [
 		DatePipe,
 	],
-	bootstrap: Test2Component,
+	bootstrap: Root2Component,
 };
 
 let module = Browser.bootstrap(AppModule);

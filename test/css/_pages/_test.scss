@@ -47,11 +47,8 @@
 
 	.list__item {
 		flex: 0 0 50px;
-		display: flex;
-		align-items: center;
 		min-height: 15px;
 		margin: 0;
-		padding: 20px 15px;
 		border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 		cursor: pointer;
 
@@ -72,6 +69,11 @@
 			color: #fff;
 		}
 
+	}
+
+	[sub-component] {
+		padding: 4px;
+		cursor: pointer;
 	}
 
 	@include media-breakpoint-up(sm) {

@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.6
+ * @license rxcomp v1.0.0-alpha.7
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -172,11 +172,16 @@
     _proto.compile = function compile(node, parentInstance) {
       var _this = this;
 
+      var componentNode;
       var instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(function (match) {
+        if (componentNode && componentNode !== match.node) {
+          parentInstance = undefined;
+        }
+
         var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 
         if (match.factory.prototype instanceof Component) {
-          parentInstance = undefined;
+          componentNode = match.node;
         }
 
         return instance;
@@ -194,7 +199,7 @@
         var isComponent = factory.prototype instanceof Component;
         var meta = factory.meta; // collect parentInstance scope
 
-        parentInstance = parentInstance || this.getParentInstance(node);
+        parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 
         if (!parentInstance) {
           return;
@@ -336,26 +341,39 @@
       }
     };
 
-    _proto.makeInput = function makeInput(instance, name) {
-      var context = getContext(instance);
-      var node = context.node;
-      var expression = node.getAttribute("[" + name + "]");
-      return this.makeFunction(expression);
+    _proto.makeInput = function makeInput(instance, key) {
+      var _getContext = getContext(instance),
+          node = _getContext.node;
+
+      var input,
+          expression = null;
+
+      if (node.hasAttribute(key)) {
+        expression = "'" + node.getAttribute(key) + "'";
+      } else if (node.hasAttribute("[" + key + "]")) {
+        expression = node.getAttribute("[" + key + "]");
+      }
+
+      if (expression !== null) {
+        input = this.makeFunction(expression);
+      }
+
+      return input;
     };
 
-    _proto.makeOutput = function makeOutput(instance, name) {
+    _proto.makeOutput = function makeOutput(instance, key) {
       var _this3 = this;
 
       var context = getContext(instance);
       var node = context.node;
       var parentInstance = context.parentInstance;
-      var expression = node.getAttribute("(" + name + ")");
+      var expression = node.getAttribute("(" + key + ")");
       var outputFunction = this.makeFunction(expression, ['$event']);
       var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
         _this3.resolve(outputFunction, parentInstance, event);
       }));
       output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
-      instance[name] = output$;
+      instance[key] = output$;
       return outputFunction;
     };
 
@@ -465,7 +483,11 @@
 
       if (meta.inputs) {
         meta.inputs.forEach(function (key, i) {
-          return inputs[key] = _this6.makeInput(instance, key);
+          var input = _this6.makeInput(instance, key);
+
+          if (input) {
+            inputs[key] = input;
+          }
         });
       }
 
@@ -730,7 +752,7 @@
         factory: factory,
         selector: selector
       };
-      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || ++ID;
+      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || instance.rxcompId;
       var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
       nodeContexts.push(context);
       return CONTEXTS[instance.rxcompId] = context;
@@ -761,17 +783,21 @@
     var nodeContexts = NODES[node.dataset.rxcompId];
 
     if (nodeContexts) {
+      /*
+      const same = nodeContexts.reduce((p, c) => {
+      	return p && c.node === node;
+      }, true);
+      console.log('same', same);
+      */
       context = nodeContexts.reduce(function (previous, current) {
-        if (current.node === node && current.factory.prototype instanceof Component) {
-          if (previous && current.factory.prototype instanceof Context) {
-            return previous;
-          } else {
-            return current;
-          }
+        if (current.factory.prototype instanceof Component) {
+          return current;
+        } else if (current.factory.prototype instanceof Context) {
+          return previous ? previous : current;
         } else {
           return previous;
         }
-      }, null);
+      }, null); // console.log(node.dataset.rxcompId, context);
     }
 
     return context;
@@ -840,6 +866,7 @@
       if (expression) {
         var outputFunction = module.makeFunction(expression, ['$event']);
         event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+          // console.log(parentInstance);
           module.resolve(outputFunction, parentInstance, event);
         });
       } else {
@@ -1349,42 +1376,72 @@
       var selectors = [];
       factories.forEach(function (factory) {
         factory.meta.selector.split(',').forEach(function (selector) {
-          selector = selector.trim();
+          selector = selector.trim(); // (\:not\((\.[\w\-\_]+)|(\[.+?\])|([\w\-\_]+)\))|(\.[\w\-\_]+)|(\[.+?\])|([\w\-\_]+);
 
-          if (selector.indexOf('.') === 0) {
-            var className = selector.replace(/\./g, '');
-            selectors.push(function (node) {
-              var match = node.classList.has(className);
-              return match ? {
-                node: node,
-                factory: factory,
-                selector: selector
-              } : false;
-            });
-          } else if (selector.match(/\[(.+)\]/)) {
-            var attribute = selector.substr(1, selector.length - 2);
-            selectors.push(function (node) {
-              var match = node.hasAttribute(attribute);
-              return match ? {
-                node: node,
-                factory: factory,
-                selector: selector
-              } : false;
-            });
-          } else {
-            selectors.push(function (node) {
-              var match = node.nodeName.toLowerCase() === selector.toLowerCase();
-              return match ? {
-                node: node,
-                factory: factory,
-                selector: selector
-              } : false;
-            });
-          }
+          var matchers = [];
+          selector.replace(/(\.[\w\-\_]+)|(\[+.+?\]+)|([\w\-\_]+)/g, function (value, className, attrName, nodeName) {
+            if (className) {
+              matchers.push(function (node) {
+                return node.classList.contains(className.replace(/\./g, ''));
+              });
+            }
+
+            if (attrName) {
+              matchers.push(function (node) {
+                return node.hasAttribute(attrName.substr(1, attrName.length - 2));
+              });
+            }
+
+            if (nodeName) {
+              matchers.push(function (node) {
+                return node.nodeName.toLowerCase() === nodeName.toLowerCase();
+              });
+            }
+          });
+          selectors.push(function (node) {
+            var match = matchers.reduce(function (match, matcher) {
+              return match && matcher(node);
+            }, true);
+            return match ? {
+              node: node,
+              factory: factory,
+              selector: selector
+            } : false;
+          });
         });
       });
       return selectors;
-    };
+    }
+    /*
+    static unwrapSelectors(factories) {
+    	const selectors = [];
+    	factories.forEach(factory => {
+    		factory.meta.selector.split(',').forEach(selector => {
+    			selector = selector.trim();
+    			if (selector.indexOf('.') === 0) {
+    				const className = selector.replace(/\./g, '');
+    				selectors.push((node) => {
+    					const match = node.classList.contains(className);
+    					return match ? { node, factory, selector } : false;
+    				});
+    			} else if (selector.match(/\[(.+)\]/)) {
+    				const attribute = selector.substr(1, selector.length - 2);
+    				selectors.push((node) => {
+    					const match = node.hasAttribute(attribute);
+    					return match ? { node, factory, selector } : false;
+    				});
+    			} else {
+    				selectors.push((node) => {
+    					const match = node.nodeName.toLowerCase() === selector.toLowerCase();
+    					return match ? { node, factory, selector } : false;
+    				});
+    			}
+    		});
+    	});
+    	return selectors;
+    }
+    */
+    ;
 
     Platform.isBrowser = function isBrowser() {
       return window;

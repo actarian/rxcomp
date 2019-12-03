@@ -53,61 +53,64 @@
 	}
 
 	.list__item {
-		--accent: $foreground;
-
-		display: flex;
-		align-items: center;
-		min-height: 120px;
 		margin: 0;
-		padding: 20px;
 
-		.title {
-			position: relative;
-			margin-top: 10px;
-			font-size: 28px;
-			font-weight: 800;
-			line-height: 1;
-			text-align: left;
+		.content {
+			display: flex;
+			align-items: center;
+			min-height: 120px;
+			padding: 20px;
 
-			&:after {
-				content: '';
-				// background-image: url('../img/underline.svg');
-				background-color: black;
-				background-color: var(--accent);
-				background-size: 170px 8px;
-				background-repeat: no-repeat;
-				position: absolute;
-				width: 0;
-				height: 8px;
-				left: -8px;
-				top: 50%;
-				margin-top: -2px;
-				z-index: 1;
-				// mix-blend-mode: multiply;
-				transition: ease-in-out 300ms width;
+			--accent: $foreground;
+
+			.title {
+				position: relative;
+				margin-top: 10px;
+				font-size: 28px;
+				font-weight: 800;
+				line-height: 1;
+				text-align: left;
+
+				&:after {
+					content: '';
+					// background-image: url('../img/underline.svg');
+					background-color: black;
+					background-color: var(--accent);
+					background-size: 170px 8px;
+					background-repeat: no-repeat;
+					position: absolute;
+					width: 0;
+					height: 8px;
+					left: -8px;
+					top: 50%;
+					margin-top: -2px;
+					z-index: 1;
+					// mix-blend-mode: multiply;
+					transition: ease-in-out 300ms width;
+				}
 			}
 
+			.date {
+				font-size: 10px;
+				font-weight: 800;
+				line-height: 1;
+				text-align: left;
+				white-space: nowrap;
+				text-transform: uppercase;
+				text-indent: 1px;
+				// color: var(--accent);
+			}
 		}
 
 		&.done {
-			.title {
-				&:after {
-					width: 170px;
+			.content {
+				.title {
+					&:after {
+						width: 170px;
+					}
 				}
 			}
 		}
-
-		.date {
-			font-size: 10px;
-			font-weight: 800;
-			line-height: 1;
-			text-align: left;
-			white-space: nowrap;
-			text-transform: uppercase;
-			text-indent: 1px;
-			// color: var(--accent);
-		}
-
 	}
 
 	.btn--toggle {
