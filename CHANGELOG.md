@@ -3,6 +3,14 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-alpha.8] - 2019-12-06
+### Added
+- :not selector
+### Fixing
+- TextNode parser
+
+---
+
 ## [1.0.0-alpha.7] - 2019-12-03
 ### Fixing
 - Component scope

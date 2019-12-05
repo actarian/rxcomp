@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.7
+ * @license rxcomp v1.0.0-alpha.8
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -461,11 +461,11 @@
           }
         } else if (child.nodeType === 3) {
           var expression = child.nodeExpression || child.nodeValue;
-          var replacedText = this.evaluate(expression, instance); // console.log(instance.constructor.name, expression, replacedText);
+          var replacedText = this.evaluate(expression, instance);
 
           if (expression !== replacedText) {
-            child.nodeExpression = child.nodeExpression || expression;
             var textNode = document.createTextNode(replacedText);
+            textNode.nodeExpression = expression;
             node.replaceChild(textNode, child);
           }
         }
@@ -1372,41 +1372,68 @@
       });
     };
 
+    Platform.getExpressions = function getExpressions(selector) {
+      var matchers = [];
+      selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value, c1, a2, u3, v4, a5, e6) {
+        if (c1) {
+          matchers.push(function (node) {
+            return node.classList.contains(c1);
+          });
+        }
+
+        if (a2) {
+          matchers.push(function (node) {
+            return node.hasAttribute(a2) && node.getAttribute(a2) === v4;
+          });
+        }
+
+        if (a5) {
+          matchers.push(function (node) {
+            return node.hasAttribute(a5);
+          });
+        }
+
+        if (e6) {
+          matchers.push(function (node) {
+            return node.nodeName.toLowerCase() === e6.toLowerCase();
+          });
+        }
+      });
+      return matchers;
+    };
+
     Platform.unwrapSelectors = function unwrapSelectors(factories) {
+      var _this4 = this;
+
       var selectors = [];
       factories.forEach(function (factory) {
         factory.meta.selector.split(',').forEach(function (selector) {
-          selector = selector.trim(); // (\:not\((\.[\w\-\_]+)|(\[.+?\])|([\w\-\_]+)\))|(\.[\w\-\_]+)|(\[.+?\])|([\w\-\_]+);
-
-          var matchers = [];
-          selector.replace(/(\.[\w\-\_]+)|(\[+.+?\]+)|([\w\-\_]+)/g, function (value, className, attrName, nodeName) {
-            if (className) {
-              matchers.push(function (node) {
-                return node.classList.contains(className.replace(/\./g, ''));
-              });
-            }
-
-            if (attrName) {
-              matchers.push(function (node) {
-                return node.hasAttribute(attrName.substr(1, attrName.length - 2));
-              });
-            }
-
-            if (nodeName) {
-              matchers.push(function (node) {
-                return node.nodeName.toLowerCase() === nodeName.toLowerCase();
-              });
-            }
+          selector = selector.trim();
+          var excludes = [];
+          var matchSelector = selector.replace(/\:not\((.+?)\)/g, function (value, unmatchSelector) {
+            excludes = this.getExpressions(unmatchSelector);
+            return '';
           });
+
+          var includes = _this4.getExpressions(matchSelector);
+
           selectors.push(function (node) {
-            var match = matchers.reduce(function (match, matcher) {
-              return match && matcher(node);
+            var include = includes.reduce(function (result, e) {
+              return result && e(node);
             }, true);
-            return match ? {
-              node: node,
-              factory: factory,
-              selector: selector
-            } : false;
+            var exclude = excludes.reduce(function (result, e) {
+              return result || e(node);
+            }, false);
+
+            if (include && !exclude) {
+              return {
+                node: node,
+                factory: factory,
+                selector: selector
+              };
+            } else {
+              return false;
+            }
           });
         });
       });
@@ -1418,24 +1445,30 @@
     	factories.forEach(factory => {
     		factory.meta.selector.split(',').forEach(selector => {
     			selector = selector.trim();
-    			if (selector.indexOf('.') === 0) {
-    				const className = selector.replace(/\./g, '');
-    				selectors.push((node) => {
-    					const match = node.classList.contains(className);
-    					return match ? { node, factory, selector } : false;
-    				});
-    			} else if (selector.match(/\[(.+)\]/)) {
-    				const attribute = selector.substr(1, selector.length - 2);
-    				selectors.push((node) => {
-    					const match = node.hasAttribute(attribute);
-    					return match ? { node, factory, selector } : false;
-    				});
-    			} else {
-    				selectors.push((node) => {
-    					const match = node.nodeName.toLowerCase() === selector.toLowerCase();
-    					return match ? { node, factory, selector } : false;
-    				});
-    			}
+    			let matchers = [];
+    			selector.replace(/(\.[\w\-\_]+)|(\[+.+?\]+)|([\w\-\_]+)/g, function(value, className, attrName, nodeName) {
+    				if (className) {
+    					matchers.push(function(node) {
+    						return node.classList.contains(className.replace(/\./g, ''));
+    					});
+    				}
+    				if (attrName) {
+    					matchers.push(function(node) {
+    						return node.hasAttribute(attrName.substr(1, attrName.length - 2));
+    					});
+    				}
+    				if (nodeName) {
+    					matchers.push(function(node) {
+    						return node.nodeName.toLowerCase() === nodeName.toLowerCase();
+    					});
+    				}
+    			});
+    			selectors.push(function(node) {
+    				const match = matchers.reduce((match, matcher) => {
+    					return match && matcher(node);
+    				}, true);
+    				return match ? { node, factory, selector } : false;
+    			});
     		});
     	});
     	return selectors;

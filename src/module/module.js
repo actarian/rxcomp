@@ -264,10 +264,9 @@ export default class Module {
 			} else if (child.nodeType === 3) {
 				const expression = child.nodeExpression || child.nodeValue;
 				const replacedText = this.evaluate(expression, instance);
-				// console.log(instance.constructor.name, expression, replacedText);
 				if (expression !== replacedText) {
-					child.nodeExpression = child.nodeExpression || expression;
 					const textNode = document.createTextNode(replacedText);
+					textNode.nodeExpression = expression;
 					node.replaceChild(textNode, child);
 				}
 			}

@@ -1,3 +1,5 @@
+import { interval } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Browser, Component, CoreModule, Module } from '../../src/rxcomp';
 import DatePipe from './date/date.pipe';
 
@@ -5,6 +7,13 @@ class RootComponent extends Component {
 
 	onInit() {
 		// console.log('RootComponent.onInit');
+		this.ticks = -1;
+		interval(1000).pipe(
+			takeUntil(this.unsubscribe$)
+		).subscribe(ticks => {
+			this.ticks = ticks;
+			this.pushChanges();
+		});
 		this.items = [1, 2];
 		this.object = { a: 1, b: 2 };
 		this.date = new Date();
@@ -19,6 +28,13 @@ class Root2Component extends Component {
 
 	onInit() {
 		// console.log('RootComponent.onInit');
+		this.ticks = -1;
+		interval(1000).pipe(
+			takeUntil(this.unsubscribe$)
+		).subscribe(ticks => {
+			this.ticks = ticks;
+			this.pushChanges();
+		});
 		this.items = [2, 3];
 		this.object = { a: 2, b: 3 };
 		this.date = new Date();

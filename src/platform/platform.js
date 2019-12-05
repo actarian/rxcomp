@@ -65,12 +65,68 @@ export default class Platform {
 		});
 	}
 
+	static getExpressions(selector) {
+		let matchers = [];
+		selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function(value, c1, a2, u3, v4, a5, e6) {
+			if (c1) {
+				matchers.push(function(node) {
+					return node.classList.contains(c1);
+				});
+			}
+			if (a2) {
+				matchers.push(function(node) {
+					return node.hasAttribute(a2) && node.getAttribute(a2) === v4;
+				});
+			}
+			if (a5) {
+				matchers.push(function(node) {
+					return node.hasAttribute(a5);
+				});
+			}
+			if (e6) {
+				matchers.push(function(node) {
+					return node.nodeName.toLowerCase() === e6.toLowerCase();
+				});
+			}
+		});
+		return matchers;
+	}
+
 	static unwrapSelectors(factories) {
 		const selectors = [];
 		factories.forEach(factory => {
 			factory.meta.selector.split(',').forEach(selector => {
 				selector = selector.trim();
-				// (\:not\((\.[\w\-\_]+)|(\[.+?\])|([\w\-\_]+)\))|(\.[\w\-\_]+)|(\[.+?\])|([\w\-\_]+);
+				let excludes = [];
+				const matchSelector = selector.replace(/\:not\((.+?)\)/g, function(value, unmatchSelector) {
+					excludes = this.getExpressions(unmatchSelector);
+					return '';
+				});
+				const includes = this.getExpressions(matchSelector);
+				selectors.push(function(node) {
+					const include = includes.reduce((result, e) => {
+						return result && e(node);
+					}, true);
+					const exclude = excludes.reduce((result, e) => {
+						return result || e(node);
+					}, false);
+					if (include && !exclude) {
+						return { node, factory, selector };
+					} else {
+						return false;
+					}
+				});
+			});
+		});
+		return selectors;
+	}
+
+	/*
+	static unwrapSelectors(factories) {
+		const selectors = [];
+		factories.forEach(factory => {
+			factory.meta.selector.split(',').forEach(selector => {
+				selector = selector.trim();
 				let matchers = [];
 				selector.replace(/(\.[\w\-\_]+)|(\[+.+?\]+)|([\w\-\_]+)/g, function(value, className, attrName, nodeName) {
 					if (className) {
@@ -95,35 +151,6 @@ export default class Platform {
 					}, true);
 					return match ? { node, factory, selector } : false;
 				});
-			});
-		});
-		return selectors;
-	}
-
-	/*
-	static unwrapSelectors(factories) {
-		const selectors = [];
-		factories.forEach(factory => {
-			factory.meta.selector.split(',').forEach(selector => {
-				selector = selector.trim();
-				if (selector.indexOf('.') === 0) {
-					const className = selector.replace(/\./g, '');
-					selectors.push((node) => {
-						const match = node.classList.contains(className);
-						return match ? { node, factory, selector } : false;
-					});
-				} else if (selector.match(/\[(.+)\]/)) {
-					const attribute = selector.substr(1, selector.length - 2);
-					selectors.push((node) => {
-						const match = node.hasAttribute(attribute);
-						return match ? { node, factory, selector } : false;
-					});
-				} else {
-					selectors.push((node) => {
-						const match = node.nodeName.toLowerCase() === selector.toLowerCase();
-						return match ? { node, factory, selector } : false;
-					});
-				}
 			});
 		});
 		return selectors;
