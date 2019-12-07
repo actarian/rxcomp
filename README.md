@@ -6,16 +6,20 @@
 
 If you like Angular declarative syntax but you just want go Vanilla, RxComp library come in useful.
 
-RxComp bundle size `5Kb` gzipped, `15Kb` minified.  
-RxJS dependancy bundle size `26Kb` gzipped, `345.5Kb` minified.  
+ lib & dependancy | size
+:-----------------|:----------------------------------------------------------------------------------------------|
+rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/rxcomp.min.js.svg?compression=gzip)
+rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/rxcomp.min.js.svg)
+rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg?compression=gzip)
+rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg)
  
 > [TodoMvc demo](https://actarian.github.io/rxcomp-todomvc/)  
-> [TodoMvc source](https://github.com/actarian/rxcomp-todomvc)
+> [TodoMvc source](https://github.com/actarian/rxcomp-todomvc)  
 ___
 
 ### What is included
 * Modules *```imports```, ```exports```*
-* Components *```inputs```, ```outputs```, ```template```*
+* Components *```inputs```, ```outputs```, ```hosts```, ```template```*
 * Structures *```ForStructure```, ```IfStructure```*
 * Directives *```ClassDirective```, ```EventDirective```, ```InnerHtmlDirective```, ```StyleDirective```*
 * Pipes *```JsonPipe```*
@@ -50,7 +54,7 @@ ___
 For CDN, you can use unpkg
 
 ```html
-<script src="https://unpkg.com/rxcomp@1.0.0-alpha.8/dist/rxcomp.min.js"></script>
+<script src="https://unpkg.com/rxcomp@1.0.0-alpha.9/dist/rxcomp.min.js"></script>
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -117,7 +121,8 @@ export default class TodoItemComponent extends Component {
 TodoItemComponent.meta = {
     selector: '[todo-item-component]',
     inputs: ['item'],
-    outputs: ['toggle', 'remove'],
+	outputs: ['toggle', 'remove'],
+	// hosts: { host: HostFactory },
     template: /* html */ `
         <button type="button" class="btn--toggle" (click)="onToggle(item)">
             <div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
@@ -210,6 +215,11 @@ ___
 
 ## Release Notes
 Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
+
+---
+
+## 1.0.0-alpha.9
+* Added meta hosts { key: Factory }
 
 ---
 

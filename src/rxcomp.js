@@ -10,7 +10,7 @@ export { default as ForStructure } from './for/for.structure';
 export { default as IfStructure } from './if/if.structure';
 export { default as InnerHtmlDirective } from './inner-html/inner-html.directive';
 export { default as JsonPipe } from './json/json.pipe';
-export { default as Module, getContext, getContextByNode } from './module/module';
+export { default as Module, getContext, getContextByNode, getHost } from './module/module';
 export { default as Browser } from './platform/browser';
 export { default as Platform } from './platform/platform';
 export { default as StyleDirective } from './style/style.directive';

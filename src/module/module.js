@@ -72,6 +72,7 @@ export default class Module {
 			// creating component input and outputs
 			// if (isComponent && meta) {
 			if (meta) {
+				this.makeHosts(meta, instance, node);
 				context.inputs = this.makeInputs(meta, instance);
 				context.outputs = this.makeOutputs(meta, instance);
 			}
@@ -277,6 +278,15 @@ export default class Module {
 		return expressionFunc.apply(changes, [payload, this]);
 	}
 
+	makeHosts(meta, instance, node) {
+		if (meta.hosts) {
+			Object.keys(meta.hosts).forEach(key => {
+				const factory = meta.hosts[key];
+				instance[key] = getHost(instance, factory, node);
+			});
+		}
+	}
+
 	makeInputs(meta, instance) {
 		const inputs = {};
 		if (meta.inputs) {
@@ -410,9 +420,7 @@ export default class Module {
 	static querySelectorsAll(node, selectors, results) {
 		if (node.nodeType === 1) {
 			results = this.matchSelectors(node, selectors, results);
-		}
-		const childNodes = node.childNodes;
-		if (childNodes) {
+			const childNodes = node.childNodes;
 			for (let i = 0; i < childNodes.length; i++) {
 				results = this.querySelectorsAll(childNodes[i], selectors, results);
 			}
@@ -521,4 +529,40 @@ export function getContextByNode(node) {
 		// console.log(node.dataset.rxcompId, context);
 	}
 	return context;
+}
+
+export function getHost(instance, factory, node) {
+	if (!node) {
+		node = getContext(instance).node;
+	}
+	if (!node.dataset) {
+		return;
+	}
+	const nodeContexts = NODES[node.dataset.rxcompId];
+	if (nodeContexts) {
+		// console.log(nodeContexts);
+		// let hasComponent;
+		for (let i = 0; i < nodeContexts.length; i++) {
+			const context = nodeContexts[i];
+			if (context.instance !== instance) {
+				// console.log(context.instance, instance);
+				if (context.instance instanceof factory) {
+					return context.instance;
+				}
+				/*
+				else if (context.instance instanceof Component) {
+					hasComponent = true;
+				}
+				*/
+			}
+		}
+		/*
+		if (hasComponent) {
+			return undefined;
+		}
+		*/
+	}
+	if (node.parentNode) {
+		return getHost(instance, factory, node.parentNode);
+	}
 }

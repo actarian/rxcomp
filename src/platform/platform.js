@@ -61,7 +61,12 @@ export default class Platform {
 		factories.sort((a, b) => {
 			const ai = ORDER.reduce((p, c, i) => a.prototype instanceof c ? i : p, -1);
 			const bi = ORDER.reduce((p, c, i) => b.prototype instanceof c ? i : p, -1);
-			return ai - bi;
+			// return ai - bi;
+			const o = ai - bi;
+			if (o === 0) {
+				return (a.meta.hosts ? 1 : 0) - (b.meta.hosts ? 1 : 0);
+			}
+			return o;
 		});
 	}
 
@@ -120,42 +125,6 @@ export default class Platform {
 		});
 		return selectors;
 	}
-
-	/*
-	static unwrapSelectors(factories) {
-		const selectors = [];
-		factories.forEach(factory => {
-			factory.meta.selector.split(',').forEach(selector => {
-				selector = selector.trim();
-				let matchers = [];
-				selector.replace(/(\.[\w\-\_]+)|(\[+.+?\]+)|([\w\-\_]+)/g, function(value, className, attrName, nodeName) {
-					if (className) {
-						matchers.push(function(node) {
-							return node.classList.contains(className.replace(/\./g, ''));
-						});
-					}
-					if (attrName) {
-						matchers.push(function(node) {
-							return node.hasAttribute(attrName.substr(1, attrName.length - 2));
-						});
-					}
-					if (nodeName) {
-						matchers.push(function(node) {
-							return node.nodeName.toLowerCase() === nodeName.toLowerCase();
-						});
-					}
-				});
-				selectors.push(function(node) {
-					const match = matchers.reduce((match, matcher) => {
-						return match && matcher(node);
-					}, true);
-					return match ? { node, factory, selector } : false;
-				});
-			});
-		});
-		return selectors;
-	}
-	*/
 
 	static isBrowser() {
 		return window;

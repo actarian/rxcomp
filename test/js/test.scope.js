@@ -1,4 +1,4 @@
-import { Browser, Component, CoreModule, Module } from '../../src/rxcomp';
+import { Browser, Component, CoreModule, Directive, Module, StyleDirective } from '../../src/rxcomp';
 
 class RootComponent extends Component {
 	onInit() {
@@ -29,12 +29,36 @@ SubComponent.meta = {
 	template: `<div [style]="{ 'background-color': background }" (click)="onToggle()" [innerHTML]="item"></div>`
 };
 
+class HostDirective extends Directive {
+	onInit() {
+		console.log('style', this.style);
+	}
+}
+HostDirective.meta = {
+	selector: '[host]',
+	hosts: { style: StyleDirective }
+};
+
+class HostedDirective extends Directive {
+	onInit() {
+		console.log('host', this.host);
+	}
+}
+HostedDirective.meta = {
+	selector: '[hosted]',
+	hosts: { host: HostDirective }
+};
+
 class AppModule extends Module {}
 AppModule.meta = {
 	imports: [
 		CoreModule
 	],
-	declarations: [SubComponent],
+	declarations: [
+		HostedDirective,
+		HostDirective,
+		SubComponent
+	],
 	bootstrap: RootComponent,
 };
 

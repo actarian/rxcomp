@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.8
+ * @license rxcomp v1.0.0-alpha.9
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -248,6 +248,7 @@
 
 
         if (meta) {
+          this.makeHosts(meta, instance, node);
           context.inputs = this.makeInputs(meta, instance);
           context.outputs = this.makeOutputs(meta, instance);
         } // calling onInit event
@@ -476,6 +477,15 @@
       return expressionFunc.apply(changes, [payload, this]);
     };
 
+    _proto.makeHosts = function makeHosts(meta, instance, node) {
+      if (meta.hosts) {
+        Object.keys(meta.hosts).forEach(function (key) {
+          var factory = meta.hosts[key];
+          instance[key] = getHost(instance, factory, node);
+        });
+      }
+    };
+
     _proto.makeInputs = function makeInputs(meta, instance) {
       var _this6 = this;
 
@@ -647,11 +657,8 @@
     Module.querySelectorsAll = function querySelectorsAll(node, selectors, results) {
       if (node.nodeType === 1) {
         results = this.matchSelectors(node, selectors, results);
-      }
+        var childNodes = node.childNodes;
 
-      var childNodes = node.childNodes;
-
-      if (childNodes) {
         for (var i = 0; i < childNodes.length; i++) {
           results = this.querySelectorsAll(childNodes[i], selectors, results);
         }
@@ -801,6 +808,48 @@
     }
 
     return context;
+  }
+  function getHost(instance, factory, node) {
+    if (!node) {
+      node = getContext(instance).node;
+    }
+
+    if (!node.dataset) {
+      return;
+    }
+
+    var nodeContexts = NODES[node.dataset.rxcompId];
+
+    if (nodeContexts) {
+      // console.log(nodeContexts);
+      // let hasComponent;
+      for (var i = 0; i < nodeContexts.length; i++) {
+        var context = nodeContexts[i];
+
+        if (context.instance !== instance) {
+          // console.log(context.instance, instance);
+          if (context.instance instanceof factory) {
+            return context.instance;
+          }
+          /*
+          else if (context.instance instanceof Component) {
+          	hasComponent = true;
+          }
+          */
+
+        }
+      }
+      /*
+      if (hasComponent) {
+      	return undefined;
+      }
+      */
+
+    }
+
+    if (node.parentNode) {
+      return getHost(instance, factory, node.parentNode);
+    }
   }
 
   var ClassDirective =
@@ -1367,8 +1416,15 @@
         }, -1);
         var bi = ORDER.reduce(function (p, c, i) {
           return b.prototype instanceof c ? i : p;
-        }, -1);
-        return ai - bi;
+        }, -1); // return ai - bi;
+
+        var o = ai - bi;
+
+        if (o === 0) {
+          return (a.meta.hosts ? 1 : 0) - (b.meta.hosts ? 1 : 0);
+        }
+
+        return o;
       });
     };
 
@@ -1438,43 +1494,7 @@
         });
       });
       return selectors;
-    }
-    /*
-    static unwrapSelectors(factories) {
-    	const selectors = [];
-    	factories.forEach(factory => {
-    		factory.meta.selector.split(',').forEach(selector => {
-    			selector = selector.trim();
-    			let matchers = [];
-    			selector.replace(/(\.[\w\-\_]+)|(\[+.+?\]+)|([\w\-\_]+)/g, function(value, className, attrName, nodeName) {
-    				if (className) {
-    					matchers.push(function(node) {
-    						return node.classList.contains(className.replace(/\./g, ''));
-    					});
-    				}
-    				if (attrName) {
-    					matchers.push(function(node) {
-    						return node.hasAttribute(attrName.substr(1, attrName.length - 2));
-    					});
-    				}
-    				if (nodeName) {
-    					matchers.push(function(node) {
-    						return node.nodeName.toLowerCase() === nodeName.toLowerCase();
-    					});
-    				}
-    			});
-    			selectors.push(function(node) {
-    				const match = matchers.reduce((match, matcher) => {
-    					return match && matcher(node);
-    				}, true);
-    				return match ? { node, factory, selector } : false;
-    			});
-    		});
-    	});
-    	return selectors;
-    }
-    */
-    ;
+    };
 
     Platform.isBrowser = function isBrowser() {
       return window;
