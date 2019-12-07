@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.9
+ * @license rxcomp v1.0.0-alpha.10
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1467,7 +1467,7 @@
           selector = selector.trim();
           var excludes = [];
           var matchSelector = selector.replace(/\:not\((.+?)\)/g, function (value, unmatchSelector) {
-            excludes = this.getExpressions(unmatchSelector);
+            excludes = _this4.getExpressions(unmatchSelector);
             return '';
           });
 

@@ -103,12 +103,12 @@ export default class Platform {
 			factory.meta.selector.split(',').forEach(selector => {
 				selector = selector.trim();
 				let excludes = [];
-				const matchSelector = selector.replace(/\:not\((.+?)\)/g, function(value, unmatchSelector) {
+				const matchSelector = selector.replace(/\:not\((.+?)\)/g, (value, unmatchSelector) => {
 					excludes = this.getExpressions(unmatchSelector);
 					return '';
 				});
 				const includes = this.getExpressions(matchSelector);
-				selectors.push(function(node) {
+				selectors.push((node) => {
 					const include = includes.reduce((result, e) => {
 						return result && e(node);
 					}, true);

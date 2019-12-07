@@ -23,7 +23,7 @@ class SubComponent extends Component {
 	}
 }
 SubComponent.meta = {
-	selector: '[sub-component]',
+	selector: '[sub-component]:not(.red)',
 	inputs: ['item'],
 	outputs: ['toggle'],
 	template: `<div [style]="{ 'background-color': background }" (click)="onToggle()" [innerHTML]="item"></div>`

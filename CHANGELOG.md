@@ -3,7 +3,7 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
-## [1.0.0-alpha.9] - 2019-12-07
+## [1.0.0-alpha.10] - 2019-12-07
 ### Added
 - meta hosts { key: Factory }
 
