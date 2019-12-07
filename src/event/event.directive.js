@@ -8,11 +8,7 @@ const EVENTS = ['click', 'mousedown', 'mouseup', 'touchstart', 'touchmove', 'tou
 export default class EventDirective extends Directive {
 
 	onInit() {
-		const context = getContext(this);
-		const module = context.module;
-		const node = context.node;
-		const selector = context.selector;
-		const parentInstance = context.parentInstance;
+		const { module, node, parentInstance, selector } = getContext(this);
 		const event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
 		const event$ = this.event$ = fromEvent(node, event).pipe(shareReplay(1));
 		const expression = node.getAttribute(`(${event})`);

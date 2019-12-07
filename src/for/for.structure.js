@@ -5,9 +5,7 @@ import ForItem from './for.item';
 export default class ForStructure extends Structure {
 
 	onInit() {
-		const context = getContext(this);
-		const module = context.module;
-		const node = context.node;
+		const { module, node } = getContext(this);
 		const forbegin = this.forbegin = document.createComment(`*for begin`);
 		node.parentNode.replaceChild(forbegin, node);
 		const forend = this.forend = document.createComment(`*for end`);
@@ -65,8 +63,7 @@ export default class ForStructure extends Structure {
 			} else {
 				// remove
 				const instance = this.instances[i];
-				const context = getContext(instance);
-				const node = context.node;
+				const { node } = getContext(instance);
 				node.parentNode.removeChild(node);
 				module.remove(node);
 			}

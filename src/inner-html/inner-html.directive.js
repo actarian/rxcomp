@@ -3,34 +3,14 @@ import { getContext } from '../module/module';
 
 export default class InnerHtmlDirective extends Directive {
 
-	onInit() {
-		const context = getContext(this);
-		const node = context.node;
-		const selector = context.selector;
-		const key = selector.replace(/\[(.+)\]/, (...matches) => {
-			return matches[1];
-		});
-		let expression = node.getAttribute(key);
-		if (!expression) {
-			throw (`invalid ${key}`);
-		}
-		if (key === '[innerHTML]') {
-			expression = `{{${expression}}}`;
-		}
-		this.innerHtmlExpression = expression;
-		// console.log('InnerHtmlDirective.onInit', node, expression, key);
-	}
-
 	onChanges(changes) {
-		const context = getContext(this);
-		const innerHTML = context.module.evaluate(this.innerHtmlExpression, changes);
-		// console.log('InnerHtmlDirective.onChanges', this.innerHtmlExpression, innerHTML);
-		const node = context.node;
-		node.innerHTML = innerHTML;
+		const { node } = getContext(this);
+		node.innerHTML = this.innerHTML;
 	}
 
 }
 
 InnerHtmlDirective.meta = {
-	selector: `[[innerHTML]],[innerHTML]`
+	selector: `[innerHTML]`,
+	inputs: ['innerHTML'],
 };

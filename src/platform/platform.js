@@ -80,12 +80,13 @@ export default class Platform {
 			}
 			if (a2) {
 				matchers.push(function(node) {
-					return node.hasAttribute(a2) && node.getAttribute(a2) === v4;
+					return (node.hasAttribute(a2) && node.getAttribute(a2) === v4) ||
+						(node.hasAttribute(`[${a2}]`) && node.getAttribute(`[${a2}]`) === v4);
 				});
 			}
 			if (a5) {
 				matchers.push(function(node) {
-					return node.hasAttribute(a5);
+					return node.hasAttribute(a5) || node.hasAttribute(`[${a5}]`);
 				});
 			}
 			if (e6) {

@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.10
+ * @license rxcomp v1.0.0-alpha.11
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -342,42 +342,6 @@
       }
     };
 
-    _proto.makeInput = function makeInput(instance, key) {
-      var _getContext = getContext(instance),
-          node = _getContext.node;
-
-      var input,
-          expression = null;
-
-      if (node.hasAttribute(key)) {
-        expression = "'" + node.getAttribute(key) + "'";
-      } else if (node.hasAttribute("[" + key + "]")) {
-        expression = node.getAttribute("[" + key + "]");
-      }
-
-      if (expression !== null) {
-        input = this.makeFunction(expression);
-      }
-
-      return input;
-    };
-
-    _proto.makeOutput = function makeOutput(instance, key) {
-      var _this3 = this;
-
-      var context = getContext(instance);
-      var node = context.node;
-      var parentInstance = context.parentInstance;
-      var expression = node.getAttribute("(" + key + ")");
-      var outputFunction = this.makeFunction(expression, ['$event']);
-      var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
-        _this3.resolve(outputFunction, parentInstance, event);
-      }));
-      output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
-      instance[key] = output$;
-      return outputFunction;
-    };
-
     _proto.getInstance = function getInstance(node) {
       if (node === document) {
         return window;
@@ -391,10 +355,10 @@
     };
 
     _proto.getParentInstance = function getParentInstance(node) {
-      var _this4 = this;
+      var _this3 = this;
 
       return Module.traverseUp(node, function (node) {
-        return _this4.getInstance(node);
+        return _this3.getInstance(node);
       });
     };
 
@@ -431,15 +395,15 @@
     };
 
     _proto.evaluate = function evaluate(text, instance) {
-      var _this5 = this;
+      var _this4 = this;
 
       var parse_eval_ = function parse_eval_() {
         var expression = arguments.length <= 1 ? undefined : arguments[1]; // console.log('expression', expression);
 
         try {
-          var parse_func_ = _this5.makeFunction(expression);
+          var parse_func_ = _this4.makeFunction(expression);
 
-          return _this5.resolve(parse_func_, instance, instance);
+          return _this4.resolve(parse_func_, instance, instance);
         } catch (e) {
           console.error(e);
           return e.message;
@@ -486,14 +450,34 @@
       }
     };
 
+    _proto.makeInput = function makeInput(instance, key) {
+      var _getContext = getContext(instance),
+          node = _getContext.node;
+
+      var input,
+          expression = null;
+
+      if (node.hasAttribute(key)) {
+        expression = "'" + node.getAttribute(key).replace('{{', '\'+').replace('}}', '+\'') + "'";
+      } else if (node.hasAttribute("[" + key + "]")) {
+        expression = node.getAttribute("[" + key + "]");
+      }
+
+      if (expression !== null) {
+        input = this.makeFunction(expression);
+      }
+
+      return input;
+    };
+
     _proto.makeInputs = function makeInputs(meta, instance) {
-      var _this6 = this;
+      var _this5 = this;
 
       var inputs = {};
 
       if (meta.inputs) {
         meta.inputs.forEach(function (key, i) {
-          var input = _this6.makeInput(instance, key);
+          var input = _this5.makeInput(instance, key);
 
           if (input) {
             inputs[key] = input;
@@ -502,6 +486,22 @@
       }
 
       return inputs;
+    };
+
+    _proto.makeOutput = function makeOutput(instance, key) {
+      var _this6 = this;
+
+      var context = getContext(instance);
+      var node = context.node;
+      var parentInstance = context.parentInstance;
+      var expression = node.getAttribute("(" + key + ")");
+      var outputFunction = this.makeFunction(expression, ['$event']);
+      var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
+        _this6.resolve(outputFunction, parentInstance, event);
+      }));
+      output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
+      instance[key] = output$;
+      return outputFunction;
     };
 
     _proto.makeOutputs = function makeOutputs(meta, instance) {
@@ -864,17 +864,19 @@
     var _proto = ClassDirective.prototype;
 
     _proto.onInit = function onInit() {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node;
+
       var expression = node.getAttribute('[class]');
       this.classFunction = module.makeFunction(expression); // console.log('ClassDirective.onInit', this.classList, expression);
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
+      var _getContext2 = getContext(this),
+          module = _getContext2.module,
+          node = _getContext2.node;
+
       var classList = module.resolve(this.classFunction, changes, this);
 
       for (var key in classList) {
@@ -903,11 +905,12 @@
     var _proto = EventDirective.prototype;
 
     _proto.onInit = function onInit() {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
-      var selector = context.selector;
-      var parentInstance = context.parentInstance;
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node,
+          parentInstance = _getContext.parentInstance,
+          selector = _getContext.selector;
+
       var event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
       var event$ = this.event$ = rxjs.fromEvent(node, event).pipe(operators.shareReplay(1));
       var expression = node.getAttribute("(" + event + ")");
@@ -1014,9 +1017,10 @@
     var _proto = ForStructure.prototype;
 
     _proto.onInit = function onInit() {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node;
+
       var forbegin = this.forbegin = document.createComment("*for begin");
       node.parentNode.replaceChild(forbegin, node);
       var forend = this.forend = document.createComment("*for end");
@@ -1078,9 +1082,8 @@
           // remove
           var _instance2 = this.instances[i];
 
-          var _context = getContext(_instance2);
-
-          var _node = _context.node;
+          var _getContext2 = getContext(_instance2),
+              _node = _getContext2.node;
 
           _node.parentNode.removeChild(_node);
 
@@ -1153,9 +1156,10 @@
     var _proto = IfStructure.prototype;
 
     _proto.onInit = function onInit() {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node;
+
       var ifbegin = this.ifbegin = document.createComment("*if begin");
       node.parentNode.replaceChild(ifbegin, node);
       var ifend = this.ifend = document.createComment("*if end");
@@ -1169,8 +1173,9 @@
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = getContext(this);
-      var module = context.module; // console.log('IfStructure.onChanges', changes, this.expression);
+      var _getContext2 = getContext(this),
+          module = _getContext2.module; // console.log('IfStructure.onChanges', changes, this.expression);
+
 
       var value = module.resolve(this.ifFunction, changes, this);
 
@@ -1204,38 +1209,18 @@
 
     var _proto = InnerHtmlDirective.prototype;
 
-    _proto.onInit = function onInit() {
-      var context = getContext(this);
-      var node = context.node;
-      var selector = context.selector;
-      var key = selector.replace(/\[(.+)\]/, function () {
-        return arguments.length <= 1 ? undefined : arguments[1];
-      });
-      var expression = node.getAttribute(key);
-
-      if (!expression) {
-        throw "invalid " + key;
-      }
-
-      if (key === '[innerHTML]') {
-        expression = "{{" + expression + "}}";
-      }
-
-      this.innerHtmlExpression = expression; // console.log('InnerHtmlDirective.onInit', node, expression, key);
-    };
-
     _proto.onChanges = function onChanges(changes) {
-      var context = getContext(this);
-      var innerHTML = context.module.evaluate(this.innerHtmlExpression, changes); // console.log('InnerHtmlDirective.onChanges', this.innerHtmlExpression, innerHTML);
+      var _getContext = getContext(this),
+          node = _getContext.node;
 
-      var node = context.node;
-      node.innerHTML = innerHTML;
+      node.innerHTML = this.innerHTML;
     };
 
     return InnerHtmlDirective;
   }(Directive);
   InnerHtmlDirective.meta = {
-    selector: "[[innerHTML]],[innerHTML]"
+    selector: "[innerHTML]",
+    inputs: ['innerHTML']
   };
 
   var Pipe =
@@ -1260,7 +1245,7 @@
     }
 
     JsonPipe.transform = function transform(value) {
-      return JSON.stringify(value);
+      return JSON.stringify(value, null, '\t');
     };
 
     return JsonPipe;
@@ -1281,17 +1266,19 @@
     var _proto = StyleDirective.prototype;
 
     _proto.onInit = function onInit() {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node;
+
       var expression = node.getAttribute('[style]');
       this.styleFunction = module.makeFunction(expression); // console.log('StyleDirective.onInit', expression);
     };
 
     _proto.onChanges = function onChanges(changes) {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
+      var _getContext2 = getContext(this),
+          module = _getContext2.module,
+          node = _getContext2.node;
+
       var style = module.resolve(this.styleFunction, changes, this);
 
       for (var key in style) {
@@ -1439,13 +1426,13 @@
 
         if (a2) {
           matchers.push(function (node) {
-            return node.hasAttribute(a2) && node.getAttribute(a2) === v4;
+            return node.hasAttribute(a2) && node.getAttribute(a2) === v4 || node.hasAttribute("[" + a2 + "]") && node.getAttribute("[" + a2 + "]") === v4;
           });
         }
 
         if (a5) {
           matchers.push(function (node) {
-            return node.hasAttribute(a5);
+            return node.hasAttribute(a5) || node.hasAttribute("[" + a5 + "]");
           });
         }
 

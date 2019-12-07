@@ -39,7 +39,7 @@
 				[{{item}}] {{{index}}, {{count}}, {{first}}, {{last}}, {{even}}, {{odd}}}
 			</li>
 			<li class="list__item" innerHTML="{{object.a}}"></li>
-			<li class="list__item" innerHTML="{{object.a + ' ' + object.b}}"></li>
+			<li class="list__item" innerHTML="{{object['a'] + '  ' + object.b}}"></li>
 			<li class="list__item" [innerHTML]="object.a"></li>
 			<li class="list__item" [innerHTML]="object.a + ' ' + object.b"></li>
 			<li class="list__item" [innerHTML]="object | json"></li>

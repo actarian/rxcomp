@@ -161,38 +161,6 @@ export default class Module {
 		}
 	}
 
-	makeInput(instance, key) {
-		const { node } = getContext(instance);
-		let input, expression = null;
-		if (node.hasAttribute(key)) {
-			expression = `'${node.getAttribute(key)}'`;
-		} else if (node.hasAttribute(`[${key}]`)) {
-			expression = node.getAttribute(`[${key}]`);
-		}
-		if (expression !== null) {
-			input = this.makeFunction(expression);
-		}
-		return input;
-	}
-
-	makeOutput(instance, key) {
-		const context = getContext(instance);
-		const node = context.node;
-		const parentInstance = context.parentInstance;
-		const expression = node.getAttribute(`(${key})`);
-		const outputFunction = this.makeFunction(expression, ['$event']);
-		const output$ = new Subject().pipe(
-			tap((event) => {
-				this.resolve(outputFunction, parentInstance, event);
-			})
-		);
-		output$.pipe(
-			takeUntil(instance.unsubscribe$)
-		).subscribe();
-		instance[key] = output$;
-		return outputFunction;
-	}
-
 	getInstance(node) {
 		if (node === document) {
 			return window;
@@ -287,6 +255,20 @@ export default class Module {
 		}
 	}
 
+	makeInput(instance, key) {
+		const { node } = getContext(instance);
+		let input, expression = null;
+		if (node.hasAttribute(key)) {
+			expression = `'${node.getAttribute(key).replace('{{','\'+').replace('}}','+\'')}'`;
+		} else if (node.hasAttribute(`[${key}]`)) {
+			expression = node.getAttribute(`[${key}]`);
+		}
+		if (expression !== null) {
+			input = this.makeFunction(expression);
+		}
+		return input;
+	}
+
 	makeInputs(meta, instance) {
 		const inputs = {};
 		if (meta.inputs) {
@@ -299,6 +281,24 @@ export default class Module {
 		}
 		return inputs;
 	};
+
+	makeOutput(instance, key) {
+		const context = getContext(instance);
+		const node = context.node;
+		const parentInstance = context.parentInstance;
+		const expression = node.getAttribute(`(${key})`);
+		const outputFunction = this.makeFunction(expression, ['$event']);
+		const output$ = new Subject().pipe(
+			tap((event) => {
+				this.resolve(outputFunction, parentInstance, event);
+			})
+		);
+		output$.pipe(
+			takeUntil(instance.unsubscribe$)
+		).subscribe();
+		instance[key] = output$;
+		return outputFunction;
+	}
 
 	makeOutputs(meta, instance) {
 		const outputs = {};
