@@ -17,6 +17,14 @@ rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rx
 > [TodoMvc source](https://github.com/actarian/rxcomp-todomvc)  
 ___
 
+### Modules
+
+ module           | library
+:-----------------|:----------------------------------------------------------------------------------------------|
+CoreModule        | [rxcomp](https://github.com/actarian/rxcomp)
+FormModule        | [rxcomp-form](https://github.com/actarian/rxcomp-form)
+___
+
 ### What is included
 * Modules *```imports```, ```exports```*
 * Components *```inputs```, ```outputs```, ```hosts```, ```template```*
@@ -28,6 +36,8 @@ ___
 * Automatic Subscription / Unsubscription
 * Optional Chaining
 * Component Template
+* Reactive Forms with [RxComp FormModule](https://github.com/actarian/rxcomp-form)
+* Form Validation with [RxComp FormModule](https://github.com/actarian/rxcomp-form)
 
 ___
 
@@ -35,8 +45,6 @@ ___
 * ~~Two-Way Data Binding~~
 * ~~Dependency Injection~~
 * ~~Routing~~
-* ~~Form Validation~~
-* ~~Reactive Forms~~
 * ~~Server Side Rendering~~
 
 ___
@@ -87,14 +95,14 @@ import { CoreModule, Module } from 'rxcomp';
 export default class AppModule extends Module {}
 
 AppModule.meta = {
-	imports: [
-		CoreModule
-	],
-	declarations: [
-		TodoItemComponent,
-		DatePipe,
-	],
-	bootstrap: AppComponent,
+    imports: [
+        CoreModule
+    ],
+    declarations: [
+        TodoItemComponent,
+        DatePipe,
+    ],
+    bootstrap: AppComponent,
 };
 ```
 ___
