@@ -45,6 +45,7 @@ ___
 ### What is NOT included
 * ~~Two-Way Data Binding~~
 * ~~Dependency Injection~~
+* ~~HttpClient~~
 * ~~Routing~~
 * ~~Server Side Rendering~~
 
@@ -53,8 +54,11 @@ ___
 ## Installation and Usage
 
 ### ES6 via npm
+This library depend on [RxJs](https://github.com/ReactiveX/rxjs)  
+install via npm or include via script   
+
 ```
-npm install rxcomp --save
+npm install rxjs rxcomp --save
 ```
 ___
 
@@ -63,7 +67,8 @@ ___
 For CDN, you can use unpkg
 
 ```html
-<script src="https://unpkg.com/rxcomp@1.0.0-alpha.11/dist/rxcomp.min.js"></script>
+<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
+<script src="https://unpkg.com/rxcomp@1.0.0-alpha.12/dist/rxcomp.min.js"></script>  
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -71,21 +76,6 @@ The global namespace for RxComp is `rxcomp`
 ```javascript
 import { CoreModule, Module } from 'rxcomp';
 ```
-___
-
-### Dependancy
-
-This library depend on [RxJs](https://github.com/ReactiveX/rxjs)  
-install via npm or include via script  
-
-```
-npm install rxjs --save
-```
-
-```html
-<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
-```
-
 ___
 
 ### Bootstrapping Module
@@ -224,6 +214,11 @@ ___
 
 ## Release Notes
 Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
+
+---
+
+## 1.0.0-alpha.12
+* Fixing destroy phase
 
 ---
 

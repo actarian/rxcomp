@@ -41,10 +41,4 @@ export default class ForItem extends Context {
 
 	get odd() { return !this.even; }
 
-	/*
-	onDestroy() {
-		console.log('onDestroy');
-	}
-	*/
-
 }

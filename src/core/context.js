@@ -35,7 +35,7 @@ export default class Context extends Component {
 				const descriptor = Object.getOwnPropertyDescriptor(source, key);
 				if (typeof descriptor.value == "function") {
 					descriptor.value = (...args) => {
-						instance[key].apply(instance, args);
+						return instance[key].apply(instance, args);
 					};
 				}
 				descriptors[key] = descriptor;

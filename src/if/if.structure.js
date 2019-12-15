@@ -6,31 +6,34 @@ export default class IfStructure extends Structure {
 	onInit() {
 		const { module, node } = getContext(this);
 		const ifbegin = this.ifbegin = document.createComment(`*if begin`);
+		ifbegin.rxcompId = node.rxcompId;
 		node.parentNode.replaceChild(ifbegin, node);
 		const ifend = this.ifend = document.createComment(`*if end`);
 		ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
 		const expression = node.getAttribute('*if');
-		this.expression = expression;
 		this.ifFunction = module.makeFunction(expression);
 		const clonedNode = node.cloneNode(true);
 		clonedNode.removeAttribute('*if');
 		this.clonedNode = clonedNode;
+		this.node = clonedNode.cloneNode(true);
 		// console.log('IfStructure.expression', expression);
 	}
 
 	onChanges(changes) {
 		const { module } = getContext(this);
-		// console.log('IfStructure.onChanges', changes, this.expression);
+		// console.log('IfStructure.onChanges', changes);
 		const value = module.resolve(this.ifFunction, changes, this);
+		const node = this.node;
 		if (value) {
-			if (!this.clonedNode.parentNode) {
-				this.ifend.parentNode.insertBefore(this.clonedNode, this.ifend);
-				module.compile(this.clonedNode);
+			if (!node.parentNode) {
+				this.ifend.parentNode.insertBefore(node, this.ifend);
+				module.compile(node);
 			}
 		} else {
-			if (this.clonedNode.parentNode) {
-				this.clonedNode.parentNode.removeChild(this.clonedNode);
-				module.remove(this.clonedNode);
+			if (node.parentNode) {
+				module.remove(node, this);
+				node.parentNode.removeChild(node);
+				this.node = this.clonedNode.cloneNode(true);
 			}
 		}
 	}

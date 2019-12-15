@@ -7,10 +7,12 @@ export default class ForStructure extends Structure {
 	onInit() {
 		const { module, node } = getContext(this);
 		const forbegin = this.forbegin = document.createComment(`*for begin`);
+		forbegin.rxcompId = node.rxcompId;
 		node.parentNode.replaceChild(forbegin, node);
 		const forend = this.forend = document.createComment(`*for end`);
 		forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
 		const expression = node.getAttribute('*for');
+		// this.expression = expression;
 		node.removeAttribute('*for');
 		const tokens = this.tokens = this.getExpressionTokens(expression);
 		this.forFunction = module.makeFunction(tokens.iterable);
@@ -50,7 +52,7 @@ export default class ForStructure extends Structure {
 				} else {
 					// create
 					const clonedNode = node.cloneNode(true);
-					delete clonedNode.dataset.rxcompId;
+					delete clonedNode.rxcompId;
 					this.forend.parentNode.insertBefore(clonedNode, this.forend);
 					const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);

@@ -177,34 +177,6 @@ export default class Module {
 		});
 	}
 
-	remove(node) {
-		Module.traverseDown(node, (node) => {
-			for (let id in CONTEXTS) {
-				const context = CONTEXTS[id];
-				if (context.node === node) {
-					const instance = context.instance;
-					instance.unsubscribe$.next();
-					instance.unsubscribe$.complete();
-					if (typeof instance.onDestroy === 'function') {
-						instance.onDestroy();
-					}
-					delete node.dataset.rxcompId;
-					REMOVED_IDS.push(id);
-				}
-			}
-		});
-		// console.log('Module.remove', REMOVED_IDS);
-		while (REMOVED_IDS.length) {
-			Module.deleteContext(REMOVED_IDS.shift());
-		}
-		return node;
-	}
-
-	destroy() {
-		this.remove(this.meta.node);
-		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
-	}
-
 	evaluate(text, instance) {
 		const parse_eval_ = (...args) => {
 			const expression = args[1];
@@ -341,6 +313,60 @@ export default class Module {
 			return previous || '';
 		});
 		return expression;
+	}
+
+	destroy() {
+		this.remove(this.meta.node);
+		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
+	}
+
+	remove(node, keepInstance) {
+		const keepContext = keepInstance ? getContext(keepInstance) : undefined;
+		Module.traverseDown(node, (node) => {
+			const rxcompId = node.rxcompId;
+			if (rxcompId) {
+				const keepContexts = Module.deleteContext(rxcompId, keepContext);
+				if (keepContexts.length === 0) {
+					delete node.rxcompId;
+				}
+			}
+		});
+		return node;
+	}
+
+	static makeContext(module, instance, parentInstance, node, factory, selector) {
+		instance.rxcompId = ++ID;
+		const context = { module, instance, parentInstance, node, factory, selector };
+		const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
+		const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+		nodeContexts.push(context);
+		return CONTEXTS[instance.rxcompId] = context;
+	}
+
+	static deleteContext(id, keepContext) {
+		const keepContexts = [];
+		const nodeContexts = NODES[id];
+		if (nodeContexts) {
+			nodeContexts.forEach(context => {
+				if (context === keepContext) {
+					keepContexts.push(keepContext);
+				} else {
+					const instance = context.instance;
+					instance.unsubscribe$.next();
+					instance.unsubscribe$.complete();
+					if (typeof instance.onDestroy === 'function') {
+						instance.onDestroy();
+						delete CONTEXTS[instance.rxcompId];
+					}
+				}
+			});
+			if (keepContexts.length) {
+				NODES[id] = keepContexts;;
+			} else {
+				delete NODES[id];
+			}
+		}
+		return keepContexts;
 	}
 
 	static getPipesSegments(expression) {
@@ -480,27 +506,6 @@ export default class Module {
 		return this.traverseNext(node.nextSibling, callback, i + 1);
 	}
 
-	static makeContext(module, instance, parentInstance, node, factory, selector) {
-		instance.rxcompId = ++ID;
-		const context = { module, instance, parentInstance, node, factory, selector };
-		const rxcompNodeId = node.dataset.rxcompId = (node.dataset.rxcompId || instance.rxcompId);
-		const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
-		nodeContexts.push(context);
-		return CONTEXTS[instance.rxcompId] = context;
-	}
-
-	static deleteContext(id) {
-		const context = CONTEXTS[id];
-		const nodeContexts = NODES[context.node.dataset.rxcompId];
-		if (nodeContexts) {
-			const index = nodeContexts.indexOf(context);
-			if (index !== -1) {
-				nodeContexts.splice(index, 1);
-			}
-		}
-		delete CONTEXTS[id];
-	}
-
 }
 
 export function getContext(instance) {
@@ -509,14 +514,8 @@ export function getContext(instance) {
 
 export function getContextByNode(node) {
 	let context;
-	const nodeContexts = NODES[node.dataset.rxcompId];
+	const nodeContexts = NODES[node.rxcompId];
 	if (nodeContexts) {
-		/*
-		const same = nodeContexts.reduce((p, c) => {
-			return p && c.node === node;
-		}, true);
-		console.log('same', same);
-		*/
 		context = nodeContexts.reduce((previous, current) => {
 			if (current.factory.prototype instanceof Component) {
 				return current;
@@ -526,7 +525,7 @@ export function getContextByNode(node) {
 				return previous;
 			}
 		}, null);
-		// console.log(node.dataset.rxcompId, context);
+		// console.log(node.rxcompId, context);
 	}
 	return context;
 }
@@ -535,10 +534,10 @@ export function getHost(instance, factory, node) {
 	if (!node) {
 		node = getContext(instance).node;
 	}
-	if (!node.dataset) {
+	if (!node.rxcompId) {
 		return;
 	}
-	const nodeContexts = NODES[node.dataset.rxcompId];
+	const nodeContexts = NODES[node.rxcompId];
 	if (nodeContexts) {
 		// console.log(nodeContexts);
 		// let hasComponent;

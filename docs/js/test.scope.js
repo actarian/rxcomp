@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.11
+ * @license rxcomp v1.0.0-alpha.12
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -139,7 +139,7 @@
                 args[_key] = arguments[_key];
               }
 
-              instance[key].apply(instance, args);
+              return instance[key].apply(instance, args);
             };
           }
 
@@ -160,7 +160,6 @@
   var ID = 0;
   var CONTEXTS = {};
   var NODES = {};
-  var REMOVED_IDS = [];
 
   var Module =
   /*#__PURE__*/
@@ -362,38 +361,6 @@
       });
     };
 
-    _proto.remove = function remove(node) {
-      Module.traverseDown(node, function (node) {
-        for (var id in CONTEXTS) {
-          var context = CONTEXTS[id];
-
-          if (context.node === node) {
-            var instance = context.instance;
-            instance.unsubscribe$.next();
-            instance.unsubscribe$.complete();
-
-            if (typeof instance.onDestroy === 'function') {
-              instance.onDestroy();
-            }
-
-            delete node.dataset.rxcompId;
-            REMOVED_IDS.push(id);
-          }
-        }
-      }); // console.log('Module.remove', REMOVED_IDS);
-
-      while (REMOVED_IDS.length) {
-        Module.deleteContext(REMOVED_IDS.shift());
-      }
-
-      return node;
-    };
-
-    _proto.destroy = function destroy() {
-      this.remove(this.meta.node);
-      this.meta.node.innerHTML = this.meta.nodeInnerHTML;
-    };
-
     _proto.evaluate = function evaluate(text, instance) {
       var _this4 = this;
 
@@ -558,6 +525,73 @@
         return previous || '';
       });
       return expression;
+    };
+
+    _proto.destroy = function destroy() {
+      this.remove(this.meta.node);
+      this.meta.node.innerHTML = this.meta.nodeInnerHTML;
+    };
+
+    _proto.remove = function remove(node, keepInstance) {
+      var keepContext = keepInstance ? getContext(keepInstance) : undefined;
+      Module.traverseDown(node, function (node) {
+        var rxcompId = node.rxcompId;
+
+        if (rxcompId) {
+          var keepContexts = Module.deleteContext(rxcompId, keepContext);
+
+          if (keepContexts.length === 0) {
+            delete node.rxcompId;
+          }
+        }
+      });
+      return node;
+    };
+
+    Module.makeContext = function makeContext(module, instance, parentInstance, node, factory, selector) {
+      instance.rxcompId = ++ID;
+      var context = {
+        module: module,
+        instance: instance,
+        parentInstance: parentInstance,
+        node: node,
+        factory: factory,
+        selector: selector
+      };
+      var rxcompNodeId = node.rxcompId = node.rxcompId || instance.rxcompId;
+      var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+      nodeContexts.push(context);
+      return CONTEXTS[instance.rxcompId] = context;
+    };
+
+    Module.deleteContext = function deleteContext(id, keepContext) {
+      var keepContexts = [];
+      var nodeContexts = NODES[id];
+
+      if (nodeContexts) {
+        nodeContexts.forEach(function (context) {
+          if (context === keepContext) {
+            keepContexts.push(keepContext);
+          } else {
+            var instance = context.instance;
+            instance.unsubscribe$.next();
+            instance.unsubscribe$.complete();
+
+            if (typeof instance.onDestroy === 'function') {
+              instance.onDestroy();
+              delete CONTEXTS[instance.rxcompId];
+            }
+          }
+        });
+
+        if (keepContexts.length) {
+          NODES[id] = keepContexts;
+        } else {
+          delete NODES[id];
+        }
+      }
+
+      return keepContexts;
     };
 
     Module.getPipesSegments = function getPipesSegments(expression) {
@@ -749,37 +783,6 @@
       return this.traverseNext(node.nextSibling, callback, i + 1);
     };
 
-    Module.makeContext = function makeContext(module, instance, parentInstance, node, factory, selector) {
-      instance.rxcompId = ++ID;
-      var context = {
-        module: module,
-        instance: instance,
-        parentInstance: parentInstance,
-        node: node,
-        factory: factory,
-        selector: selector
-      };
-      var rxcompNodeId = node.dataset.rxcompId = node.dataset.rxcompId || instance.rxcompId;
-      var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
-      nodeContexts.push(context);
-      return CONTEXTS[instance.rxcompId] = context;
-    };
-
-    Module.deleteContext = function deleteContext(id) {
-      var context = CONTEXTS[id];
-      var nodeContexts = NODES[context.node.dataset.rxcompId];
-
-      if (nodeContexts) {
-        var index = nodeContexts.indexOf(context);
-
-        if (index !== -1) {
-          nodeContexts.splice(index, 1);
-        }
-      }
-
-      delete CONTEXTS[id];
-    };
-
     return Module;
   }();
   function getContext(instance) {
@@ -787,15 +790,9 @@
   }
   function getContextByNode(node) {
     var context;
-    var nodeContexts = NODES[node.dataset.rxcompId];
+    var nodeContexts = NODES[node.rxcompId];
 
     if (nodeContexts) {
-      /*
-      const same = nodeContexts.reduce((p, c) => {
-      	return p && c.node === node;
-      }, true);
-      console.log('same', same);
-      */
       context = nodeContexts.reduce(function (previous, current) {
         if (current.factory.prototype instanceof Component) {
           return current;
@@ -804,7 +801,7 @@
         } else {
           return previous;
         }
-      }, null); // console.log(node.dataset.rxcompId, context);
+      }, null); // console.log(node.rxcompId, context);
     }
 
     return context;
@@ -814,11 +811,11 @@
       node = getContext(instance).node;
     }
 
-    if (!node.dataset) {
+    if (!node.rxcompId) {
       return;
     }
 
-    var nodeContexts = NODES[node.dataset.rxcompId];
+    var nodeContexts = NODES[node.rxcompId];
 
     if (nodeContexts) {
       // console.log(nodeContexts);
@@ -994,12 +991,6 @@
       get: function get() {
         return !this.even;
       }
-      /*
-      onDestroy() {
-      	console.log('onDestroy');
-      }
-      */
-
     }]);
 
     return ForItem;
@@ -1022,10 +1013,12 @@
           node = _getContext.node;
 
       var forbegin = this.forbegin = document.createComment("*for begin");
+      forbegin.rxcompId = node.rxcompId;
       node.parentNode.replaceChild(forbegin, node);
       var forend = this.forend = document.createComment("*for end");
       forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
-      var expression = node.getAttribute('*for');
+      var expression = node.getAttribute('*for'); // this.expression = expression;
+
       node.removeAttribute('*for');
       var tokens = this.tokens = this.getExpressionTokens(expression);
       this.forFunction = module.makeFunction(tokens.iterable);
@@ -1066,7 +1059,7 @@
           } else {
             // create
             var clonedNode = node.cloneNode(true);
-            delete clonedNode.dataset.rxcompId;
+            delete clonedNode.rxcompId;
             this.forend.parentNode.insertBefore(clonedNode, this.forend);
             var args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 
@@ -1161,33 +1154,36 @@
           node = _getContext.node;
 
       var ifbegin = this.ifbegin = document.createComment("*if begin");
+      ifbegin.rxcompId = node.rxcompId;
       node.parentNode.replaceChild(ifbegin, node);
       var ifend = this.ifend = document.createComment("*if end");
       ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
       var expression = node.getAttribute('*if');
-      this.expression = expression;
       this.ifFunction = module.makeFunction(expression);
       var clonedNode = node.cloneNode(true);
       clonedNode.removeAttribute('*if');
-      this.clonedNode = clonedNode; // console.log('IfStructure.expression', expression);
+      this.clonedNode = clonedNode;
+      this.node = clonedNode.cloneNode(true); // console.log('IfStructure.expression', expression);
     };
 
     _proto.onChanges = function onChanges(changes) {
       var _getContext2 = getContext(this),
-          module = _getContext2.module; // console.log('IfStructure.onChanges', changes, this.expression);
+          module = _getContext2.module; // console.log('IfStructure.onChanges', changes);
 
 
       var value = module.resolve(this.ifFunction, changes, this);
+      var node = this.node;
 
       if (value) {
-        if (!this.clonedNode.parentNode) {
-          this.ifend.parentNode.insertBefore(this.clonedNode, this.ifend);
-          module.compile(this.clonedNode);
+        if (!node.parentNode) {
+          this.ifend.parentNode.insertBefore(node, this.ifend);
+          module.compile(node);
         }
       } else {
-        if (this.clonedNode.parentNode) {
-          this.clonedNode.parentNode.removeChild(this.clonedNode);
-          module.remove(this.clonedNode);
+        if (node.parentNode) {
+          module.remove(node, this);
+          node.parentNode.removeChild(node);
+          this.node = this.clonedNode.cloneNode(true);
         }
       }
     };

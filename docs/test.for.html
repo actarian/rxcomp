@@ -24,7 +24,14 @@
 				<i class="icon--github"></i>
 			</a>
 		</div>
-		<div class="list__item" *for="let item of items" [style]="{ opacity: item / 10 }" (click)="alert(item)">{{item | example}}</div>
+		<div class="list__item" *for="let [key, value] of object">
+			<div class="item">{{key}} {{value | json}}</div>
+		</div>
+		<div *if="flag">
+			<div class="list__item" *for="let item of items" (click)="alert(item)">
+				<div class="item" [style]="{ color: getColor(index) }">{{item | example}}</div>
+			</div>
+		</div>
 	</main>
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign"></script>
 	<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>

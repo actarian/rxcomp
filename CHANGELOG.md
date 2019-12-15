@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-alpha.12] - 2019-12-15
+### Fixing
+- Destroy phase
+
+---
+
 ## [1.0.0-alpha.11] - 2019-12-07
 ### Added
 - meta hosts { key: Factory }

@@ -52,6 +52,10 @@
 		border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 		cursor: pointer;
 
+		.item {
+			padding: 10px 20px;
+		}
+
 		&>.title {
 			flex: 1 1 auto;
 			margin: 0 10px;
