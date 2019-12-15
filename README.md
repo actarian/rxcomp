@@ -68,7 +68,7 @@ For CDN, you can use unpkg
 
 ```html
 <script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
-<script src="https://unpkg.com/rxcomp@1.0.0-alpha.12/dist/rxcomp.min.js"></script>  
+<script src="https://unpkg.com/rxcomp@1.0.0-alpha.13/dist/rxcomp.min.js"></script>  
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -217,7 +217,7 @@ Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
 
 ---
 
-## 1.0.0-alpha.12
+## 1.0.0-alpha.13
 * Fixing destroy phase
 
 ---

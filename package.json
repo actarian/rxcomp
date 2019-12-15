@@ -2,7 +2,7 @@
 	"author": "Luca Zampetti <lzampetti@gmail.com>",
 	"name": "rxcomp",
 	"description": "Reactive component library for JavaScript",
-	"version": "1.0.0-alpha.12",
+	"version": "1.0.0-alpha.13",
 	"main": "dist/rxcomp.js",
 	"license": "MIT",
 	"keywords": ["rxcomp", "framework", "rxjs", "es6", "es2015"],

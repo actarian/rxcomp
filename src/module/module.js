@@ -6,7 +6,6 @@ import Context from '../core/context';
 let ID = 0;
 const CONTEXTS = {};
 const NODES = {};
-const REMOVED_IDS = [];
 
 export default class Module {
 
@@ -534,32 +533,20 @@ export function getHost(instance, factory, node) {
 	if (!node) {
 		node = getContext(instance).node;
 	}
-	if (!node.rxcompId) {
-		return;
-	}
-	const nodeContexts = NODES[node.rxcompId];
-	if (nodeContexts) {
-		// console.log(nodeContexts);
-		// let hasComponent;
-		for (let i = 0; i < nodeContexts.length; i++) {
-			const context = nodeContexts[i];
-			if (context.instance !== instance) {
-				// console.log(context.instance, instance);
-				if (context.instance instanceof factory) {
-					return context.instance;
+	if (node.rxcompId) {
+		const nodeContexts = NODES[node.rxcompId];
+		if (nodeContexts) {
+			// console.log(nodeContexts);
+			for (let i = 0; i < nodeContexts.length; i++) {
+				const context = nodeContexts[i];
+				if (context.instance !== instance) {
+					// console.log(context.instance, instance);
+					if (context.instance instanceof factory) {
+						return context.instance;
+					}
 				}
-				/*
-				else if (context.instance instanceof Component) {
-					hasComponent = true;
-				}
-				*/
 			}
 		}
-		/*
-		if (hasComponent) {
-			return undefined;
-		}
-		*/
 	}
 	if (node.parentNode) {
 		return getHost(instance, factory, node.parentNode);

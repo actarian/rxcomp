@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.12
+ * @license rxcomp v1.0.0-alpha.13
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -811,37 +811,22 @@
       node = getContext(instance).node;
     }
 
-    if (!node.rxcompId) {
-      return;
-    }
+    if (node.rxcompId) {
+      var nodeContexts = NODES[node.rxcompId];
 
-    var nodeContexts = NODES[node.rxcompId];
+      if (nodeContexts) {
+        // console.log(nodeContexts);
+        for (var i = 0; i < nodeContexts.length; i++) {
+          var context = nodeContexts[i];
 
-    if (nodeContexts) {
-      // console.log(nodeContexts);
-      // let hasComponent;
-      for (var i = 0; i < nodeContexts.length; i++) {
-        var context = nodeContexts[i];
-
-        if (context.instance !== instance) {
-          // console.log(context.instance, instance);
-          if (context.instance instanceof factory) {
-            return context.instance;
+          if (context.instance !== instance) {
+            // console.log(context.instance, instance);
+            if (context.instance instanceof factory) {
+              return context.instance;
+            }
           }
-          /*
-          else if (context.instance instanceof Component) {
-          	hasComponent = true;
-          }
-          */
-
         }
       }
-      /*
-      if (hasComponent) {
-      	return undefined;
-      }
-      */
-
     }
 
     if (node.parentNode) {

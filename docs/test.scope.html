@@ -24,12 +24,14 @@
 				<i class="icon--github"></i>
 			</a>
 		</div>
-		<ul class="list" host [style]="{ 'color': 'red' }">
-			<li class="list__item" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items">
-				<div sub-component [item]="item"></div>
-			</li>
-			<li class="list__item" hosted [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" sub-component [item]="item"></li>
-		</ul>
+		<div host [style]="{ 'color': 'red' }">
+			<ul class="list">
+				<li class="list__item" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items">
+					<div sub-component [item]="item"></div>
+				</li>
+				<li class="list__item" hosted [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" sub-component [item]="item"></li>
+			</ul>
+		</div>
 		<div [style]="{ 'background-color': background }" (click)="onItem(4)" sub-component [item]="4"></div>
 		<div [style]="{ 'background-color': background }" (toggle)="onItem($event)" sub-component [item]="5"></div>
 	</main>
