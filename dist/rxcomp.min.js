@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.13
+ * @license rxcomp v1.0.0-alpha.14
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */

@@ -61,6 +61,7 @@
 				"input": "src/rxcomp.js",
 				"output": "dist/rxcomp.js",
 				"rollup": {
+					"name": "rxcomp",
 					"format": "umd",
 					"globals": {
 						"rxjs": "rxjs",

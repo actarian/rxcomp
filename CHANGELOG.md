@@ -3,7 +3,7 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
-## [1.0.0-alpha.13] - 2019-12-15
+## [1.0.0-alpha.14] - 2019-12-15
 ### Fixing
 - Destroy phase
 
