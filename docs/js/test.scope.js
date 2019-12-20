@@ -312,6 +312,7 @@
       var args = params.join(',');
       var pipes = this.meta.pipes;
       var transforms = Module.getPipesSegments(expression);
+      console.log(transforms);
       expression = transforms.shift().trim();
       expression = this.transformOptionalChaining(expression); // console.log(pipes, transforms, expression);
       // console.log(transforms.length, params);
@@ -1285,7 +1286,7 @@
 
     return CoreModule;
   }(Module);
-  var factories = [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective, JsonPipe];
+  var factories = [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective];
   var pipes = [JsonPipe];
   CoreModule.meta = {
     declarations: [].concat(factories, pipes),

@@ -42,6 +42,18 @@
 				},
 				"minify": true
 			}, {
+				"input": "test/js/test.pipes.js",
+				"output": "docs/js/test.pipes.js",
+				"rollup": {
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
+				},
+				"minify": true
+			}, {
 				"input": "test/js/test.scope.js",
 				"output": "docs/js/test.scope.js",
 				"rollup": {

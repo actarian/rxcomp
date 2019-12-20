@@ -125,6 +125,7 @@ export default class Module {
 		const args = params.join(',');
 		const pipes = this.meta.pipes;
 		const transforms = Module.getPipesSegments(expression);
+		console.log(transforms);
 		expression = transforms.shift().trim();
 		expression = this.transformOptionalChaining(expression);
 		// console.log(pipes, transforms, expression);
@@ -158,6 +159,66 @@ export default class Module {
 			}`);
 			return expression_func;
 		}
+	}
+
+	static getPipesSegments(expression) {
+		const segments = [];
+		let i = 0,
+			word = '',
+			block = 0;
+		const t = expression.length;
+		while (i < t) {
+			const c = expression.substr(i, 1);
+			if (c === '{' || c === '(' || c === '[') {
+				block++;
+			}
+			if (c === '}' || c === ')' || c === ']') {
+				block--;
+			}
+			if (c === '|' && block === 0) {
+				if (word.length) {
+					segments.push(word);
+				}
+				word = '';
+			} else {
+				word += c;
+			}
+			i++;
+		}
+		if (word.length) {
+			segments.push(word);
+		}
+		return segments;
+	}
+
+	static getPipeParamsSegments(expression) {
+		const segments = [];
+		let i = 0,
+			word = '',
+			block = 0;
+		const t = expression.length;
+		while (i < t) {
+			const c = expression.substr(i, 1);
+			if (c === '{' || c === '(' || c === '[') {
+				block++;
+			}
+			if (c === '}' || c === ')' || c === ']') {
+				block--;
+			}
+			if (c === ':' && block === 0) {
+				if (word.length) {
+					segments.push(word);
+				}
+				word = '';
+			} else {
+				word += c;
+			}
+			i++;
+		}
+		if (word.length) {
+			segments.push(word);
+		}
+		return segments;
 	}
 
 	getInstance(node) {
@@ -366,66 +427,6 @@ export default class Module {
 			}
 		}
 		return keepContexts;
-	}
-
-	static getPipesSegments(expression) {
-		const segments = [];
-		let i = 0,
-			word = '',
-			block = 0;
-		const t = expression.length;
-		while (i < t) {
-			const c = expression.substr(i, 1);
-			if (c === '{' || c === '(' || c === '[') {
-				block++;
-			}
-			if (c === '}' || c === ')' || c === ']') {
-				block--;
-			}
-			if (c === '|' && block === 0) {
-				if (word.length) {
-					segments.push(word);
-				}
-				word = '';
-			} else {
-				word += c;
-			}
-			i++;
-		}
-		if (word.length) {
-			segments.push(word);
-		}
-		return segments;
-	}
-
-	static getPipeParamsSegments(expression) {
-		const segments = [];
-		let i = 0,
-			word = '',
-			block = 0;
-		const t = expression.length;
-		while (i < t) {
-			const c = expression.substr(i, 1);
-			if (c === '{' || c === '(' || c === '[') {
-				block++;
-			}
-			if (c === '}' || c === ')' || c === ']') {
-				block--;
-			}
-			if (c === ':' && block === 0) {
-				if (word.length) {
-					segments.push(word);
-				}
-				word = '';
-			} else {
-				word += c;
-			}
-			i++;
-		}
-		if (word.length) {
-			segments.push(word);
-		}
-		return segments;
 	}
 
 	static matchSelectors(node, selectors, results) {

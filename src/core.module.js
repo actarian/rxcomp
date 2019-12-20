@@ -15,7 +15,6 @@ const factories = [
 	IfStructure,
 	InnerHtmlDirective,
 	StyleDirective,
-	JsonPipe,
 ];
 const pipes = [
 	JsonPipe,
