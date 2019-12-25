@@ -102,12 +102,6 @@ export default class Module {
 					instance.pushChanges();
 				});
 			}
-			/*
-			// parse component text nodes
-			if (isComponent) {
-				this.parse(node, instance);
-			}
-			*/
 			return instance;
 		}
 	}
@@ -119,79 +113,55 @@ export default class Module {
 	}
 
 	makeFunction(expression, params = ['$instance']) {
-		if (!expression) {
-			return () => { return null; };
-		}
-		const args = params.join(',');
-		const pipes = this.meta.pipes;
-		const transforms = Module.getPipesSegments(expression);
-		console.log(transforms);
-		expression = transforms.shift().trim();
-		expression = this.transformOptionalChaining(expression);
-		// console.log(pipes, transforms, expression);
-		// console.log(transforms.length, params);
-		// keyword 'this' represents changes from func.apply(changes, instance)
-		if (transforms.length) {
-			expression = transforms.reduce((expression, transform, i) => {
-				const params = Module.getPipeParamsSegments(transform);
-				const name = params.shift().trim();
-				const pipe = pipes[name];
-				if (!pipe || typeof pipe.transform !== 'function') {
-					throw (`missing pipe '${name}'`);
-				}
-				return `$$pipes.${name}.transform(${expression},${params.join(',')})`;
-			}, expression);
-			// console.log('expression', expression);
+		if (expression) {
+			expression = Module.parseExpression(expression);
+			// console.log(expression);
+			const args = params.join(',');
 			const expression_func = new Function(`with(this) {
 				return (function (${args}, $$module) {
 					const $$pipes = $$module.meta.pipes;
 					return ${expression};
 				}.bind(this)).apply(this, arguments);
 			}`);
+			// console.log(expression_func);
 			return expression_func;
 		} else {
-			// console.log('expression', args, expression);
-			// console.log('${expression.replace(/\'/g,'"')}', this);
-			const expression_func = new Function(`with(this) {
-				return (function (${args}, $$module) {
-					return ${expression};
-				}.bind(this)).apply(this, arguments);
-			}`);
-			return expression_func;
+			return () => { return null; };
 		}
 	}
 
-	static getPipesSegments(expression) {
-		const segments = [];
-		let i = 0,
-			word = '',
-			block = 0;
-		const t = expression.length;
-		while (i < t) {
-			const c = expression.substr(i, 1);
-			if (c === '{' || c === '(' || c === '[') {
-				block++;
-			}
-			if (c === '}' || c === ')' || c === ']') {
-				block--;
-			}
-			if (c === '|' && block === 0) {
-				if (word.length) {
-					segments.push(word);
-				}
-				word = '';
-			} else {
-				word += c;
-			}
-			i++;
+	static parseExpression(expression) {
+		const l = '┌';
+		const r = '┘';
+		const rx1 = /(\()([^\(\)]*)(\))/;
+		while (expression.match(rx1)) {
+			expression = expression.replace(rx1, function(...g1) {
+				return `${l}${Module.parsePipes(g1[2])}${r}`;
+			});
 		}
-		if (word.length) {
-			segments.push(word);
-		}
-		return segments;
+		expression = Module.parsePipes(expression);
+		expression = expression.replace(/(┌)|(┘)/g, function(...g2) {
+			return g2[1] ? '(' : ')';
+		});
+		return Module.parseOptionalChaining(expression);
 	}
 
-	static getPipeParamsSegments(expression) {
+	static parsePipes(expression) {
+		const l = '┌';
+		const r = '┘';
+		const rx1 = /(.*?)\|([^\|]*)/;
+		while (expression.match(rx1)) {
+			expression = expression.replace(rx1, function(...g1) {
+				const value = g1[1].trim();
+				const params = Module.parsePipeParams(g1[2]);
+				const func = params.shift().trim();
+				return `$$pipes.${func}.transform┌${[value, ...params]}┘`;
+			});
+		}
+		return expression;
+	}
+
+	static parsePipeParams(expression) {
 		const segments = [];
 		let i = 0,
 			word = '',
@@ -207,7 +177,7 @@ export default class Module {
 			}
 			if (c === ':' && block === 0) {
 				if (word.length) {
-					segments.push(word);
+					segments.push(word.trim());
 				}
 				word = '';
 			} else {
@@ -216,9 +186,24 @@ export default class Module {
 			i++;
 		}
 		if (word.length) {
-			segments.push(word);
+			segments.push(word.trim());
 		}
 		return segments;
+	}
+
+	static parseOptionalChaining(expression) {
+		const regex = /(\w+(\?\.))+([\.|\w]+)/g;
+		let previous;
+		expression = expression.replace(regex, function(...args) {
+			const tokens = args[0].split('?.');
+			for (let i = 0; i < tokens.length - 1; i++) {
+				const a = i > 0 ? `(${tokens[i]} = ${previous})` : tokens[i];
+				const b = tokens[i + 1];
+				previous = i > 0 ? `${a}.${b}` : `(${a} ? ${a}.${b} : void 0)`;
+			}
+			return previous || '';
+		});
+		return expression;
 	}
 
 	getInstance(node) {
@@ -237,24 +222,7 @@ export default class Module {
 		});
 	}
 
-	evaluate(text, instance) {
-		const parse_eval_ = (...args) => {
-			const expression = args[1];
-			// console.log('expression', expression);
-			try {
-				const parse_func_ = this.makeFunction(expression);
-				return this.resolve(parse_func_, instance, instance);
-			} catch (e) {
-				console.error(e);
-				return e.message;
-			}
-		};
-		return text.replace(/\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g, parse_eval_);
-		// return text.replace(/\{{2}((([^{}])|(\{[^{}]+?\}))*?)\}{2}/g, parse_eval_);
-	}
-
 	parse(node, instance) {
-		// console.log('parse', instance.constructor.name, node);
 		for (let i = 0; i < node.childNodes.length; i++) {
 			const child = node.childNodes[i];
 			if (child.nodeType === 1) {
@@ -263,15 +231,50 @@ export default class Module {
 					this.parse(child, instance);
 				}
 			} else if (child.nodeType === 3) {
-				const expression = child.nodeExpression || child.nodeValue;
-				const replacedText = this.evaluate(expression, instance);
-				if (expression !== replacedText) {
-					const textNode = document.createTextNode(replacedText);
-					textNode.nodeExpression = expression;
-					node.replaceChild(textNode, child);
-				}
+				this.parseTextNode(child, instance);
 			}
 		}
+	}
+
+	parseTextNode(node, instance) {
+		let expressions = node.nodeExpressions;
+		if (!expressions) {
+			expressions = this.parseTextNodeExpression(node.nodeValue);
+		}
+		const replacedText = expressions.reduce((p, c) => {
+			return p + (typeof c === 'function' ?
+				this.resolve(c, instance, instance) : c);
+		}, '');
+		if (node.nodeValue !== replacedText) {
+			const textNode = document.createTextNode(replacedText);
+			textNode.nodeExpressions = expressions;
+			node.parentNode.replaceChild(textNode, node);
+		}
+	}
+
+	parseTextNodeExpression(expression) {
+		const expressions = [];
+		const regex = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
+		let lastIndex = 0,
+			matches;
+		const pushFragment = function(from, to) {
+			const fragment = expression.substring(from, to);
+			expressions.push(fragment);
+		};
+		while ((matches = regex.exec(expression)) !== null) {
+			const index = regex.lastIndex - matches[0].length;
+			if (index > lastIndex) {
+				pushFragment(index, lastIndex);
+			}
+			lastIndex = regex.lastIndex;
+			const fragment = this.makeFunction(matches[1]);
+			expressions.push(fragment);
+		}
+		const length = expression.length;
+		if (length > lastIndex) {
+			pushFragment(lastIndex, length);
+		}
+		return expressions;
 	}
 
 	resolve(expressionFunc, changes, payload) {
@@ -312,7 +315,7 @@ export default class Module {
 			});
 		}
 		return inputs;
-	};
+	}
 
 	makeOutput(instance, key) {
 		const context = getContext(instance);
@@ -357,22 +360,6 @@ export default class Module {
 			// console.log(`setted -> ${key}`, value);
 		}
 		*/
-	}
-
-	transformOptionalChaining(expression) {
-		const regex = /(\w+(\?\.))+([\.|\w]+)/g;
-		let previous;
-		expression = expression.replace(regex, (...args) => {
-			const tokens = args[0].split('?.');
-			for (let i = 0; i < tokens.length - 1; i++) {
-				const a = i > 0 ? `(${tokens[i]} = ${previous})` : tokens[i];
-				const b = tokens[i + 1];
-				previous = i > 0 ? `${a}.${b}` : `(${a} ? ${a}.${b} : void 0)`;
-				// log(previous);
-			}
-			return previous || '';
-		});
-		return expression;
 	}
 
 	destroy() {

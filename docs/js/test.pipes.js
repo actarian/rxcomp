@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-alpha.14
+ * @license rxcomp v1.0.0-beta.1
  * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -280,13 +280,6 @@
             instance.pushChanges();
           });
         }
-        /*
-        // parse component text nodes
-        if (isComponent) {
-        	this.parse(node, instance);
-        }
-        */
-
 
         return instance;
       }
@@ -303,43 +296,114 @@
         params = ['$instance'];
       }
 
-      if (!expression) {
+      if (expression) {
+        expression = Module.parseExpression(expression); // console.log(expression);
+
+        var args = params.join(',');
+        var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}"); // console.log(expression_func);
+
+        return expression_func;
+      } else {
         return function () {
           return null;
         };
       }
+    };
 
-      var args = params.join(',');
-      var pipes = this.meta.pipes;
-      var transforms = Module.getPipesSegments(expression);
-      console.log(transforms);
-      expression = transforms.shift().trim();
-      expression = this.transformOptionalChaining(expression); // console.log(pipes, transforms, expression);
-      // console.log(transforms.length, params);
-      // keyword 'this' represents changes from func.apply(changes, instance)
+    Module.parseExpression = function parseExpression(expression) {
+      var l = '┌';
+      var r = '┘';
+      var rx1 = /(\()([^\(\)]*)(\))/;
 
-      if (transforms.length) {
-        expression = transforms.reduce(function (expression, transform, i) {
-          var params = Module.getPipeParamsSegments(transform);
-          var name = params.shift().trim();
-          var pipe = pipes[name];
+      while (expression.match(rx1)) {
+        expression = expression.replace(rx1, function () {
+          return "" + l + Module.parsePipes(arguments.length <= 2 ? undefined : arguments[2]) + r;
+        });
+      }
 
-          if (!pipe || typeof pipe.transform !== 'function') {
-            throw "missing pipe '" + name + "'";
+      expression = Module.parsePipes(expression);
+      expression = expression.replace(/(┌)|(┘)/g, function () {
+        return (arguments.length <= 1 ? undefined : arguments[1]) ? '(' : ')';
+      });
+      return Module.parseOptionalChaining(expression);
+    };
+
+    Module.parsePipes = function parsePipes(expression) {
+      var rx1 = /(.*?)\|([^\|]*)/;
+
+      while (expression.match(rx1)) {
+        expression = expression.replace(rx1, function () {
+          for (var _len = arguments.length, g1 = new Array(_len), _key = 0; _key < _len; _key++) {
+            g1[_key] = arguments[_key];
           }
 
-          return "$$pipes." + name + ".transform(" + expression + "," + params.join(',') + ")";
-        }, expression); // console.log('expression', expression);
-
-        var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
-        return expression_func;
-      } else {
-        // console.log('expression', args, expression);
-        // console.log('${expression.replace(/\'/g,'"')}', this);
-        var _expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
-
-        return _expression_func;
+          var value = g1[1].trim();
+          var params = Module.parsePipeParams(g1[2]);
+          var func = params.shift().trim();
+          return "$$pipes." + func + ".transform\u250C" + [value].concat(params) + "\u2518";
+        });
       }
+
+      return expression;
+    };
+
+    Module.parsePipeParams = function parsePipeParams(expression) {
+      var segments = [];
+      var i = 0,
+          word = '',
+          block = 0;
+      var t = expression.length;
+
+      while (i < t) {
+        var c = expression.substr(i, 1);
+
+        if (c === '{' || c === '(' || c === '[') {
+          block++;
+        }
+
+        if (c === '}' || c === ')' || c === ']') {
+          block--;
+        }
+
+        if (c === ':' && block === 0) {
+          if (word.length) {
+            segments.push(word.trim());
+          }
+
+          word = '';
+        } else {
+          word += c;
+        }
+
+        i++;
+      }
+
+      if (word.length) {
+        segments.push(word.trim());
+      }
+
+      return segments;
+    };
+
+    Module.parseOptionalChaining = function parseOptionalChaining(expression) {
+      var regex = /(\w+(\?\.))+([\.|\w]+)/g;
+      var previous;
+      expression = expression.replace(regex, function () {
+        for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+
+        var tokens = args[0].split('?.');
+
+        for (var i = 0; i < tokens.length - 1; i++) {
+          var a = i > 0 ? "(" + tokens[i] + " = " + previous + ")" : tokens[i];
+          var b = tokens[i + 1];
+          previous = i > 0 ? a + "." + b : "(" + a + " ? " + a + "." + b + " : void 0)";
+        }
+
+        return previous || '';
+      });
+      return expression;
     };
 
     _proto.getInstance = function getInstance(node) {
@@ -362,27 +426,7 @@
       });
     };
 
-    _proto.evaluate = function evaluate(text, instance) {
-      var _this4 = this;
-
-      var parse_eval_ = function parse_eval_() {
-        var expression = arguments.length <= 1 ? undefined : arguments[1]; // console.log('expression', expression);
-
-        try {
-          var parse_func_ = _this4.makeFunction(expression);
-
-          return _this4.resolve(parse_func_, instance, instance);
-        } catch (e) {
-          console.error(e);
-          return e.message;
-        }
-      };
-
-      return text.replace(/\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g, parse_eval_); // return text.replace(/\{{2}((([^{}])|(\{[^{}]+?\}))*?)\}{2}/g, parse_eval_);
-    };
-
     _proto.parse = function parse(node, instance) {
-      // console.log('parse', instance.constructor.name, node);
       for (var i = 0; i < node.childNodes.length; i++) {
         var child = node.childNodes[i];
 
@@ -393,16 +437,61 @@
             this.parse(child, instance);
           }
         } else if (child.nodeType === 3) {
-          var expression = child.nodeExpression || child.nodeValue;
-          var replacedText = this.evaluate(expression, instance);
-
-          if (expression !== replacedText) {
-            var textNode = document.createTextNode(replacedText);
-            textNode.nodeExpression = expression;
-            node.replaceChild(textNode, child);
-          }
+          this.parseTextNode(child, instance);
         }
       }
+    };
+
+    _proto.parseTextNode = function parseTextNode(node, instance) {
+      var _this4 = this;
+
+      var expressions = node.nodeExpressions;
+
+      if (!expressions) {
+        expressions = this.parseTextNodeExpression(node.nodeValue);
+      }
+
+      var replacedText = expressions.reduce(function (p, c) {
+        return p + (typeof c === 'function' ? _this4.resolve(c, instance, instance) : c);
+      }, '');
+
+      if (node.nodeValue !== replacedText) {
+        var textNode = document.createTextNode(replacedText);
+        textNode.nodeExpressions = expressions;
+        node.parentNode.replaceChild(textNode, node);
+      }
+    };
+
+    _proto.parseTextNodeExpression = function parseTextNodeExpression(expression) {
+      var expressions = [];
+      var regex = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
+      var lastIndex = 0,
+          matches;
+
+      var pushFragment = function pushFragment(from, to) {
+        var fragment = expression.substring(from, to);
+        expressions.push(fragment);
+      };
+
+      while ((matches = regex.exec(expression)) !== null) {
+        var index = regex.lastIndex - matches[0].length;
+
+        if (index > lastIndex) {
+          pushFragment(index, lastIndex);
+        }
+
+        lastIndex = regex.lastIndex;
+        var fragment = this.makeFunction(matches[1]);
+        expressions.push(fragment);
+      }
+
+      var length = expression.length;
+
+      if (length > lastIndex) {
+        pushFragment(lastIndex, length);
+      }
+
+      return expressions;
     };
 
     _proto.resolve = function resolve(expressionFunc, changes, payload) {
@@ -507,27 +596,6 @@
 
     };
 
-    _proto.transformOptionalChaining = function transformOptionalChaining(expression) {
-      var regex = /(\w+(\?\.))+([\.|\w]+)/g;
-      var previous;
-      expression = expression.replace(regex, function () {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-
-        var tokens = args[0].split('?.');
-
-        for (var i = 0; i < tokens.length - 1; i++) {
-          var a = i > 0 ? "(" + tokens[i] + " = " + previous + ")" : tokens[i];
-          var b = tokens[i + 1];
-          previous = i > 0 ? a + "." + b : "(" + a + " ? " + a + "." + b + " : void 0)"; // log(previous);
-        }
-
-        return previous || '';
-      });
-      return expression;
-    };
-
     _proto.destroy = function destroy() {
       this.remove(this.meta.node);
       this.meta.node.innerHTML = this.meta.nodeInnerHTML;
@@ -593,82 +661,6 @@
       }
 
       return keepContexts;
-    };
-
-    Module.getPipesSegments = function getPipesSegments(expression) {
-      var segments = [];
-      var i = 0,
-          word = '',
-          block = 0;
-      var t = expression.length;
-
-      while (i < t) {
-        var c = expression.substr(i, 1);
-
-        if (c === '{' || c === '(' || c === '[') {
-          block++;
-        }
-
-        if (c === '}' || c === ')' || c === ']') {
-          block--;
-        }
-
-        if (c === '|' && block === 0) {
-          if (word.length) {
-            segments.push(word);
-          }
-
-          word = '';
-        } else {
-          word += c;
-        }
-
-        i++;
-      }
-
-      if (word.length) {
-        segments.push(word);
-      }
-
-      return segments;
-    };
-
-    Module.getPipeParamsSegments = function getPipeParamsSegments(expression) {
-      var segments = [];
-      var i = 0,
-          word = '',
-          block = 0;
-      var t = expression.length;
-
-      while (i < t) {
-        var c = expression.substr(i, 1);
-
-        if (c === '{' || c === '(' || c === '[') {
-          block++;
-        }
-
-        if (c === '}' || c === ')' || c === ']') {
-          block--;
-        }
-
-        if (c === ':' && block === 0) {
-          if (word.length) {
-            segments.push(word);
-          }
-
-          word = '';
-        } else {
-          word += c;
-        }
-
-        i++;
-      }
-
-      if (word.length) {
-        segments.push(word);
-      }
-
-      return segments;
     };
 
     Module.matchSelectors = function matchSelectors(node, selectors, results) {
@@ -1539,12 +1531,16 @@
       return _Pipe2.apply(this, arguments) || this;
     }
 
-    MultPipe.transform = function transform(value, mult) {
-      if (mult === void 0) {
-        mult = 2;
+    MultPipe.transform = function transform(value, mult1, mult2) {
+      if (mult1 === void 0) {
+        mult1 = 2;
       }
 
-      return Number(value) * Number(mult);
+      if (mult2 === void 0) {
+        mult2 = 1;
+      }
+
+      return Number(value) * Number(mult1) * Number(mult2);
     };
 
     return MultPipe;

@@ -35,7 +35,7 @@
 				<span class="item" [innerHTML]="value | mult:6"></span class="item">
 			</li>
 			<li class="list__item">
-				<span class="item" [innerHTML]="value | mult:2 | mult:2"></span class="item">
+				<span class="item" [innerHTML]="(value | mult:value:value) + value | mult:2"></span class="item">
 			</li>
 		</ul>
 	</main>

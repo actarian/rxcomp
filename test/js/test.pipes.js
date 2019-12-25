@@ -21,8 +21,8 @@ TimePipe.meta = {
 };
 
 class MultPipe extends Pipe {
-	static transform(value, mult = 2) {
-		return Number(value) * Number(mult);
+	static transform(value, mult1 = 2, mult2 = 1) {
+		return Number(value) * Number(mult1) * Number(mult2);
 	}
 }
 MultPipe.meta = {
