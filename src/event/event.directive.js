@@ -3,7 +3,7 @@ import { shareReplay, takeUntil } from 'rxjs/operators';
 import Directive from '../core/directive';
 import { getContext } from '../module/module';
 
-const EVENTS = ['click', 'mousedown', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
+const EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
 export default class EventDirective extends Directive {
 

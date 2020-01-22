@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.2] - 2020-01-22
+### Added
+- SrcDirective, HrefDirective
+
+---
+
 ## [1.0.0-beta.1] - 2019-12-25
 ### Modified
 - Optimized expression evaluation

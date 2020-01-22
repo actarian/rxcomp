@@ -30,7 +30,7 @@ ___
 * Modules *```imports```, ```exports```*
 * Components *```inputs```, ```outputs```, ```hosts```, ```template```*
 * Structures *```ForStructure```, ```IfStructure```*
-* Directives *```ClassDirective```, ```EventDirective```, ```InnerHtmlDirective```, ```StyleDirective```*
+* Directives *```ClassDirective```, ```EventDirective```, ```HrefDirective```, ```InnerHtmlDirective```, ```SrcDirective```, ```StyleDirective```*
 * Pipes *```JsonPipe```*
 * Declarative Syntax
 * OnPush Strategy via *```pushChanges```* method
@@ -68,7 +68,7 @@ For CDN, you can use unpkg
 
 ```html
 <script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
-<script src="https://unpkg.com/rxcomp@1.0.0-beta.1/dist/rxcomp.min.js"></script>  
+<script src="https://unpkg.com/rxcomp@1.0.0-beta.2/dist/rxcomp.min.js"></script>  
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -214,40 +214,3 @@ ___
 
 ## Release Notes
 Changelog [here](https://github.com/actarian/rxcomp/blob/master/CHANGELOG.md).
-
----
-
-## 1.0.0-beta.1
-* Optimized expression evaluation
-
----
-
-## 1.0.0-alpha.14
-* Fixing destroy phase
-
----
-
-## 1.0.0-alpha.11
-* Added meta hosts { key: Factory }
-
----
-
-## 1.0.0-alpha.8
-* Added :not selector
-* Fixing TextNode parser
-
----
-
-### 1.0.0-alpha.7
-* Fixing Component scope  
-
----
-
-### 1.0.0-alpha.6
-* Added Module import / export  
-
----
-
-### 1.0.0-alpha.5
-
-* Initial release of RxComp library

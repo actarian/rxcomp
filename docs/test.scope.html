@@ -34,6 +34,7 @@
 		</div>
 		<div [style]="{ 'background-color': background }" (click)="onItem(4)" sub-component [item]="4"></div>
 		<div [style]="{ 'background-color': background }" (toggle)="onItem($event)" sub-component [item]="5"></div>
+		<div><a [href]="href">{{href}}</a></div>
 	</main>
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign"></script>
 	<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>

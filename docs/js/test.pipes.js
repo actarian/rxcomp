@@ -1,6 +1,6 @@
 /**
- * @license rxcomp v1.0.0-beta.1
- * (c) 2019 Luca Zampetti <lzampetti@gmail.com>
+ * @license rxcomp v1.0.0-beta.2
+ * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
 
@@ -866,7 +866,7 @@
     selector: "[[class]]"
   };
 
-  var EVENTS = ['click', 'mousedown', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
+  var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
   var EventDirective =
   /*#__PURE__*/
@@ -1115,6 +1115,31 @@
     selector: '[*for]'
   };
 
+  var HrefDirective =
+  /*#__PURE__*/
+  function (_Directive) {
+    _inheritsLoose(HrefDirective, _Directive);
+
+    function HrefDirective() {
+      return _Directive.apply(this, arguments) || this;
+    }
+
+    var _proto = HrefDirective.prototype;
+
+    _proto.onChanges = function onChanges(changes) {
+      var _getContext = getContext(this),
+          node = _getContext.node;
+
+      node.setAttribute('href', this.href);
+    };
+
+    return HrefDirective;
+  }(Directive);
+  HrefDirective.meta = {
+    selector: '[[href]]',
+    inputs: ['href']
+  };
+
   var IfStructure =
   /*#__PURE__*/
   function (_Structure) {
@@ -1228,6 +1253,31 @@
     name: 'json'
   };
 
+  var SrcDirective =
+  /*#__PURE__*/
+  function (_Directive) {
+    _inheritsLoose(SrcDirective, _Directive);
+
+    function SrcDirective() {
+      return _Directive.apply(this, arguments) || this;
+    }
+
+    var _proto = SrcDirective.prototype;
+
+    _proto.onChanges = function onChanges(changes) {
+      var _getContext = getContext(this),
+          node = _getContext.node;
+
+      node.setAttribute('src', this.src);
+    };
+
+    return SrcDirective;
+  }(Directive);
+  SrcDirective.meta = {
+    selector: '[[src]]',
+    inputs: ['src']
+  };
+
   var StyleDirective =
   /*#__PURE__*/
   function (_Directive) {
@@ -1278,7 +1328,7 @@
 
     return CoreModule;
   }(Module);
-  var factories = [ClassDirective, EventDirective, ForStructure, IfStructure, InnerHtmlDirective, StyleDirective];
+  var factories = [ClassDirective, EventDirective, ForStructure, HrefDirective, IfStructure, InnerHtmlDirective, SrcDirective, StyleDirective];
   var pipes = [JsonPipe];
   CoreModule.meta = {
     declarations: [].concat(factories, pipes),

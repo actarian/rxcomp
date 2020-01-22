@@ -4,6 +4,7 @@ class RootComponent extends Component {
 	onInit() {
 		this.background = '#b9dbff';
 		this.items = [1, 2, 3];
+		this.href = 'https://github.com/actarian/rxcomp';
 	}
 	onItem(item) {
 		console.log('RootComponent.item', item);
