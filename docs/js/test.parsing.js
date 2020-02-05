@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.2
+ * @license rxcomp v1.0.0-beta.3
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -452,7 +452,20 @@
       }
 
       var replacedText = expressions.reduce(function (p, c) {
-        return p + (typeof c === 'function' ? _this4.resolve(c, instance, instance) : c);
+        var text;
+
+        if (typeof c === 'function') {
+          text = _this4.resolve(c, instance, instance);
+
+          if (text == undefined) {
+            // !!! keep == loose equality
+            text = '';
+          }
+        } else {
+          text = c;
+        }
+
+        return p + text;
       }, '');
 
       if (node.nodeValue !== replacedText) {
@@ -495,6 +508,7 @@
     };
 
     _proto.resolve = function resolve(expressionFunc, changes, payload) {
+      // console.log(expressionFunc, changes, payload);
       return expressionFunc.apply(changes, [payload, this]);
     };
 
@@ -675,6 +689,11 @@
           }
 
           results.push(match);
+
+          if (factory.prototype instanceof Structure) {
+            // console.log('Structure', node);
+            break;
+          }
         }
       }
 
@@ -684,6 +703,11 @@
     Module.querySelectorsAll = function querySelectorsAll(node, selectors, results) {
       if (node.nodeType === 1) {
         results = this.matchSelectors(node, selectors, results);
+
+        if (results.length && results[0].factory.prototype instanceof Structure) {
+          return results;
+        }
+
         var childNodes = node.childNodes;
 
         for (var i = 0; i < childNodes.length; i++) {
@@ -1212,7 +1236,7 @@
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      node.innerHTML = this.innerHTML;
+      node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML; // !!! keep == loose equality
     };
 
     return InnerHtmlDirective;
@@ -1573,6 +1597,7 @@
       var _this = this;
 
       // console.log('RootComponent.onInit');
+      this.value = undefined;
       this.ticks = -1;
       rxjs.interval(1000).pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (ticks) {
         _this.ticks = ticks;
@@ -1609,6 +1634,7 @@
       var _this2 = this;
 
       // console.log('RootComponent.onInit');
+      this.value = null;
       this.ticks = -1;
       rxjs.interval(1000).pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (ticks) {
         _this2.ticks = ticks;

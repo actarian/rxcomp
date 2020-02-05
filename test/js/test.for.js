@@ -6,17 +6,24 @@ import { Browser, Component, CoreModule, Module, Pipe } from '../../src/rxcomp';
 class RootComponent extends Component {
 	onInit() {
 		this.flag = false;
+		this.nested = [
+			{ items: [1, 2, 3, 4] },
+			{ items: [1, 2, 3, 4] },
+			{ items: [1, 2, 3, 4] }
+		];
 		this.items = [1, 2, 3, 4];
 		this.object = { a: 1, b: { c: 2 } };
-		return interval(1000).pipe(
-			take(1000),
-			takeUntil(this.unsubscribe$)
-		).subscribe(items => {
-			this.flag = !this.flag;
-			this.pushChanges();
-		});
+		if (true) {
+			interval(1000).pipe(
+				take(1000),
+				takeUntil(this.unsubscribe$)
+			).subscribe(items => {
+				this.flag = !this.flag;
+				this.pushChanges();
+			});
+		}
 		/*
-		return interval(50).pipe(
+		interval(50).pipe(
 			take(1000),
 			takeUntil(this.unsubscribe$)
 		).subscribe(items => {

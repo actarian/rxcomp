@@ -24,6 +24,11 @@
 				<i class="icon--github"></i>
 			</a>
 		</div>
+		<div class="list__item" *for="let parent of nested">
+			<span *for="let item of parent.items">
+				<span class="item" [innerHTML]="item"></span>
+			</span>
+		</div>
 		<div class="list__item" *for="let [key, value] of object">
 			<div class="item">{{key}} {{value | json}}</div>
 		</div>

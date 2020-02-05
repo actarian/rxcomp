@@ -461,7 +461,7 @@ button,
     -webkit-box-flex: 0;
         -ms-flex: 0 0 50px;
             flex: 0 0 50px;
-    min-height: 15px;
+    min-height: 40px;
     margin: 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     cursor: pointer; }

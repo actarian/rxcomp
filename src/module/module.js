@@ -2,6 +2,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
+import { Structure } from '../rxcomp';
 
 let ID = 0;
 const CONTEXTS = {};
@@ -242,8 +243,16 @@ export default class Module {
 			expressions = this.parseTextNodeExpression(node.nodeValue);
 		}
 		const replacedText = expressions.reduce((p, c) => {
-			return p + (typeof c === 'function' ?
-				this.resolve(c, instance, instance) : c);
+			let text;
+			if (typeof c === 'function') {
+				text = this.resolve(c, instance, instance);
+				if (text == undefined) { // !!! keep == loose equality
+					text = '';
+				}
+			} else {
+				text = c;
+			}
+			return p + text;
 		}, '');
 		if (node.nodeValue !== replacedText) {
 			const textNode = document.createTextNode(replacedText);
@@ -278,6 +287,7 @@ export default class Module {
 	}
 
 	resolve(expressionFunc, changes, payload) {
+		// console.log(expressionFunc, changes, payload);
 		return expressionFunc.apply(changes, [payload, this]);
 	}
 
@@ -425,6 +435,10 @@ export default class Module {
 					node.innerHTML = factory.meta.template;
 				}
 				results.push(match);
+				if (factory.prototype instanceof Structure) {
+					// console.log('Structure', node);
+					break;
+				}
 			}
 		}
 		return results;
@@ -433,6 +447,9 @@ export default class Module {
 	static querySelectorsAll(node, selectors, results) {
 		if (node.nodeType === 1) {
 			results = this.matchSelectors(node, selectors, results);
+			if (results.length && results[0].factory.prototype instanceof Structure) {
+				return results;
+			}
 			const childNodes = node.childNodes;
 			for (let i = 0; i < childNodes.length; i++) {
 				results = this.querySelectorsAll(childNodes[i], selectors, results);

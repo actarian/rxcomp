@@ -7,6 +7,7 @@ class RootComponent extends Component {
 
 	onInit() {
 		// console.log('RootComponent.onInit');
+		this.value = undefined;
 		this.ticks = -1;
 		interval(1000).pipe(
 			takeUntil(this.unsubscribe$)
@@ -28,6 +29,7 @@ class Root2Component extends Component {
 
 	onInit() {
 		// console.log('RootComponent.onInit');
+		this.value = null;
 		this.ticks = -1;
 		interval(1000).pipe(
 			takeUntil(this.unsubscribe$)
