@@ -26,10 +26,22 @@
 		</div>
 		<ul class="list">
 			<li class="list__item">
-				<div class="item">{{value}}</div>
+				<div class="item" [innerHTML]="html"></div>
 			</li>
 			<li class="list__item">
-				<div class="item"><span [innerHTML]="value"></span>&nbsp;</div>
+				<div class="item" innerHTML="<em class='italic'>em</em>"></div>
+			</li>
+			<li class="list__item">
+				<div class="item">{{valueUndefined}}</div>
+			</li>
+			<li class="list__item">
+				<div class="item"><span [innerHTML]="valueUndefined"></span>&nbsp;</div>
+			</li>
+			<li class="list__item">
+				<div class="item">{{valueUndefined || valueDefined}}</div>
+			</li>
+			<li class="list__item">
+				<div class="item"><span [innerHTML]="valueUndefined || valueDefined"></span>&nbsp;</div>
 			</li>
 			<li class="list__item">
 				<div class="item">{{ticks}}</div>

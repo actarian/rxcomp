@@ -7,7 +7,9 @@ class RootComponent extends Component {
 
 	onInit() {
 		// console.log('RootComponent.onInit');
-		this.value = undefined;
+		this.html = /* html */ `<b class="bold">bold</b>`;
+		this.valueUndefined = undefined;
+		this.valueDefined = 1;
 		this.ticks = -1;
 		interval(1000).pipe(
 			takeUntil(this.unsubscribe$)
@@ -29,7 +31,9 @@ class Root2Component extends Component {
 
 	onInit() {
 		// console.log('RootComponent.onInit');
-		this.value = null;
+		this.html = /* html */ `<strong class="bold">strong</strong>`;
+		this.valueUndefined = undefined;
+		this.valueDefined = 2;
 		this.ticks = -1;
 		interval(1000).pipe(
 			takeUntil(this.unsubscribe$)

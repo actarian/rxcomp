@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.3
+ * @license rxcomp v1.0.0-beta.4
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -156,6 +156,8 @@
 
     return Context;
   }(Component);
+
+  var Structure = function Structure() {};
 
   var ID = 0;
   var CONTEXTS = {};
@@ -329,7 +331,7 @@
     };
 
     Module.parsePipes = function parsePipes(expression) {
-      var rx1 = /(.*?)\|([^\|]*)/;
+      var rx1 = /(.*?[^\|])\|([^\|]+)/;
 
       while (expression.match(rx1)) {
         expression = expression.replace(rx1, function () {
@@ -529,7 +531,21 @@
           expression = null;
 
       if (node.hasAttribute(key)) {
-        expression = "'" + node.getAttribute(key).replace('{{', '\'+').replace('}}', '+\'') + "'";
+        // const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
+        var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (match, a, b, c) {
+          if (a) {
+            return '"+';
+          }
+
+          if (b) {
+            return '+"';
+          }
+
+          if (c) {
+            return '\"';
+          }
+        });
+        expression = "\"" + attribute + "\"";
       } else if (node.hasAttribute("[" + key + "]")) {
         expression = node.getAttribute("[" + key + "]");
       }
@@ -931,8 +947,6 @@
   EventDirective.meta = {
     selector: "[(" + EVENTS.join(')],[(') + ")]"
   };
-
-  var Structure = function Structure() {};
 
   var ForItem =
   /*#__PURE__*/

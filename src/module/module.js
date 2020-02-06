@@ -2,7 +2,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
-import { Structure } from '../rxcomp';
+import Structure from '../core/structure';
 
 let ID = 0;
 const CONTEXTS = {};
@@ -150,7 +150,7 @@ export default class Module {
 	static parsePipes(expression) {
 		const l = '┌';
 		const r = '┘';
-		const rx1 = /(.*?)\|([^\|]*)/;
+		const rx1 = /(.*?[^\|])\|([^\|]+)/;
 		while (expression.match(rx1)) {
 			expression = expression.replace(rx1, function(...g1) {
 				const value = g1[1].trim();
@@ -304,7 +304,19 @@ export default class Module {
 		const { node } = getContext(instance);
 		let input, expression = null;
 		if (node.hasAttribute(key)) {
-			expression = `'${node.getAttribute(key).replace('{{','\'+').replace('}}','+\'')}'`;
+			// const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
+			const attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function(match, a, b, c) {
+				if (a) {
+					return '"+';
+				}
+				if (b) {
+					return '+"';
+				}
+				if (c) {
+					return '\"';
+				}
+			});
+			expression = `"${attribute}"`;
 		} else if (node.hasAttribute(`[${key}]`)) {
 			expression = node.getAttribute(`[${key}]`);
 		}
