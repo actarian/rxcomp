@@ -458,8 +458,10 @@ export default class Module {
 
 	static querySelectorsAll(node, selectors, results) {
 		if (node.nodeType === 1) {
-			results = this.matchSelectors(node, selectors, results);
-			if (results.length && results[0].factory.prototype instanceof Structure) {
+			const matches = this.matchSelectors(node, selectors, []);
+			results = results.concat(matches);
+			const structure = matches.find(x => x.factory.prototype instanceof Structure);
+			if (structure) {
 				return results;
 			}
 			const childNodes = node.childNodes;

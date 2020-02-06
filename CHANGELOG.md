@@ -3,7 +3,7 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
-## [1.0.0-beta.4] - 2020-02-06
+## [1.0.0-beta.5] - 2020-02-06
 ### Fixing
 - ForStructure, html attributes
 

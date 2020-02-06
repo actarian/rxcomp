@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.4
+ * @license rxcomp v1.0.0-beta.5
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -718,9 +718,13 @@
 
     Module.querySelectorsAll = function querySelectorsAll(node, selectors, results) {
       if (node.nodeType === 1) {
-        results = this.matchSelectors(node, selectors, results);
+        var matches = this.matchSelectors(node, selectors, []);
+        results = results.concat(matches);
+        var structure = matches.find(function (x) {
+          return x.factory.prototype instanceof Structure;
+        });
 
-        if (results.length && results[0].factory.prototype instanceof Structure) {
+        if (structure) {
           return results;
         }
 
