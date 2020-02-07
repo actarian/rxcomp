@@ -8,37 +8,48 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 	<meta name="Content-Language" content="it" />
 	<meta name="robots" content="noindex,nofollow" />
-	<title>TodoMvc</title>
+	<title>
+		RxComp
+	</title>
 	<link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="css/main.min.css" />
 </head>
 
 <body class="page--test">
-	<main root-component>
-		<div class="header">
-			<a href="https://github.com/actarian/rxcomp" target="_blank" class="brand">RxComp</a>
-			<a href="https://twitter.com/actarian" target="_blank" class="btn--twitter">
-				<i class="icon--twitter"></i>
-			</a>
-			<a href="https://github.com/actarian/rxcomp" target="_blank" class="btn--github">
-				<i class="icon--github"></i>
-			</a>
-		</div>
-		<div host [style]="{ 'color': 'red' }">
-			<ul class="list">
-				<li class="list__item" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items">
-					<div sub-component [item]="item"></div>
-				</li>
-				<li class="list__item" hosted [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" sub-component [item]="item"></li>
-			</ul>
-		</div>
-		<div [style]="{ 'background-color': background }" (click)="onItem(4)" sub-component [item]="4"></div>
-		<div [style]="{ 'background-color': background }" (toggle)="onItem($event)" sub-component [item]="5"></div>
-		<div><a [href]="href">{{href}}</a></div>
-	</main>
+<!-- start main -->
+<main root-component>
+<!-- start header.html-->
+<div class="header">
+	<a href="https://github.com/actarian/rxcomp" target="_blank" class="brand">RxComp</a>
+	<a href="https://twitter.com/actarian" target="_blank" class="btn--twitter">
+		<i class="icon--twitter"></i>
+	</a>
+	<a href="https://github.com/actarian/rxcomp" target="_blank" class="btn--github">
+		<i class="icon--github"></i>
+	</a>
+</div>
+
+<!-- end header.html-->
+	<div host [style]="{ 'color': 'red' }">
+		<ul class="list">
+			<li class="list__item" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items">
+				<div sub-component [item]="item"></div>
+			</li>
+			<li class="list__item" hosted [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" sub-component [item]="item"></li>
+		</ul>
+	</div>
+	<div [style]="{ 'background-color': background }" (click)="onItem(4)" sub-component [item]="4"></div>
+	<div [style]="{ 'background-color': background }" (toggle)="onItem($event)" sub-component [item]="5"></div>
+	<div><a [href]="href">{{href}}</a></div>
+</main>
+
+<!-- end main -->
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign"></script>
-	<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
-	<script src="js/test.scope.js"></script>
+	<script src="https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js"></script>
+<!-- start js -->
+<script src="js/test.scope.js"></script>
+
+<!-- end js -->
 </body>
 
 </html>

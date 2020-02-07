@@ -1,0 +1,26 @@
+<!-- @@master = ./templates/layout.html { "class": "page--todomvc", "title": "RxComp" } -->
+<!-- @@block = main-->
+<main app-component>
+	<!-- @@include ./templates/shared/header.html -->
+	<div class="group--form">
+		<input type="text" class="control--text" placeholder="todo..." (input)="onInput($event)" (keyup)="$event.keyCode == 13 && onAddItem($event)" />
+		<button type="button" class="btn--add" [class]="{ disabled: !input.value }" (click)="onAddItem($event)"><i class="icon--add"></i></button>
+	</div>
+	<ul class="list">
+		<li class="list__item" *for="let item of items" [class]="{ done: item.done }" todo-item-component [item]="item" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
+			<div class="content" [style]="{ background: background, color: foreground, '--accent': accent }">
+				<button type="button" class="btn--toggle" (click)="onToggle(item)">
+					<div class="title" [innerHTML]="item.name"></div>
+					<div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+				</button>
+				<button type="button" class="btn--remove" (click)="onRemove(item)">
+					<i class="icon--remove"></i>
+				</button>
+			</div>
+		</li>
+	</ul>
+</main>
+<!-- @@close-->
+<!-- @@block = js-->
+<script src="js/main.js"></script>
+<!-- @@close-->

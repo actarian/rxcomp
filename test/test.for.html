@@ -1,0 +1,23 @@
+<!-- @@master = ./templates/layout.html { "class": "page--test", "title": "RxComp" } -->
+<!-- @@block = main-->
+<main root-component>
+	<!-- @@include ./templates/shared/header.html -->
+	<div class="list__item" *for="let parent of nested">
+		<span *for="let item of parent.items">
+			<span class="item" [innerHTML]="item"></span>
+		</span>
+	</div>
+	<div class="list__item" *for="let [key, value] of object">
+		<div class="item">{{key}} {{value | json}}</div>
+	</div>
+	<div *if="flag">
+		<div class="list__item" *for="let item of items" (click)="alert(item)">
+			<div class="item" [style]="{ color: getColor(index) }">{{item | example}}</div>
+		</div>
+	</div>
+</main>
+<!-- @@close-->
+<!-- @@block = js-->
+<script src="js/test.for.js"></script>
+<script src="js/test.js"></script>
+<!-- @@close-->
