@@ -2,6 +2,7 @@ import Directive from '../core/directive';
 import { getContext } from '../module/module';
 
 export default class StyleDirective extends Directive {
+	styleFunction: Function;
 
 	onInit() {
 		const { module, node } = getContext(this);

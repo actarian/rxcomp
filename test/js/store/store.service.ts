@@ -4,12 +4,14 @@ import LocalStorageService from '../local-storage/local-storage.service';
 
 export default class StoreService {
 
+	static store$: BehaviorSubject<any>;
+
 	static set(items) {
 		LocalStorageService.set('items', items);
 		return this.get$().next(items);
 	}
 
-	static get$() {
+	static get$(): BehaviorSubject<any> {
 		if (this.store$) {
 			return this.store$;
 		}
@@ -27,7 +29,7 @@ export default class StoreService {
 		this.store$ = new BehaviorSubject(items);
 		return this.store$.pipe(
 			delay(1) // simulate http
-		);
+		) as BehaviorSubject<any>;
 	}
 
 	static add$(patch) {

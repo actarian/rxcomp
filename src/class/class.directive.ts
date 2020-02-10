@@ -3,6 +3,8 @@ import { getContext } from '../module/module';
 
 export default class ClassDirective extends Directive {
 
+	classFunction: Function;
+
 	onInit() {
 		const { module, node } = getContext(this);
 		const expression = node.getAttribute('[class]');

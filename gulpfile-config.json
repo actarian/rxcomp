@@ -10,7 +10,7 @@
 				"output": "docs/css/main.css",
 				"minify": true
 			}, {
-				"input": "test/js/main.js",
+				"input": "test/js/main.ts",
 				"output": "docs/js/main.js",
 				"rollup": {
 					"output": {
@@ -24,7 +24,7 @@
 				},
 				"minify": true
 			}, {
-				"input": "test/js/test.for.js",
+				"input": "test/js/test.for.ts",
 				"output": "docs/js/test.for.js",
 				"rollup": {
 					"output": {
@@ -38,7 +38,7 @@
 				},
 				"minify": true
 			}, {
-				"input": "test/js/test.parsing.js",
+				"input": "test/js/test.parsing.ts",
 				"output": "docs/js/test.parsing.js",
 				"rollup": {
 					"output": {
@@ -52,7 +52,7 @@
 				},
 				"minify": true
 			}, {
-				"input": "test/js/test.pipes.js",
+				"input": "test/js/test.pipes.ts",
 				"output": "docs/js/test.pipes.js",
 				"rollup": {
 					"output": {
@@ -66,7 +66,7 @@
 				},
 				"minify": true
 			}, {
-				"input": "test/js/test.scope.js",
+				"input": "test/js/test.scope.ts",
 				"output": "docs/js/test.scope.js",
 				"rollup": {
 					"output": {
@@ -84,7 +84,7 @@
 		},
 		"dist": {
 			"compile": [{
-				"input": "src/rxcomp.js",
+				"input": "src/rxcomp.ts",
 				"output": "dist/rxcomp.js",
 				"rollup": {
 					"output": {

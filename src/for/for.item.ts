@@ -2,6 +2,8 @@ import Context from '../core/context';
 
 export default class ForItem extends Context {
 
+	index: number;
+	count: number;
 	// !!! try with payload options { key, $key, value, $value, index, count } or use onInit()
 
 	constructor(key, $key, value, $value, index, count, parentInstance) {
@@ -33,12 +35,12 @@ export default class ForItem extends Context {
 		this.count = count;
 	}
 
-	get first() { return this.index === 0; }
+	get first(): boolean { return this.index === 0; }
 
-	get last() { return this.index === this.count - 1; }
+	get last(): boolean { return this.index === this.count - 1; }
 
-	get even() { return this.index % 2 === 0; }
+	get even(): boolean { return this.index % 2 === 0; }
 
-	get odd() { return !this.even; }
+	get odd(): boolean { return !this.even; }
 
 }

@@ -1,5 +1,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
+import Factory, { SelectorFunction } from 'src/core/factory';
+import Pipe from 'src/core/pipe';
 import Component from '../core/component';
 import Context from '../core/context';
 import Structure from '../core/structure';
@@ -8,9 +10,34 @@ let ID = 0;
 const CONTEXTS = {};
 const NODES = {};
 
+export class ModuleContext {
+	module: Module;
+	instance: Function;
+	parentInstance: Function;
+	node: HTMLElement;
+	factory: Function;
+	selector: string;
+	inputs?: {};
+	outputs?: {};
+}
+
+export interface IModuleMeta {
+	imports: (typeof Module | IModuleMeta)[];
+	declarations: (typeof Factory | Pipe)[];
+	exports: (typeof Factory | Pipe)[];
+	pipes: Pipe[];
+	factories: typeof Factory[];
+	selectors: SelectorFunction[];
+	node?: HTMLElement;
+	nodeInnerHTML?: string;
+	bootstrap: typeof Factory;
+}
+
 export default class Module {
 
-	compile(node, parentInstance) {
+	meta: IModuleMeta;
+
+	compile(node, parentInstance): Factory[] {
 		let componentNode;
 		const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(match => {
 			if (componentNode && componentNode !== match.node) {
@@ -26,10 +53,11 @@ export default class Module {
 		return instances;
 	}
 
-	makeInstance(node, factory, selector, parentInstance, args) {
+	makeInstance(node, factory, selector, parentInstance, args?: any) {
 		if (parentInstance || node.parentNode) {
 			const isComponent = factory.prototype instanceof Component;
 			const meta = factory.meta;
+			// console.log('meta', meta, factory);
 			// collect parentInstance scope
 			parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 			if (!parentInstance) {
@@ -55,13 +83,13 @@ export default class Module {
 			let initialized;
 			// injecting instance pushChanges method
 			const module = this;
-			instance.pushChanges = function() {
+			instance.pushChanges = function () {
 				// console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
 				this.changes$.next(this);
 				// parse component text nodes
 				if (isComponent) {
 					// console.log('Module.parse', instance.constructor.name);
-					initialized ? module.parse(node, instance) : setTimeout(function() { module.parse(node, instance); });
+					initialized ? module.parse(node, instance) : setTimeout(function () { module.parse(node, instance); });
 				}
 				// calling onView event
 				if (typeof instance.onView === 'function') {
@@ -86,6 +114,16 @@ export default class Module {
 				parentInstance.changes$.pipe(
 					// filter(() => node.parentNode),
 					// debounceTime(1),
+					/*
+					distinctUntilChanged(function(prev, curr) {
+						console.log(isComponent, context.inputs);
+						if (isComponent && meta && Object.keys(context.inputs).length === 0) {
+							return true; // same
+						} else {
+							return false;
+						}
+					}),
+					*/
 					takeUntil(instance.unsubscribe$)
 				).subscribe(changes => {
 					// resolve component input outputs
@@ -129,82 +167,6 @@ export default class Module {
 		} else {
 			return () => { return null; };
 		}
-	}
-
-	static parseExpression(expression) {
-		const l = '┌';
-		const r = '┘';
-		const rx1 = /(\()([^\(\)]*)(\))/;
-		while (expression.match(rx1)) {
-			expression = expression.replace(rx1, function(...g1) {
-				return `${l}${Module.parsePipes(g1[2])}${r}`;
-			});
-		}
-		expression = Module.parsePipes(expression);
-		expression = expression.replace(/(┌)|(┘)/g, function(...g2) {
-			return g2[1] ? '(' : ')';
-		});
-		return Module.parseOptionalChaining(expression);
-	}
-
-	static parsePipes(expression) {
-		const l = '┌';
-		const r = '┘';
-		const rx1 = /(.*?[^\|])\|([^\|]+)/;
-		while (expression.match(rx1)) {
-			expression = expression.replace(rx1, function(...g1) {
-				const value = g1[1].trim();
-				const params = Module.parsePipeParams(g1[2]);
-				const func = params.shift().trim();
-				return `$$pipes.${func}.transform┌${[value, ...params]}┘`;
-			});
-		}
-		return expression;
-	}
-
-	static parsePipeParams(expression) {
-		const segments = [];
-		let i = 0,
-			word = '',
-			block = 0;
-		const t = expression.length;
-		while (i < t) {
-			const c = expression.substr(i, 1);
-			if (c === '{' || c === '(' || c === '[') {
-				block++;
-			}
-			if (c === '}' || c === ')' || c === ']') {
-				block--;
-			}
-			if (c === ':' && block === 0) {
-				if (word.length) {
-					segments.push(word.trim());
-				}
-				word = '';
-			} else {
-				word += c;
-			}
-			i++;
-		}
-		if (word.length) {
-			segments.push(word.trim());
-		}
-		return segments;
-	}
-
-	static parseOptionalChaining(expression) {
-		const regex = /(\w+(\?\.))+([\.|\w]+)/g;
-		let previous;
-		expression = expression.replace(regex, function(...args) {
-			const tokens = args[0].split('?.');
-			for (let i = 0; i < tokens.length - 1; i++) {
-				const a = i > 0 ? `(${tokens[i]} = ${previous})` : tokens[i];
-				const b = tokens[i + 1];
-				previous = i > 0 ? `${a}.${b}` : `(${a} ? ${a}.${b} : void 0)`;
-			}
-			return previous || '';
-		});
-		return expression;
 	}
 
 	getInstance(node) {
@@ -255,7 +217,7 @@ export default class Module {
 			return p + text;
 		}, '');
 		if (node.nodeValue !== replacedText) {
-			const textNode = document.createTextNode(replacedText);
+			const textNode = document.createTextNode(replacedText) as any;
 			textNode.nodeExpressions = expressions;
 			node.parentNode.replaceChild(textNode, node);
 		}
@@ -266,7 +228,7 @@ export default class Module {
 		const regex = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
 		let lastIndex = 0,
 			matches;
-		const pushFragment = function(from, to) {
+		const pushFragment = function (from, to) {
 			const fragment = expression.substring(from, to);
 			expressions.push(fragment);
 		};
@@ -305,7 +267,7 @@ export default class Module {
 		let input, expression = null;
 		if (node.hasAttribute(key)) {
 			// const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
-			const attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function(match, a, b, c) {
+			const attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (match, a, b, c) {
 				if (a) {
 					return '"+';
 				}
@@ -389,7 +351,7 @@ export default class Module {
 		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
 	}
 
-	remove(node, keepInstance) {
+	remove(node, keepInstance?: any) {
 		const keepContext = keepInstance ? getContext(keepInstance) : undefined;
 		Module.traverseDown(node, (node) => {
 			const rxcompId = node.rxcompId;
@@ -403,7 +365,83 @@ export default class Module {
 		return node;
 	}
 
-	static makeContext(module, instance, parentInstance, node, factory, selector) {
+	static parseExpression(expression) {
+		const l = '┌';
+		const r = '┘';
+		const rx1 = /(\()([^\(\)]*)(\))/;
+		while (expression.match(rx1)) {
+			expression = expression.replace(rx1, function (...g1) {
+				return `${l}${Module.parsePipes(g1[2])}${r}`;
+			});
+		}
+		expression = Module.parsePipes(expression);
+		expression = expression.replace(/(┌)|(┘)/g, function (...g2) {
+			return g2[1] ? '(' : ')';
+		});
+		return Module.parseOptionalChaining(expression);
+	}
+
+	static parsePipes(expression) {
+		const l = '┌';
+		const r = '┘';
+		const rx1 = /(.*?[^\|])\|([^\|]+)/;
+		while (expression.match(rx1)) {
+			expression = expression.replace(rx1, function (...g1) {
+				const value = g1[1].trim();
+				const params = Module.parsePipeParams(g1[2]);
+				const func = params.shift().trim();
+				return `$$pipes.${func}.transform┌${[value, ...params]}┘`;
+			});
+		}
+		return expression;
+	}
+
+	static parsePipeParams(expression) {
+		const segments = [];
+		let i = 0,
+			word = '',
+			block = 0;
+		const t = expression.length;
+		while (i < t) {
+			const c = expression.substr(i, 1);
+			if (c === '{' || c === '(' || c === '[') {
+				block++;
+			}
+			if (c === '}' || c === ')' || c === ']') {
+				block--;
+			}
+			if (c === ':' && block === 0) {
+				if (word.length) {
+					segments.push(word.trim());
+				}
+				word = '';
+			} else {
+				word += c;
+			}
+			i++;
+		}
+		if (word.length) {
+			segments.push(word.trim());
+		}
+		return segments;
+	}
+
+	static parseOptionalChaining(expression) {
+		const regex = /(\w+(\?\.))+([\.|\w]+)/g;
+		let previous;
+		expression = expression.replace(regex, function (...args) {
+			const tokens = args[0].split('?.');
+			for (let i = 0; i < tokens.length - 1; i++) {
+				const a = i > 0 ? `(${tokens[i]} = ${previous})` : tokens[i];
+				const b = tokens[i + 1];
+				previous = i > 0 ? `${a}.${b}` : `(${a} ? ${a}.${b} : void 0)`;
+			}
+			return previous || '';
+		});
+		return expression;
+	}
+
+	static makeContext(module, instance, parentInstance, node, factory, selector): ModuleContext {
 		instance.rxcompId = ++ID;
 		const context = { module, instance, parentInstance, node, factory, selector };
 		const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
@@ -523,6 +561,8 @@ export default class Module {
 		}
 		return this.traverseNext(node.nextSibling, callback, i + 1);
 	}
+
+	static meta: IModuleMeta;
 
 }
 

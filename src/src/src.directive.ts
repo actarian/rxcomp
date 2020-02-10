@@ -3,6 +3,8 @@ import { getContext } from '../module/module';
 
 export default class SrcDirective extends Directive {
 
+	src: string;
+
 	onChanges(changes) {
 		const { node } = getContext(this);
 		node.setAttribute('src', this.src);

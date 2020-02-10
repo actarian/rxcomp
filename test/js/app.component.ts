@@ -1,8 +1,13 @@
+import { BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Component, getContext } from '../../src/rxcomp';
 import StoreService from './store/store.service';
 
 export default class AppComponent extends Component {
+
+	input: HTMLInputElement;
+	items: any[];
+	store$: BehaviorSubject<any>
 
 	onInit() {
 		// context

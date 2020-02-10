@@ -1,4 +1,4 @@
-import { fromEvent } from 'rxjs';
+import { fromEvent, Observable } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
 import Directive from '../core/directive';
 import { getContext } from '../module/module';
@@ -7,10 +7,13 @@ const EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouse
 
 export default class EventDirective extends Directive {
 
+	event: string;
+	event$: Observable<Event>;
+
 	onInit() {
 		const { module, node, parentInstance, selector } = getContext(this);
 		const event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
-		const event$ = this.event$ = fromEvent(node, event).pipe(shareReplay(1));
+		const event$ = this.event$ = fromEvent<Event>(node, event).pipe(shareReplay(1));
 		const expression = node.getAttribute(`(${event})`);
 		if (expression) {
 			const outputFunction = module.makeFunction(expression, ['$event']);

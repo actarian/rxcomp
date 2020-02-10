@@ -9,7 +9,7 @@ import Module from './module/module';
 import SrcDirective from './src/src.directive';
 import StyleDirective from './style/style.directive';
 
-export default class CoreModule extends Module {}
+export default class CoreModule extends Module { }
 const factories = [
 	ClassDirective,
 	EventDirective,

@@ -1,10 +1,8 @@
 import { Browser, Component, CoreModule, Module, Pipe } from '../../src/rxcomp';
 
 class RootComponent extends Component {
-	onInit() {
-		this.time = new Date();
-		this.value = 2;
-	}
+	time: Date = new Date();
+	value: number = 2;
 }
 RootComponent.meta = {
 	selector: '[root-component]',
@@ -29,7 +27,7 @@ MultPipe.meta = {
 	name: 'mult',
 };
 
-class AppModule extends Module {}
+class AppModule extends Module { }
 AppModule.meta = {
 	imports: [
 		CoreModule

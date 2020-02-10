@@ -1,11 +1,11 @@
+import { BehaviorSubject } from 'rxjs';
 import { Browser, Component, CoreModule, Directive, Module, StyleDirective } from '../../src/rxcomp';
 
 class RootComponent extends Component {
-	onInit() {
-		this.background = '#b9dbff';
-		this.items = [1, 2, 3];
-		this.href = 'https://github.com/actarian/rxcomp';
-	}
+	background = '#b9dbff';
+	items = [1, 2, 3];
+	href = 'https://github.com/actarian/rxcomp';
+
 	onItem(item) {
 		console.log('RootComponent.item', item);
 	}
@@ -15,9 +15,11 @@ RootComponent.meta = {
 };
 
 class SubComponent extends Component {
-	onInit() {
-		this.background = '#ffb9b9';
-	}
+
+	background = '#ffb9b9';
+	toggle: BehaviorSubject<any>;
+	item: number;
+
 	onToggle() {
 		// console.log(this.item);
 		this.toggle.next(this.item);
@@ -31,6 +33,8 @@ SubComponent.meta = {
 };
 
 class HostDirective extends Directive {
+	style: any;
+
 	onInit() {
 		console.log('style', this.style);
 	}
@@ -41,6 +45,8 @@ HostDirective.meta = {
 };
 
 class HostedDirective extends Directive {
+	host: HostDirective;
+
 	onInit() {
 		console.log('host', this.host);
 	}
@@ -50,7 +56,7 @@ HostedDirective.meta = {
 	hosts: { host: HostDirective }
 };
 
-class AppModule extends Module {}
+class AppModule extends Module { }
 AppModule.meta = {
 	imports: [
 		CoreModule
