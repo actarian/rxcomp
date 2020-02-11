@@ -37,7 +37,7 @@ export default class Module {
 
 	meta: IModuleMeta;
 
-	compile(node: RxCompElement, parentInstance: Factory | Window): Factory[] {
+	compile(node: RxCompElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode;
 		const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(match => {
 			if (componentNode && componentNode !== match.node) {

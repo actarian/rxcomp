@@ -5,10 +5,10 @@
  */
 
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('rxjs'), require('rxjs/operators')) :
-    typeof define === 'function' && define.amd ? define('test.scope', ['rxjs', 'rxjs/operators'], factory) :
-    (global = global || self, factory(global.rxjs, global.rxjs.operators));
-}(this, (function (rxjs, operators) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('rxjs/operators')) :
+    typeof define === 'function' && define.amd ? define('rxcomp', ['exports', 'rxjs', 'rxjs/operators'], factory) :
+    (global = global || self, factory(global.rxcomp = {}, global.rxjs, global.rxjs.operators));
+}(this, (function (exports, rxjs, operators) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -1128,88 +1128,29 @@
         return Browser;
     }(Platform));
 
-    var RootComponent = (function (_super) {
-        __extends(RootComponent, _super);
-        function RootComponent() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.background = '#b9dbff';
-            _this.items = [1, 2, 3];
-            _this.href = 'https://github.com/actarian/rxcomp';
-            return _this;
-        }
-        RootComponent.prototype.onItem = function (item) {
-            console.log('RootComponent.item', item);
-        };
-        return RootComponent;
-    }(Component));
-    RootComponent.meta = {
-        selector: '[root-component]',
-    };
-    var SubComponent = (function (_super) {
-        __extends(SubComponent, _super);
-        function SubComponent() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.background = '#ffb9b9';
-            return _this;
-        }
-        SubComponent.prototype.onToggle = function () {
-            this.toggle.next(this.item);
-        };
-        return SubComponent;
-    }(Component));
-    SubComponent.meta = {
-        selector: '[sub-component]:not(.red)',
-        inputs: ['item'],
-        outputs: ['toggle'],
-        template: "<div [style]=\"{ 'background-color': background }\" (click)=\"onToggle()\" [innerHTML]=\"item\"></div>"
-    };
-    var HostDirective = (function (_super) {
-        __extends(HostDirective, _super);
-        function HostDirective() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        HostDirective.prototype.onInit = function () {
-            console.log('style', this.style);
-        };
-        return HostDirective;
-    }(Directive));
-    HostDirective.meta = {
-        selector: '[host]',
-        hosts: { style: StyleDirective }
-    };
-    var HostedDirective = (function (_super) {
-        __extends(HostedDirective, _super);
-        function HostedDirective() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        HostedDirective.prototype.onInit = function () {
-            console.log('host', this.host);
-        };
-        return HostedDirective;
-    }(Directive));
-    HostedDirective.meta = {
-        selector: '[hosted]',
-        hosts: { host: HostDirective }
-    };
-    var AppModule = (function (_super) {
-        __extends(AppModule, _super);
-        function AppModule() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        return AppModule;
-    }(Module));
-    AppModule.meta = {
-        imports: [
-            CoreModule
-        ],
-        declarations: [
-            HostedDirective,
-            HostDirective,
-            SubComponent
-        ],
-        bootstrap: RootComponent,
-    };
-    Browser.bootstrap(AppModule);
+    exports.Browser = Browser;
+    exports.ClassDirective = ClassDirective;
+    exports.Component = Component;
+    exports.Context = Context;
+    exports.CoreModule = CoreModule;
+    exports.Directive = Directive;
+    exports.EventDirective = EventDirective;
+    exports.ForItem = ForItem;
+    exports.ForStructure = ForStructure;
+    exports.HrefDirective = HrefDirective;
+    exports.IfStructure = IfStructure;
+    exports.InnerHtmlDirective = InnerHtmlDirective;
+    exports.JsonPipe = JsonPipe;
+    exports.Module = Module;
+    exports.Pipe = Pipe;
+    exports.Platform = Platform;
+    exports.SrcDirective = SrcDirective;
+    exports.Structure = Structure;
+    exports.StyleDirective = StyleDirective;
+    exports.getContext = getContext;
+    exports.getContextByNode = getContextByNode;
+    exports.getHost = getHost;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-//# sourceMappingURL=test.scope.js.map

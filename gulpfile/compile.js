@@ -123,16 +123,24 @@ function compileTs_(config, done) {
 function compileRollupTs_(config, item) {
 	const rollupInput = {
 		plugins: [
+			rollupPluginTypescript(),
+			/*
 			rollupPluginTypescript({
 				lib: ['es5', 'es6', 'dom'],
 				target: 'es5',
 				tsconfig: false,
 			}),
-			/*
 			rollupPluginCommonJs(),
 			rollupPluginBabel({
 				presets: [
-					[babelPresetEnv, { modules: false, loose: true }]
+					[babelPresetEnv, {
+						targets: {
+							chrome: '58',
+							ie: '11'
+						},
+						modules: false,
+						loose: true
+					}]
 				],
 				exclude: 'node_modules/**' // only transpile our source code
 				// babelrc: false,
