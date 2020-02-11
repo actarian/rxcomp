@@ -123,7 +123,12 @@ function compileTs_(config, done) {
 function compileRollupTs_(config, item) {
 	const rollupInput = {
 		plugins: [
-			rollupPluginTypescript(),
+			rollupPluginTypescript({
+				lib: ['es5', 'es6', 'dom'],
+				target: 'es5',
+				tsconfig: false,
+			}),
+			/*
 			rollupPluginCommonJs(),
 			rollupPluginBabel({
 				presets: [
@@ -132,6 +137,7 @@ function compileRollupTs_(config, item) {
 				exclude: 'node_modules/**' // only transpile our source code
 				// babelrc: false,
 			}),
+			*/
 			rollupPluginLicense({
 				banner: `@license <%= pkg.name %> v<%= pkg.version %>
 				(c) <%= moment().format('YYYY') %> <%= pkg.author %>
@@ -164,61 +170,6 @@ function compileRollupTs_(config, item) {
 		.pipe(filter('**/*.js'))
 		.pipe(connect.reload());
 }
-
-/*
-function compileTs__(config, done) {
-	let options = {
-		global: true,
-		plugins: ['@babel/plugin-transform-flow-strip-types'],
-		presets: [
-			['@babel/preset-env', {
-				targets: {
-					chrome: '58',
-					// ie: '11'
-				},
-				loose: true,
-			}],
-		],
-		extensions: ['.ts']
-	};
-	const items = compiles_(config, '.ts');
-	const tasks = items.map(item => function itemTask(done) {
-		log(item.input);
-		return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
-			.pipe(plumber())
-			.pipe(through2.obj((file, enc, next) => {
-				browserify(file.path)
-					.plugin(tsify)
-					.transform('babelify', options)
-					.bundle((error, response) => {
-						if (error) {
-							log.error('compile:ts', error);
-						} else {
-							file.contents = response;
-							next(null, file);
-						}
-					})
-					.on('error', (error) => {
-						log.error('compile:ts', error.toString());
-					});
-			}, (done) => {
-				done();
-			}))
-			.pipe(rename(item.output))
-			.pipe(tfsCheckout(config))
-			.pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
-			.pipe(filter('**\/*.js'))
-			.on('end', () => log('Compile', item.output))
-			.pipe(gulpif(item.minify, terser()))
-			.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-			.pipe(tfsCheckout(config, !item.minify))
-			.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
-			.pipe(filter('**\/*.js'))
-			.pipe(connect.reload());
-	});
-	return tasks.length ? parallel(...tasks)(done) : done();
-}
-*/
 
 function compileHtml_(config, done) {
 	const items = compiles_(config, '.html');

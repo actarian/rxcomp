@@ -1,6 +1,8 @@
-import { Subject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 
 export type SelectorFunction = (node: HTMLElement) => boolean;
+
+export type ExpressionFunction = () => any;
 
 export interface IFactoryMeta {
 	selector: string;
@@ -10,8 +12,28 @@ export interface IFactoryMeta {
 	template?: string;
 }
 
-export default abstract class Factory {
-	unsubscribe$: Subject<void>;
-	pushChanges: Function;
+export class RxCompElement extends HTMLElement {
+	rxcompId?: number;
+}
+
+export class RxCompText extends Text {
+	nodeExpressions?: (ExpressionFunction | string)[];
+}
+
+export default class Factory {
+	rxcompId?: number;
+	changes$?: BehaviorSubject<Factory>;
+	unsubscribe$?: Subject<void>;
+	/*
+	onInit?: () => void;
+	onChanges?: (changes: Factory) => void;
+	onView?: () => void;
+	onDestroy?: () => void;
+	*/
+	pushChanges?: Function;
 	static meta: IFactoryMeta;
+
+	constructor(...args: any[]) {
+
+	}
 }

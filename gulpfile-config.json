@@ -22,7 +22,7 @@
 						"external": ["rxjs"]
 					}
 				},
-				"minify": true
+				"minify": false
 			}, {
 				"input": "test/js/test.for.ts",
 				"output": "docs/js/test.for.js",
@@ -36,7 +36,7 @@
 						"external": ["rxjs"]
 					}
 				},
-				"minify": true
+				"minify": false
 			}, {
 				"input": "test/js/test.parsing.ts",
 				"output": "docs/js/test.parsing.js",
@@ -50,7 +50,7 @@
 						"external": ["rxjs"]
 					}
 				},
-				"minify": true
+				"minify": false
 			}, {
 				"input": "test/js/test.pipes.ts",
 				"output": "docs/js/test.pipes.js",
@@ -64,7 +64,7 @@
 						"external": ["rxjs"]
 					}
 				},
-				"minify": true
+				"minify": false
 			}, {
 				"input": "test/js/test.scope.ts",
 				"output": "docs/js/test.scope.js",
@@ -78,7 +78,7 @@
 						"external": ["rxjs"]
 					}
 				},
-				"minify": true
+				"minify": false
 			}],
 			"bundle": []
 		},

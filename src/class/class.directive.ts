@@ -1,9 +1,10 @@
 import Directive from '../core/directive';
+import { ExpressionFunction } from '../core/factory';
 import { getContext } from '../module/module';
 
 export default class ClassDirective extends Directive {
 
-	classFunction: Function;
+	classFunction: ExpressionFunction;
 
 	onInit() {
 		const { module, node } = getContext(this);

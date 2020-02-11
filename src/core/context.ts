@@ -1,11 +1,12 @@
 // import { BehaviorSubject, Subject } from 'rxjs';
 import Component from './component';
+import Factory from './factory';
 
 const RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
 export default class Context extends Component {
 
-	constructor(instance, descriptors = {}) {
+	constructor(instance: Factory, descriptors = {}) {
 		super();
 		descriptors = Context.mergeDescriptors(instance, instance, descriptors);
 		descriptors = Context.mergeDescriptors(Object.getPrototypeOf(instance), instance, descriptors);

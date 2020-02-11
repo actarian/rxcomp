@@ -4,6 +4,7 @@
 	"description": "Reactive component library for JavaScript",
 	"version": "1.0.0-beta.5",
 	"main": "dist/rxcomp.js",
+	"types": "dist/rxcomp.d.ts",
 	"license": "MIT",
 	"keywords": [
 		"rxcomp",

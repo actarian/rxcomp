@@ -1,4 +1,5 @@
 import Context from '../core/context';
+import Factory from '../core/factory';
 
 export default class ForItem extends Context {
 
@@ -6,7 +7,7 @@ export default class ForItem extends Context {
 	count: number;
 	// !!! try with payload options { key, $key, value, $value, index, count } or use onInit()
 
-	constructor(key, $key, value, $value, index, count, parentInstance) {
+	constructor(key: string, $key: number | string, value: string, $value: any, index: number, count: number, parentInstance: Factory) {
 		// console.log('ForItem', arguments);
 		super(parentInstance);
 		/*

@@ -15,7 +15,6 @@ RootComponent.meta = {
 };
 
 class SubComponent extends Component {
-
 	background = '#ffb9b9';
 	toggle: BehaviorSubject<any>;
 	item: number;
