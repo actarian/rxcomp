@@ -3,8 +3,12 @@
 	"name": "rxcomp",
 	"description": "Reactive component library for JavaScript",
 	"version": "1.0.0-beta.5",
-	"main": "dist/rxcomp.js",
-	"types": "dist/rxcomp.d.ts",
+
+	"main": "lib/rxcomp.js",
+	"types": "lib/rxcomp.d.ts",
+	"module": "dist/umd/rxcomp.js",
+	"es2015": "dist/es6/rxcomp.js",
+
 	"license": "MIT",
 	"keywords": [
 		"rxcomp",
@@ -78,6 +82,7 @@
 		"through2": "~3.0.1",
 		"time-stamp": "~2.2.0",
 		"tslib": "~1.10.0",
-		"typescript": "~3.7.5"
+		"typescript": "~3.7.5",
+		"vinyl": "~2.2.0"
 	}
 }

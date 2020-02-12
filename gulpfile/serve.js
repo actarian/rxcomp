@@ -7,19 +7,19 @@ const log = require('./logger');
 function serve_(config, done) {
 	if (config.server) {
 		const options = Object.assign({
+			name: 'Development',
 			root: './docs',
 			port: 8001,
 			host: 'localhost',
-			name: 'Development',
 			https: false,
 			path: '/',
-			fallback: '/tiemme-com/index.html',
 			livereload: true,
 		}, config.server || {});
+		options.fallback = `${options.path}index.html`;
 		const middleware = middleware_({
 			logger: options.log ? log : undefined,
 			rewrites: [{
-				from: new RegExp(`^${options.path}.*$`), //   /^\/tiemme-com\/.*$/,
+				from: new RegExp(`^${options.path}.*$`),
 				to: (context) => {
 					return context.parsedUrl.pathname.replace(options.path, '/');
 				}
@@ -41,15 +41,7 @@ function middleware_(options) {
 	const logger = getLogger(options);
 	return function(req, res, next) {
 		const headers = req.headers;
-		if (req.method !== 'GET') {
-			logger(
-				'Not rewriting',
-				req.method,
-				req.url,
-				'because the method is not GET.'
-			);
-			return next();
-		} else if (!headers || typeof headers.accept !== 'string') {
+		if (!headers || typeof headers.accept !== 'string') {
 			logger(
 				'Not rewriting',
 				req.method,
@@ -58,11 +50,24 @@ function middleware_(options) {
 			);
 			return next();
 		} else if (headers.accept.indexOf('application/json') === 0) {
+			if (req.url.indexOf('.json') !== -1) {
+				req.method = 'GET';
+			}
+			/*
 			logger(
 				'Not rewriting',
 				req.method,
 				req.url,
 				'because the client prefers JSON.'
+			);
+			return next();
+			*/
+		} else if (req.method !== 'GET') {
+			logger(
+				'Not rewriting',
+				req.method,
+				req.url,
+				'because the method is not GET.'
 			);
 			return next();
 		} else if (!acceptsHtml(headers.accept, options)) {
@@ -82,7 +87,6 @@ function middleware_(options) {
 			const match = parsedUrl.pathname.match(rewrite.from);
 			if (match !== null) {
 				rewriteTarget = evaluateRewriteRule(parsedUrl, match, rewrite.to, req);
-
 				if (rewriteTarget.charAt(0) !== '/') {
 					logger(
 						'We recommend using an absolute path for the rewrite target.',
@@ -92,7 +96,6 @@ function middleware_(options) {
 						req.url
 					);
 				}
-
 				logger('Rewriting', req.method, req.url, 'to', rewriteTarget);
 				req.url = rewriteTarget;
 				return next();

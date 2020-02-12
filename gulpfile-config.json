@@ -87,7 +87,8 @@
 				"input": "src/rxcomp.ts",
 				"output": "dist/rxcomp.js",
 				"rollup": {
-					"output": {
+					"output": [{
+						"file": "dist/umd/rxcomp.js",
 						"name": "rxcomp",
 						"format": "umd",
 						"globals": {
@@ -95,7 +96,25 @@
 							"rxjs/operators": "rxjs.operators"
 						},
 						"external": ["rxjs"]
-					}
+					}, {
+						"file": "dist/es6/rxcomp.js",
+						"name": "rxcomp",
+						"format": "es",
+						"globals": {
+							"rxjs": "rxjs",
+							"rxjs/operators": "rxjs.operators"
+						},
+						"external": ["rxjs"]
+					}, {
+						"file": "dist/iife/rxcomp.js",
+						"name": "rxcomp",
+						"format": "iife",
+						"globals": {
+							"rxjs": "rxjs",
+							"rxjs/operators": "rxjs.operators"
+						},
+						"external": ["rxjs"]
+					}]
 				},
 				"minify": true
 			}],
