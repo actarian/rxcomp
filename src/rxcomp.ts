@@ -17,3 +17,7 @@ export { default as Browser } from './platform/browser';
 export { default as Platform } from './platform/platform';
 export { default as SrcDirective } from './src/src.directive';
 export { default as StyleDirective } from './style/style.directive';
+
+
+
+//# sourceMappingURL=rxcomp.ts.map

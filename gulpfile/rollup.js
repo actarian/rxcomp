@@ -105,7 +105,6 @@ function rollupInput_(input) {
 		// Compile TypeScript files
 		path.extname(input) === '.ts' ? rollupPluginTypescript({
 			rollupCommonJSResolveHack: true,
-			// exclude: '**/__tests__/**',
 			clean: true,
 			declaration: true
 		}) : null,
@@ -183,38 +182,6 @@ function rollupOutput_(input, output) {
 		*/
 		return output;
 	});
-}
-
-function example_() {
-	return {
-		input: `src/${libraryName}.ts`,
-		output: [
-			{ file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: true },
-			{ file: pkg.module, format: 'es', sourcemap: true },
-  		],
-		// Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
-		external: [],
-		watch: {
-			include: 'src/**',
-		},
-		plugins: [
-			// Compile TypeScript files
-			rollupPluginTypescript({ useTsconfigDeclarationDir: true }),
-			// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-			rollupPluginCommonJs(),
-			// Allow node_modules resolution, so you can use 'external' to control
-			// which external modules to include in the bundle
-			// https://github.com/rollup/rollup-plugin-node-resolve#usage
-			rollupPluginNodeResolve(),
-			rollupPluginLicense({
-				banner: `@license <%= pkg.name %> v<%= pkg.version %>
-				(c) <%= moment().format('YYYY') %> <%= pkg.author %>
-				License: <%= pkg.license %>`,
-			}),
-			// Resolve source maps to the original source
-			rollupPluginSourcemaps(),
-		],
-	};
 }
 
 module.exports = {

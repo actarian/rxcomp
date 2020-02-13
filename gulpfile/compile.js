@@ -147,40 +147,6 @@ function logWatch(path, stats) {
 	log('Changed', path);
 }
 
-function compileRollupTs__(config, item) {
-	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
-		.pipe(plumber())
-		.pipe(rollup_(config, item))
-		// .pipe(rename(item.output))
-		.pipe(tfsCheckout(config))
-		// .pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
-		.pipe(filter('**/*.js'))
-		.on('end', () => log('Compile', item.output))
-		.pipe(gulpif(item.minify, terser()))
-		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-		.pipe(tfsCheckout(config, !item.minify))
-		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
-		.pipe(filter('**/*.js'))
-		.pipe(connect.reload());
-}
-
-function compileRollupJs_(config, item) {
-	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
-		.pipe(plumber())
-		.pipe(rollup_(config, item))
-		// .pipe(rename(item.output))
-		.pipe(tfsCheckout(config))
-		.pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
-		.pipe(filter('**/*.js'))
-		.on('end', () => log('Compile', item.output))
-		.pipe(gulpif(item.minify, terser()))
-		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-		.pipe(tfsCheckout(config, !item.minify))
-		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
-		.pipe(filter('**/*.js'))
-		.pipe(connect.reload());
-}
-
 module.exports = {
 	compileScss_,
 	compileJs_,

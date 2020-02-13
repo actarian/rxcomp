@@ -103,7 +103,7 @@
 					},
 					"external": ["rxjs"]
 				}],
-				"minify": true
+				"minify": false
 			}],
 			"bundle": []
 		}
