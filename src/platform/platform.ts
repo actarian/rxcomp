@@ -11,7 +11,7 @@ export default class Platform {
 
 	static bootstrap(moduleFactory: typeof Module): Module {
 		const meta = this.resolveMeta(moduleFactory);
-		console.log(meta);
+		// console.log(meta);
 		const bootstrap = meta.bootstrap;
 		if (!bootstrap) {
 			throw ('missing bootstrap');

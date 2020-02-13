@@ -4,80 +4,130 @@
  * License: MIT
  */
 
-var rxcomp = (function (exports, rxjs, operators) {
+var rxcomp = (function (exports, tslib, rxjs, operators) {
 	'use strict';
 
-	class Factory {
-	    constructor(...args) {
+	var RxCompElement = (function (_super) {
+	    tslib.__extends(RxCompElement, _super);
+	    function RxCompElement() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	}
+	    return RxCompElement;
+	}(HTMLElement));
+	var RxCompText = (function (_super) {
+	    tslib.__extends(RxCompText, _super);
+	    function RxCompText() {
+	        return _super !== null && _super.apply(this, arguments) || this;
+	    }
+	    return RxCompText;
+	}(Text));
+	var Factory = (function () {
+	    function Factory() {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i] = arguments[_i];
+	        }
+	    }
+	    return Factory;
+	}());
 
-	class Directive extends Factory {
-	}
+	var Directive = (function (_super) {
+	    tslib.__extends(Directive, _super);
+	    function Directive() {
+	        return _super !== null && _super.apply(this, arguments) || this;
+	    }
+	    return Directive;
+	}(Factory));
 
-	class Component extends Factory {
-	}
+	var Component = (function (_super) {
+	    tslib.__extends(Component, _super);
+	    function Component() {
+	        return _super !== null && _super.apply(this, arguments) || this;
+	    }
+	    return Component;
+	}(Factory));
 
-	const RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
-	class Context extends Component {
-	    constructor(instance, descriptors = {}) {
-	        super();
+	var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
+	var Context = (function (_super) {
+	    tslib.__extends(Context, _super);
+	    function Context(instance, descriptors) {
+	        if (descriptors === void 0) { descriptors = {}; }
+	        var _this = _super.call(this) || this;
 	        descriptors = Context.mergeDescriptors(instance, instance, descriptors);
 	        descriptors = Context.mergeDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
-	        Object.defineProperties(this, descriptors);
+	        Object.defineProperties(_this, descriptors);
+	        return _this;
 	    }
-	    static mergeDescriptors(source, instance, descriptors = {}) {
-	        const properties = Object.getOwnPropertyNames(source);
-	        while (properties.length) {
-	            let key = properties.shift();
+	    Context.mergeDescriptors = function (source, instance, descriptors) {
+	        if (descriptors === void 0) { descriptors = {}; }
+	        var properties = Object.getOwnPropertyNames(source);
+	        var _loop_1 = function () {
+	            var key = properties.shift();
 	            if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
-	                const descriptor = Object.getOwnPropertyDescriptor(source, key);
+	                var descriptor = Object.getOwnPropertyDescriptor(source, key);
 	                if (typeof descriptor.value == "function") {
-	                    descriptor.value = (...args) => {
+	                    descriptor.value = function () {
+	                        var args = [];
+	                        for (var _i = 0; _i < arguments.length; _i++) {
+	                            args[_i] = arguments[_i];
+	                        }
 	                        return instance[key].apply(instance, args);
 	                    };
 	                }
 	                descriptors[key] = descriptor;
 	            }
+	        };
+	        while (properties.length) {
+	            _loop_1();
 	        }
 	        return descriptors;
+	    };
+	    return Context;
+	}(Component));
+
+	var Structure = (function (_super) {
+	    tslib.__extends(Structure, _super);
+	    function Structure() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	}
+	    return Structure;
+	}(Factory));
 
-	class Structure extends Factory {
-	}
-
-	let ID = 0;
-	const CONTEXTS = {};
-	const NODES = {};
-	class Module {
-	    compile(node, parentInstance) {
-	        let componentNode;
-	        const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(match => {
+	var ID = 0;
+	var CONTEXTS = {};
+	var NODES = {};
+	var Module = (function () {
+	    function Module() {
+	    }
+	    Module.prototype.compile = function (node, parentInstance) {
+	        var _this = this;
+	        var componentNode;
+	        var instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(function (match) {
 	            if (componentNode && componentNode !== match.node) {
 	                parentInstance = undefined;
 	            }
-	            const instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+	            var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 	            if (match.factory.prototype instanceof Component) {
 	                componentNode = match.node;
 	            }
 	            return instance;
-	        }).filter(x => x);
+	        }).filter(function (x) { return x; });
 	        return instances;
-	    }
-	    makeInstance(node, factory, selector, parentInstance, args) {
+	    };
+	    Module.prototype.makeInstance = function (node, factory, selector, parentInstance, args) {
+	        var _this = this;
 	        if (parentInstance || node.parentNode) {
-	            const isComponent = factory.prototype instanceof Component;
-	            const meta = factory.meta;
+	            var isComponent_1 = factory.prototype instanceof Component;
+	            var meta_1 = factory.meta;
 	            parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 	            if (!parentInstance) {
 	                return;
 	            }
-	            const instance = new factory(...(args || []));
-	            const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
-	            Object.defineProperties(instance, {
+	            var instance_1 = new (factory.bind.apply(factory, tslib.__spreadArrays([void 0], (args || []))))();
+	            var context = Module.makeContext(this, instance_1, parentInstance, node, factory, selector);
+	            Object.defineProperties(instance_1, {
 	                changes$: {
-	                    value: new rxjs.BehaviorSubject(instance),
+	                    value: new rxjs.BehaviorSubject(instance_1),
 	                    writable: false,
 	                    enumerable: false,
 	                },
@@ -87,99 +137,97 @@ var rxcomp = (function (exports, rxjs, operators) {
 	                    enumerable: false,
 	                }
 	            });
-	            let initialized;
-	            const module = this;
-	            instance.pushChanges = function () {
+	            var initialized_1;
+	            var module_1 = this;
+	            instance_1.pushChanges = function () {
 	                this.changes$.next(this);
-	                if (isComponent) {
-	                    initialized ? module.parse(node, instance) : setTimeout(function () { module.parse(node, instance); });
+	                if (isComponent_1) {
+	                    initialized_1 ? module_1.parse(node, instance_1) : setTimeout(function () { module_1.parse(node, instance_1); });
 	                }
-	                if (instance['onView']) {
-	                    instance['onView']();
+	                if (instance_1['onView']) {
+	                    instance_1['onView']();
 	                }
 	            };
-	            if (meta) {
-	                this.makeHosts(meta, instance, node);
-	                context.inputs = this.makeInputs(meta, instance);
-	                context.outputs = this.makeOutputs(meta, instance);
+	            if (meta_1) {
+	                this.makeHosts(meta_1, instance_1, node);
+	                context.inputs = this.makeInputs(meta_1, instance_1);
+	                context.outputs = this.makeOutputs(meta_1, instance_1);
 	            }
-	            if (instance['onInit']) {
-	                instance['onInit']();
+	            if (instance_1['onInit']) {
+	                instance_1['onInit']();
 	            }
-	            initialized = true;
+	            initialized_1 = true;
 	            if (parentInstance instanceof Factory && parentInstance.changes$) {
-	                parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(changes => {
-	                    if (meta) {
-	                        this.resolveInputsOutputs(instance, changes);
+	                parentInstance.changes$.pipe(operators.takeUntil(instance_1.unsubscribe$)).subscribe(function (changes) {
+	                    if (meta_1) {
+	                        _this.resolveInputsOutputs(instance_1, changes);
 	                    }
-	                    if (instance['onChanges']) {
-	                        instance['onChanges'](changes);
+	                    if (instance_1['onChanges']) {
+	                        instance_1['onChanges'](changes);
 	                    }
-	                    instance.pushChanges();
+	                    instance_1.pushChanges();
 	                });
 	            }
-	            return instance;
+	            return instance_1;
 	        }
-	    }
-	    makeContext(instance, parentInstance, node, selector) {
-	        const context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
+	    };
+	    Module.prototype.makeContext = function (instance, parentInstance, node, selector) {
+	        var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
 	        return context;
-	    }
-	    makeFunction(expression, params = ['$instance']) {
+	    };
+	    Module.prototype.makeFunction = function (expression, params) {
+	        if (params === void 0) { params = ['$instance']; }
 	        if (expression) {
 	            expression = Module.parseExpression(expression);
-	            const args = params.join(',');
-	            const expression_func = new Function(`with(this) {
-				return (function (${args}, $$module) {
-					const $$pipes = $$module.meta.pipes;
-					return ${expression};
-				}.bind(this)).apply(this, arguments);
-			}`);
+	            var args = params.join(',');
+	            var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
 	            return expression_func;
 	        }
 	        else {
-	            return () => { return null; };
+	            return function () { return null; };
 	        }
-	    }
-	    getInstance(node) {
+	    };
+	    Module.prototype.getInstance = function (node) {
 	        if (node instanceof Document) {
 	            return window;
 	        }
-	        const context = getContextByNode(node);
+	        var context = getContextByNode(node);
 	        if (context) {
 	            return context.instance;
 	        }
-	    }
-	    getParentInstance(node) {
-	        return Module.traverseUp(node, (node) => {
-	            return this.getInstance(node);
+	    };
+	    Module.prototype.getParentInstance = function (node) {
+	        var _this = this;
+	        return Module.traverseUp(node, function (node) {
+	            return _this.getInstance(node);
 	        });
-	    }
-	    parse(node, instance) {
-	        for (let i = 0; i < node.childNodes.length; i++) {
-	            const child = node.childNodes[i];
+	    };
+	    Module.prototype.parse = function (node, instance) {
+	        for (var i = 0; i < node.childNodes.length; i++) {
+	            var child = node.childNodes[i];
 	            if (child.nodeType === 1) {
-	                const htmlNode = child;
-	                const context = getContextByNode(htmlNode);
+	                var htmlNode = child;
+	                var context = getContextByNode(htmlNode);
 	                if (!context) {
 	                    this.parse(htmlNode, instance);
 	                }
 	            }
 	            else if (child.nodeType === 3) {
-	                const text = child;
+	                var text = child;
 	                this.parseTextNode(text, instance);
 	            }
 	        }
-	    }
-	    parseTextNode(node, instance) {
-	        let expressions = node.nodeExpressions;
+	    };
+	    Module.prototype.parseTextNode = function (node, instance) {
+	        var _this = this;
+	        var expressions = node.nodeExpressions;
 	        if (!expressions) {
 	            expressions = this.parseTextNodeExpression(node.nodeValue);
 	        }
-	        const replacedText = expressions.reduce((p, c) => {
-	            let text;
+	        var replacedText = expressions.reduce(function (p, c) {
+	            var text;
 	            if (typeof c === 'function') {
-	                text = this.resolve(c, instance, instance);
+	                text = _this.resolve(c, instance, instance);
 	                if (text == undefined) {
 	                    text = '';
 	                }
@@ -190,51 +238,50 @@ var rxcomp = (function (exports, rxjs, operators) {
 	            return p + text;
 	        }, '');
 	        if (node.nodeValue !== replacedText) {
-	            const textNode = document.createTextNode(replacedText);
+	            var textNode = document.createTextNode(replacedText);
 	            textNode.nodeExpressions = expressions;
 	            node.parentNode.replaceChild(textNode, node);
 	        }
-	    }
-	    pushFragment(nodeValue, from, to, expressions) {
-	        const fragment = nodeValue.substring(from, to);
+	    };
+	    Module.prototype.pushFragment = function (nodeValue, from, to, expressions) {
+	        var fragment = nodeValue.substring(from, to);
 	        expressions.push(fragment);
-	    }
-	    ;
-	    parseTextNodeExpression(nodeValue) {
-	        const expressions = [];
-	        const regex = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
-	        let lastIndex = 0, matches;
+	    };
+	    Module.prototype.parseTextNodeExpression = function (nodeValue) {
+	        var expressions = [];
+	        var regex = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
+	        var lastIndex = 0, matches;
 	        while ((matches = regex.exec(nodeValue)) !== null) {
-	            const index = regex.lastIndex - matches[0].length;
+	            var index = regex.lastIndex - matches[0].length;
 	            if (index > lastIndex) {
 	                this.pushFragment(nodeValue, index, lastIndex, expressions);
 	            }
 	            lastIndex = regex.lastIndex;
-	            const expression = this.makeFunction(matches[1]);
+	            var expression = this.makeFunction(matches[1]);
 	            expressions.push(expression);
 	        }
-	        const length = nodeValue.length;
+	        var length = nodeValue.length;
 	        if (length > lastIndex) {
 	            this.pushFragment(nodeValue, lastIndex, length, expressions);
 	        }
 	        return expressions;
-	    }
-	    resolve(expression, parentInstance, payload) {
+	    };
+	    Module.prototype.resolve = function (expression, parentInstance, payload) {
 	        return expression.apply(parentInstance, [payload, this]);
-	    }
-	    makeHosts(meta, instance, node) {
+	    };
+	    Module.prototype.makeHosts = function (meta, instance, node) {
 	        if (meta.hosts) {
-	            Object.keys(meta.hosts).forEach((key) => {
-	                const factory = meta.hosts[key];
+	            Object.keys(meta.hosts).forEach(function (key) {
+	                var factory = meta.hosts[key];
 	                instance[key] = getHost(instance, factory, node);
 	            });
 	        }
-	    }
-	    makeInput(instance, key) {
-	        const { node } = getContext(instance);
-	        let input, expression = null;
+	    };
+	    Module.prototype.makeInput = function (instance, key) {
+	        var node = getContext(instance).node;
+	        var input, expression = null;
 	        if (node.hasAttribute(key)) {
-	            const attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (match, a, b, c) {
+	            var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (match, a, b, c) {
 	                if (a) {
 	                    return '"+';
 	                }
@@ -245,108 +292,123 @@ var rxcomp = (function (exports, rxjs, operators) {
 	                    return '\"';
 	                }
 	            });
-	            expression = `"${attribute}"`;
+	            expression = "\"" + attribute + "\"";
 	        }
-	        else if (node.hasAttribute(`[${key}]`)) {
-	            expression = node.getAttribute(`[${key}]`);
+	        else if (node.hasAttribute("[" + key + "]")) {
+	            expression = node.getAttribute("[" + key + "]");
 	        }
 	        if (expression !== null) {
 	            input = this.makeFunction(expression);
 	        }
 	        return input;
-	    }
-	    makeInputs(meta, instance) {
-	        const inputs = {};
+	    };
+	    Module.prototype.makeInputs = function (meta, instance) {
+	        var _this = this;
+	        var inputs = {};
 	        if (meta.inputs) {
-	            meta.inputs.forEach((key, i) => {
-	                const input = this.makeInput(instance, key);
+	            meta.inputs.forEach(function (key, i) {
+	                var input = _this.makeInput(instance, key);
 	                if (input) {
 	                    inputs[key] = input;
 	                }
 	            });
 	        }
 	        return inputs;
-	    }
-	    makeOutput(instance, key) {
-	        const context = getContext(instance);
-	        const node = context.node;
-	        const parentInstance = context.parentInstance;
-	        const expression = node.getAttribute(`(${key})`);
-	        const outputFunction = this.makeFunction(expression, ['$event']);
-	        const output$ = new rxjs.Subject().pipe(operators.tap((event) => {
-	            this.resolve(outputFunction, parentInstance, event);
+	    };
+	    Module.prototype.makeOutput = function (instance, key) {
+	        var _this = this;
+	        var context = getContext(instance);
+	        var node = context.node;
+	        var parentInstance = context.parentInstance;
+	        var expression = node.getAttribute("(" + key + ")");
+	        var outputFunction = this.makeFunction(expression, ['$event']);
+	        var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
+	            _this.resolve(outputFunction, parentInstance, event);
 	        }));
 	        output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
 	        instance[key] = output$;
 	        return outputFunction;
-	    }
-	    makeOutputs(meta, instance) {
-	        const outputs = {};
+	    };
+	    Module.prototype.makeOutputs = function (meta, instance) {
+	        var _this = this;
+	        var outputs = {};
 	        if (meta.outputs) {
-	            meta.outputs.forEach((key, i) => outputs[key] = this.makeOutput(instance, key));
+	            meta.outputs.forEach(function (key, i) { return outputs[key] = _this.makeOutput(instance, key); });
 	        }
 	        return outputs;
-	    }
-	    resolveInputsOutputs(instance, changes) {
-	        const context = getContext(instance);
-	        const parentInstance = context.parentInstance;
-	        const inputs = context.inputs;
-	        for (let key in inputs) {
-	            const inputFunction = inputs[key];
-	            const value = this.resolve(inputFunction, parentInstance, instance);
+	    };
+	    Module.prototype.resolveInputsOutputs = function (instance, changes) {
+	        var context = getContext(instance);
+	        var parentInstance = context.parentInstance;
+	        var inputs = context.inputs;
+	        for (var key in inputs) {
+	            var inputFunction = inputs[key];
+	            var value = this.resolve(inputFunction, parentInstance, instance);
 	            instance[key] = value;
 	        }
-	    }
-	    destroy() {
+	    };
+	    Module.prototype.destroy = function () {
 	        this.remove(this.meta.node);
 	        this.meta.node.innerHTML = this.meta.nodeInnerHTML;
-	    }
-	    remove(node, keepInstance) {
-	        const keepContext = keepInstance ? getContext(keepInstance) : undefined;
-	        Module.traverseDown(node, (node) => {
-	            const rxcompId = node.rxcompId;
+	    };
+	    Module.prototype.remove = function (node, keepInstance) {
+	        var keepContext = keepInstance ? getContext(keepInstance) : undefined;
+	        Module.traverseDown(node, function (node) {
+	            var rxcompId = node.rxcompId;
 	            if (rxcompId) {
-	                const keepContexts = Module.deleteContext(rxcompId, keepContext);
+	                var keepContexts = Module.deleteContext(rxcompId, keepContext);
 	                if (keepContexts.length === 0) {
 	                    delete node.rxcompId;
 	                }
 	            }
 	        });
 	        return node;
-	    }
-	    static parseExpression(expression) {
-	        const l = '┌';
-	        const r = '┘';
-	        const rx1 = /(\()([^\(\)]*)(\))/;
+	    };
+	    Module.parseExpression = function (expression) {
+	        var l = '┌';
+	        var r = '┘';
+	        var rx1 = /(\()([^\(\)]*)(\))/;
 	        while (expression.match(rx1)) {
-	            expression = expression.replace(rx1, function (...g1) {
-	                return `${l}${Module.parsePipes(g1[2])}${r}`;
+	            expression = expression.replace(rx1, function () {
+	                var g1 = [];
+	                for (var _i = 0; _i < arguments.length; _i++) {
+	                    g1[_i] = arguments[_i];
+	                }
+	                return "" + l + Module.parsePipes(g1[2]) + r;
 	            });
 	        }
 	        expression = Module.parsePipes(expression);
-	        expression = expression.replace(/(┌)|(┘)/g, function (...g2) {
+	        expression = expression.replace(/(┌)|(┘)/g, function () {
+	            var g2 = [];
+	            for (var _i = 0; _i < arguments.length; _i++) {
+	                g2[_i] = arguments[_i];
+	            }
 	            return g2[1] ? '(' : ')';
 	        });
 	        return Module.parseOptionalChaining(expression);
-	    }
-	    static parsePipes(expression) {
-	        const rx1 = /(.*?[^\|])\|([^\|]+)/;
+	    };
+	    Module.parsePipes = function (expression) {
+	        var rx1 = /(.*?[^\|])\|([^\|]+)/;
 	        while (expression.match(rx1)) {
-	            expression = expression.replace(rx1, function (substring, ...args) {
-	                const value = args[0].trim();
-	                const params = Module.parsePipeParams(args[1]);
-	                const func = params.shift().trim();
-	                return `$$pipes.${func}.transform┌${[value, ...params]}┘`;
+	            expression = expression.replace(rx1, function (substring) {
+	                var args = [];
+	                for (var _i = 1; _i < arguments.length; _i++) {
+	                    args[_i - 1] = arguments[_i];
+	                }
+	                var value = args[0].trim();
+	                var params = Module.parsePipeParams(args[1]);
+	                var func = params.shift().trim();
+	                return "$$pipes." + func + ".transform\u250C" + tslib.__spreadArrays([value], params) + "\u2518";
 	            });
 	        }
 	        return expression;
-	    }
-	    static parsePipeParams(expression) {
-	        const segments = [];
-	        let i = 0, word = '', block = 0;
-	        const t = expression.length;
+	    };
+	    Module.parsePipeParams = function (expression) {
+	        var segments = [];
+	        var i = 0, word = '', block = 0;
+	        var t = expression.length;
 	        while (i < t) {
-	            const c = expression.substr(i, 1);
+	            var c = expression.substr(i, 1);
 	            if (c === '{' || c === '(' || c === '[') {
 	                block++;
 	            }
@@ -368,40 +430,44 @@ var rxcomp = (function (exports, rxjs, operators) {
 	            segments.push(word.trim());
 	        }
 	        return segments;
-	    }
-	    static parseOptionalChaining(expression) {
-	        const regex = /(\w+(\?\.))+([\.|\w]+)/g;
-	        let previous;
-	        expression = expression.replace(regex, function (substring, ...args) {
-	            const tokens = substring.split('?.');
-	            for (let i = 0; i < tokens.length - 1; i++) {
-	                const a = i > 0 ? `(${tokens[i]} = ${previous})` : tokens[i];
-	                const b = tokens[i + 1];
-	                previous = i > 0 ? `${a}.${b}` : `(${a} ? ${a}.${b} : void 0)`;
+	    };
+	    Module.parseOptionalChaining = function (expression) {
+	        var regex = /(\w+(\?\.))+([\.|\w]+)/g;
+	        var previous;
+	        expression = expression.replace(regex, function (substring) {
+	            var args = [];
+	            for (var _i = 1; _i < arguments.length; _i++) {
+	                args[_i - 1] = arguments[_i];
+	            }
+	            var tokens = substring.split('?.');
+	            for (var i = 0; i < tokens.length - 1; i++) {
+	                var a = i > 0 ? "(" + tokens[i] + " = " + previous + ")" : tokens[i];
+	                var b = tokens[i + 1];
+	                previous = i > 0 ? a + "." + b : "(" + a + " ? " + a + "." + b + " : void 0)";
 	            }
 	            return previous || '';
 	        });
 	        return expression;
-	    }
-	    static makeContext(module, instance, parentInstance, node, factory, selector) {
+	    };
+	    Module.makeContext = function (module, instance, parentInstance, node, factory, selector) {
 	        instance.rxcompId = ++ID;
-	        const context = { module, instance, parentInstance, node, factory, selector };
-	        const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
-	        const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+	        var context = { module: module, instance: instance, parentInstance: parentInstance, node: node, factory: factory, selector: selector };
+	        var rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
+	        var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
 	        nodeContexts.push(context);
 	        CONTEXTS[instance.rxcompId] = context;
 	        return context;
-	    }
-	    static deleteContext(id, keepContext) {
-	        const keepContexts = [];
-	        const nodeContexts = NODES[id];
+	    };
+	    Module.deleteContext = function (id, keepContext) {
+	        var keepContexts = [];
+	        var nodeContexts = NODES[id];
 	        if (nodeContexts) {
-	            nodeContexts.forEach(context => {
+	            nodeContexts.forEach(function (context) {
 	                if (context === keepContext) {
 	                    keepContexts.push(keepContext);
 	                }
 	                else {
-	                    const instance = context.instance;
+	                    var instance = context.instance;
 	                    instance.unsubscribe$.next();
 	                    instance.unsubscribe$.complete();
 	                    if (instance['onDestroy']) {
@@ -418,12 +484,12 @@ var rxcomp = (function (exports, rxjs, operators) {
 	            }
 	        }
 	        return keepContexts;
-	    }
-	    static matchSelectors(node, selectors, results) {
-	        for (let i = 0; i < selectors.length; i++) {
-	            const match = selectors[i](node);
+	    };
+	    Module.matchSelectors = function (node, selectors, results) {
+	        for (var i = 0; i < selectors.length; i++) {
+	            var match = selectors[i](node);
 	            if (match) {
-	                const factory = match.factory;
+	                var factory = match.factory;
 	                if (factory.prototype instanceof Component && factory.meta.template) {
 	                    node.innerHTML = factory.meta.template;
 	                }
@@ -434,80 +500,85 @@ var rxcomp = (function (exports, rxjs, operators) {
 	            }
 	        }
 	        return results;
-	    }
-	    static querySelectorsAll(node, selectors, results) {
+	    };
+	    Module.querySelectorsAll = function (node, selectors, results) {
 	        if (node.nodeType === 1) {
-	            const matches = this.matchSelectors(node, selectors, []);
+	            var matches = this.matchSelectors(node, selectors, []);
 	            results = results.concat(matches);
-	            const structure = matches.find(x => x.factory.prototype instanceof Structure);
+	            var structure = matches.find(function (x) { return x.factory.prototype instanceof Structure; });
 	            if (structure) {
 	                return results;
 	            }
-	            const childNodes = node.childNodes;
-	            for (let i = 0; i < childNodes.length; i++) {
+	            var childNodes = node.childNodes;
+	            for (var i = 0; i < childNodes.length; i++) {
 	                results = this.querySelectorsAll(childNodes[i], selectors, results);
 	            }
 	        }
 	        return results;
-	    }
-	    static traverseUp(node, callback, i = 0) {
+	    };
+	    Module.traverseUp = function (node, callback, i) {
+	        if (i === void 0) { i = 0; }
 	        if (!node) {
 	            return;
 	        }
-	        const result = callback(node, i);
+	        var result = callback(node, i);
 	        if (result) {
 	            return result;
 	        }
 	        return this.traverseUp(node.parentNode, callback, i + 1);
-	    }
-	    static traverseDown(node, callback, i = 0) {
+	    };
+	    Module.traverseDown = function (node, callback, i) {
+	        if (i === void 0) { i = 0; }
 	        if (!node) {
 	            return;
 	        }
-	        let result = callback(node, i);
+	        var result = callback(node, i);
 	        if (result) {
 	            return result;
 	        }
 	        if (node.nodeType === 1) {
-	            let j = 0, t = node.childNodes.length;
+	            var j = 0, t = node.childNodes.length;
 	            while (j < t && !result) {
 	                result = this.traverseDown(node.childNodes[j], callback, i + 1);
 	                j++;
 	            }
 	        }
 	        return result;
-	    }
-	    static traversePrevious(node, callback, i = 0) {
+	    };
+	    Module.traversePrevious = function (node, callback, i) {
+	        if (i === void 0) { i = 0; }
 	        if (!node) {
 	            return;
 	        }
-	        const result = callback(node, i);
+	        var result = callback(node, i);
 	        if (result) {
 	            return result;
 	        }
 	        return this.traversePrevious(node.previousSibling, callback, i + 1);
-	    }
-	    static traverseNext(node, callback, i = 0) {
+	    };
+	    Module.traverseNext = function (node, callback, i) {
+	        if (i === void 0) { i = 0; }
 	        if (!node) {
 	            return;
 	        }
-	        const result = callback(node, i);
+	        var result = callback(node, i);
 	        if (result) {
 	            return result;
 	        }
 	        return this.traverseNext(node.nextSibling, callback, i + 1);
-	    }
-	}
+	    };
+	    return Module;
+	}());
 	function getContext(instance) {
 	    return CONTEXTS[instance.rxcompId];
 	}
 	function getContextByNode(node) {
-	    let context;
-	    const rxcompId = node['rxcompId'];
+	    var context;
+	    var rxcompId = node['rxcompId'];
 	    if (rxcompId) {
-	        const nodeContexts = NODES[rxcompId];
+	        var nodeContexts = NODES[rxcompId];
 	        if (nodeContexts) {
-	            context = nodeContexts.reduce((previous, current) => {
+	            context = nodeContexts.reduce(function (previous, current) {
 	                if (current.factory.prototype instanceof Component) {
 	                    return current;
 	                }
@@ -527,10 +598,10 @@ var rxcomp = (function (exports, rxjs, operators) {
 	        node = getContext(instance).node;
 	    }
 	    if (node.rxcompId) {
-	        const nodeContexts = NODES[node.rxcompId];
+	        var nodeContexts = NODES[node.rxcompId];
 	        if (nodeContexts) {
-	            for (let i = 0; i < nodeContexts.length; i++) {
-	                const context = nodeContexts[i];
+	            for (var i = 0; i < nodeContexts.length; i++) {
+	                var context = nodeContexts[i];
 	                if (context.instance !== instance) {
 	                    if (context.instance instanceof Factory) {
 	                        return context.instance;
@@ -544,182 +615,221 @@ var rxcomp = (function (exports, rxjs, operators) {
 	    }
 	}
 
-	class ClassDirective extends Directive {
-	    onInit() {
-	        const { module, node } = getContext(this);
-	        const expression = node.getAttribute('[class]');
-	        this.classFunction = module.makeFunction(expression);
+	var ClassDirective = (function (_super) {
+	    tslib.__extends(ClassDirective, _super);
+	    function ClassDirective() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	    onChanges(changes) {
-	        const { module, node } = getContext(this);
-	        const classList = module.resolve(this.classFunction, changes, this);
-	        for (let key in classList) {
+	    ClassDirective.prototype.onInit = function () {
+	        var _a = getContext(this), module = _a.module, node = _a.node;
+	        var expression = node.getAttribute('[class]');
+	        this.classFunction = module.makeFunction(expression);
+	    };
+	    ClassDirective.prototype.onChanges = function (changes) {
+	        var _a = getContext(this), module = _a.module, node = _a.node;
+	        var classList = module.resolve(this.classFunction, changes, this);
+	        for (var key in classList) {
 	            classList[key] ? node.classList.add(key) : node.classList.remove(key);
 	        }
-	    }
-	}
+	    };
+	    return ClassDirective;
+	}(Directive));
 	ClassDirective.meta = {
-	    selector: `[[class]]`,
+	    selector: "[[class]]",
 	};
 
-	const EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
-	class EventDirective extends Directive {
-	    onInit() {
-	        const { module, node, parentInstance, selector } = getContext(this);
-	        const event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
-	        const event$ = this.event$ = rxjs.fromEvent(node, event).pipe(operators.shareReplay(1));
-	        const expression = node.getAttribute(`(${event})`);
+	var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
+	var EventDirective = (function (_super) {
+	    tslib.__extends(EventDirective, _super);
+	    function EventDirective() {
+	        return _super !== null && _super.apply(this, arguments) || this;
+	    }
+	    EventDirective.prototype.onInit = function () {
+	        var _a = getContext(this), module = _a.module, node = _a.node, parentInstance = _a.parentInstance, selector = _a.selector;
+	        var event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
+	        var event$ = this.event$ = rxjs.fromEvent(node, event).pipe(operators.shareReplay(1));
+	        var expression = node.getAttribute("(" + event + ")");
 	        if (expression) {
-	            const outputFunction = module.makeFunction(expression, ['$event']);
-	            event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(event => {
-	                module.resolve(outputFunction, parentInstance, event);
+	            var outputFunction_1 = module.makeFunction(expression, ['$event']);
+	            event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+	                module.resolve(outputFunction_1, parentInstance, event);
 	            });
 	        }
 	        else {
-	            parentInstance[`${event}$`] = event$;
+	            parentInstance[event + "$"] = event$;
 	        }
-	    }
-	}
+	    };
+	    return EventDirective;
+	}(Directive));
 	EventDirective.meta = {
-	    selector: `[(${EVENTS.join(')],[(')})]`,
+	    selector: "[(" + EVENTS.join(')],[(') + ")]",
 	};
 
-	class ForItem extends Context {
-	    constructor(key, $key, value, $value, index, count, parentInstance) {
-	        super(parentInstance);
-	        this[key] = $key;
-	        this[value] = $value;
-	        this.index = index;
-	        this.count = count;
+	var ForItem = (function (_super) {
+	    tslib.__extends(ForItem, _super);
+	    function ForItem(key, $key, value, $value, index, count, parentInstance) {
+	        var _this = _super.call(this, parentInstance) || this;
+	        _this[key] = $key;
+	        _this[value] = $value;
+	        _this.index = index;
+	        _this.count = count;
+	        return _this;
 	    }
-	    get first() { return this.index === 0; }
-	    get last() { return this.index === this.count - 1; }
-	    get even() { return this.index % 2 === 0; }
-	    get odd() { return !this.even; }
-	}
+	    Object.defineProperty(ForItem.prototype, "first", {
+	        get: function () { return this.index === 0; },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(ForItem.prototype, "last", {
+	        get: function () { return this.index === this.count - 1; },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(ForItem.prototype, "even", {
+	        get: function () { return this.index % 2 === 0; },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Object.defineProperty(ForItem.prototype, "odd", {
+	        get: function () { return !this.even; },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    return ForItem;
+	}(Context));
 
-	class ForStructure extends Structure {
-	    constructor() {
-	        super(...arguments);
-	        this.instances = [];
+	var ForStructure = (function (_super) {
+	    tslib.__extends(ForStructure, _super);
+	    function ForStructure() {
+	        var _this = _super !== null && _super.apply(this, arguments) || this;
+	        _this.instances = [];
+	        return _this;
 	    }
-	    onInit() {
-	        const { module, node } = getContext(this);
-	        const forbegin = this.forbegin = document.createComment(`*for begin`);
+	    ForStructure.prototype.onInit = function () {
+	        var _a = getContext(this), module = _a.module, node = _a.node;
+	        var forbegin = this.forbegin = document.createComment("*for begin");
 	        forbegin['rxcompId'] = node.rxcompId;
 	        node.parentNode.replaceChild(forbegin, node);
-	        const forend = this.forend = document.createComment(`*for end`);
+	        var forend = this.forend = document.createComment("*for end");
 	        forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
-	        const expression = node.getAttribute('*for');
+	        var expression = node.getAttribute('*for');
 	        node.removeAttribute('*for');
-	        const token = this.token = this.getExpressionToken(expression);
+	        var token = this.token = this.getExpressionToken(expression);
 	        this.forFunction = module.makeFunction(token.iterable);
-	    }
-	    onChanges(changes) {
-	        const context = getContext(this);
-	        const module = context.module;
-	        const node = context.node;
-	        const token = this.token;
-	        let result = module.resolve(this.forFunction, changes, this) || [];
-	        const isArray = Array.isArray(result);
-	        const array = isArray ? result : Object.keys(result);
-	        const total = array.length;
-	        const previous = this.instances.length;
-	        for (let i = 0; i < Math.max(previous, total); i++) {
+	    };
+	    ForStructure.prototype.onChanges = function (changes) {
+	        var context = getContext(this);
+	        var module = context.module;
+	        var node = context.node;
+	        var token = this.token;
+	        var result = module.resolve(this.forFunction, changes, this) || [];
+	        var isArray = Array.isArray(result);
+	        var array = isArray ? result : Object.keys(result);
+	        var total = array.length;
+	        var previous = this.instances.length;
+	        for (var i = 0; i < Math.max(previous, total); i++) {
 	            if (i < total) {
-	                const key = isArray ? i : array[i];
-	                const value = isArray ? array[key] : result[key];
+	                var key = isArray ? i : array[i];
+	                var value = isArray ? array[key] : result[key];
 	                if (i < previous) {
-	                    const instance = this.instances[i];
+	                    var instance = this.instances[i];
 	                    instance[token.key] = key;
 	                    instance[token.value] = value;
 	                }
 	                else {
-	                    const clonedNode = node.cloneNode(true);
+	                    var clonedNode = node.cloneNode(true);
 	                    delete clonedNode['rxcompId'];
 	                    this.forend.parentNode.insertBefore(clonedNode, this.forend);
-	                    const args = [token.key, key, token.value, value, i, total, context.parentInstance];
-	                    const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
+	                    var args = [token.key, key, token.value, value, i, total, context.parentInstance];
+	                    var instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 	                    if (instance) {
-	                        const forItemContext = getContext(instance);
+	                        var forItemContext = getContext(instance);
 	                        module.compile(clonedNode, forItemContext.instance);
 	                        this.instances.push(instance);
 	                    }
 	                }
 	            }
 	            else {
-	                const instance = this.instances[i];
-	                const { node } = getContext(instance);
-	                node.parentNode.removeChild(node);
-	                module.remove(node);
+	                var instance = this.instances[i];
+	                var node_1 = getContext(instance).node;
+	                node_1.parentNode.removeChild(node_1);
+	                module.remove(node_1);
 	            }
 	        }
 	        this.instances.length = array.length;
-	    }
-	    getExpressionToken(expression) {
+	    };
+	    ForStructure.prototype.getExpressionToken = function (expression) {
 	        if (expression === null) {
 	            throw ('invalid for');
 	        }
 	        if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
 	            throw ('invalid for');
 	        }
-	        const expressions = expression.split(';').map(x => x.trim()).filter(x => x !== '');
-	        const forExpressions = expressions[0].split(' of ').map(x => x.trim());
-	        let value = forExpressions[0].replace(/\s*let\s*/, '');
-	        const iterable = forExpressions[1];
-	        let key = 'index';
-	        const keyValueMatches = value.match(/\[(.+)\s*,\s*(.+)\]/);
+	        var expressions = expression.split(';').map(function (x) { return x.trim(); }).filter(function (x) { return x !== ''; });
+	        var forExpressions = expressions[0].split(' of ').map(function (x) { return x.trim(); });
+	        var value = forExpressions[0].replace(/\s*let\s*/, '');
+	        var iterable = forExpressions[1];
+	        var key = 'index';
+	        var keyValueMatches = value.match(/\[(.+)\s*,\s*(.+)\]/);
 	        if (keyValueMatches) {
 	            key = keyValueMatches[1];
 	            value = keyValueMatches[2];
 	        }
 	        if (expressions.length > 1) {
-	            const indexExpressions = expressions[1].split(/\s*let\s*|\s*=\s*index/).map(x => x.trim());
+	            var indexExpressions = expressions[1].split(/\s*let\s*|\s*=\s*index/).map(function (x) { return x.trim(); });
 	            if (indexExpressions.length === 3) {
 	                key = indexExpressions[1];
 	            }
 	        }
-	        return { key, value, iterable };
-	    }
-	}
+	        return { key: key, value: value, iterable: iterable };
+	    };
+	    return ForStructure;
+	}(Structure));
 	ForStructure.meta = {
 	    selector: '[*for]',
 	};
 
-	class HrefDirective extends Directive {
-	    onChanges(changes) {
-	        const { node } = getContext(this);
-	        node.setAttribute('href', this.href);
+	var HrefDirective = (function (_super) {
+	    tslib.__extends(HrefDirective, _super);
+	    function HrefDirective() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	}
+	    HrefDirective.prototype.onChanges = function (changes) {
+	        var node = getContext(this).node;
+	        node.setAttribute('href', this.href);
+	    };
+	    return HrefDirective;
+	}(Directive));
 	HrefDirective.meta = {
 	    selector: '[[href]]',
 	    inputs: ['href'],
 	};
 
-	class IfStructure extends Structure {
-	    constructor() {
-	        super(...arguments);
-	        this.instances = [];
+	var IfStructure = (function (_super) {
+	    tslib.__extends(IfStructure, _super);
+	    function IfStructure() {
+	        var _this = _super !== null && _super.apply(this, arguments) || this;
+	        _this.instances = [];
+	        return _this;
 	    }
-	    onInit() {
-	        const { module, node } = getContext(this);
-	        const ifbegin = this.ifbegin = document.createComment(`*if begin`);
+	    IfStructure.prototype.onInit = function () {
+	        var _a = getContext(this), module = _a.module, node = _a.node;
+	        var ifbegin = this.ifbegin = document.createComment("*if begin");
 	        ifbegin['rxcompId'] = node.rxcompId;
 	        node.parentNode.replaceChild(ifbegin, node);
-	        const ifend = this.ifend = document.createComment(`*if end`);
+	        var ifend = this.ifend = document.createComment("*if end");
 	        ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
-	        const expression = node.getAttribute('*if');
+	        var expression = node.getAttribute('*if');
 	        this.ifFunction = module.makeFunction(expression);
-	        const clonedNode = node.cloneNode(true);
+	        var clonedNode = node.cloneNode(true);
 	        clonedNode.removeAttribute('*if');
 	        this.clonedNode = clonedNode;
 	        this.node = clonedNode.cloneNode(true);
-	    }
-	    onChanges(changes) {
-	        const { module } = getContext(this);
-	        const value = module.resolve(this.ifFunction, changes, this);
-	        const node = this.node;
+	    };
+	    IfStructure.prototype.onChanges = function (changes) {
+	        var module = getContext(this).module;
+	        var value = module.resolve(this.ifFunction, changes, this);
+	        var node = this.node;
 	        if (value) {
 	            if (!node.parentNode) {
 	                this.ifend.parentNode.insertBefore(node, this.ifend);
@@ -733,70 +843,99 @@ var rxcomp = (function (exports, rxjs, operators) {
 	                this.node = this.clonedNode.cloneNode(true);
 	            }
 	        }
-	    }
-	}
+	    };
+	    return IfStructure;
+	}(Structure));
 	IfStructure.meta = {
 	    selector: '[*if]',
 	};
 
-	class InnerHtmlDirective extends Directive {
-	    onChanges(changes) {
-	        const { node } = getContext(this);
-	        node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML;
+	var InnerHtmlDirective = (function (_super) {
+	    tslib.__extends(InnerHtmlDirective, _super);
+	    function InnerHtmlDirective() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	}
+	    InnerHtmlDirective.prototype.onChanges = function (changes) {
+	        var node = getContext(this).node;
+	        node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML;
+	    };
+	    return InnerHtmlDirective;
+	}(Directive));
 	InnerHtmlDirective.meta = {
-	    selector: `[innerHTML]`,
+	    selector: "[innerHTML]",
 	    inputs: ['innerHTML'],
 	};
 
-	class Pipe {
-	    static transform(value) {
+	var Pipe = (function () {
+	    function Pipe() {
+	    }
+	    Pipe.transform = function (value) {
 	        return value;
-	    }
-	}
+	    };
+	    return Pipe;
+	}());
 
-	class JsonPipe extends Pipe {
-	    static transform(value) {
-	        return JSON.stringify(value, null, '\t');
+	var JsonPipe = (function (_super) {
+	    tslib.__extends(JsonPipe, _super);
+	    function JsonPipe() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	}
+	    JsonPipe.transform = function (value) {
+	        return JSON.stringify(value, null, '\t');
+	    };
+	    return JsonPipe;
+	}(Pipe));
 	JsonPipe.meta = {
 	    name: 'json',
 	};
 
-	class SrcDirective extends Directive {
-	    onChanges(changes) {
-	        const { node } = getContext(this);
-	        node.setAttribute('src', this.src);
+	var SrcDirective = (function (_super) {
+	    tslib.__extends(SrcDirective, _super);
+	    function SrcDirective() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	}
+	    SrcDirective.prototype.onChanges = function (changes) {
+	        var node = getContext(this).node;
+	        node.setAttribute('src', this.src);
+	    };
+	    return SrcDirective;
+	}(Directive));
 	SrcDirective.meta = {
 	    selector: '[[src]]',
 	    inputs: ['src'],
 	};
 
-	class StyleDirective extends Directive {
-	    onInit() {
-	        const { module, node } = getContext(this);
-	        const expression = node.getAttribute('[style]');
-	        this.styleFunction = module.makeFunction(expression);
+	var StyleDirective = (function (_super) {
+	    tslib.__extends(StyleDirective, _super);
+	    function StyleDirective() {
+	        return _super !== null && _super.apply(this, arguments) || this;
 	    }
-	    onChanges(changes) {
-	        const { module, node } = getContext(this);
-	        const style = module.resolve(this.styleFunction, changes, this);
-	        for (let key in style) {
+	    StyleDirective.prototype.onInit = function () {
+	        var _a = getContext(this), module = _a.module, node = _a.node;
+	        var expression = node.getAttribute('[style]');
+	        this.styleFunction = module.makeFunction(expression);
+	    };
+	    StyleDirective.prototype.onChanges = function (changes) {
+	        var _a = getContext(this), module = _a.module, node = _a.node;
+	        var style = module.resolve(this.styleFunction, changes, this);
+	        for (var key in style) {
 	            node.style.setProperty(key, style[key]);
 	        }
-	    }
-	}
+	    };
+	    return StyleDirective;
+	}(Directive));
 	StyleDirective.meta = {
-	    selector: `[[style]]`
+	    selector: "[[style]]"
 	};
 
-	class CoreModule extends Module {
-	}
-	const factories = [
+	var CoreModule = (function (_super) {
+	    tslib.__extends(CoreModule, _super);
+	    function CoreModule() {
+	        return _super !== null && _super.apply(this, arguments) || this;
+	    }
+	    return CoreModule;
+	}(Module));
+	var factories = [
 	    ClassDirective,
 	    EventDirective,
 	    ForStructure,
@@ -806,79 +945,78 @@ var rxcomp = (function (exports, rxjs, operators) {
 	    SrcDirective,
 	    StyleDirective,
 	];
-	const pipes = [
+	var pipes = [
 	    JsonPipe,
 	];
 	CoreModule.meta = {
-	    declarations: [
-	        ...factories,
-	        ...pipes,
-	    ],
-	    exports: [
-	        ...factories,
-	        ...pipes,
-	    ]
+	    declarations: tslib.__spreadArrays(factories, pipes),
+	    exports: tslib.__spreadArrays(factories, pipes)
 	};
 
-	const ORDER = [Structure, Component, Directive];
-	class Platform {
-	    static bootstrap(moduleFactory) {
-	        const meta = this.resolveMeta(moduleFactory);
-	        console.log(meta);
-	        const bootstrap = meta.bootstrap;
+	var ORDER = [Structure, Component, Directive];
+	var Platform = (function () {
+	    function Platform() {
+	    }
+	    Platform.bootstrap = function (moduleFactory) {
+	        var meta = this.resolveMeta(moduleFactory);
+	        var bootstrap = meta.bootstrap;
 	        if (!bootstrap) {
 	            throw ('missing bootstrap');
 	        }
-	        const node = meta.node = this.querySelector(bootstrap.meta.selector);
+	        var node = meta.node = this.querySelector(bootstrap.meta.selector);
 	        if (!node) {
-	            throw (`missing node ${bootstrap.meta.selector}`);
+	            throw ("missing node " + bootstrap.meta.selector);
 	        }
 	        meta.nodeInnerHTML = node.innerHTML;
-	        const pipes = meta.pipes = this.resolvePipes(meta);
-	        const factories = meta.factories = this.resolveFactories(meta);
+	        var pipes = meta.pipes = this.resolvePipes(meta);
+	        var factories = meta.factories = this.resolveFactories(meta);
 	        this.sortFactories(factories);
 	        factories.unshift(bootstrap);
-	        const selectors = meta.selectors = this.unwrapSelectors(factories);
-	        const module = new moduleFactory();
+	        var selectors = meta.selectors = this.unwrapSelectors(factories);
+	        var module = new moduleFactory();
 	        module.meta = meta;
-	        const instances = module.compile(node, window);
-	        const root = instances[0];
+	        var instances = module.compile(node, window);
+	        var root = instances[0];
 	        root.pushChanges();
 	        return module;
-	    }
-	    static querySelector(selector) {
+	    };
+	    Platform.querySelector = function (selector) {
 	        return document.querySelector(selector);
-	    }
-	    static resolveMeta(moduleFactory) {
-	        const meta = Object.assign({ imports: [], declarations: [], pipes: [], exports: [] }, moduleFactory.meta);
-	        meta.imports = meta.imports.map(moduleFactory => this.resolveMeta(moduleFactory));
+	    };
+	    Platform.resolveMeta = function (moduleFactory) {
+	        var _this = this;
+	        var meta = Object.assign({ imports: [], declarations: [], pipes: [], exports: [] }, moduleFactory.meta);
+	        meta.imports = meta.imports.map(function (moduleFactory) { return _this.resolveMeta(moduleFactory); });
 	        return meta;
-	    }
-	    static resolvePipes(meta, exported) {
-	        const importedPipes = meta.imports.map((importMeta) => this.resolvePipes(importMeta, true));
-	        const pipes = {};
-	        const pipeList = (exported ? meta.exports : meta.declarations).filter((x) => x.prototype instanceof Pipe);
-	        pipeList.forEach(pipeFactory => pipes[pipeFactory.meta.name] = pipeFactory);
-	        return Object.assign({}, ...importedPipes, pipes);
-	    }
-	    static resolveFactories(meta, exported) {
-	        const importedFactories = meta.imports.map((importMeta) => this.resolveFactories(importMeta, true));
-	        const factoryList = (exported ? meta.exports : meta.declarations).filter(x => (x.prototype instanceof Structure || x.prototype instanceof Component || x.prototype instanceof Directive));
-	        return Array.prototype.concat.call(factoryList, ...importedFactories);
-	    }
-	    static sortFactories(factories) {
-	        factories.sort((a, b) => {
-	            const ai = ORDER.reduce((p, c, i) => a.prototype instanceof c ? i : p, -1);
-	            const bi = ORDER.reduce((p, c, i) => b.prototype instanceof c ? i : p, -1);
-	            const o = ai - bi;
+	    };
+	    Platform.resolvePipes = function (meta, exported) {
+	        var _this = this;
+	        var importedPipes = meta.imports.map(function (importMeta) { return _this.resolvePipes(importMeta, true); });
+	        var pipes = {};
+	        var pipeList = (exported ? meta.exports : meta.declarations).filter(function (x) { return x.prototype instanceof Pipe; });
+	        pipeList.forEach(function (pipeFactory) { return pipes[pipeFactory.meta.name] = pipeFactory; });
+	        return Object.assign.apply(Object, tslib.__spreadArrays([{}], importedPipes, [pipes]));
+	    };
+	    Platform.resolveFactories = function (meta, exported) {
+	        var _a;
+	        var _this = this;
+	        var importedFactories = meta.imports.map(function (importMeta) { return _this.resolveFactories(importMeta, true); });
+	        var factoryList = (exported ? meta.exports : meta.declarations).filter(function (x) { return (x.prototype instanceof Structure || x.prototype instanceof Component || x.prototype instanceof Directive); });
+	        return (_a = Array.prototype.concat).call.apply(_a, tslib.__spreadArrays([factoryList], importedFactories));
+	    };
+	    Platform.sortFactories = function (factories) {
+	        factories.sort(function (a, b) {
+	            var ai = ORDER.reduce(function (p, c, i) { return a.prototype instanceof c ? i : p; }, -1);
+	            var bi = ORDER.reduce(function (p, c, i) { return b.prototype instanceof c ? i : p; }, -1);
+	            var o = ai - bi;
 	            if (o === 0) {
 	                return (a.meta.hosts ? 1 : 0) - (b.meta.hosts ? 1 : 0);
 	            }
 	            return o;
 	        });
-	    }
-	    static getExpressions(selector) {
-	        let matchers = [];
+	    };
+	    Platform.getExpressions = function (selector) {
+	        var matchers = [];
 	        selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value, c1, a2, u3, v4, a5, e6) {
 	            if (c1) {
 	                matchers.push(function (node) {
@@ -888,12 +1026,12 @@ var rxcomp = (function (exports, rxjs, operators) {
 	            if (a2) {
 	                matchers.push(function (node) {
 	                    return (node.hasAttribute(a2) && node.getAttribute(a2) === v4) ||
-	                        (node.hasAttribute(`[${a2}]`) && node.getAttribute(`[${a2}]`) === v4);
+	                        (node.hasAttribute("[" + a2 + "]") && node.getAttribute("[" + a2 + "]") === v4);
 	                });
 	            }
 	            if (a5) {
 	                matchers.push(function (node) {
-	                    return node.hasAttribute(a5) || node.hasAttribute(`[${a5}]`);
+	                    return node.hasAttribute(a5) || node.hasAttribute("[" + a5 + "]");
 	                });
 	            }
 	            if (e6) {
@@ -904,27 +1042,28 @@ var rxcomp = (function (exports, rxjs, operators) {
 	            return '';
 	        });
 	        return matchers;
-	    }
-	    static unwrapSelectors(factories) {
-	        const selectors = [];
-	        factories.forEach(factory => {
-	            factory.meta.selector.split(',').forEach(selector => {
+	    };
+	    Platform.unwrapSelectors = function (factories) {
+	        var _this = this;
+	        var selectors = [];
+	        factories.forEach(function (factory) {
+	            factory.meta.selector.split(',').forEach(function (selector) {
 	                selector = selector.trim();
-	                let excludes = [];
-	                const matchSelector = selector.replace(/\:not\((.+?)\)/g, (value, unmatchSelector) => {
-	                    excludes = this.getExpressions(unmatchSelector);
+	                var excludes = [];
+	                var matchSelector = selector.replace(/\:not\((.+?)\)/g, function (value, unmatchSelector) {
+	                    excludes = _this.getExpressions(unmatchSelector);
 	                    return '';
 	                });
-	                const includes = this.getExpressions(matchSelector);
-	                selectors.push((node) => {
-	                    const include = includes.reduce((result, e) => {
+	                var includes = _this.getExpressions(matchSelector);
+	                selectors.push(function (node) {
+	                    var include = includes.reduce(function (result, e) {
 	                        return result && e(node);
 	                    }, true);
-	                    const exclude = excludes.reduce((result, e) => {
+	                    var exclude = excludes.reduce(function (result, e) {
 	                        return result || e(node);
 	                    }, false);
 	                    if (include && !exclude) {
-	                        return { node, factory, selector };
+	                        return { node: node, factory: factory, selector: selector };
 	                    }
 	                    else {
 	                        return false;
@@ -933,14 +1072,20 @@ var rxcomp = (function (exports, rxjs, operators) {
 	            });
 	        });
 	        return selectors;
-	    }
-	    static isBrowser() {
+	    };
+	    Platform.isBrowser = function () {
 	        return Boolean(window);
-	    }
-	}
+	    };
+	    return Platform;
+	}());
 
-	class Browser extends Platform {
-	}
+	var Browser = (function (_super) {
+	    tslib.__extends(Browser, _super);
+	    function Browser() {
+	        return _super !== null && _super.apply(this, arguments) || this;
+	    }
+	    return Browser;
+	}(Platform));
 
 	exports.Browser = Browser;
 	exports.ClassDirective = ClassDirective;
@@ -967,4 +1112,4 @@ var rxcomp = (function (exports, rxjs, operators) {
 
 	return exports;
 
-}({}, rxjs, rxjs.operators));
+}({}, tslib, rxjs, rxjs.operators));

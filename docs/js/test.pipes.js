@@ -6,7 +6,7 @@
 
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('rxjs'), require('rxjs/operators')) :
-    typeof define === 'function' && define.amd ? define('test.pipes', ['rxjs', 'rxjs/operators'], factory) :
+    typeof define === 'function' && define.amd ? define(['rxjs', 'rxjs/operators'], factory) :
     (global = global || self, factory(global.rxjs, global.rxjs.operators));
 }(this, (function (rxjs, operators) { 'use strict';
 
@@ -999,7 +999,6 @@
         }
         Platform.bootstrap = function (moduleFactory) {
             var meta = this.resolveMeta(moduleFactory);
-            console.log(meta);
             var bootstrap = meta.bootstrap;
             if (!bootstrap) {
                 throw ('missing bootstrap');

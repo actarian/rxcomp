@@ -11,72 +11,62 @@
 				"minify": true
 			}, {
 				"input": "test/js/main.ts",
-				"output": "docs/js/main.js",
-				"rollup": {
-					"output": {
-						"format": "umd",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}
+				"output": {
+					"file": "docs/js/main.js",
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
 				},
 				"minify": false
 			}, {
 				"input": "test/js/test.for.ts",
-				"output": "docs/js/test.for.js",
-				"rollup": {
-					"output": {
-						"format": "umd",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}
+				"output": {
+					"file": "docs/js/test.for.js",
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
 				},
 				"minify": false
 			}, {
 				"input": "test/js/test.parsing.ts",
-				"output": "docs/js/test.parsing.js",
-				"rollup": {
-					"output": {
-						"format": "umd",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}
+				"output": {
+					"file": "docs/js/test.parsing.js",
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
 				},
 				"minify": false
 			}, {
 				"input": "test/js/test.pipes.ts",
-				"output": "docs/js/test.pipes.js",
-				"rollup": {
-					"output": {
-						"format": "umd",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}
+				"output": {
+					"file": "docs/js/test.pipes.js",
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
 				},
 				"minify": false
 			}, {
 				"input": "test/js/test.scope.ts",
-				"output": "docs/js/test.scope.js",
-				"rollup": {
-					"output": {
-						"format": "umd",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}
+				"output": {
+					"file": "docs/js/test.scope.js",
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
 				},
 				"minify": false
 			}],
@@ -85,37 +75,34 @@
 		"dist": {
 			"compile": [{
 				"input": "src/rxcomp.ts",
-				"output": "dist/rxcomp.js",
-				"rollup": {
-					"output": [{
-						"file": "dist/umd/rxcomp.js",
-						"name": "rxcomp",
-						"format": "umd",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}, {
-						"file": "dist/es6/rxcomp.js",
-						"name": "rxcomp",
-						"format": "es",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}, {
-						"file": "dist/iife/rxcomp.js",
-						"name": "rxcomp",
-						"format": "iife",
-						"globals": {
-							"rxjs": "rxjs",
-							"rxjs/operators": "rxjs.operators"
-						},
-						"external": ["rxjs"]
-					}]
-				},
+				"output": [{
+					"file": "dist/es6/rxcomp.js",
+					"name": "rxcomp",
+					"format": "es",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
+				}, {
+					"file": "dist/iife/rxcomp.js",
+					"name": "rxcomp",
+					"format": "iife",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
+				}, {
+					"file": "dist/umd/rxcomp.js",
+					"name": "rxcomp",
+					"format": "umd",
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs"]
+				}],
 				"minify": true
 			}],
 			"bundle": []
