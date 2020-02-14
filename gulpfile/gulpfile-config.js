@@ -1,6 +1,6 @@
 const { parallel, series } = require('gulp');
-const { compileScss_, compileJs_, compileTs_, compileHtml_, compileWatcher_ } = require('./compile');
-const { bundleCss_, bundleJs_, bundleResource_, bundleWatcher_ } = require('./bundle');
+const { compileScss_, compileJs_, compileTs_, compileHtml_, compileWatcher_, compileCssWatcher_, compileJsWatcher_ } = require('./compile');
+const { bundleCss_, bundleJs_, bundleResource_, bundleWatcher_, bundleCssWatcher_, bundleJsWatcher_ } = require('./bundle');
 const { serve_ } = require('./serve');
 const { getConfig, configWatcher_ } = require('./config');
 
@@ -24,6 +24,10 @@ function compileHtml(done) {
 }
 
 const compileTask = parallel(compileScss, compileJs, compileTs, compileHtml); // compilePartials, compileSnippets
+
+const compileCssTask = parallel(compileScss);
+
+const compileJsTask = parallel(compileJs, compileTs);
 
 // BUNDLERS
 function bundleCss(done) {
@@ -59,6 +63,38 @@ function watchTask(done) {
 	done();
 }
 
+function watchCssTask(done) {
+	while (watchers.length) {
+		const w = watchers.shift();
+		if (typeof w.close === 'function') {
+			w.close();
+		}
+	}
+	const compileCssWatcher = compileCssWatcher_(config);
+	const bundleCssWatcher = bundleCssWatcher_(config);
+	const configWatcher = configWatcher_(function(done) {
+		return series(compileCssTask, bundleCss, watchCssTask)(done);
+	});
+	watchers = [].concat(compileCssWatcher, bundleCssWatcher, configWatcher);
+	done();
+}
+
+function watchJsTask(done) {
+	while (watchers.length) {
+		const w = watchers.shift();
+		if (typeof w.close === 'function') {
+			w.close();
+		}
+	}
+	const compileJsWatcher = compileJsWatcher_(config);
+	const bundleJsWatcher = bundleJsWatcher_(config);
+	const configWatcher = configWatcher_(function(done) {
+		return series(compileJsTask, bundleJs, watchTask)(done);
+	});
+	watchers = [].concat(compileJsWatcher, bundleJsWatcher, configWatcher);
+	done();
+}
+
 // SERVE
 function serveTask(done) {
 	return serve_(config, done);
@@ -84,5 +120,9 @@ exports.bundle = bundleTask;
 exports.watch = watchTask;
 exports.serve = serveTask;
 exports.build = series(compileTask, bundleTask);
+exports.buildCss = series(compileCssTask, bundleCss);
+exports.buildCssAndWatch = series(compileCssTask, bundleCss, watchCssTask);
+exports.buildJs = series(compileJsTask, bundleJs);
+exports.buildJsAndWatch = series(compileJsTask, bundleJs, watchJsTask);
 exports.buildAndWatch = series(compileTask, bundleTask, watchTask);
 exports.buildWatchAndServe = series(compileTask, bundleTask, watchTask, serveTask);

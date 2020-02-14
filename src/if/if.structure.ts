@@ -1,6 +1,6 @@
-import Factory, { ExpressionFunction, RxCompElement } from 'src/core/factory';
-import { IExpressionToken } from 'src/for/for.structure';
+import Factory, { ExpressionFunction, RxCompElement } from '../core/factory';
 import Structure from '../core/structure';
+import { IExpressionToken } from '../for/for.structure';
 import { getContext } from '../module/module';
 
 export default class IfStructure extends Structure {

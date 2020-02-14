@@ -17,6 +17,7 @@ const log = require('./logger');
 const tfsCheckout = require('./tfs');
 
 const { rollup_, rollupInput_, rollupOutput_ } = require('./rollup');
+const { typescript_, typescriptInput_, typescriptOutput_ } = require('./typescript');
 
 // COMPILERS
 function compileScss_(config, done) {
@@ -65,7 +66,7 @@ function compileTs_(config, done) {
 	const tasks = [];
 	items.forEach(item => {
 		tasks.push(function itemTask(done) {
-			return compileRollup_(config, item);
+			return compileTypescript_(config, item);
 		});
 	});
 	return tasks.length ? parallel(...tasks)(done) : done();
@@ -85,6 +86,28 @@ function compileRollup_(config, item) {
 		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
 		.pipe(tfsCheckout(config, !item.minify))
 		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
+		.pipe(filter('**/*.js'))
+		.pipe(connect.reload());
+}
+
+function compileTypescript_(config, item) {
+	const outputs = rollupOutput_(item.input, item.output);
+	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
+		.pipe(plumber())
+		.pipe(typescript_(config, item))
+		/*
+		// .pipe(rename(item.output))
+		.pipe(tfsCheckout(config))
+		.pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
+		*/
+		.pipe(filter('**/*.js'))
+		.on('end', () => log('Compile', outputs.map(x => x.file).join(', ')))
+		/*
+		.pipe(gulpif(item.minify, terser()))
+		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
+		.pipe(tfsCheckout(config, !item.minify))
+		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
+		*/
 		.pipe(filter('**/*.js'))
 		.pipe(connect.reload());
 }
@@ -143,6 +166,23 @@ function compileWatcher_(config) {
 	return [scss, js, ts, html];
 }
 
+function compileCssWatcher_(config) {
+	const scss = watch(compilesGlobs_(config, '.scss'), function compileScss(done) {
+		compileScss_(config, done);
+	}).on('change', logWatch);
+	return [scss];
+}
+
+function compileJsWatcher_(config) {
+	const js = watch(compilesGlobs_(config, '.js'), function compileJs(done) {
+		compileJs_(config, done);
+	}).on('change', logWatch);
+	const ts = watch(compilesGlobs_(config, '.ts'), function compileTs(done) {
+		compileTs_(config, done);
+	}).on('change', logWatch);
+	return [js, ts];
+}
+
 function logWatch(path, stats) {
 	log('Changed', path);
 }
@@ -153,5 +193,7 @@ module.exports = {
 	compileTs_,
 	compileHtml_,
 	compilesGlobs_,
-	compileWatcher_
+	compileWatcher_,
+	compileCssWatcher_,
+	compileJsWatcher_
 };

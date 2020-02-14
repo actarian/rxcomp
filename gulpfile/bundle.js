@@ -124,6 +124,24 @@ function bundleWatcher_(config) {
 	return [css, js, resource];
 }
 
+function bundleCssWatcher_(config) {
+	const css = bundles_(config, '.css').map((item) => {
+		return watch(item.input, function bundleCss_(done) {
+			return bundleCssItem_(config, item);
+		}).on('change', logWatch);
+	});
+	return [css];
+}
+
+function bundleJsWatcher_(config) {
+	const js = bundles_(config, '.js').map((item) => {
+		return watch(item.input, function bundleJs_(done) {
+			return bundleJsItem_(config, item);
+		}).on('change', logWatch);
+	});
+	return [js];
+}
+
 function logWatch(path, stats) {
 	log('Changed', path);
 }
@@ -137,5 +155,7 @@ module.exports = {
 	bundleResourceItem_,
 	bundles_,
 	resources_,
-	bundleWatcher_
+	bundleWatcher_,
+	bundleCssWatcher_,
+	bundleJsWatcher_
 };
