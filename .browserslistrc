@@ -1,0 +1,5 @@
+# supported browsers
+defaults
+last 2 version
+IE 11
+maintained node versions

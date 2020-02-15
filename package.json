@@ -3,10 +3,15 @@
 	"name": "rxcomp",
 	"description": "Reactive component library for JavaScript",
 	"version": "1.0.0-beta.5",
-	"main": "dist/lib/rxcomp.js",
-	"types": "dist/lib/rxcomp.d.ts",
+	"browser": "dist/iife/rxcomp.js",
+	"main": "dist/cjs/rxcomp.js",
+	"types": "dist/cjs/rxcomp.d.ts",
 	"module": "dist/umd/rxcomp.js",
-	"es2015": "dist/es6/rxcomp.js",
+	"es2015": "dist/esm/rxcomp.js",
+	"files": [
+    "dist/",
+    "src/"
+  ],
 	"license": "MIT",
 	"keywords": [
 		"rxcomp",
@@ -26,15 +31,6 @@
 	"scripts": {
 		"start": "gulp",
 		"build": "gulp build --target dist"
-	},
-	"browserslist": {
-		"development": [
-			"last 1 version"
-		],
-		"production": [
-			"last 2 version",
-			"ie 11"
-		]
 	},
 	"dependencies": {
 		"rxjs": "~6.5.4",

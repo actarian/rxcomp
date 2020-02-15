@@ -13,62 +13,62 @@
 				"input": "test/js/main.ts",
 				"output": {
 					"file": "docs/js/main.js",
-					"format": "umd",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"format": "iife"
 				},
-				"minify": false
+				"globals": {
+					"rxjs": "rxjs",
+					"rxjs/operators": "rxjs.operators"
+				},
+				"external": ["rxjs", "rxjs/operators"],
+				"minify": true
 			}, {
 				"input": "test/js/test.for.ts",
 				"output": {
 					"file": "docs/js/test.for.js",
-					"format": "umd",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"format": "iife"
 				},
-				"minify": false
+				"globals": {
+					"rxjs": "rxjs",
+					"rxjs/operators": "rxjs.operators"
+				},
+				"external": ["rxjs", "rxjs/operators"],
+				"minify": true
 			}, {
 				"input": "test/js/test.parsing.ts",
 				"output": {
 					"file": "docs/js/test.parsing.js",
-					"format": "umd",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"format": "iife"
 				},
-				"minify": false
+				"globals": {
+					"rxjs": "rxjs",
+					"rxjs/operators": "rxjs.operators"
+				},
+				"external": ["rxjs", "rxjs/operators"],
+				"minify": true
 			}, {
 				"input": "test/js/test.pipes.ts",
 				"output": {
 					"file": "docs/js/test.pipes.js",
-					"format": "umd",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"format": "iife"
 				},
-				"minify": false
+				"globals": {
+					"rxjs": "rxjs",
+					"rxjs/operators": "rxjs.operators"
+				},
+				"external": ["rxjs", "rxjs/operators"],
+				"minify": true
 			}, {
 				"input": "test/js/test.scope.ts",
 				"output": {
 					"file": "docs/js/test.scope.js",
-					"format": "umd",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"format": "iife"
 				},
-				"minify": false
+				"globals": {
+					"rxjs": "rxjs",
+					"rxjs/operators": "rxjs.operators"
+				},
+				"external": ["rxjs", "rxjs/operators"],
+				"minify": true
 			}],
 			"bundle": []
 		},
@@ -76,34 +76,32 @@
 			"compile": [{
 				"input": "src/rxcomp.ts",
 				"output": [{
-					"file": "dist/es6/rxcomp.js",
-					"name": "rxcomp",
-					"format": "es",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"file": "dist/amd/rxcomp.js",
+					"format": "amd"
+				}, {
+					"file": "dist/cjs/",
+					"format": "cjs"
+				}, {
+					"file": "dist/esm/",
+					"format": "esm"
+				}, {
+					"file": "dist/system/rxcomp.js",
+					"format": "system"
 				}, {
 					"file": "dist/iife/rxcomp.js",
-					"name": "rxcomp",
 					"format": "iife",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"minify": true
 				}, {
 					"file": "dist/umd/rxcomp.js",
-					"name": "rxcomp",
 					"format": "umd",
-					"globals": {
-						"rxjs": "rxjs",
-						"rxjs/operators": "rxjs.operators"
-					},
-					"external": ["rxjs"]
+					"minify": true
 				}],
-				"minify": false
+				"globals": {
+					"rxjs": "rxjs",
+					"rxjs/operators": "rxjs.operators"
+				},
+				"name": "rxcomp",
+				"external": ["rxjs", "rxjs/operators"]
 			}],
 			"bundle": []
 		}

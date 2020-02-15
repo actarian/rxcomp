@@ -1,4 +1,6 @@
-const babelPresetEnv = require('@babel/preset-env'),
+const { DEFAULT_EXTENSIONS } = require('@babel/core'),
+	babelPresetEnv = require('@babel/preset-env'),
+	babelPresetTypescript = require('@babel/preset-typescript'),
 	path = require('path'),
 	rollup = require('rollup'),
 	rollupPluginBabel = require('rollup-plugin-babel'),
@@ -9,6 +11,7 @@ const babelPresetEnv = require('@babel/preset-env'),
 	rollupPluginTypescript = require('rollup-plugin-typescript2'),
 	// rollupPluginTypescript = require('@rollup/plugin-typescript'),
 	through2 = require('through2'),
+	typescript = require('typescript'),
 	vinyl = require('vinyl');
 
 function rollup_(config, item) {
@@ -78,8 +81,9 @@ function rollup_(config, item) {
 				*/
 			});
 		};
-		rollup.rollup(rollupInput_(file.path)).then(bundle => {
-			const bundles = rollupOutput_(item.input, item.output);
+		rollup.rollup(rollupInput_(item)).then(bundle => {
+			const bundles = rollupOutput_(item);
+			// console.log(bundles);
 			return Promise.all(bundles.map((output, i) => rollupGenerate(bundle, output, i))).then(complete => {
 				callback(null, file);
 			});
@@ -96,43 +100,91 @@ function rollup_(config, item) {
 	});
 }
 
-function rollupInput_(input) {
+function rollupInput_(item) {
+	const tsconfigDefaults = {
+		compilerOptions: {
+			target: 'esNext',
+			module: 'esNext',
+			lib: ["dom", "es2015", "es2016", "es2017"],
+			allowJs: true,
+			declaration: false,
+			sourceMap: true,
+			removeComments: true,
+		},
+		exclude: [
+			"./node_modules/*",
+			".npm"
+		]
+	};
+	const tsconfigOverride = {
+		compilerOptions: {
+			target: 'esNext',
+			module: 'esNext',
+			lib: ["dom", "es2015", "es2016", "es2017"],
+			allowJs: true,
+			declaration: false,
+			sourceMap: true,
+			removeComments: true,
+		},
+		exclude: [
+			"./node_modules/*",
+			".npm"
+		]
+	};
 	// const watchGlob = path.dirname(input) + '/**/*' + path.extname(input);
 	// console.log('watchGlob', watchGlob);
 	const plugins = [
 		// Resolve source maps to the original source
 		rollupPluginSourcemaps(),
-		// Compile TypeScript files
-		path.extname(input) === '.ts' ? rollupPluginTypescript({
-			rollupCommonJSResolveHack: true,
-			clean: true,
-			declaration: true
-		}) : null,
 		/*
-		rollupPluginTypescript({
-			lib: ['es5', 'es6', 'dom'],
-			target: 'es5',
-			tsconfig: false,
-		}),
-		*/
-		// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-		rollupPluginCommonJs(),
 		// Allow node_modules resolution, so you can use 'external' to control
 		// which external modules to include in the bundle
 		// https://github.com/rollup/rollup-plugin-node-resolve#usage
-		// rollupPluginNodeResolve(),
+		// import node modules
+		rollupPluginNodeResolve(),
+		*/
 		/*
+		// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
+		// import commonJs require;
+		rollupPluginCommonJs({
+			include: 'node_modules/**',
+			exclude: ['node_modules/rxjs/**'],
+		}),
+		*/
+		// Compile TypeScript files
+		path.extname(item.input) === '.ts' ? rollupPluginTypescript({
+			typescript: typescript,
+			tsconfigDefaults: tsconfigDefaults,
+			tsconfig: 'tsconfig.json',
+			tsconfigOverride: tsconfigOverride,
+			rollupCommonJSResolveHack: true,
+			clean: true,
+		}) : null,
 		rollupPluginBabel({
+			extensions: [
+				...DEFAULT_EXTENSIONS,
+				'.ts',
+				'.tsx'
+			],
 			presets: [
 				[babelPresetEnv, {
 					modules: false,
 					loose: true
+				}],
+				/*
+				[babelPresetTypescript, {
+					modules: false,
+					loose: true
 				}]
+				*/
 			],
-			exclude: 'node_modules/**' // only transpile our source code
+			plugins: [
+				'@babel/plugin-proposal-class-properties',
+				'@babel/plugin-proposal-object-rest-spread'
+			],
+			exclude: 'node_modules/**', // only transpile our source code
 			// babelrc: false,
 		}),
-		*/
 		rollupPluginLicense({
 			banner: `@license <%= pkg.name %> v<%= pkg.version %>
 			(c) <%= moment().format('YYYY') %> <%= pkg.author %>
@@ -140,11 +192,10 @@ function rollupInput_(input) {
 		}),
 	].filter(x => x);
 	input = {
-		input: input,
+		input: item.input,
 		plugins: plugins,
-		external: [],
+		external: item.external || [],
 		/*
-		external: ['tslib'],
 		watch: {
 			include: watchGlob,
 		},
@@ -153,13 +204,16 @@ function rollupInput_(input) {
 	return input;
 }
 
-function rollupOutput_(input, output) {
+function rollupOutput_(item) {
+	const input = item.input;
+	const output = item.output;
 	const outputs = Array.isArray(output) ? output : [output];
 	const default_ = {
-		format: 'umd',
-		globals: {},
-		external: [],
-		sourcemap: true
+		format: 'iife',
+		name: item.name || null,
+		globals: item.globals || {},
+		sourcemap: true,
+		minify: item.minify || false,
 	};
 	return outputs.map(x => {
 		let output = Object.assign({}, default_);

@@ -11,7 +11,7 @@ const autoprefixer = require('gulp-autoprefixer'),
 	scss = require('gulp-sass'),
 	terser = require('gulp-terser');
 
-const { dest, parallel, src, watch } = require('gulp');
+const { dest, parallel, series, src, watch } = require('gulp');
 
 const log = require('./logger');
 const tfsCheckout = require('./tfs');
@@ -61,52 +61,78 @@ function compileJs_(config, done) {
 	return tasks.length ? parallel(...tasks)(done) : done();
 }
 
-function compileTs_(config, done) {
-	const items = compiles_(config, '.ts');
-	const tasks = [];
-	items.forEach(item => {
-		tasks.push(function itemTask(done) {
-			return compileTypescript_(config, item);
-		});
-	});
-	return tasks.length ? parallel(...tasks)(done) : done();
-}
-
 function compileRollup_(config, item) {
-	const outputs = rollupOutput_(item.input, item.output);
+	const outputs = rollupOutput_(item);
+	const minify = item.output.minify;
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(plumber())
 		.pipe(rollup_(config, item))
 		// .pipe(rename(item.output))
 		.pipe(tfsCheckout(config))
-		.pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
+		.pipe(dest('.', minify ? null : { sourcemaps: '.' }))
 		.pipe(filter('**/*.js'))
 		.on('end', () => log('Compile', outputs.map(x => x.file).join(', ')))
-		.pipe(gulpif(item.minify, terser()))
-		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-		.pipe(tfsCheckout(config, !item.minify))
-		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
+		.pipe(gulpif(minify, terser()))
+		.pipe(gulpif(minify, rename({ extname: '.min.js' })))
+		.pipe(tfsCheckout(config, !minify))
+		.pipe(gulpif(minify, dest('.', { sourcemaps: '.' })))
 		.pipe(filter('**/*.js'))
 		.pipe(connect.reload());
 }
 
+function compileTs_(config, done) {
+	const items = compiles_(config, '.ts');
+	const tasks = [];
+	items.forEach(item => {
+		const outputs = typescriptOutput_(item);
+		outputs.forEach((output, i) => {
+			// console.log(output);
+			tasks.push(function itemTask(done) {
+				const item_ = Object.assign(item, { output });
+				// console.log('item_', item_);
+				const output_ = typescriptOutput_(item_)[0];
+				switch (output_.format) {
+					case 'iife':
+					case 'umd':
+						return compileRollup_(config, item_);
+						break;
+					default:
+						return compileTypescript_(config, item_);
+				}
+				/*
+				'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
+				'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
+
+				'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+				'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+				'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+				'system': 'system', // Native format of the SystemJS loader
+				*/
+				return compileTypescript_(config, item_);
+			});
+		});
+	});
+	return tasks.length ? series(...tasks)(done) : done();
+}
+
 function compileTypescript_(config, item) {
-	const outputs = rollupOutput_(item.input, item.output);
+	const outputs = typescriptOutput_(item);
+	const minify = outputs[0].minify;
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(plumber())
 		.pipe(typescript_(config, item))
 		/*
 		// .pipe(rename(item.output))
 		.pipe(tfsCheckout(config))
-		.pipe(dest('.', item.minify ? null : { sourcemaps: '.' }))
+		.pipe(dest('.', minify ? null : { sourcemaps: '.' }))
 		*/
 		.pipe(filter('**/*.js'))
 		.on('end', () => log('Compile', outputs.map(x => x.file).join(', ')))
 		/*
-		.pipe(gulpif(item.minify, terser()))
-		.pipe(gulpif(item.minify, rename({ extname: '.min.js' })))
-		.pipe(tfsCheckout(config, !item.minify))
-		.pipe(gulpif(item.minify, dest('.', { sourcemaps: '.' })))
+		.pipe(gulpif(minify, terser()))
+		.pipe(gulpif(minify, rename({ extname: '.min.js' })))
+		.pipe(tfsCheckout(config, !minify))
+		.pipe(gulpif(minify, dest('.', { sourcemaps: '.' })))
 		*/
 		.pipe(filter('**/*.js'))
 		.pipe(connect.reload());

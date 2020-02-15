@@ -14,96 +14,46 @@ const typescript = require('typescript'),
 	through2 = require('through2'),
 	vinyl = require('vinyl');
 
-function typescriptConfig_(item) {
-	const configFileName = 'tsconfig.json';
+const { rollup_, rollupInput_, rollupOutput_ } = require('./rollup');
 
-	// Read config file
-	const configFileText = `{
-		"compilerOptions": {
-			${true ? '"target": "es2015",' : '"target": "esnext",'}
-			${true ? '"module": "es6",' : '"module": "esnext",'}
-			${false ? '"outFile": "dist/test/rxcomp.js",' : '"outDir": "dist/test",'}
-			"lib": ["dom", "es2015", "es2016", "es2017"],
-			"moduleResolution": "node",
-			"typeRoots": ["node_modules/@types"],
-			"declaration": true,
-			"emitDecoratorMetadata": true,
-			"experimentalDecorators": true,
-			"sourceMap": true,
-			"removeComments": true,
-			"importHelpers": true,
-			"allowSyntheticDefaultImports": true,
-			"esModuleInterop": true,
-			"allowJs": true,
-			"strict": false,
-		},
-		"files": [
-			"src/rxcomp.ts"
-		],
-		"exclude": [
-			"node_modules",
-			".npm"
-		]
-	}`;
-	/*
-	"baseUrl": "",
-	"mapRoot": "./",
-	*/
-	// Parse JSON, after removing comments. Just fancier JSON.parse
-	const result = typescript.parseConfigFileTextToJson(configFileName, configFileText);
-	const configObject = result.config;
-	if (!configObject) {
-		typescriptDiagnostic_([result.error]);
-		return;
-		process.exit(1);
-	}
+/*
+const RollupFormats = {
+	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+	'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
+	'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
+	'system': 'system', // Native format of the SystemJS loader
+};
 
-	// Extract config infromation
-	const configParseResult = typescript.parseJsonConfigFileContent(configObject, typescript.sys, path.dirname(configFileName));
-	if (configParseResult.errors.length > 0) {
-		typescriptDiagnostic_(configParseResult.errors);
-		return;
-		process.exit(1);
-	}
-	return configParseResult;
-}
-
-function typescriptCompile_(file, item) {
-	// Extract configuration from config file
-	const config = typescriptConfig_(item);
-	console.log('fileNames', config.fileNames);
-	console.log('options', config.options);
-
-	// return 0;
-	const program = typescript.createProgram(config.fileNames, config.options);
-	const emitResult = program.emit();
-	console.log('emitResult', emitResult);
-
-	// Report errors
-	typescriptDiagnostic_(typescript.getPreEmitDiagnostics(program).concat(emitResult.diagnostics));
-
-	// Return code
-	const exitCode = emitResult.emitSkipped ? 1 : 0;
-	console.log('exitCode', exitCode);
-	return exitCode;
-	process.exit(exitCode);
-}
-
-function typescriptDiagnostic_(diagnostics) {
-	diagnostics.forEach(diagnostic => {
-		let message = 'Error';
-		if (diagnostic.file) {
-			const where = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-			message += ' ' + diagnostic.file.fileName + ' ' + where.line + ', ' + where.character + 1;
-		}
-		message += ': ' + typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-		console.log(message);
-	});
-}
+const TypescriptTarget = ["ES3", "ES5", "ES6", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ESNext"];
+const TypescriptModule = ["CommonJS", "AMD", "System", "UMD", "ES6", "ES2015", "ESNext", "None"];
+*/
 
 // compile('tsconfig.json');
 
 function typescript_(config, item) {
+	const output = typescriptOutput_(item)[0];
+	switch (output.format) {
+		case 'iife':
+		case 'umd':
+			return rollup_(config, item);
+			break;
+		default:
+			return typescriptLib_(config, item, output);
+	}
+	/*
+	'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
+	'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
+
+	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+	'system': 'system', // Native format of the SystemJS loader
+	*/
+}
+
+function typescriptLib_(config, item, output) {
 	return through2.obj(function(file, enc, callback) {
 		// console.log('TfsCheckout', file.path);
 		if (file.isNull()) {
@@ -113,8 +63,7 @@ function typescript_(config, item) {
 			console.warn('Rollup, Streaming not supported');
 			return callback(null, file);
 		}
-		const result = typescriptCompile_(file, item);
-
+		const result = typescriptCompile_(file, item, output);
 		return callback(null, file);
 		const rollupGenerate = (bundle, output, i) => {
 			return bundle.generate(output).then(result => {
@@ -173,8 +122,8 @@ function typescript_(config, item) {
 				*/
 			});
 		};
-		rollup.rollup(typescriptInput_(file.path)).then(bundle => {
-			const bundles = typescriptOutput_(item.input, item.output);
+		rollup.rollup(typescriptInput_(item)).then(bundle => {
+			const bundles = typescriptOutput_(item);
 			return Promise.all(bundles.map((output, i) => rollupGenerate(bundle, output, i))).then(complete => {
 				callback(null, file);
 			});
@@ -191,14 +140,150 @@ function typescript_(config, item) {
 	});
 }
 
-function typescriptInput_(input) {
-	// const watchGlob = path.dirname(input) + '/**/*' + path.extname(input);
+function typescriptCompile_(file, item) {
+	// Extract configuration from config file
+	const config = typescriptConfig_(item);
+	// console.log('fileNames', config.fileNames);
+	// console.log('options', config.options);
+
+	// return 0;
+	const program = typescript.createProgram(config.fileNames, config.options);
+	const emitResult = program.emit();
+	// console.log('emitResult', emitResult);
+
+	// Report errors
+	typescriptDiagnostic_(typescript.getPreEmitDiagnostics(program).concat(emitResult.diagnostics));
+
+	// Return code
+	const exitCode = emitResult.emitSkipped ? 1 : 0;
+	// console.log('exitCode', exitCode);
+	return exitCode;
+	process.exit(exitCode);
+}
+
+function typescriptConfig_(item) {
+	const output = typescriptOutput_(item)[0];
+	// console.log(output);
+
+	const configFileName = 'tsconfig.json';
+
+	// Read config file
+	let configFileText = `{
+		"compilerOptions": {
+			"moduleResolution": "node",
+			"typeRoots": ["node_modules/@types"],
+			"emitDecoratorMetadata": true,
+			"experimentalDecorators": true,
+			"removeComments": true,
+			"importHelpers": true,
+			"allowSyntheticDefaultImports": true,
+			"esModuleInterop": true,
+			"allowJs": true,
+			"strict": false
+		},
+		"exclude": [
+			"node_modules",
+			".npm"
+		]
+	}`;
+
+	let json = JSON.parse(configFileText);
+	json.files = [item.input];
+	switch (output.format) {
+		case 'amd':
+			json.compilerOptions = Object.assign(json.compilerOptions, {
+				target: 'es5',
+				module: 'amd',
+				outFile: output.file,
+				lib: ["dom", "es2015", "es2016", "es2017"],
+				declaration: false,
+				sourceMap: true,
+			});
+			break;
+		case 'cjs':
+			json.compilerOptions = Object.assign(json.compilerOptions, {
+				target: 'es5',
+				module: 'commonJS',
+				outDir: output.file,
+				lib: ["dom", "es2015", "es2016", "es2017"],
+				declaration: true,
+				sourceMap: false,
+			});
+			break;
+		case 'esm':
+			json.compilerOptions = Object.assign(json.compilerOptions, {
+				target: 'es2015',
+				module: 'es6',
+				outDir: output.file,
+				lib: ["dom", "es2015", "es2016", "es2017"],
+				declaration: true,
+				sourceMap: false,
+			});
+			break;
+		case 'system':
+			json.compilerOptions = Object.assign(json.compilerOptions, {
+				target: 'es5',
+				module: 'system',
+				outFile: output.file,
+				lib: ["dom", "es2015", "es2016", "es2017"],
+				declaration: false,
+				sourceMap: true,
+			});
+			break;
+	}
+
+	/*
+	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+	'system': 'system', // Native format of the SystemJS loader
+	*/
+
+	configFileText = JSON.stringify(json);
+
+	/*
+	"baseUrl": "",
+	"mapRoot": "./",
+	*/
+	// Parse JSON, after removing comments. Just fancier JSON.parse
+	const result = typescript.parseConfigFileTextToJson(configFileName, configFileText);
+	const configObject = result.config;
+	if (!configObject) {
+		typescriptDiagnostic_([result.error]);
+		return;
+		process.exit(1);
+	}
+
+	// Extract config infromation
+	const configParseResult = typescript.parseJsonConfigFileContent(configObject, typescript.sys, path.dirname(configFileName));
+	if (configParseResult.errors.length > 0) {
+		typescriptDiagnostic_(configParseResult.errors);
+		return;
+		process.exit(1);
+	}
+	return configParseResult;
+}
+
+function typescriptDiagnostic_(diagnostics) {
+	diagnostics.forEach(diagnostic => {
+		let message = 'Error';
+		if (diagnostic.file) {
+			const where = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+			message += ' ' + diagnostic.file.fileName + ' ' + where.line + ', ' + where.character + 1;
+		}
+		message += ': ' + typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+		console.log(message);
+	});
+}
+
+function typescriptInput_(item) {
+	// const watchGlob = path.dirname(item.input) + '/**/*' + path.extname(item.input);
 	// console.log('watchGlob', watchGlob);
 	const plugins = [
 		// Resolve source maps to the original source
 		rollupPluginSourcemaps(),
 		// Compile TypeScript files
-		path.extname(input) === '.ts' ? rollupPluginTypescript({
+		path.extname(item.input) === '.ts' ? rollupPluginTypescript({
 			rollupCommonJSResolveHack: true,
 			clean: true,
 			declaration: true
@@ -235,9 +320,9 @@ function typescriptInput_(input) {
 		}),
 	].filter(x => x);
 	input = {
-		input: input,
+		input: item.input,
 		plugins: plugins,
-		external: [],
+		external: item.external || [],
 		/*
 		external: ['tslib'],
 		watch: {
@@ -248,13 +333,16 @@ function typescriptInput_(input) {
 	return input;
 }
 
-function typescriptOutput_(input, output) {
+function typescriptOutput_(item) {
+	const input = item.input;
+	const output = item.output;
 	const outputs = Array.isArray(output) ? output : [output];
 	const default_ = {
-		format: 'umd',
-		globals: {},
-		external: [],
-		sourcemap: true
+		format: 'iife',
+		name: item.name || null,
+		globals: item.globals || {},
+		sourcemap: true,
+		minify: item.minify || false,
 	};
 	return outputs.map(x => {
 		let output = Object.assign({}, default_);
