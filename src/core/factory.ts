@@ -5,7 +5,7 @@ export type MatchFunction = (node: HTMLElement) => boolean;
 export type SelectorFunction = (node: HTMLElement) => ISelectorResult | false;
 
 export interface ISelectorResult {
-	node: RxCompElement;
+	node: IElement;
 	factory: typeof Factory;
 	selector: string;
 }
@@ -20,11 +20,11 @@ export interface IFactoryMeta {
 	template?: string;
 }
 
-export class RxCompElement extends HTMLElement {
+export interface IElement extends HTMLElement {
 	rxcompId?: number;
 }
 
-export class RxCompText extends Text {
+export interface IText extends Text {
 	nodeExpressions?: (ExpressionFunction | string)[];
 }
 

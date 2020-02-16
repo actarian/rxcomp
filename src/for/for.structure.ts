@@ -1,6 +1,6 @@
-import Factory, { ExpressionFunction, RxCompElement } from '../core/factory';
+import Factory, { ExpressionFunction, IElement } from '../core/factory';
 import Structure from '../core/structure';
-import Module, { getContext, ModuleContext } from '../module/module';
+import Module, { getContext, IContext } from '../module/module';
 import ForItem from './for.item';
 
 export interface IExpressionToken {
@@ -32,9 +32,9 @@ export default class ForStructure extends Structure {
 	}
 
 	onChanges(changes) {
-		const context: ModuleContext = getContext(this);
+		const context: IContext = getContext(this);
 		const module: Module = context.module;
-		const node: RxCompElement = context.node;
+		const node: IElement = context.node;
 		// resolve
 		const token: IExpressionToken = this.token;
 		let result = module.resolve(this.forFunction, changes, this) || [];
@@ -63,7 +63,7 @@ export default class ForStructure extends Structure {
 					*/
 				} else {
 					// create
-					const clonedNode: RxCompElement = node.cloneNode(true) as RxCompElement;
+					const clonedNode: IElement = node.cloneNode(true) as IElement;
 					delete clonedNode['rxcompId'];
 					this.forend.parentNode.insertBefore(clonedNode, this.forend);
 					const args = [token.key, key, token.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?

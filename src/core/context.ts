@@ -6,7 +6,7 @@ const RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', '
 
 export default class Context extends Component {
 
-	constructor(instance: Factory, descriptors = {}) {
+	constructor(instance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}) {
 		super();
 		descriptors = Context.mergeDescriptors(instance, instance, descriptors);
 		descriptors = Context.mergeDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
@@ -27,13 +27,13 @@ export default class Context extends Component {
 		Object.defineProperties(this, descriptors);
 	}
 
-	static mergeDescriptors(source, instance, descriptors = {}) {
-		const properties = Object.getOwnPropertyNames(source);
+	static mergeDescriptors(source: Object, instance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}): { [key: string]: PropertyDescriptor } {
+		const properties: string[] = Object.getOwnPropertyNames(source);
 		while (properties.length) {
-			let key = properties.shift();
+			const key: string = properties.shift();
 			if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
 				// console.log('Context.mergeDescriptors', key, source[key]);
-				const descriptor = Object.getOwnPropertyDescriptor(source, key);
+				const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(source, key);
 				if (typeof descriptor.value == 'function') {
 					descriptor.value = (...args) => {
 						return instance[key].apply(instance, args);

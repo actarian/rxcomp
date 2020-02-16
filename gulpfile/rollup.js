@@ -101,6 +101,14 @@ function rollup_(config, item) {
 }
 
 function rollupInput_(item) {
+	let babelTargets;
+	if (item.target === 'esm') {
+		babelTargets = {
+			"esmodules": true
+		};
+	} else {
+		babelTargets = item.target; // 'last 2 version, ie 11';
+	}
 	const tsconfigDefaults = {
 		compilerOptions: {
 			target: 'esNext',
@@ -170,7 +178,8 @@ function rollupInput_(item) {
 			presets: [
 				[babelPresetEnv, {
 					modules: false,
-					loose: true
+					loose: true,
+					targets: babelTargets
 				}],
 				/*
 				[babelPresetTypescript, {

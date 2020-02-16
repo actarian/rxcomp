@@ -1,6 +1,6 @@
 import Component from '../core/component';
 import Directive from '../core/directive';
-import Factory, { ISelectorResult, MatchFunction, RxCompElement, SelectorFunction } from '../core/factory';
+import Factory, { IElement, ISelectorResult, MatchFunction, SelectorFunction } from '../core/factory';
 import Pipe from '../core/pipe';
 import Structure from '../core/structure';
 import Module, { IModuleMeta } from '../module/module';
@@ -36,7 +36,7 @@ export default class Platform {
 		return module;
 	}
 
-	static querySelector(selector: string): RxCompElement | null {
+	static querySelector(selector: string): IElement | null {
 		return document.querySelector(selector);
 	}
 

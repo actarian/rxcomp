@@ -1,4 +1,4 @@
-import Factory, { ExpressionFunction, RxCompElement } from '../core/factory';
+import Factory, { ExpressionFunction, IElement } from '../core/factory';
 import Structure from '../core/structure';
 import { IExpressionToken } from '../for/for.structure';
 import { getContext } from '../module/module';
@@ -10,8 +10,8 @@ export default class IfStructure extends Structure {
 	instances: Factory[] = [];
 	token: IExpressionToken;
 	ifFunction: ExpressionFunction;
-	clonedNode: RxCompElement;
-	node: RxCompElement;
+	clonedNode: IElement;
+	node: IElement;
 
 	onInit() {
 		const { module, node } = getContext(this);
@@ -22,10 +22,10 @@ export default class IfStructure extends Structure {
 		ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
 		const expression = node.getAttribute('*if');
 		this.ifFunction = module.makeFunction(expression);
-		const clonedNode = node.cloneNode(true) as RxCompElement;
+		const clonedNode = node.cloneNode(true) as IElement;
 		clonedNode.removeAttribute('*if');
 		this.clonedNode = clonedNode;
-		this.node = clonedNode.cloneNode(true) as RxCompElement;
+		this.node = clonedNode.cloneNode(true) as IElement;
 		// console.log('IfStructure.expression', expression);
 	}
 
@@ -43,7 +43,7 @@ export default class IfStructure extends Structure {
 			if (node.parentNode) {
 				module.remove(node, this);
 				node.parentNode.removeChild(node);
-				this.node = this.clonedNode.cloneNode(true) as RxCompElement;
+				this.node = this.clonedNode.cloneNode(true) as IElement;
 			}
 		}
 	}

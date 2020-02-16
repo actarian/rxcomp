@@ -1,5 +1,10 @@
 # supported browsers
-defaults
+[production]
+> 1%
+ie 11
+
+[modern]
 last 2 version
-IE 11
-maintained node versions
+
+[ssr]
+node 12

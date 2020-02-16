@@ -14,6 +14,8 @@ const typescript = require('typescript'),
 	through2 = require('through2'),
 	vinyl = require('vinyl');
 
+const { getObject, extend } = require('./json');
+
 const { rollup_, rollupInput_, rollupOutput_ } = require('./rollup');
 
 /*
@@ -162,72 +164,87 @@ function typescriptCompile_(file, item) {
 }
 
 function typescriptConfig_(item) {
-	const output = typescriptOutput_(item)[0];
-	// console.log(output);
 
 	const configFileName = 'tsconfig.json';
 
-	// Read config file
-	let configFileText = `{
-		"compilerOptions": {
-			"moduleResolution": "node",
-			"typeRoots": ["node_modules/@types"],
-			"emitDecoratorMetadata": true,
-			"experimentalDecorators": true,
-			"removeComments": true,
-			"importHelpers": true,
-			"allowSyntheticDefaultImports": true,
-			"esModuleInterop": true,
-			"allowJs": true,
-			"strict": false
-		},
-		"exclude": [
-			"node_modules",
-			".npm"
-		]
-	}`;
+	const configDefault = {
+		compilerOptions: {
+			typeRoots: ['node_modules/@types'],
+			strict: false
+		}
+	};
+	/*
+	"baseUrl": "",
+	"mapRoot": "./",
+	*/
 
-	let json = JSON.parse(configFileText);
-	json.files = [item.input];
+	let configOverride = {
+		files: [item.input],
+		compilerOptions: {
+			moduleResolution: 'node',
+			experimentalDecorators: true,
+			emitDecoratorMetadata: true,
+			removeComments: true,
+			importHelpers: true,
+			allowSyntheticDefaultImports: true,
+			esModuleInterop: true,
+			allowJs: true,
+		},
+		exclude: [
+			'node_modules',
+			'.npm'
+		]
+	};
+
+	const output = typescriptOutput_(item)[0];
+	// console.log(output);
 	switch (output.format) {
 		case 'amd':
-			json.compilerOptions = Object.assign(json.compilerOptions, {
-				target: 'es5',
-				module: 'amd',
-				outFile: output.file,
-				lib: ["dom", "es2015", "es2016", "es2017"],
-				declaration: false,
-				sourceMap: true,
+			configOverride = extend(configOverride, {
+				compilerOptions: {
+					target: 'es5',
+					module: 'amd',
+					outFile: output.file,
+					lib: ['dom', 'es2015', 'es2016', 'es2017'],
+					declaration: false,
+					sourceMap: true,
+				}
 			});
 			break;
 		case 'cjs':
-			json.compilerOptions = Object.assign(json.compilerOptions, {
-				target: 'es5',
-				module: 'commonJS',
-				outDir: output.file,
-				lib: ["dom", "es2015", "es2016", "es2017"],
-				declaration: true,
-				sourceMap: false,
+			configOverride = extend(configOverride, {
+				compilerOptions: {
+					target: 'es5',
+					module: 'commonJS',
+					outDir: output.file,
+					lib: ['dom', 'es2015', 'es2016', 'es2017'],
+					declaration: true,
+					sourceMap: false,
+				}
 			});
 			break;
 		case 'esm':
-			json.compilerOptions = Object.assign(json.compilerOptions, {
-				target: 'es2015',
-				module: 'es6',
-				outDir: output.file,
-				lib: ["dom", "es2015", "es2016", "es2017"],
-				declaration: true,
-				sourceMap: false,
+			configOverride = extend(configOverride, {
+				compilerOptions: {
+					target: 'es2015',
+					module: 'es6',
+					outDir: output.file,
+					lib: ['dom', 'es2015', 'es2016', 'es2017'],
+					declaration: true,
+					sourceMap: false,
+				}
 			});
 			break;
 		case 'system':
-			json.compilerOptions = Object.assign(json.compilerOptions, {
-				target: 'es5',
-				module: 'system',
-				outFile: output.file,
-				lib: ["dom", "es2015", "es2016", "es2017"],
-				declaration: false,
-				sourceMap: true,
+			configOverride = extend(configOverride, {
+				compilerOptions: {
+					target: 'es5',
+					module: 'system',
+					outFile: output.file,
+					lib: ['dom', 'es2015', 'es2016', 'es2017'],
+					declaration: false,
+					sourceMap: true,
+				}
 			});
 			break;
 	}
@@ -239,12 +256,10 @@ function typescriptConfig_(item) {
 	'system': 'system', // Native format of the SystemJS loader
 	*/
 
-	configFileText = JSON.stringify(json);
+	const config = getObject(`./${configFileName}`, configDefault, configOverride);
 
-	/*
-	"baseUrl": "",
-	"mapRoot": "./",
-	*/
+	const configFileText = JSON.stringify(config);
+
 	// Parse JSON, after removing comments. Just fancier JSON.parse
 	const result = typescript.parseConfigFileTextToJson(configFileName, configFileText);
 	const configObject = result.config;

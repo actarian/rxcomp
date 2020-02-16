@@ -30,7 +30,9 @@ export default class StyleDirective extends Directive {
 		const style = this.style;
 		if (style) {
 			for (let key in style) {
-				node.style.setProperty(key, style[key]);
+				const splitted: string[] = key.split('.');
+				const name = splitted.shift();
+				node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
 			}
 		}
 		// console.log('StyleDirective.onChanges', changes, style);

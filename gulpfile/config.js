@@ -6,6 +6,8 @@ const { watch } = require('gulp');
 
 const log = require('./logger');
 
+const { getObject, extend } = require('./json');
+
 const path_ = './gulpfile-config.json';
 const options = getOptions();
 const target = options.target || 'browser';
@@ -32,15 +34,18 @@ function getOptions() {
 	return o;
 }
 
-function getConfig() {
-	const defaultTarget = {
+function getTarget_() {
+	return {
 		compile: [],
-		bundle: []
+		bundle: [],
 	};
-	let config = {
+}
+
+function getConfig() {
+	let configDefault = {
 		targets: {
-			browser: defaultTarget,
-			dist: defaultTarget
+			browser: getTarget_(),
+			dist: getTarget_()
 		},
 		tfs: false,
 		server: {
@@ -50,23 +55,9 @@ function getConfig() {
 			port: 40900
 		}
 	};
-	if (fs.existsSync(path_)) {
-		const gulpfileConfigText = fs.readFileSync(path_, 'utf8');
-		const gulpfileConfig = JSON.parse(stripBom(gulpfileConfigText));
-		config = Object.assign(config, gulpfileConfig);
-	} else {
-		log.warn('missing gulpfile-config.json');
-	}
-	config.target = config.targets[target] || defaultTarget;
+	const config = getObject(path_, configDefault);
+	config.target = config.targets[target] || getTarget_();
 	return config;
-}
-
-function stripBom(text) {
-	text = text.toString();
-	if (text.charCodeAt(0) === 0xFEFF) {
-		text = text.slice(1);
-	}
-	return text;
 }
 
 function configWatcher_(callback) {

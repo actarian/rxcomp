@@ -29,13 +29,6 @@ var rxcomp = (function (exports, rxjs, operators) {
     subClass.__proto__ = superClass;
   }
 
-  function _getPrototypeOf(o) {
-    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-      return o.__proto__ || Object.getPrototypeOf(o);
-    };
-    return _getPrototypeOf(o);
-  }
-
   function _setPrototypeOf(o, p) {
     _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
       o.__proto__ = p;
@@ -75,44 +68,6 @@ var rxcomp = (function (exports, rxjs, operators) {
     return _construct.apply(null, arguments);
   }
 
-  function _isNativeFunction(fn) {
-    return Function.toString.call(fn).indexOf("[native code]") !== -1;
-  }
-
-  function _wrapNativeSuper(Class) {
-    var _cache = typeof Map === "function" ? new Map() : undefined;
-
-    _wrapNativeSuper = function _wrapNativeSuper(Class) {
-      if (Class === null || !_isNativeFunction(Class)) return Class;
-
-      if (typeof Class !== "function") {
-        throw new TypeError("Super expression must either be null or a function");
-      }
-
-      if (typeof _cache !== "undefined") {
-        if (_cache.has(Class)) return _cache.get(Class);
-
-        _cache.set(Class, Wrapper);
-      }
-
-      function Wrapper() {
-        return _construct(Class, arguments, _getPrototypeOf(this).constructor);
-      }
-
-      Wrapper.prototype = Object.create(Class.prototype, {
-        constructor: {
-          value: Wrapper,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      });
-      return _setPrototypeOf(Wrapper, Class);
-    };
-
-    return _wrapNativeSuper(Class);
-  }
-
   function _assertThisInitialized(self) {
     if (self === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -120,29 +75,6 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     return self;
   }
-
-  var RxCompElement =
-  /*#__PURE__*/
-  function (_HTMLElement) {
-    _inheritsLoose(RxCompElement, _HTMLElement);
-
-    function RxCompElement() {
-      return _HTMLElement.apply(this, arguments) || this;
-    }
-
-    return RxCompElement;
-  }(_wrapNativeSuper(HTMLElement));
-  var RxCompText =
-  /*#__PURE__*/
-  function (_Text) {
-    _inheritsLoose(RxCompText, _Text);
-
-    function RxCompText() {
-      return _Text.apply(this, arguments) || this;
-    }
-
-    return RxCompText;
-  }(_wrapNativeSuper(Text));
 
   var Factory = function Factory() {};
 
@@ -394,11 +326,11 @@ var rxcomp = (function (exports, rxjs, operators) {
         var child = node.childNodes[i];
 
         if (child.nodeType === 1) {
-          var htmlNode = child;
-          var context = getContextByNode(htmlNode);
+          var element = child;
+          var context = getContextByNode(element);
 
           if (!context) {
-            this.parse(htmlNode, instance);
+            this.parse(element, instance);
           }
         } else if (child.nodeType === 3) {
           var text = child;
@@ -491,7 +423,9 @@ var rxcomp = (function (exports, rxjs, operators) {
       var input,
           expression = null;
 
-      if (node.hasAttribute(key)) {
+      if (node.hasAttribute("[" + key + "]")) {
+        expression = node.getAttribute("[" + key + "]");
+      } else if (node.hasAttribute(key)) {
         var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
           if (a) {
             return '"+';
@@ -506,8 +440,6 @@ var rxcomp = (function (exports, rxjs, operators) {
           }
         });
         expression = "\"" + attribute + "\"";
-      } else if (node.hasAttribute("[" + key + "]")) {
-        expression = node.getAttribute("[" + key + "]");
       }
 
       if (expression !== null) {
@@ -922,24 +854,47 @@ var rxcomp = (function (exports, rxjs, operators) {
     _inheritsLoose(ClassDirective, _Directive);
 
     function ClassDirective() {
-      return _Directive.apply(this, arguments) || this;
+      var _this;
+
+      _this = _Directive.apply(this, arguments) || this;
+      _this.keys = [];
+      return _this;
     }
 
     var _proto = ClassDirective.prototype;
 
-    _proto.onChanges = function onChanges() {
+    _proto.onInit = function onInit() {
+      var _this2 = this;
+
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      var classList = this.class;
+      node.classList.forEach(function (x) {
+        return _this2.keys.push(x);
+      });
+    };
 
-      if (typeof classList === 'object') {
-        for (var key in classList) {
-          classList[key] ? node.classList.add(key) : node.classList.remove(key);
+    _proto.onChanges = function onChanges() {
+      var _getContext2 = getContext(this),
+          node = _getContext2.node;
+
+      var keys;
+      var object = this.class;
+
+      if (typeof object === 'object') {
+        keys = [];
+
+        for (var key in object) {
+          if (object[key]) {
+            keys.push(key);
+          }
         }
-      } else if (typeof classList === 'string') {
-        node.setAttribute('class', classList);
+      } else if (typeof object === 'string') {
+        keys = object.split(/\s+/);
       }
+
+      keys = (keys || []).concat(this.keys);
+      node.setAttribute('class', keys.join(' '));
     };
 
     return ClassDirective;
@@ -1345,7 +1300,9 @@ var rxcomp = (function (exports, rxjs, operators) {
 
       if (style) {
         for (var key in style) {
-          node.style.setProperty(key, style[key]);
+          var splitted = key.split('.');
+          var name = splitted.shift();
+          node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
         }
       }
     };
