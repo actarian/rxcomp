@@ -5,7 +5,7 @@ export default class InnerHtmlDirective extends Directive {
 
 	innerHTML: string;
 
-	onChanges(changes) {
+	onChanges() {
 		const { node } = getContext(this);
 		node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML; // !!! keep == loose equality
 	}

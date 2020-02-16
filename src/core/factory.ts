@@ -1,6 +1,14 @@
-import { BehaviorSubject, Subject } from "rxjs";
+import { BehaviorSubject, Subject } from 'rxjs';
 
-export type SelectorFunction = (node: HTMLElement) => boolean;
+export type MatchFunction = (node: HTMLElement) => boolean;
+
+export type SelectorFunction = (node: HTMLElement) => ISelectorResult | false;
+
+export interface ISelectorResult {
+	node: RxCompElement;
+	factory: typeof Factory;
+	selector: string;
+}
 
 export type ExpressionFunction = () => any;
 

@@ -1,8 +1,8 @@
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
-import Factory, { ExpressionFunction, IFactoryMeta, RxCompElement, RxCompText, SelectorFunction } from '../core/factory';
+import Factory, { ExpressionFunction, IFactoryMeta, ISelectorResult, RxCompElement, RxCompText, SelectorFunction } from '../core/factory';
 import Pipe from '../core/pipe';
 import Structure from '../core/structure';
 
@@ -13,8 +13,8 @@ export interface ModuleContext {
 	node: RxCompElement;
 	factory: typeof Factory;
 	selector: string;
-	inputs?: {};
-	outputs?: {};
+	inputs?: { [key: string]: ExpressionFunction };
+	outputs?: { [key: string]: ExpressionFunction };
 }
 
 let ID: number = 0;
@@ -38,22 +38,22 @@ export default class Module {
 	meta: IModuleMeta;
 
 	compile(node: RxCompElement, parentInstance?: Factory | Window): Factory[] {
-		let componentNode;
-		const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(match => {
+		let componentNode: RxCompElement;
+		const instances: Factory[] = Module.querySelectorsAll(node, this.meta.selectors, []).map((match: ISelectorResult) => {
 			if (componentNode && componentNode !== match.node) {
 				parentInstance = undefined;
 			}
-			const instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+			const instance: Factory | undefined = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 			if (match.factory.prototype instanceof Component) {
 				componentNode = match.node;
 			}
 			return instance;
-		}).filter(x => x);
+		}).filter(x => x != undefined);
 		// console.log('compile', instances, node, parentInstance);
 		return instances;
 	}
 
-	makeInstance(node: RxCompElement, factory: typeof Factory, selector: string, parentInstance: Factory | Window, args?: any[]): Factory | void {
+	makeInstance(node: RxCompElement, factory: typeof Factory, selector: string, parentInstance: Factory | Window, args?: any[]): Factory | undefined {
 		if (parentInstance || node.parentNode) {
 			const isComponent = factory.prototype instanceof Component;
 			const meta = factory.meta;
@@ -92,7 +92,7 @@ export default class Module {
 					initialized ? module.parse(node, instance) : setTimeout(function () { module.parse(node, instance); });
 				}
 				// calling onView event
-				if (instance['onView']) {
+				if (typeof instance['onView'] === 'function') {
 					// console.log('onView', instance.constructor.name);
 					instance['onView']();
 				}
@@ -105,7 +105,7 @@ export default class Module {
 				context.outputs = this.makeOutputs(meta, instance);
 			}
 			// calling onInit event
-			if (instance['onInit']) {
+			if (typeof instance['onInit'] === 'function') {
 				instance['onInit']();
 			}
 			initialized = true;
@@ -125,14 +125,14 @@ export default class Module {
 					}),
 					*/
 					takeUntil(instance.unsubscribe$)
-				).subscribe(changes => {
+				).subscribe((changes: Factory | Window) => {
 					// resolve component input outputs
 					// if (isComponent && meta) {
 					if (meta) {
 						this.resolveInputsOutputs(instance, changes);
 					}
-					// calling onChanges event with parentInstance
-					if (instance['onChanges']) {
+					// calling onChanges event with changes
+					if (typeof instance['onChanges'] === 'function') {
 						// console.log('onChanges', instance.constructor.name);
 						// console.log('onChanges', instance.constructor.meta.selector, changes);
 						instance['onChanges'](changes);
@@ -146,7 +146,7 @@ export default class Module {
 	}
 
 	makeContext(instance: Factory, parentInstance: Factory | Window, node: RxCompElement, selector: string): ModuleContext {
-		const context = Module.makeContext(this, instance, parentInstance, node, instance.constructor as typeof Factory, selector);
+		const context: ModuleContext = Module.makeContext(this, instance, parentInstance, node, instance.constructor as typeof Factory, selector);
 		// console.log('Module.makeContext', context, context.instance, context.node);
 		return context;
 	}
@@ -186,7 +186,7 @@ export default class Module {
 	}
 
 	parse(node: HTMLElement, instance: Factory): void {
-		for (let i = 0; i < node.childNodes.length; i++) {
+		for (let i: number = 0; i < node.childNodes.length; i++) {
 			const child: ChildNode = node.childNodes[i];
 			if (child.nodeType === 1) {
 				const htmlNode: HTMLElement = child as HTMLElement;
@@ -228,7 +228,7 @@ export default class Module {
 	}
 
 	pushFragment(nodeValue: string, from: number, to: number, expressions: (ExpressionFunction | string)[]): void {
-		const fragment = nodeValue.substring(from, to);
+		const fragment: string = nodeValue.substring(from, to);
 		expressions.push(fragment);
 	};
 
@@ -264,7 +264,7 @@ export default class Module {
 		return expression.apply(parentInstance, [payload, this]);
 	}
 
-	makeHosts(meta: IFactoryMeta, instance: Factory, node: RxCompElement) {
+	makeHosts(meta: IFactoryMeta, instance: Factory, node: RxCompElement): void {
 		if (meta.hosts) {
 			Object.keys(meta.hosts).forEach((key: string) => {
 				const factory: typeof Factory = meta.hosts[key];
@@ -273,12 +273,12 @@ export default class Module {
 		}
 	}
 
-	makeInput(instance, key) {
+	makeInput(instance: Factory, key: string): ExpressionFunction {
 		const { node } = getContext(instance);
-		let input, expression = null;
+		let input: ExpressionFunction, expression: string = null;
 		if (node.hasAttribute(key)) {
 			// const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
-			const attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (match, a, b, c) {
+			const attribute: string = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
 				if (a) {
 					return '"+';
 				}
@@ -299,10 +299,10 @@ export default class Module {
 		return input;
 	}
 
-	makeInputs(meta, instance) {
-		const inputs = {};
+	makeInputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
+		const inputs: { [key: string]: ExpressionFunction } = {};
 		if (meta.inputs) {
-			meta.inputs.forEach((key, i) => {
+			meta.inputs.forEach((key: string, i: number) => {
 				const input = this.makeInput(instance, key);
 				if (input) {
 					inputs[key] = input;
@@ -312,13 +312,13 @@ export default class Module {
 		return inputs;
 	}
 
-	makeOutput(instance, key) {
-		const context = getContext(instance);
-		const node = context.node;
-		const parentInstance = context.parentInstance;
-		const expression = node.getAttribute(`(${key})`);
-		const outputFunction = this.makeFunction(expression, ['$event']);
-		const output$ = new Subject().pipe(
+	makeOutput(instance: Factory, key: string): ExpressionFunction {
+		const context: ModuleContext = getContext(instance);
+		const node: RxCompElement = context.node;
+		const parentInstance: Factory | Window = context.parentInstance;
+		const expression: string = node.getAttribute(`(${key})`);
+		const outputFunction: ExpressionFunction = this.makeFunction(expression, ['$event']);
+		const output$: Observable<any> = new Subject<any>().pipe(
 			tap((event) => {
 				this.resolve(outputFunction, parentInstance, event);
 			})
@@ -330,21 +330,23 @@ export default class Module {
 		return outputFunction;
 	}
 
-	makeOutputs(meta, instance) {
-		const outputs = {};
+	makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
+		const outputs: { [key: string]: ExpressionFunction } = {};
 		if (meta.outputs) {
-			meta.outputs.forEach((key, i) => outputs[key] = this.makeOutput(instance, key));
+			meta.outputs.forEach((key: string, i: number) => {
+				outputs[key] = this.makeOutput(instance, key);
+			});
 		}
 		return outputs;
 	}
 
-	resolveInputsOutputs(instance, changes) {
-		const context = getContext(instance);
-		const parentInstance = context.parentInstance;
-		const inputs = context.inputs;
+	resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
+		const context: ModuleContext = getContext(instance);
+		const parentInstance: Factory | Window = context.parentInstance;
+		const inputs: { [key: string]: ExpressionFunction } = context.inputs;
 		for (let key in inputs) {
-			const inputFunction = inputs[key];
-			const value = this.resolve(inputFunction, parentInstance, instance);
+			const inputFunction: ExpressionFunction = inputs[key];
+			const value: any = this.resolve(inputFunction, parentInstance, instance);
 			instance[key] = value;
 		}
 		/*
@@ -357,17 +359,17 @@ export default class Module {
 		*/
 	}
 
-	destroy() {
+	destroy(): void {
 		this.remove(this.meta.node);
 		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
 	}
 
-	remove(node, keepInstance?: any) {
-		const keepContext = keepInstance ? getContext(keepInstance) : undefined;
+	remove(node: Node, keepInstance?: Factory): Node {
+		const keepContext: ModuleContext = keepInstance ? getContext(keepInstance) : undefined;
 		Module.traverseDown(node, (node: RxCompElement) => {
-			const rxcompId = node.rxcompId;
+			const rxcompId: number = node.rxcompId;
 			if (rxcompId) {
-				const keepContexts = Module.deleteContext(rxcompId, keepContext);
+				const keepContexts: ModuleContext[] = Module.deleteContext(rxcompId, keepContext);
 				if (keepContexts.length === 0) {
 					delete node.rxcompId;
 				}
@@ -377,17 +379,17 @@ export default class Module {
 	}
 
 	static parseExpression(expression: string): string {
-		const l = '┌';
-		const r = '┘';
-		const rx1 = /(\()([^\(\)]*)(\))/;
+		const l: string = '┌';
+		const r: string = '┘';
+		const rx1: RegExp = /(\()([^\(\)]*)(\))/;
 		while (expression.match(rx1)) {
-			expression = expression.replace(rx1, function (...g1) {
-				return `${l}${Module.parsePipes(g1[2])}${r}`;
+			expression = expression.replace(rx1, function (substring: string, ...args: any[]) {
+				return `${l}${Module.parsePipes(args[1])}${r}`;
 			});
 		}
 		expression = Module.parsePipes(expression);
-		expression = expression.replace(/(┌)|(┘)/g, function (...g2) {
-			return g2[1] ? '(' : ')';
+		expression = expression.replace(/(┌)|(┘)/g, function (substring: string, ...args) {
+			return args[0] ? '(' : ')';
 		});
 		return Module.parseOptionalChaining(expression);
 	}
@@ -454,7 +456,7 @@ export default class Module {
 
 	static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: RxCompElement, factory: typeof Factory, selector: string): ModuleContext {
 		instance.rxcompId = ++ID;
-		const context = { module, instance, parentInstance, node, factory, selector };
+		const context: ModuleContext = { module, instance, parentInstance, node, factory, selector };
 		const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
 		const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
 		nodeContexts.push(context);
@@ -462,25 +464,25 @@ export default class Module {
 		return context;
 	}
 
-	static deleteContext(id, keepContext) {
-		const keepContexts = [];
-		const nodeContexts = NODES[id];
+	static deleteContext(id: number, keepContext: ModuleContext): ModuleContext[] {
+		const keepContexts: ModuleContext[] = [];
+		const nodeContexts: ModuleContext[] = NODES[id];
 		if (nodeContexts) {
-			nodeContexts.forEach(context => {
+			nodeContexts.forEach((context: ModuleContext) => {
 				if (context === keepContext) {
 					keepContexts.push(keepContext);
 				} else {
-					const instance = context.instance;
+					const instance: Factory = context.instance;
 					instance.unsubscribe$.next();
 					instance.unsubscribe$.complete();
-					if (instance['onDestroy']) {
+					if (typeof instance['onDestroy'] === 'function') {
 						instance['onDestroy']();
 						delete CONTEXTS[instance.rxcompId];
 					}
 				}
 			});
 			if (keepContexts.length) {
-				NODES[id] = keepContexts;;
+				NODES[id] = keepContexts;
 			} else {
 				delete NODES[id];
 			}
@@ -488,15 +490,15 @@ export default class Module {
 		return keepContexts;
 	}
 
-	static matchSelectors(node, selectors, results) {
-		for (let i = 0; i < selectors.length; i++) {
-			const match = selectors[i](node);
-			if (match) {
-				const factory = match.factory;
+	static matchSelectors(node: HTMLElement, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
+		for (let i: number = 0; i < selectors.length; i++) {
+			const selectorResult: ISelectorResult | false = selectors[i](node);
+			if (selectorResult) {
+				const factory: typeof Factory = selectorResult.factory;
 				if (factory.prototype instanceof Component && factory.meta.template) {
 					node.innerHTML = factory.meta.template;
 				}
-				results.push(match);
+				results.push(selectorResult);
 				if (factory.prototype instanceof Structure) {
 					// console.log('Structure', node);
 					break;
@@ -506,16 +508,16 @@ export default class Module {
 		return results;
 	}
 
-	static querySelectorsAll(node, selectors, results) {
+	static querySelectorsAll(node: Node, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
 		if (node.nodeType === 1) {
-			const matches = this.matchSelectors(node, selectors, []);
-			results = results.concat(matches);
-			const structure = matches.find(x => x.factory.prototype instanceof Structure);
+			const selectorResults: ISelectorResult[] = this.matchSelectors(node as HTMLElement, selectors, []);
+			results = results.concat(selectorResults);
+			const structure: ISelectorResult = selectorResults.find(x => x.factory.prototype instanceof Structure);
 			if (structure) {
 				return results;
 			}
-			const childNodes = node.childNodes;
-			for (let i = 0; i < childNodes.length; i++) {
+			const childNodes: NodeListOf<ChildNode> = node.childNodes;
+			for (let i: number = 0; i < childNodes.length; i++) {
 				results = this.querySelectorsAll(childNodes[i], selectors, results);
 			}
 		}
@@ -603,7 +605,7 @@ export function getContextByNode(node: Node): ModuleContext | void {
 	return context;
 }
 
-export function getHost(instance: Factory, factory: typeof Factory, node: RxCompElement) {
+export function getHost(instance: Factory, factory: typeof Factory, node: RxCompElement): Factory {
 	if (!node) {
 		node = getContext(instance).node;
 	}
@@ -615,7 +617,7 @@ export function getHost(instance: Factory, factory: typeof Factory, node: RxComp
 				const context: ModuleContext = nodeContexts[i];
 				if (context.instance !== instance) {
 					// console.log(context.instance, instance);
-					if (context.instance instanceof Factory) {
+					if (context.instance instanceof factory) {
 						return context.instance;
 					}
 				}

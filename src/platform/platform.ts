@@ -1,6 +1,6 @@
 import Component from '../core/component';
 import Directive from '../core/directive';
-import Factory, { RxCompElement, SelectorFunction } from '../core/factory';
+import Factory, { ISelectorResult, MatchFunction, RxCompElement, SelectorFunction } from '../core/factory';
 import Pipe from '../core/pipe';
 import Structure from '../core/structure';
 import Module, { IModuleMeta } from '../module/module';
@@ -49,7 +49,7 @@ export default class Platform {
 	static resolvePipes(meta: IModuleMeta, exported?: boolean): { [key: string]: typeof Pipe } {
 		const importedPipes = meta.imports.map((importMeta: IModuleMeta) => this.resolvePipes(importMeta, true));
 		const pipes = {};
-		const pipeList: (typeof Factory | typeof Pipe)[] = (exported ? meta.exports : meta.declarations).filter((x: typeof Pipe) => x.prototype instanceof Pipe);
+		const pipeList: (typeof Pipe)[] = (exported ? meta.exports : meta.declarations).filter((x: typeof Pipe) => x.prototype instanceof Pipe) as (typeof Pipe)[];
 		pipeList.forEach(pipeFactory => pipes[pipeFactory.meta.name] = pipeFactory);
 		return Object.assign({}, ...importedPipes, pipes);
 	}
@@ -73,7 +73,7 @@ export default class Platform {
 		});
 	}
 
-	static getExpressions(selector: string): SelectorFunction[] {
+	static getExpressions(selector: string): MatchFunction[] {
 		let matchers = [];
 		selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value: string, c1, a2, u3, v4, a5, e6) {
 			if (c1) {
@@ -103,25 +103,25 @@ export default class Platform {
 	}
 
 	static unwrapSelectors(factories: (typeof Factory)[]): SelectorFunction[] {
-		const selectors = [];
-		factories.forEach(factory => {
-			factory.meta.selector.split(',').forEach(selector => {
+		const selectors: SelectorFunction[] = [];
+		factories.forEach((factory: typeof Factory) => {
+			factory.meta.selector.split(',').forEach((selector: string) => {
 				selector = selector.trim();
-				let excludes = [];
+				let excludes: MatchFunction[] = [];
 				const matchSelector = selector.replace(/\:not\((.+?)\)/g, (value, unmatchSelector) => {
 					excludes = this.getExpressions(unmatchSelector);
 					return '';
 				});
-				const includes = this.getExpressions(matchSelector);
+				const includes: MatchFunction[] = this.getExpressions(matchSelector);
 				selectors.push((node) => {
-					const include = includes.reduce((result, e) => {
-						return result && e(node);
+					const included = includes.reduce((p, match) => {
+						return p && match(node);
 					}, true);
-					const exclude = excludes.reduce((result, e) => {
-						return result || e(node);
+					const excluded = excludes.reduce((p, match) => {
+						return p || match(node);
 					}, false);
-					if (include && !exclude) {
-						return { node, factory, selector };
+					if (included && !excluded) {
+						return { node, factory, selector } as ISelectorResult;
 					} else {
 						return false;
 					}

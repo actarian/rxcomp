@@ -5,7 +5,7 @@ export default class SrcDirective extends Directive {
 
 	src: string;
 
-	onChanges(changes) {
+	onChanges() {
 		const { node } = getContext(this);
 		node.setAttribute('src', this.src);
 	}

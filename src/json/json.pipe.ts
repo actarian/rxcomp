@@ -1,4 +1,4 @@
-import Pipe from "../core/pipe";
+import Pipe from '../core/pipe';
 
 export default class JsonPipe extends Pipe {
 

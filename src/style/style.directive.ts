@@ -1,9 +1,9 @@
 import Directive from '../core/directive';
-import { ExpressionFunction } from '../core/factory';
 import { getContext } from '../module/module';
 
 export default class StyleDirective extends Directive {
 
+	/*
 	styleFunction: ExpressionFunction;
 
 	onInit() {
@@ -21,9 +21,24 @@ export default class StyleDirective extends Directive {
 		}
 		// console.log('StyleDirective.onChanges', changes, style);
 	}
+	*/
+
+	style: { [key: string]: string };
+
+	onChanges() {
+		const { node } = getContext(this);
+		const style = this.style;
+		if (style) {
+			for (let key in style) {
+				node.style.setProperty(key, style[key]);
+			}
+		}
+		// console.log('StyleDirective.onChanges', changes, style);
+	}
 
 }
 
 StyleDirective.meta = {
-	selector: `[[style]]`
+	selector: `[[style]]`,
+	inputs: ['style']
 };

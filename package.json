@@ -6,7 +6,6 @@
 	"browser": "dist/iife/rxcomp.js",
 	"main": "dist/cjs/rxcomp.js",
 	"types": "dist/cjs/rxcomp.d.ts",
-	"module": "dist/umd/rxcomp.js",
 	"es2015": "dist/esm/rxcomp.js",
 	"files": [
     "dist/",

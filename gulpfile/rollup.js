@@ -159,6 +159,7 @@ function rollupInput_(item) {
 			tsconfigOverride: tsconfigOverride,
 			rollupCommonJSResolveHack: true,
 			clean: true,
+			check: false,
 		}) : null,
 		rollupPluginBabel({
 			extensions: [

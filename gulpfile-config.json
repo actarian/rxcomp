@@ -76,24 +76,14 @@
 			"compile": [{
 				"input": "src/rxcomp.ts",
 				"output": [{
-					"file": "dist/amd/rxcomp.js",
-					"format": "amd"
-				}, {
 					"file": "dist/cjs/",
 					"format": "cjs"
 				}, {
 					"file": "dist/esm/",
 					"format": "esm"
 				}, {
-					"file": "dist/system/rxcomp.js",
-					"format": "system"
-				}, {
 					"file": "dist/iife/rxcomp.js",
 					"format": "iife",
-					"minify": true
-				}, {
-					"file": "dist/umd/rxcomp.js",
-					"format": "umd",
 					"minify": true
 				}],
 				"globals": {

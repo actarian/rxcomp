@@ -204,7 +204,7 @@ var rxcomp = (function (exports, rxjs, operators) {
         if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
           var descriptor = Object.getOwnPropertyDescriptor(source, key);
 
-          if (typeof descriptor.value == "function") {
+          if (typeof descriptor.value == 'function') {
             descriptor.value = function () {
               for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
                 args[_key] = arguments[_key];
@@ -268,7 +268,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
         return instance;
       }).filter(function (x) {
-        return x;
+        return x != undefined;
       });
       return instances;
     };
@@ -312,7 +312,7 @@ var rxcomp = (function (exports, rxjs, operators) {
             });
           }
 
-          if (instance['onView']) {
+          if (typeof instance['onView'] === 'function') {
             instance['onView']();
           }
         };
@@ -323,7 +323,7 @@ var rxcomp = (function (exports, rxjs, operators) {
           context.outputs = this.makeOutputs(meta, instance);
         }
 
-        if (instance['onInit']) {
+        if (typeof instance['onInit'] === 'function') {
           instance['onInit']();
         }
 
@@ -335,7 +335,7 @@ var rxcomp = (function (exports, rxjs, operators) {
               _this2.resolveInputsOutputs(instance, changes);
             }
 
-            if (instance['onChanges']) {
+            if (typeof instance['onChanges'] === 'function') {
               instance['onChanges'](changes);
             }
 
@@ -492,7 +492,7 @@ var rxcomp = (function (exports, rxjs, operators) {
           expression = null;
 
       if (node.hasAttribute(key)) {
-        var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (match, a, b, c) {
+        var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
           if (a) {
             return '"+';
           }
@@ -558,7 +558,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
       if (meta.outputs) {
         meta.outputs.forEach(function (key, i) {
-          return outputs[key] = _this7.makeOutput(instance, key);
+          outputs[key] = _this7.makeOutput(instance, key);
         });
       }
 
@@ -604,13 +604,13 @@ var rxcomp = (function (exports, rxjs, operators) {
       var rx1 = /(\()([^\(\)]*)(\))/;
 
       while (expression.match(rx1)) {
-        expression = expression.replace(rx1, function () {
+        expression = expression.replace(rx1, function (substring) {
           return "" + l + Module.parsePipes(arguments.length <= 2 ? undefined : arguments[2]) + r;
         });
       }
 
       expression = Module.parsePipes(expression);
-      expression = expression.replace(/(┌)|(┘)/g, function () {
+      expression = expression.replace(/(┌)|(┘)/g, function (substring) {
         return (arguments.length <= 1 ? undefined : arguments[1]) ? '(' : ')';
       });
       return Module.parseOptionalChaining(expression);
@@ -720,7 +720,7 @@ var rxcomp = (function (exports, rxjs, operators) {
             instance.unsubscribe$.next();
             instance.unsubscribe$.complete();
 
-            if (instance['onDestroy']) {
+            if (typeof instance['onDestroy'] === 'function') {
               instance['onDestroy']();
               delete CONTEXTS[instance.rxcompId];
             }
@@ -739,16 +739,16 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     Module.matchSelectors = function matchSelectors(node, selectors, results) {
       for (var i = 0; i < selectors.length; i++) {
-        var match = selectors[i](node);
+        var selectorResult = selectors[i](node);
 
-        if (match) {
-          var factory = match.factory;
+        if (selectorResult) {
+          var factory = selectorResult.factory;
 
           if (factory.prototype instanceof Component && factory.meta.template) {
             node.innerHTML = factory.meta.template;
           }
 
-          results.push(match);
+          results.push(selectorResult);
 
           if (factory.prototype instanceof Structure) {
             break;
@@ -761,9 +761,9 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     Module.querySelectorsAll = function querySelectorsAll(node, selectors, results) {
       if (node.nodeType === 1) {
-        var matches = this.matchSelectors(node, selectors, []);
-        results = results.concat(matches);
-        var structure = matches.find(function (x) {
+        var selectorResults = this.matchSelectors(node, selectors, []);
+        results = results.concat(selectorResults);
+        var structure = selectorResults.find(function (x) {
           return x.factory.prototype instanceof Structure;
         });
 
@@ -903,7 +903,7 @@ var rxcomp = (function (exports, rxjs, operators) {
           var context = nodeContexts[i];
 
           if (context.instance !== instance) {
-            if (context.instance instanceof Factory) {
+            if (context.instance instanceof factory) {
               return context.instance;
             }
           }
@@ -927,31 +927,26 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     var _proto = ClassDirective.prototype;
 
-    _proto.onInit = function onInit() {
+    _proto.onChanges = function onChanges() {
       var _getContext = getContext(this),
-          module = _getContext.module,
           node = _getContext.node;
 
-      var expression = node.getAttribute('[class]');
-      this.classFunction = module.makeFunction(expression);
-    };
+      var classList = this.class;
 
-    _proto.onChanges = function onChanges(changes) {
-      var _getContext2 = getContext(this),
-          module = _getContext2.module,
-          node = _getContext2.node;
-
-      var classList = module.resolve(this.classFunction, changes, this);
-
-      for (var key in classList) {
-        classList[key] ? node.classList.add(key) : node.classList.remove(key);
+      if (typeof classList === 'object') {
+        for (var key in classList) {
+          classList[key] ? node.classList.add(key) : node.classList.remove(key);
+        }
+      } else if (typeof classList === 'string') {
+        node.setAttribute('class', classList);
       }
     };
 
     return ClassDirective;
   }(Directive);
   ClassDirective.meta = {
-    selector: "[[class]]"
+    selector: "[[class]]",
+    inputs: ['class']
   };
 
   var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
@@ -1176,7 +1171,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     var _proto = HrefDirective.prototype;
 
-    _proto.onChanges = function onChanges(changes) {
+    _proto.onChanges = function onChanges() {
       var _getContext = getContext(this),
           node = _getContext.node;
 
@@ -1261,7 +1256,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     var _proto = InnerHtmlDirective.prototype;
 
-    _proto.onChanges = function onChanges(changes) {
+    _proto.onChanges = function onChanges() {
       var _getContext = getContext(this),
           node = _getContext.node;
 
@@ -1317,7 +1312,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     var _proto = SrcDirective.prototype;
 
-    _proto.onChanges = function onChanges(changes) {
+    _proto.onChanges = function onChanges() {
       var _getContext = getContext(this),
           node = _getContext.node;
 
@@ -1342,31 +1337,24 @@ var rxcomp = (function (exports, rxjs, operators) {
 
     var _proto = StyleDirective.prototype;
 
-    _proto.onInit = function onInit() {
+    _proto.onChanges = function onChanges() {
       var _getContext = getContext(this),
-          module = _getContext.module,
           node = _getContext.node;
 
-      var expression = node.getAttribute('[style]');
-      this.styleFunction = module.makeFunction(expression);
-    };
+      var style = this.style;
 
-    _proto.onChanges = function onChanges(changes) {
-      var _getContext2 = getContext(this),
-          module = _getContext2.module,
-          node = _getContext2.node;
-
-      var style = module.resolve(this.styleFunction, changes, this);
-
-      for (var key in style) {
-        node.style.setProperty(key, style[key]);
+      if (style) {
+        for (var key in style) {
+          node.style.setProperty(key, style[key]);
+        }
       }
     };
 
     return StyleDirective;
   }(Directive);
   StyleDirective.meta = {
-    selector: "[[style]]"
+    selector: "[[style]]",
+    inputs: ['style']
   };
 
   var CoreModule =
@@ -1536,14 +1524,14 @@ var rxcomp = (function (exports, rxjs, operators) {
           var includes = _this4.getExpressions(matchSelector);
 
           selectors.push(function (node) {
-            var include = includes.reduce(function (result, e) {
-              return result && e(node);
+            var included = includes.reduce(function (p, match) {
+              return p && match(node);
             }, true);
-            var exclude = excludes.reduce(function (result, e) {
-              return result || e(node);
+            var excluded = excludes.reduce(function (p, match) {
+              return p || match(node);
             }, false);
 
-            if (include && !exclude) {
+            if (included && !excluded) {
               return {
                 node: node,
                 factory: factory,
