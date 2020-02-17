@@ -106,12 +106,12 @@
 			"bundle": []
 		}
 	},
-	"tfs": false,
 	"server": {
 		"root": "./docs",
 		"path": "/rxcomp/",
 		"host": "localhost",
 		"port": 40999,
 		"log": false
-	}
+	},
+	"tfs": false
 }

@@ -867,19 +867,23 @@
       var _this2 = this;
 
       var _getContext = getContext(this),
+          module = _getContext.module,
           node = _getContext.node;
 
+      var expression = node.getAttribute('[class]');
+      this.classFunction = module.makeFunction(expression);
       node.classList.forEach(function (x) {
         return _this2.keys.push(x);
       });
     };
 
-    _proto.onChanges = function onChanges() {
+    _proto.onChanges = function onChanges(changes) {
       var _getContext2 = getContext(this),
+          module = _getContext2.module,
           node = _getContext2.node;
 
+      var object = module.resolve(this.classFunction, changes, this);
       var keys;
-      var object = this.class;
 
       if (typeof object === 'object') {
         keys = [];
@@ -890,7 +894,7 @@
           }
         }
       } else if (typeof object === 'string') {
-        keys = object.split(/\s+/);
+        keys = object.split(' ');
       }
 
       keys = (keys || []).concat(this.keys);
@@ -1305,6 +1309,8 @@
           node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
         }
       }
+
+      console.log('StyleDirective.onChanges', style);
     };
 
     return StyleDirective;

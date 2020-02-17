@@ -1,6 +1,8 @@
+import Factory, { ExpressionFunction } from '../../dist/cjs/core/factory';
 import Directive from '../core/directive';
 import { getContext } from '../module/module';
 
+/*
 export default class ClassDirective extends Directive {
 
 	class: { [key: string]: string } | string;
@@ -37,8 +39,8 @@ ClassDirective.meta = {
 	selector: `[[class]]`,
 	inputs: ['class']
 };
+*/
 
-/*
 export default class ClassDirective extends Directive {
 
 	classFunction: ExpressionFunction;
@@ -78,4 +80,4 @@ ClassDirective.meta = {
 	selector: `[[class]]`,
 	inputs: ['class']
 };
-*/
+

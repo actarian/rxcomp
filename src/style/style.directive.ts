@@ -35,7 +35,7 @@ export default class StyleDirective extends Directive {
 				node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
 			}
 		}
-		// console.log('StyleDirective.onChanges', changes, style);
+		console.log('StyleDirective.onChanges', style);
 	}
 
 }

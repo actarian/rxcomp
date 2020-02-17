@@ -8,9 +8,9 @@
 	"types": "dist/cjs/rxcomp.d.ts",
 	"es2015": "dist/esm/rxcomp.js",
 	"files": [
-    "dist/",
-    "src/"
-  ],
+		"dist/",
+		"src/"
+	],
 	"license": "MIT",
 	"keywords": [
 		"rxcomp",
@@ -77,7 +77,6 @@
 		"tfs": "~1.6.0",
 		"through2": "~3.0.1",
 		"time-stamp": "~2.2.0",
-		"tslib": "~1.10.0",
 		"typescript": "~3.7.5",
 		"vinyl": "~2.2.0"
 	}

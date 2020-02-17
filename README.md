@@ -86,14 +86,14 @@ import { CoreModule, Module } from 'rxcomp';
 export default class AppModule extends Module {}
 
 AppModule.meta = {
-    imports: [
-        CoreModule
-    ],
-    declarations: [
-        TodoItemComponent,
-        DatePipe,
-    ],
-    bootstrap: AppComponent,
+  imports: [
+    CoreModule
+  ],
+  declarations: [
+    TodoItemComponent,
+    DatePipe,
+  ],
+  bootstrap: AppComponent,
 };
 ```
 ___
@@ -103,34 +103,34 @@ ___
 ```javascript
 export default class TodoItemComponent extends Component {
 
-    onChanges(changes) {
-        this.color = color(changes.item.id);
-    }
+  onChanges(changes) {
+      this.color = color(changes.item.id);
+  }
 
-    onToggle($event) {
-        this.toggle.next($event);
-    }
+  onToggle($event) {
+      this.toggle.next($event);
+  }
 
-    onRemove($event) {
-        this.remove.next($event);
-    }
+  onRemove($event) {
+      this.remove.next($event);
+  }
 
 }
 
 TodoItemComponent.meta = {
-    selector: '[todo-item-component]',
-    inputs: ['item'],
+  selector: '[todo-item-component]',
+  inputs: ['item'],
 	outputs: ['toggle', 'remove'],
 	// hosts: { host: HostFactory },
-    template: /* html */ `
-        <button type="button" class="btn--toggle" (click)="onToggle(item)">
-            <div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-            <div class="title" [innerHTML]="item.name"></div>
-        </button>
-        <button type="button" class="btn--remove" (click)="onRemove(item)">
-            <i class="icon--remove"></i>
-        </button>
-    `,
+  template: /* html */ `
+      <button type="button" class="btn--toggle" (click)="onToggle(item)">
+          <div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+          <div class="title" [innerHTML]="item.name"></div>
+      </button>
+      <button type="button" class="btn--remove" (click)="onRemove(item)">
+          <i class="icon--remove"></i>
+      </button>
+  `,
 };
 
 ```
@@ -140,13 +140,13 @@ ___
 
 ```html
 <li class="list__item" *for="let item of items" [class]="{ done: item.done }" [style]="{ background: background, color: foreground, '--accent': accent }" todo-item-component [item]="item" (toggle)="onToggleItem($event)" (remove)="onRemoveItem($event)">
-    <button type="button" class="btn--toggle" (click)="onToggle(item)">
-        <div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-        <div class="title" [innerHTML]="item.name"></div>
-    </button>
-    <button type="button" class="btn--remove" (click)="onRemove(item)">
-        <i class="icon--remove"></i>
-    </button>
+  <button type="button" class="btn--toggle" (click)="onToggle(item)">
+    <div class="date" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
+    <div class="title" [innerHTML]="item.name"></div>
+  </button>
+  <button type="button" class="btn--remove" (click)="onRemove(item)">
+    <i class="icon--remove"></i>
+  </button>
 </li>
 ```
 ___
