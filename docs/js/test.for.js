@@ -1241,7 +1241,11 @@
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      node.setAttribute('src', this.src);
+      if (this.src) {
+        node.setAttribute('src', this.src);
+      } else {
+        node.removeAttribute('src');
+      }
     };
 
     return SrcDirective;

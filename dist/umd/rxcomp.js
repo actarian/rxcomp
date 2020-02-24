@@ -81,9 +81,7 @@
 
   var Factory = function Factory() {};
 
-  var Directive =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Directive = function (_Factory) {
     _inheritsLoose(Directive, _Factory);
 
     function Directive() {
@@ -93,9 +91,7 @@
     return Directive;
   }(Factory);
 
-  var Component =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Component = function (_Factory) {
     _inheritsLoose(Component, _Factory);
 
     function Component() {
@@ -107,9 +103,7 @@
 
   var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
-  var Context =
-  /*#__PURE__*/
-  function (_Component) {
+  var Context = function (_Component) {
     _inheritsLoose(Context, _Component);
 
     function Context(instance, descriptors) {
@@ -163,9 +157,7 @@
     return Context;
   }(Component);
 
-  var Structure =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Structure = function (_Factory) {
     _inheritsLoose(Structure, _Factory);
 
     function Structure() {
@@ -179,9 +171,7 @@
   var CONTEXTS = {};
   var NODES = {};
 
-  var Module =
-  /*#__PURE__*/
-  function () {
+  var Module = function () {
     function Module() {}
 
     var _proto = Module.prototype;
@@ -851,9 +841,7 @@
     }
   }
 
-  var ClassDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var ClassDirective = function (_Directive) {
     _inheritsLoose(ClassDirective, _Directive);
 
     function ClassDirective() {
@@ -909,9 +897,7 @@
 
   var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
-  var EventDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var EventDirective = function (_Directive) {
     _inheritsLoose(EventDirective, _Directive);
 
     function EventDirective() {
@@ -947,9 +933,7 @@
     selector: "[(" + EVENTS.join(')],[(') + ")]"
   };
 
-  var ForItem =
-  /*#__PURE__*/
-  function (_Context) {
+  var ForItem = function (_Context) {
     _inheritsLoose(ForItem, _Context);
 
     function ForItem(key, $key, value, $value, index, count, parentInstance) {
@@ -988,9 +972,7 @@
     return ForItem;
   }(Context);
 
-  var ForStructure =
-  /*#__PURE__*/
-  function (_Structure) {
+  var ForStructure = function (_Structure) {
     _inheritsLoose(ForStructure, _Structure);
 
     function ForStructure() {
@@ -1118,9 +1100,7 @@
     selector: '[*for]'
   };
 
-  var HrefDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var HrefDirective = function (_Directive) {
     _inheritsLoose(HrefDirective, _Directive);
 
     function HrefDirective() {
@@ -1143,9 +1123,7 @@
     inputs: ['href']
   };
 
-  var IfStructure =
-  /*#__PURE__*/
-  function (_Structure) {
+  var IfStructure = function (_Structure) {
     _inheritsLoose(IfStructure, _Structure);
 
     function IfStructure() {
@@ -1203,9 +1181,7 @@
     selector: '[*if]'
   };
 
-  var InnerHtmlDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var InnerHtmlDirective = function (_Directive) {
     _inheritsLoose(InnerHtmlDirective, _Directive);
 
     function InnerHtmlDirective() {
@@ -1228,9 +1204,7 @@
     inputs: ['innerHTML']
   };
 
-  var Pipe =
-  /*#__PURE__*/
-  function () {
+  var Pipe = function () {
     function Pipe() {}
 
     Pipe.transform = function transform(value) {
@@ -1240,9 +1214,7 @@
     return Pipe;
   }();
 
-  var JsonPipe =
-  /*#__PURE__*/
-  function (_Pipe) {
+  var JsonPipe = function (_Pipe) {
     _inheritsLoose(JsonPipe, _Pipe);
 
     function JsonPipe() {
@@ -1259,9 +1231,7 @@
     name: 'json'
   };
 
-  var SrcDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var SrcDirective = function (_Directive) {
     _inheritsLoose(SrcDirective, _Directive);
 
     function SrcDirective() {
@@ -1274,7 +1244,11 @@
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      node.setAttribute('src', this.src);
+      if (this.src) {
+        node.setAttribute('src', this.src);
+      } else {
+        node.removeAttribute('src');
+      }
     };
 
     return SrcDirective;
@@ -1284,9 +1258,7 @@
     inputs: ['src']
   };
 
-  var StyleDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var StyleDirective = function (_Directive) {
     _inheritsLoose(StyleDirective, _Directive);
 
     function StyleDirective() {
@@ -1300,14 +1272,32 @@
           node = _getContext.node;
 
       var style = this.style;
+      var previousStyle = this.previousStyle;
 
-      if (style) {
-        for (var key in style) {
-          var splitted = key.split('.');
-          var name = splitted.shift();
-          node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
+      if (previousStyle) {
+        for (var key in previousStyle) {
+          if (!style || !style[key]) {
+            var splitted = key.split('.');
+            var propertyName = splitted.shift();
+            node.style.removeProperty(propertyName);
+          }
         }
       }
+
+      if (style) {
+        for (var _key in style) {
+          if (!previousStyle || previousStyle[_key] !== style[_key]) {
+            var _splitted = _key.split('.');
+
+            var _propertyName = _splitted.shift();
+
+            var value = style[_key] + (_splitted.length ? _splitted[0] : '');
+            node.style.setProperty(_propertyName, value);
+          }
+        }
+      }
+
+      this.previousStyle = style;
     };
 
     return StyleDirective;
@@ -1317,9 +1307,7 @@
     inputs: ['style']
   };
 
-  var CoreModule =
-  /*#__PURE__*/
-  function (_Module) {
+  var CoreModule = function (_Module) {
     _inheritsLoose(CoreModule, _Module);
 
     function CoreModule() {
@@ -1337,9 +1325,7 @@
 
   var ORDER = [Structure, Component, Directive];
 
-  var Platform =
-  /*#__PURE__*/
-  function () {
+  var Platform = function () {
     function Platform() {}
 
     Platform.bootstrap = function bootstrap(moduleFactory) {
@@ -1513,9 +1499,7 @@
     return Platform;
   }();
 
-  var Browser =
-  /*#__PURE__*/
-  function (_Platform) {
+  var Browser = function (_Platform) {
     _inheritsLoose(Browser, _Platform);
 
     function Browser() {
@@ -1551,3 +1535,4 @@
   Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
+//# sourceMappingURL=rxcomp.js.map

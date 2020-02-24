@@ -177,14 +177,10 @@ function rollupInput(item) {
 		// import node modules
 		rollupPluginNodeResolve(),
 		*/
-		/*
 		// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-		// import commonJs require;
 		rollupPluginCommonJs({
-			include: 'node_modules/**',
-			exclude: ['node_modules/rxjs/**'],
+			exclude: ['node_modules/**'],
 		}),
-		*/
 		// Compile TypeScript files
 		path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
 			typescript: typescript,

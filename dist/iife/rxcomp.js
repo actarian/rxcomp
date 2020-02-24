@@ -78,9 +78,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var Factory = function Factory() {};
 
-  var Directive =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Directive = function (_Factory) {
     _inheritsLoose(Directive, _Factory);
 
     function Directive() {
@@ -90,9 +88,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Directive;
   }(Factory);
 
-  var Component =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Component = function (_Factory) {
     _inheritsLoose(Component, _Factory);
 
     function Component() {
@@ -104,9 +100,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
-  var Context =
-  /*#__PURE__*/
-  function (_Component) {
+  var Context = function (_Component) {
     _inheritsLoose(Context, _Component);
 
     function Context(instance, descriptors) {
@@ -160,9 +154,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Context;
   }(Component);
 
-  var Structure =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Structure = function (_Factory) {
     _inheritsLoose(Structure, _Factory);
 
     function Structure() {
@@ -176,9 +168,7 @@ var rxcomp = (function (exports, rxjs, operators) {
   var CONTEXTS = {};
   var NODES = {};
 
-  var Module =
-  /*#__PURE__*/
-  function () {
+  var Module = function () {
     function Module() {}
 
     var _proto = Module.prototype;
@@ -848,9 +838,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     }
   }
 
-  var ClassDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var ClassDirective = function (_Directive) {
     _inheritsLoose(ClassDirective, _Directive);
 
     function ClassDirective() {
@@ -906,9 +894,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
-  var EventDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var EventDirective = function (_Directive) {
     _inheritsLoose(EventDirective, _Directive);
 
     function EventDirective() {
@@ -944,9 +930,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     selector: "[(" + EVENTS.join(')],[(') + ")]"
   };
 
-  var ForItem =
-  /*#__PURE__*/
-  function (_Context) {
+  var ForItem = function (_Context) {
     _inheritsLoose(ForItem, _Context);
 
     function ForItem(key, $key, value, $value, index, count, parentInstance) {
@@ -985,9 +969,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return ForItem;
   }(Context);
 
-  var ForStructure =
-  /*#__PURE__*/
-  function (_Structure) {
+  var ForStructure = function (_Structure) {
     _inheritsLoose(ForStructure, _Structure);
 
     function ForStructure() {
@@ -1115,9 +1097,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     selector: '[*for]'
   };
 
-  var HrefDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var HrefDirective = function (_Directive) {
     _inheritsLoose(HrefDirective, _Directive);
 
     function HrefDirective() {
@@ -1140,9 +1120,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     inputs: ['href']
   };
 
-  var IfStructure =
-  /*#__PURE__*/
-  function (_Structure) {
+  var IfStructure = function (_Structure) {
     _inheritsLoose(IfStructure, _Structure);
 
     function IfStructure() {
@@ -1200,9 +1178,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     selector: '[*if]'
   };
 
-  var InnerHtmlDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var InnerHtmlDirective = function (_Directive) {
     _inheritsLoose(InnerHtmlDirective, _Directive);
 
     function InnerHtmlDirective() {
@@ -1225,9 +1201,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     inputs: ['innerHTML']
   };
 
-  var Pipe =
-  /*#__PURE__*/
-  function () {
+  var Pipe = function () {
     function Pipe() {}
 
     Pipe.transform = function transform(value) {
@@ -1237,9 +1211,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Pipe;
   }();
 
-  var JsonPipe =
-  /*#__PURE__*/
-  function (_Pipe) {
+  var JsonPipe = function (_Pipe) {
     _inheritsLoose(JsonPipe, _Pipe);
 
     function JsonPipe() {
@@ -1256,9 +1228,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     name: 'json'
   };
 
-  var SrcDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var SrcDirective = function (_Directive) {
     _inheritsLoose(SrcDirective, _Directive);
 
     function SrcDirective() {
@@ -1271,7 +1241,11 @@ var rxcomp = (function (exports, rxjs, operators) {
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      node.setAttribute('src', this.src);
+      if (this.src) {
+        node.setAttribute('src', this.src);
+      } else {
+        node.removeAttribute('src');
+      }
     };
 
     return SrcDirective;
@@ -1281,9 +1255,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     inputs: ['src']
   };
 
-  var StyleDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var StyleDirective = function (_Directive) {
     _inheritsLoose(StyleDirective, _Directive);
 
     function StyleDirective() {
@@ -1297,14 +1269,32 @@ var rxcomp = (function (exports, rxjs, operators) {
           node = _getContext.node;
 
       var style = this.style;
+      var previousStyle = this.previousStyle;
 
-      if (style) {
-        for (var key in style) {
-          var splitted = key.split('.');
-          var name = splitted.shift();
-          node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
+      if (previousStyle) {
+        for (var key in previousStyle) {
+          if (!style || !style[key]) {
+            var splitted = key.split('.');
+            var propertyName = splitted.shift();
+            node.style.removeProperty(propertyName);
+          }
         }
       }
+
+      if (style) {
+        for (var _key in style) {
+          if (!previousStyle || previousStyle[_key] !== style[_key]) {
+            var _splitted = _key.split('.');
+
+            var _propertyName = _splitted.shift();
+
+            var value = style[_key] + (_splitted.length ? _splitted[0] : '');
+            node.style.setProperty(_propertyName, value);
+          }
+        }
+      }
+
+      this.previousStyle = style;
     };
 
     return StyleDirective;
@@ -1314,9 +1304,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     inputs: ['style']
   };
 
-  var CoreModule =
-  /*#__PURE__*/
-  function (_Module) {
+  var CoreModule = function (_Module) {
     _inheritsLoose(CoreModule, _Module);
 
     function CoreModule() {
@@ -1334,9 +1322,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var ORDER = [Structure, Component, Directive];
 
-  var Platform =
-  /*#__PURE__*/
-  function () {
+  var Platform = function () {
     function Platform() {}
 
     Platform.bootstrap = function bootstrap(moduleFactory) {
@@ -1510,9 +1496,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Platform;
   }();
 
-  var Browser =
-  /*#__PURE__*/
-  function (_Platform) {
+  var Browser = function (_Platform) {
     _inheritsLoose(Browser, _Platform);
 
     function Browser() {
@@ -1548,3 +1532,4 @@ var rxcomp = (function (exports, rxjs, operators) {
   return exports;
 
 }({}, rxjs, rxjs.operators));
+//# sourceMappingURL=rxcomp.js.map

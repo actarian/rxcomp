@@ -976,7 +976,12 @@ define("src/src.directive", ["require", "exports", "tslib", "core/directive", "m
         }
         SrcDirective.prototype.onChanges = function () {
             var node = module_8.getContext(this).node;
-            node.setAttribute('src', this.src);
+            if (this.src) {
+                node.setAttribute('src', this.src);
+            }
+            else {
+                node.removeAttribute('src');
+            }
         };
         return SrcDirective;
     }(directive_5.default));
@@ -998,13 +1003,27 @@ define("style/style.directive", ["require", "exports", "tslib", "core/directive"
         StyleDirective.prototype.onChanges = function () {
             var node = module_9.getContext(this).node;
             var style = this.style;
-            if (style) {
-                for (var key in style) {
-                    var splitted = key.split('.');
-                    var name_1 = splitted.shift();
-                    node.style.setProperty(name_1, style[key] + splitted.length ? splitted[0] : '');
+            var previousStyle = this.previousStyle;
+            if (previousStyle) {
+                for (var key in previousStyle) {
+                    if (!style || !style[key]) {
+                        var splitted = key.split('.');
+                        var propertyName = splitted.shift();
+                        node.style.removeProperty(propertyName);
+                    }
                 }
             }
+            if (style) {
+                for (var key in style) {
+                    if (!previousStyle || previousStyle[key] !== style[key]) {
+                        var splitted = key.split('.');
+                        var propertyName = splitted.shift();
+                        var value = style[key] + (splitted.length ? splitted[0] : '');
+                        node.style.setProperty(propertyName, value);
+                    }
+                }
+            }
+            this.previousStyle = style;
         };
         return StyleDirective;
     }(directive_6.default));
