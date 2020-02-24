@@ -3,27 +3,23 @@ import { getContext } from '../module/module';
 
 export default class StyleDirective extends Directive {
 
+	style: { [key: string]: string };
+	// keys: { [key: string]: string } = {};
+
 	/*
-	styleFunction: ExpressionFunction;
-
 	onInit() {
-		const { module, node } = getContext(this);
-		const expression = node.getAttribute('[style]');
-		this.styleFunction = module.makeFunction(expression);
-		// console.log('StyleDirective.onInit', expression);
-	}
-
-	onChanges(changes) {
-		const { module, node } = getContext(this);
-		const style = module.resolve(this.styleFunction, changes, this);
-		for (let key in style) {
-			node.style.setProperty(key, style[key]);
-		}
-		// console.log('StyleDirective.onChanges', changes, style);
+		const { node } = getContext(this);
+		node.getAttribute('style').split(';').forEach(key => {
+			const splitted = key.split(':');
+			key = splitted[0];
+			if (key) {
+				const value = splitted[1].trim();
+				this.keys[key.trim()] = value;
+			}
+		});
+		console.log(this.keys);
 	}
 	*/
-
-	style: { [key: string]: string };
 
 	onChanges() {
 		const { node } = getContext(this);
@@ -31,11 +27,13 @@ export default class StyleDirective extends Directive {
 		if (style) {
 			for (let key in style) {
 				const splitted: string[] = key.split('.');
-				const name = splitted.shift();
-				node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
+				const propertyName = splitted.shift();
+				const value = style[key] + (splitted.length ? splitted[0] : '');
+				// console.log(propertyName, value, style, key, style[key]);
+				node.style.setProperty(propertyName, value);
 			}
 		}
-		console.log('StyleDirective.onChanges', style);
+		// console.log('StyleDirective.onChanges', style);
 	}
 
 }

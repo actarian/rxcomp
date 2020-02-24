@@ -1,8 +1,8 @@
-const gray = require('ansi-gray');
-const supportsColor = require('color-support');
-const Console = require('console').Console;
+const ansyGray = require('ansi-gray');
+const colorSupport = require('color-support');
+const consoleConsole = require('console').Console;
 const parseNodeVersion = require('parse-node-version');
-const timestamp = require('time-stamp');
+const timeStamp = require('time-stamp');
 
 const nodeVersion = parseNodeVersion(process.version);
 
@@ -17,13 +17,13 @@ const colorDetectionOptions = {
 let console;
 if (nodeVersion.major >= 10) {
 	// Node 10 also changed the way this is constructed
-	console = new Console({
+	console = new consoleConsole({
 		stdout: process.stdout,
 		stderr: process.stderr,
 		colorMode: false,
 	});
 } else {
-	console = new Console(process.stdout, process.stderr);
+	console = new consoleConsole(process.stdout, process.stderr);
 }
 
 const palette = {
@@ -66,18 +66,18 @@ function addColor(str) {
 	}
 
 	if (hasFlag('color')) {
-		return gray(str);
+		return ansyGray(str);
 	}
 
-	if (supportsColor(colorDetectionOptions)) {
-		return gray(str);
+	if (colorSupport(colorDetectionOptions)) {
+		return ansyGray(str);
 	}
 
 	return str;
 }
 
 function getTimestamp() {
-	return '[' + addColor(timestamp('HH:mm:ss')) + ']';
+	return '[' + addColor(timeStamp('HH:mm:ss')) + ']';
 }
 
 function getLogMessage(items) {

@@ -2,22 +2,22 @@ const fs = require('fs'),
 	path = require('path'),
 	process = require('process');
 
-const log = require('./logger');
+const log = require('../logger/logger');
 
-function getObject_(file, objectDefault = {}, objectOverride = {}) {
-	let object = extendObject_({}, objectDefault);
+function getObject(file, objectDefault = {}, objectOverride = {}) {
+	let object = extendObject({}, objectDefault);
 	if (fs.existsSync(file)) {
 		const text = fs.readFileSync(file, 'utf8');
-		const objectJson = JSON.parse(stripBom_(text));
-		object = extendObject_(object, objectJson);
+		const objectJson = JSON.parse(stripBom(text));
+		object = extendObject(object, objectJson);
 	} else {
 		log.warn(`missing ${file}`);
 	}
-	object = extendObject_(object, objectOverride);
+	object = extendObject(object, objectOverride);
 	return object;
 }
 
-function stripBom_(text) {
+function stripBom(text) {
 	text = text.toString();
 	if (text.charCodeAt(0) === 0xFEFF) {
 		text = text.slice(1);
@@ -25,11 +25,11 @@ function stripBom_(text) {
 	return text;
 }
 
-function extendObject_(a, b) {
+function extendObject(a, b) {
 	if (typeof a === 'object') {
 		for (let key in b) {
 			if (typeof a[key] === 'object' && typeof b[key] === 'object') {
-				a[key] = extendObject_(a[key], b[key]);
+				a[key] = extendObject(a[key], b[key]);
 			} else {
 				a[key] = b[key];
 			}
@@ -41,6 +41,6 @@ function extendObject_(a, b) {
 }
 
 module.exports = {
-	getObject: getObject_,
-	extend: extendObject_,
+	getObject,
+	extend: extendObject,
 };

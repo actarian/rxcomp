@@ -78,9 +78,7 @@
 
   var Factory = function Factory() {};
 
-  var Directive =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Directive = function (_Factory) {
     _inheritsLoose(Directive, _Factory);
 
     function Directive() {
@@ -90,9 +88,7 @@
     return Directive;
   }(Factory);
 
-  var Component =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Component = function (_Factory) {
     _inheritsLoose(Component, _Factory);
 
     function Component() {
@@ -104,9 +100,7 @@
 
   var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
-  var Context =
-  /*#__PURE__*/
-  function (_Component) {
+  var Context = function (_Component) {
     _inheritsLoose(Context, _Component);
 
     function Context(instance, descriptors) {
@@ -160,9 +154,7 @@
     return Context;
   }(Component);
 
-  var Structure =
-  /*#__PURE__*/
-  function (_Factory) {
+  var Structure = function (_Factory) {
     _inheritsLoose(Structure, _Factory);
 
     function Structure() {
@@ -176,9 +168,7 @@
   var CONTEXTS = {};
   var NODES = {};
 
-  var Module =
-  /*#__PURE__*/
-  function () {
+  var Module = function () {
     function Module() {}
 
     var _proto = Module.prototype;
@@ -848,9 +838,7 @@
     }
   }
 
-  var ClassDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var ClassDirective = function (_Directive) {
     _inheritsLoose(ClassDirective, _Directive);
 
     function ClassDirective() {
@@ -867,23 +855,19 @@
       var _this2 = this;
 
       var _getContext = getContext(this),
-          module = _getContext.module,
           node = _getContext.node;
 
-      var expression = node.getAttribute('[class]');
-      this.classFunction = module.makeFunction(expression);
       node.classList.forEach(function (x) {
         return _this2.keys.push(x);
       });
     };
 
-    _proto.onChanges = function onChanges(changes) {
+    _proto.onChanges = function onChanges() {
       var _getContext2 = getContext(this),
-          module = _getContext2.module,
           node = _getContext2.node;
 
-      var object = module.resolve(this.classFunction, changes, this);
       var keys;
+      var object = this.class;
 
       if (typeof object === 'object') {
         keys = [];
@@ -894,7 +878,7 @@
           }
         }
       } else if (typeof object === 'string') {
-        keys = object.split(' ');
+        keys = object.split(/\s+/);
       }
 
       keys = (keys || []).concat(this.keys);
@@ -910,9 +894,7 @@
 
   var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
-  var EventDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var EventDirective = function (_Directive) {
     _inheritsLoose(EventDirective, _Directive);
 
     function EventDirective() {
@@ -948,9 +930,7 @@
     selector: "[(" + EVENTS.join(')],[(') + ")]"
   };
 
-  var ForItem =
-  /*#__PURE__*/
-  function (_Context) {
+  var ForItem = function (_Context) {
     _inheritsLoose(ForItem, _Context);
 
     function ForItem(key, $key, value, $value, index, count, parentInstance) {
@@ -989,9 +969,7 @@
     return ForItem;
   }(Context);
 
-  var ForStructure =
-  /*#__PURE__*/
-  function (_Structure) {
+  var ForStructure = function (_Structure) {
     _inheritsLoose(ForStructure, _Structure);
 
     function ForStructure() {
@@ -1119,9 +1097,7 @@
     selector: '[*for]'
   };
 
-  var HrefDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var HrefDirective = function (_Directive) {
     _inheritsLoose(HrefDirective, _Directive);
 
     function HrefDirective() {
@@ -1144,9 +1120,7 @@
     inputs: ['href']
   };
 
-  var IfStructure =
-  /*#__PURE__*/
-  function (_Structure) {
+  var IfStructure = function (_Structure) {
     _inheritsLoose(IfStructure, _Structure);
 
     function IfStructure() {
@@ -1204,9 +1178,7 @@
     selector: '[*if]'
   };
 
-  var InnerHtmlDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var InnerHtmlDirective = function (_Directive) {
     _inheritsLoose(InnerHtmlDirective, _Directive);
 
     function InnerHtmlDirective() {
@@ -1229,9 +1201,7 @@
     inputs: ['innerHTML']
   };
 
-  var Pipe =
-  /*#__PURE__*/
-  function () {
+  var Pipe = function () {
     function Pipe() {}
 
     Pipe.transform = function transform(value) {
@@ -1241,9 +1211,7 @@
     return Pipe;
   }();
 
-  var JsonPipe =
-  /*#__PURE__*/
-  function (_Pipe) {
+  var JsonPipe = function (_Pipe) {
     _inheritsLoose(JsonPipe, _Pipe);
 
     function JsonPipe() {
@@ -1260,9 +1228,7 @@
     name: 'json'
   };
 
-  var SrcDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var SrcDirective = function (_Directive) {
     _inheritsLoose(SrcDirective, _Directive);
 
     function SrcDirective() {
@@ -1285,9 +1251,7 @@
     inputs: ['src']
   };
 
-  var StyleDirective =
-  /*#__PURE__*/
-  function (_Directive) {
+  var StyleDirective = function (_Directive) {
     _inheritsLoose(StyleDirective, _Directive);
 
     function StyleDirective() {
@@ -1305,12 +1269,11 @@
       if (style) {
         for (var key in style) {
           var splitted = key.split('.');
-          var name = splitted.shift();
-          node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
+          var propertyName = splitted.shift();
+          var value = style[key] + (splitted.length ? splitted[0] : '');
+          node.style.setProperty(propertyName, value);
         }
       }
-
-      console.log('StyleDirective.onChanges', style);
     };
 
     return StyleDirective;
@@ -1320,9 +1283,7 @@
     inputs: ['style']
   };
 
-  var CoreModule =
-  /*#__PURE__*/
-  function (_Module) {
+  var CoreModule = function (_Module) {
     _inheritsLoose(CoreModule, _Module);
 
     function CoreModule() {
@@ -1340,9 +1301,7 @@
 
   var ORDER = [Structure, Component, Directive];
 
-  var Platform =
-  /*#__PURE__*/
-  function () {
+  var Platform = function () {
     function Platform() {}
 
     Platform.bootstrap = function bootstrap(moduleFactory) {
@@ -1516,9 +1475,7 @@
     return Platform;
   }();
 
-  var Browser =
-  /*#__PURE__*/
-  function (_Platform) {
+  var Browser = function (_Platform) {
     _inheritsLoose(Browser, _Platform);
 
     function Browser() {
@@ -1528,9 +1485,7 @@
     return Browser;
   }(Platform);
 
-  var LocalStorageService =
-  /*#__PURE__*/
-  function () {
+  var LocalStorageService = function () {
     function LocalStorageService() {}
 
     LocalStorageService.delete = function _delete(name) {
@@ -1566,7 +1521,6 @@
           var json = JSON.stringify(value, function (key, value) {
             if (typeof value === 'object' && value !== null) {
               if (cache.indexOf(value) !== -1) {
-                // Circular reference found, discard key
                 return;
               }
 
@@ -1609,9 +1563,7 @@
     return LocalStorageService;
   }();
 
-  var StoreService =
-  /*#__PURE__*/
-  function () {
+  var StoreService = function () {
     function StoreService() {}
 
     StoreService.set = function set(items) {
@@ -1695,9 +1647,7 @@
     return StoreService;
   }();
 
-  var AppComponent =
-  /*#__PURE__*/
-  function (_Component) {
+  var AppComponent = function (_Component) {
     _inheritsLoose(AppComponent, _Component);
 
     function AppComponent() {
@@ -1753,9 +1703,7 @@
     selector: '[app-component]'
   };
 
-  var DatePipe =
-  /*#__PURE__*/
-  function (_Pipe) {
+  var DatePipe = function (_Pipe) {
     _inheritsLoose(DatePipe, _Pipe);
 
     function DatePipe() {
@@ -1826,9 +1774,7 @@
     }
   }
 
-  var TodoItemComponent =
-  /*#__PURE__*/
-  function (_Component) {
+  var TodoItemComponent = function (_Component) {
     _inheritsLoose(TodoItemComponent, _Component);
 
     function TodoItemComponent() {
@@ -1837,23 +1783,17 @@
 
     var _proto = TodoItemComponent.prototype;
 
-    // onInit() {}
     _proto.onChanges = function onChanges(changes) {
-      // console.log('onChanges', changes);
       this.background = background(this.item.id);
       this.foreground = foreground(this.item.id);
       this.accent = accent(this.item.id);
-    } // onView() {}
-    // onDestroy() {}
-    ;
+    };
 
     _proto.onToggle = function onToggle($event) {
-      // console.log('onToggle', $event);
       this.toggle.next($event);
     };
 
     _proto.onRemove = function onRemove($event) {
-      // console.log('onRemove', $event);
       this.remove.next($event);
     };
 
@@ -1862,27 +1802,10 @@
   TodoItemComponent.meta = {
     selector: '[todo-item-component]',
     inputs: ['item'],
-    outputs: ['toggle', 'remove'] // template syntax example
-
-    /*
-    template: // html // `
-    	<div class="content" [style]="{ background: background, color: foreground, '--accent': accent }">
-    		<button type="button" class="btn--toggle" (click)="onToggle(item)">
-    			<i class="icon--check" *if="item.done"></i>
-    			<i class="icon--circle" *if="!item.done"></i>
-    			<div class="title" [innerHTML]="item.name"></div>
-    		</button>
-    		<div class="date" [style]="{ background: backgroundColor, color: color }" [innerHTML]="item.date | date : 'en-US' : { month: 'short', day: '2-digit', year: 'numeric' }"></div>
-    		<button type="button" class="btn--remove" (click)="onRemove(item)"><i class="icon--remove"></i></button>
-    	</div>
-    `,
-    */
-
+    outputs: ['toggle', 'remove']
   };
 
-  var AppModule =
-  /*#__PURE__*/
-  function (_Module) {
+  var AppModule = function (_Module) {
     _inheritsLoose(AppModule, _Module);
 
     function AppModule() {

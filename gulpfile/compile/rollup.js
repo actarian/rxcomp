@@ -1,6 +1,4 @@
 const { DEFAULT_EXTENSIONS } = require('@babel/core'),
-	babelPresetEnv = require('@babel/preset-env'),
-	babelPresetTypescript = require('@babel/preset-typescript'),
 	path = require('path'),
 	rollup = require('rollup'),
 	rollupPluginBabel = require('rollup-plugin-babel'),
@@ -8,29 +6,46 @@ const { DEFAULT_EXTENSIONS } = require('@babel/core'),
 	rollupPluginSourcemaps = require('rollup-plugin-sourcemaps'),
 	rollupPluginLicense = require('rollup-plugin-license'),
 	rollupPluginNodeResolve = require('@rollup/plugin-node-resolve'),
-	rollupPluginTypescript = require('rollup-plugin-typescript2'),
+	rollupPluginTypescript2 = require('rollup-plugin-typescript2'),
 	// rollupPluginTypescript = require('@rollup/plugin-typescript'),
 	through2 = require('through2'),
 	typescript = require('typescript'),
-	vinyl = require('vinyl');
+	vinyl = require('vinyl'),
+	vinylSourcemapsApply = require('vinyl-sourcemaps-apply');
 
-function rollup_(config, item) {
+const log = require('../logger/logger');
+const { service } = require('../config/config');
+
+const { setEntry } = require('../watch/watch');
+
+// map object storing rollup cache objects for each input file
+let rollupCache = new Map();
+
+function rollup_(item) {
 	return through2.obj(function(file, enc, callback) {
-		// console.log('TfsCheckout', file.path);
 		if (file.isNull()) {
 			return callback(null, file);
 		}
 		if (file.isStream()) {
-			console.warn('Rollup, Streaming not supported');
+			log.error('rollup', 'streaming not supported');
 			return callback(null, file);
 		}
+		const inputOptions = rollupInput(item);
+		// caching is enabled by default because of the nature of gulp and the watching/recompilatin
+		// but can be disabled by setting 'cache' to false
+		if (inputOptions.cache !== false) {
+			inputOptions.cache = rollupCache.get(inputOptions.input);
+		}
+		const maps = file.sourceMap !== undefined;
+		const originalCwd = file.cwd;
+		const originalPath = file.path;
 		const rollupGenerate = (bundle, output, i) => {
 			return bundle.generate(output).then(result => {
 				if (!result) {
 					return;
 				}
 				const newFileName = path.basename(output.file);
-				const newFilePath = output.file; // path.join(file.base, newFileName);
+				const newFilePath = output.file;
 				let targetFile;
 				if (i > 0) {
 					const newFile = new vinyl({
@@ -47,96 +62,107 @@ function rollup_(config, item) {
 							isSocket: () => false
 						}
 					});
-					this.push(newFile);
 					targetFile = newFile;
 				} else {
 					file.path = newFilePath;
 					targetFile = file;
 				}
-				// console.log(output.file, file.cwd, file.base, newFileName, newFilePath);
 				const generated = result.output[0];
 				// Pass sourcemap content and metadata to gulp-sourcemaps plugin to handle
 				// destination (and custom name) was given, possibly multiple output bundles.
-				/*
-				if (createSourceMap) {
-					generated.map.file = path.relative(originalCwd, originalPath)
-					generated.map.sources = generated.map.sources.map(source => path.relative(originalCwd, source))
+				if (maps) {
+					generated.map.file = path.relative(originalCwd, originalPath);
+					generated.map.sources = generated.map.sources.map(source => path.relative(originalCwd, source));
 				}
-				*/
+				// console.log(generated.map.file);
 				// return bundled file as buffer
 				targetFile.contents = Buffer.from(generated.code);
 				// apply sourcemap to output file
-				/*
-				if (createSourceMap) {
-					applySourceMap(targetFile, generated.map);
+				if (maps) {
+					vinylSourcemapsApply(targetFile, generated.map);
 				}
-				*/
+				if (i > 0) {
+					this.push(targetFile);
+				}
+				return result;
 			}).catch(error => {
-				console.log('Rollup generate error', error);
-				/*
-				process.nextTick(() => {
-					this.emit('error', new Error('message'));
-					cb(null, file)
-				});
-				*/
+				log.error('rollup', error);
 			});
 		};
-		rollup.rollup(rollupInput_(item)).then(bundle => {
-			const bundles = rollupOutput_(item);
-			// console.log(bundles);
-			return Promise.all(bundles.map((output, i) => rollupGenerate(bundle, output, i))).then(complete => {
-				callback(null, file);
+
+		rollup.rollup(inputOptions).then(bundle => {
+				// console.log(bundle);
+				const outputs = rollupOutput(item);
+				// console.log(outputs);
+				if (inputOptions.cache !== false) {
+					rollupCache.set(inputOptions.input, bundle);
+				}
+				return Promise.all(outputs.map((output, i) => rollupGenerate(bundle, output, i)));
+				// return bundle.write(outputs);
+			})
+			.then((results) => {
+				results.forEach(x => {
+					const outputs = x.output;
+					outputs.forEach(x => {
+						setEntry(inputOptions.input, Object.keys(x.modules));
+					});
+				});
+				callback(null, file); // pass file to gulp and end stream
+			})
+			.catch(error => {
+				log.error('rollup', error);
+				if (inputOptions.cache !== false) {
+					rollupCache.delete(inputOptions.input);
+				}
+				throw (error);
+				return callback(null, file);
 			});
-			// return bundle.write(bundles);
-		}).catch(error => {
-			console.log('Rollup bundle error', error);
-			/*
-			process.nextTick(() => {
-				this.emit('error', new Error('message'));
-				cb(null, file)
-			});
-			*/
-		});
 	});
 }
 
-function rollupInput_(item) {
-	let babelTargets;
-	if (item.target === 'esm') {
-		babelTargets = {
-			"esmodules": true
+function rollupInput(item) {
+	const presetEnvOptions = {
+		modules: false,
+		loose: true,
+	};
+	if ((typeof item.output === 'object' && item.output.format === 'esm') || item.target === 'esm') {
+		presetEnvOptions.targets = {
+			esmodules: true
 		};
 	} else {
-		babelTargets = item.target; // 'last 2 version, ie 11';
+		if (item.target) {
+			presetEnvOptions.targets = item.target; // || 'last 2 version, ie 11'; // readed from .browserslistrc
+		}
 	}
+	// console.log(item.output.file, item.output, item.target, presetEnvOptions);
 	const tsconfigDefaults = {
 		compilerOptions: {
 			target: 'esNext',
 			module: 'esNext',
-			lib: ["dom", "es2015", "es2016", "es2017"],
+			lib: ['dom', 'es2015', 'es2016', 'es2017'],
 			allowJs: true,
 			declaration: false,
 			sourceMap: true,
 			removeComments: true,
 		},
 		exclude: [
-			"./node_modules/*",
-			".npm"
+			'./node_modules/*',
+			'.npm'
 		]
 	};
 	const tsconfigOverride = {
 		compilerOptions: {
 			target: 'esNext',
 			module: 'esNext',
-			lib: ["dom", "es2015", "es2016", "es2017"],
+			lib: ['dom', 'es2015', 'es2016', 'es2017'],
 			allowJs: true,
 			declaration: false,
 			sourceMap: true,
 			removeComments: true,
 		},
 		exclude: [
-			"./node_modules/*",
-			".npm"
+			'./node_modules/*',
+			'.npm'
 		]
 	};
 	// const watchGlob = path.dirname(input) + '/**/*' + path.extname(input);
@@ -160,7 +186,7 @@ function rollupInput_(item) {
 		}),
 		*/
 		// Compile TypeScript files
-		path.extname(item.input) === '.ts' ? rollupPluginTypescript({
+		path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
 			typescript: typescript,
 			tsconfigDefaults: tsconfigDefaults,
 			tsconfig: 'tsconfig.json',
@@ -176,23 +202,16 @@ function rollupInput_(item) {
 				'.tsx'
 			],
 			presets: [
-				[babelPresetEnv, {
-					modules: false,
-					loose: true,
-					targets: babelTargets
-				}],
-				/*
-				[babelPresetTypescript, {
-					modules: false,
-					loose: true
-				}]
-				*/
+				['@babel/preset-env', presetEnvOptions],
+				// ['@babel/preset-typescript', { modules: false, loose: true }]
 			],
 			plugins: [
 				'@babel/plugin-proposal-class-properties',
 				'@babel/plugin-proposal-object-rest-spread'
 			],
 			exclude: 'node_modules/**', // only transpile our source code
+			comments: false,
+			// babelHelpers: 'bundled', // only for version 5
 			// babelrc: false,
 		}),
 		rollupPluginLicense({
@@ -200,11 +219,14 @@ function rollupInput_(item) {
 			(c) <%= moment().format('YYYY') %> <%= pkg.author %>
 			License: <%= pkg.license %>`,
 		}),
+
 	].filter(x => x);
 	input = {
 		input: item.input,
 		plugins: plugins,
 		external: item.external || [],
+		cache: false, // !! break babel if true
+		treeshake: true,
 		/*
 		watch: {
 			include: watchGlob,
@@ -214,14 +236,14 @@ function rollupInput_(item) {
 	return input;
 }
 
-function rollupOutput_(item) {
+function rollupOutput(item) {
 	const input = item.input;
 	const output = item.output;
 	const outputs = Array.isArray(output) ? output : [output];
 	const default_ = {
 		format: 'iife',
 		name: item.name || null,
-		globals: item.globals || {},
+		globals: (typeof output === 'object' && output.globals) || item.globals || {},
 		sourcemap: true,
 		minify: item.minify || false,
 	};
@@ -233,35 +255,12 @@ function rollupOutput_(item) {
 			output = Object.assign(output, x);
 		}
 		output.name = output.name || path.basename(output.file, '.js');
-		/*
-		const plugins = [
-			path.extname(input) === '.ts' ? rollupPluginTypescript({
-				target: output.format === 'es' ? 'ESNext' : 'ES5',
-				module: output.format === 'es' ? 'ES6' : 'ES5',
-				moduleResolution: output.format === 'iife' ? 'classic' : 'node',
-				declaration: true
-			}) : null,
-		].filter(x => x);
-		output.plugins = plugins;
-		*/
 		return output;
 	});
 }
 
 module.exports = {
-	rollup_,
-	rollupInput_,
-	rollupOutput_,
+	rollup: rollup_,
+	rollupInput,
+	rollupOutput,
 };
-
-/*
-"forceConsistentCasingInFileNames": true,
-"suppressImplicitAnyIndexErrors": true,
-"noUnusedLocals": true,
-"noUnusedParameters": true,
-
-"noImplicitReturns": true,
-"noImplicitThis": true,
-"noImplicitAny": true,
-"strictNullChecks": true,
-*/

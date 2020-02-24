@@ -4,13 +4,17 @@ const fs = require('fs'),
 
 const { watch } = require('gulp');
 
-const log = require('./logger');
+const log = require('../logger/logger');
 
 const { getObject, extend } = require('./json');
 
-const path_ = './gulpfile-config.json';
+const CONFIG_PATH = './gulpfile-config.json';
 const options = getOptions();
 const target = options.target || 'browser';
+
+const service = {
+	options,
+};
 
 function getOptions() {
 	let key = undefined;
@@ -34,7 +38,7 @@ function getOptions() {
 	return o;
 }
 
-function getTarget_() {
+function getTarget() {
 	return {
 		compile: [],
 		bundle: [],
@@ -44,25 +48,30 @@ function getTarget_() {
 function getConfig() {
 	let configDefault = {
 		targets: {
-			browser: getTarget_(),
-			dist: getTarget_()
+			browser: getTarget(),
+			dist: getTarget()
 		},
-		tfs: false,
 		server: {
 			src: './docs',
 			path: '/gulpfile-config/',
 			host: 'localhost',
 			port: 40900
-		}
+		},
+		tfs: false
 	};
-	const config = getObject(path_, configDefault);
-	config.target = config.targets[target] || getTarget_();
+	const config = getObject(CONFIG_PATH, configDefault);
+	config.target = config.targets[target] || getTarget();
+	service.target = target;
+	service.config = config.target;
+	service.config.server = config.server;
+	service.config.tfs = config.tfs;
 	return config;
 }
 
-function configWatcher_(callback) {
-	const configWatch = watch(path_, function config(done) {
-		config = getConfig();
+/*
+function configWatcher(callback) {
+	const configWatch = watch(CONFIG_PATH, function config(done) {
+		// config = getConfig();
 		if (typeof callback === 'function') {
 			return callback(done);
 		}
@@ -73,10 +82,11 @@ function configWatcher_(callback) {
 function logWatch(path, stats) {
 	log('Changed', path);
 }
+*/
 
 module.exports = {
+	CONFIG_PATH,
 	getConfig: getConfig,
-	path: path_,
 	target: target,
-	configWatcher_: configWatcher_
+	service: service,
 };

@@ -1,11 +1,12 @@
-const connect = require('gulp-connect');
-const url = require('url');
+const gulpConnect = require('gulp-connect'),
+	url = require('url');
 
-const log = require('./logger');
+const log = require('../logger/logger');
+const { service } = require('../config/config');
 
 // SERVE
-function serve_(config, done) {
-	if (config.server) {
+function serve(done) {
+	if (service.config.server) {
 		const options = Object.assign({
 			name: 'Development',
 			root: './docs',
@@ -14,7 +15,7 @@ function serve_(config, done) {
 			https: false,
 			path: '/',
 			livereload: true,
-		}, config.server || {});
+		}, service.config.server || {});
 		options.fallback = `${options.path}index.html`;
 		const middleware = middleware_({
 			logger: options.log ? log : undefined,
@@ -24,11 +25,11 @@ function serve_(config, done) {
 					return context.parsedUrl.pathname.replace(options.path, '/');
 				}
 			}]
-		})
+		});
 		options.middleware = (connect, opt) => {
 			return [middleware];
-		}
-		connect.server(options, function() {
+		};
+		gulpConnect.server(options, function() {
 			this.server.on('close', done);
 		});
 	} else {
@@ -152,60 +153,6 @@ function getLogger(options) {
 	return function() {};
 }
 
-function serve_local_web_server_(config, done) {
-	if (config.server) {
-
-		const options = Object.assign({
-			directory: './docs',
-			port: 8001,
-			host: 'localhost',
-			name: 'Development',
-			https: false,
-			path: '/',
-			fallback: 'index.html',
-			livereload: true,
-			open: true,
-		}, config.server || {});
-
-		if (options.path !== '/') {
-			options.rewrite = [{
-				from: options.path + '*',
-				to: options.https ? 'https' : 'http' + '://' + options.host + '/$1',
-			}];
-		}
-
-		log(options.rewrite);
-
-		/*
-		this.port = 8000
-		this.hostname = '0.0.0.0'
-	    this.maxConnections = null | 1
-	    this.keepAliveTimeout = 5000
-	    this.configFile = 'lws.config.js'
-	    this.https = false
-	    this.http2 = false
-	    this.key = null
-	    this.cert = null
-	    this.pfx = null
-		this.ciphers = null
-	    this.secureProtocol = null
-	    this.stack = null
-	    this.moduleDir = ['.']
-	    this.modulePrefix = 'lws-'
-	    this.view = null
-		*/
-		try {
-			console.log(lws);
-			const ws = lws.create(options);
-			log(`Server started on port ${options.port}.`);
-		} catch (ex) {
-			log.error('Webserve could not start', ex.message);
-		}
-	} else {
-		done();
-	}
-}
-
 module.exports = {
-	serve_,
+	serve,
 };
