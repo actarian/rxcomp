@@ -855,23 +855,19 @@
       var _this2 = this;
 
       var _getContext = getContext(this),
-          module = _getContext.module,
           node = _getContext.node;
 
-      var expression = node.getAttribute('[class]');
-      this.classFunction = module.makeFunction(expression);
       node.classList.forEach(function (x) {
         return _this2.keys.push(x);
       });
     };
 
-    _proto.onChanges = function onChanges(changes) {
+    _proto.onChanges = function onChanges() {
       var _getContext2 = getContext(this),
-          module = _getContext2.module,
           node = _getContext2.node;
 
-      var object = module.resolve(this.classFunction, changes, this);
       var keys;
+      var object = this.class;
 
       if (typeof object === 'object') {
         keys = [];
@@ -882,7 +878,7 @@
           }
         }
       } else if (typeof object === 'string') {
-        keys = object.split(' ');
+        keys = object.split(/\s+/);
       }
 
       keys = (keys || []).concat(this.keys);
@@ -1269,16 +1265,32 @@
           node = _getContext.node;
 
       var style = this.style;
+      var previousStyle = this.previousStyle;
 
-      if (style) {
-        for (var key in style) {
-          var splitted = key.split('.');
-          var name = splitted.shift();
-          node.style.setProperty(name, style[key] + splitted.length ? splitted[0] : '');
+      if (previousStyle) {
+        for (var key in previousStyle) {
+          if (!style || !style[key]) {
+            var splitted = key.split('.');
+            var propertyName = splitted.shift();
+            node.style.removeProperty(propertyName);
+          }
         }
       }
 
-      console.log('StyleDirective.onChanges', style);
+      if (style) {
+        for (var _key in style) {
+          if (!previousStyle || previousStyle[_key] !== style[_key]) {
+            var _splitted = _key.split('.');
+
+            var _propertyName = _splitted.shift();
+
+            var value = style[_key] + (_splitted.length ? _splitted[0] : '');
+            node.style.setProperty(_propertyName, value);
+          }
+        }
+      }
+
+      this.previousStyle = style;
     };
 
     return StyleDirective;

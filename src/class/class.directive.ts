@@ -4,7 +4,7 @@ import { getContext } from '../module/module';
 
 export default class ClassDirective extends Directive {
 
-	class: { [key: string]: string } | string;
+	class: { [key: string]: string } | string | null;
 	keys: string[] = [];
 
 	onInit() {

@@ -7,7 +7,11 @@ export default class SrcDirective extends Directive {
 
 	onChanges() {
 		const { node } = getContext(this);
-		node.setAttribute('src', this.src);
+		if (this.src) {
+			node.setAttribute('src', this.src);
+		} else {
+			node.removeAttribute('src');
+		}
 	}
 
 }

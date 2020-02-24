@@ -1241,7 +1241,11 @@
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      node.setAttribute('src', this.src);
+      if (this.src) {
+        node.setAttribute('src', this.src);
+      } else {
+        node.removeAttribute('src');
+      }
     };
 
     return SrcDirective;
@@ -1265,15 +1269,32 @@
           node = _getContext.node;
 
       var style = this.style;
+      var previousStyle = this.previousStyle;
 
-      if (style) {
-        for (var key in style) {
-          var splitted = key.split('.');
-          var propertyName = splitted.shift();
-          var value = style[key] + (splitted.length ? splitted[0] : '');
-          node.style.setProperty(propertyName, value);
+      if (previousStyle) {
+        for (var key in previousStyle) {
+          if (!style || !style[key]) {
+            var splitted = key.split('.');
+            var propertyName = splitted.shift();
+            node.style.removeProperty(propertyName);
+          }
         }
       }
+
+      if (style) {
+        for (var _key in style) {
+          if (!previousStyle || previousStyle[_key] !== style[_key]) {
+            var _splitted = _key.split('.');
+
+            var _propertyName = _splitted.shift();
+
+            var value = style[_key] + (_splitted.length ? _splitted[0] : '');
+            node.style.setProperty(_propertyName, value);
+          }
+        }
+      }
+
+      this.previousStyle = style;
     };
 
     return StyleDirective;

@@ -260,7 +260,7 @@ function typescriptInput(item) {
 			License: <%= pkg.license %>`,
 		}),
 	].filter(x => x);
-	input = {
+	const input = {
 		input: item.input,
 		plugins: plugins,
 		external: item.external || [],

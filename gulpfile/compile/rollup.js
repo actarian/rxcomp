@@ -221,7 +221,7 @@ function rollupInput(item) {
 		}),
 
 	].filter(x => x);
-	input = {
+	const input = {
 		input: item.input,
 		plugins: plugins,
 		external: item.external || [],
