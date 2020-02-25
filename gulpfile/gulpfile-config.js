@@ -67,11 +67,11 @@ function watchTask(done, filters) {
 }
 
 function watchCssTask(done) {
-	return watchTask(node, ['.scss', '.css']);
+	return watchTask(done, ['.scss', '.css']);
 }
 
 function watchJsTask(done) {
-	return watchTask(node, ['.js', '.mjs', '.ts', '.tsx']);
+	return watchTask(done, ['.js', '.mjs', '.ts', '.tsx']);
 }
 
 exports.compile = compileTask;
@@ -85,56 +85,3 @@ exports.buildJs = series(compileJsTask, bundleJs);
 exports.buildJsAndWatch = series(compileJsTask, bundleJs, watchJsTask);
 exports.buildAndWatch = series(compileTask, bundleTask, copyTask, watchTask);
 exports.buildWatchAndServe = series(compileTask, bundleTask, copyTask, watchTask, serve);
-
-/*
-let watchers = [];
-
-function watchAllTask(done) {
-	while (watchers.length) {
-		const w = watchers.shift();
-		if (typeof w.close === 'function') {
-			w.close();
-		}
-	}
-	const compileWatcherTask = compileWatcher(config);
-	const bundleWatcherTask = bundleWatcher(config);
-	const configWatcherTask = configWatcher(function(done) {
-		config = getConfig();
-		return series(compileTask, bundleTask, copyTask, watchTask)(done);
-	});
-	watchers = [].concat(compileWatcherTask, bundleWatcherTask, configWatcherTask);
-	done();
-}
-
-function watchCssTask(done) {
-	while (watchers.length) {
-		const w = watchers.shift();
-		if (typeof w.close === 'function') {
-			w.close();
-		}
-	}
-	const compileCssWatcherTask = compileCssWatcher(config);
-	const bundleCssWatcherTask = bundleCssWatcher(config);
-	const configWatcherTask = configWatcher(function(done) {
-		return series(compileCssTask, bundleCss, watchCssTask)(done);
-	});
-	watchers = [].concat(compileCssWatcherTask, bundleCssWatcherTask, configWatcherTask);
-	done();
-}
-
-function watchJsTask(done) {
-	while (watchers.length) {
-		const w = watchers.shift();
-		if (typeof w.close === 'function') {
-			w.close();
-		}
-	}
-	const compileJsWatcherSubTask = compileJsWatcher(config);
-	const bJsWatcher = bundleJsWatcher(config);
-	const configWatcherTask = configWatcher(function(done) {
-		return series(compileJsTask, bundleJs, watchTask)(done);
-	});
-	watchers = [].concat(compileJsWatcherSubTask, bJsWatcher, configWatcherTask);
-	done();
-}
-*/

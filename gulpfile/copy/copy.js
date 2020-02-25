@@ -21,7 +21,7 @@ function copy(item, ext, done) {
 
 function copyTask(done) {
 	const items = copies(service.config);
-	const tasks = items.map(item => function itemTask(done) {
+	const tasks = items.map(item => function copy(done) {
 		return copyItemTask(item);
 	});
 	return tasks.length ? parallel(...tasks)(done) : done();

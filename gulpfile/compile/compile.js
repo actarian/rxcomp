@@ -45,7 +45,7 @@ function compile(item, ext, done) {
 
 function compileScss(done) {
 	const items = compiles('.scss');
-	const tasks = items.map(item => function itemTask() {
+	const tasks = items.map(item => function compileScss() {
 		return compileScssItem(item);
 	});
 	return tasks.length ? parallel(...tasks)(done) : done();
@@ -78,7 +78,7 @@ function compileScssItem(item) {
 
 function compileJs(done) {
 	const items = compiles('.js');
-	const tasks = items.map(item => function itemTask(done) {
+	const tasks = items.map(item => function compileJs(done) {
 		return compileJsItem(item, done);
 	});
 	return tasks.length ? parallel(...tasks)(done) : done();
@@ -88,10 +88,8 @@ function compileJsItem(item, done) {
 	const tasks = [];
 	const outputs = rollupOutput(item);
 	outputs.forEach((output, i) => {
-		// console.log(output);
-		tasks.push(function itemTask(done) {
+		tasks.push(function compileJsItem(done) {
 			const item_ = Object.assign({}, item, { output });
-			// console.log('item_', item_);
 			return compileRollup(item_);
 		});
 	});
@@ -100,7 +98,7 @@ function compileJsItem(item, done) {
 
 function compileTs(done) {
 	const items = compiles('.ts');
-	const tasks = items.map(item => function itemTask(done) {
+	const tasks = items.map(item => function compileTs(done) {
 		return compileTsItem(item, done);
 	});
 	return tasks.length ? parallel(...tasks)(done) : done();
@@ -110,28 +108,19 @@ function compileTsItem(item, done) {
 	const tasks = [];
 	const outputs = typescriptOutput(item);
 	outputs.forEach((output, i) => {
-		// console.log(output);
-		tasks.push(function itemTask(done) {
+		tasks.push(function compileTsItem(done) {
 			const item_ = Object.assign({}, item, { output });
-			// console.log('item_', item_);
 			const output_ = typescriptOutput(item_)[0];
+			let task;
 			switch (output_.format) {
 				case 'iife':
 				case 'umd':
-					return compileRollup(item_);
+					task = compileRollup(item_);
 					break;
 				default:
-					return compileTypescript(item_);
+					task = compileTypescript(item_);
 			}
-			/*
-			'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
-			'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
-			'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
-			'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
-			'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
-			'system': 'system', // Native format of the SystemJS loader
-			*/
-			return compileTypescript(item_);
+			return task;
 		});
 	});
 	return tasks.length ? series(...tasks)(done) : done();
@@ -139,7 +128,7 @@ function compileTsItem(item, done) {
 
 function compileHtml(done) {
 	const items = compiles('.html');
-	const tasks = items.map(item => function itemTask() {
+	const tasks = items.map(item => function compileHtml() {
 		return compileHtmlItem(item);
 	});
 	return tasks.length ? parallel(...tasks)(done) : done();
@@ -214,45 +203,6 @@ function compileTypescript(item) {
 		.pipe(gulpConnect.reload());
 }
 
-/*
-function compileWatcher() {
-	const scss = watch(globs('.scss'), function compileScss_(done) {
-		compileScss(done);
-	}).on('change', logWatch);
-	const js = watch(globs('.js'), function compileJs_(done) {
-		compileJs(done);
-	}).on('change', logWatch);
-	const ts = watch(globs('.ts'), function compileTs_(done) {
-		compileTs(done);
-	}).on('change', logWatch);
-	const html = watch(globs('.html'), function compileHtml_(done) {
-		compileHtml(done);
-	}).on('change', logWatch);
-	return [scss, js, ts, html];
-}
-
-function compileCssWatcher() {
-	const scss = watch(globs('.scss'), function compileScss_(done) {
-		compileScss(done);
-	}).on('change', logWatch);
-	return [scss];
-}
-
-function compileJsWatcher() {
-	const js = watch(globs('.js'), function compileJs_(done) {
-		compileJs(done);
-	}).on('change', logWatch);
-	const ts = watch(globs('.ts'), function compileTs_(done) {
-		compileTs(done);
-	}).on('change', logWatch);
-	return [js, ts];
-}
-
-function logWatch(path, stats) {
-	log('Changed', path);
-}
-*/
-
 function compiles(ext) {
 	if (service.config) {
 		return service.config.compile.filter((item) => {
@@ -279,3 +229,12 @@ module.exports = {
 	compileTsItem,
 	compileHtml,
 };
+
+/*
+'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
+'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
+'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+'system': 'system', // Native format of the SystemJS loader
+*/

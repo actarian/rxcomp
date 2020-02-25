@@ -15,7 +15,6 @@ const tfsCheckout = require('../tfs/tfs');
 const { setEntry } = require('../watch/watch');
 
 function bundle(item, ext, done) {
-	// console.log('bundle', ext, item);
 	let task;
 	switch (ext) {
 		case '.scss':
@@ -28,10 +27,9 @@ function bundle(item, ext, done) {
 	return task ? task : (typeof done === 'function' ? done() : null);
 }
 
-// BUNDLE CSS
 function bundleCss(done) {
 	const items = bundles('.css');
-	const tasks = items.map(item => function itemTask(done) {
+	const tasks = items.map(item => function bundleCss(done) {
 		setEntry(item.output, Array.isArray(item.input) ? item.input : [item.input]);
 		return bundleCssItem(item);
 	});
@@ -57,11 +55,9 @@ function bundleCssItem(item) {
 		.pipe(gulpFilter('**/*.css'));
 }
 
-// BUNDLE JS
 function bundleJs(done) {
-	// console.log('service', service, service.config.bundle[0]);
 	const items = bundles('.js');
-	const tasks = items.map(item => function itemTask(done) {
+	const tasks = items.map(item => function bundleJs(done) {
 		setEntry(item.output, Array.isArray(item.input) ? item.input : [item.input]);
 		return bundleJsItem(item);
 	});
@@ -82,44 +78,6 @@ function bundleJsItem(item) {
 		.pipe(gulpIf(item.minify, dest('.', { sourcemaps: '.' })))
 		.pipe(gulpFilter('**/*.js'));
 }
-
-/*
-function bundleWatcher(config) {
-	const css = bundles('.css').map((item) => {
-		return watch(item.input, function bundleCss_(done) {
-			return bundleCssItem(item);
-		}).on('change', logWatch);
-	});
-	const js = bundles('.js').map((item) => {
-		return watch(item.input, function bundleJs_(done) {
-			return bundleJsItem(item);
-		}).on('change', logWatch);
-	});
-	return [css, js];
-}
-
-function bundleCssWatcher(config) {
-	const css = bundles('.css').map((item) => {
-		return watch(item.input, function bundleCss_(done) {
-			return bundleCssItem(item);
-		}).on('change', logWatch);
-	});
-	return [css];
-}
-
-function bundleJsWatcher(config) {
-	const js = bundles('.js').map((item) => {
-		return watch(item.input, function bundleJs_(done) {
-			return bundleJsItem(item);
-		}).on('change', logWatch);
-	});
-	return [js];
-}
-
-function logWatch(path, stats) {
-	log('Changed', path);
-}
-*/
 
 function bundles(ext) {
 	if (service.config) {
