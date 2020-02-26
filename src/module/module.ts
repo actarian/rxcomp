@@ -2,36 +2,13 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
-import Factory, { ExpressionFunction, IElement, IFactoryMeta, ISelectorResult, IText, SelectorFunction } from '../core/factory';
-import Pipe from '../core/pipe';
+import Factory from '../core/factory';
 import Structure from '../core/structure';
-
-export interface IContext {
-	module: Module;
-	instance: Factory;
-	parentInstance: Factory | Window;
-	node: IElement;
-	factory: typeof Factory;
-	selector: string;
-	inputs?: { [key: string]: ExpressionFunction };
-	outputs?: { [key: string]: ExpressionFunction };
-}
+import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
 
 let ID: number = 0;
 const CONTEXTS: { [key: number]: IContext } = {};
 const NODES: { [key: number]: IContext[] } = {};
-
-export interface IModuleMeta {
-	declarations?: (typeof Factory | typeof Pipe)[];
-	exports?: (typeof Factory | typeof Pipe)[];
-	imports?: (typeof Module | IModuleMeta)[];
-	pipes?: { [key: string]: typeof Pipe };
-	factories?: typeof Factory[];
-	selectors?: SelectorFunction[];
-	bootstrap?: typeof Factory;
-	node?: IElement;
-	nodeInnerHTML?: string;
-}
 
 export default class Module {
 

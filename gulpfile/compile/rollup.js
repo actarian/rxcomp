@@ -143,7 +143,7 @@ function rollupInput(item) {
 			allowJs: true,
 			declaration: false,
 			sourceMap: true,
-			removeComments: true,
+			removeComments: item.output.format === 'iife',
 		},
 		exclude: [
 			'./node_modules/*',
@@ -158,7 +158,7 @@ function rollupInput(item) {
 			allowJs: true,
 			declaration: false,
 			sourceMap: true,
-			removeComments: true,
+			removeComments: item.output.format === 'iife',
 		},
 		exclude: [
 			'./node_modules/*',
@@ -206,7 +206,7 @@ function rollupInput(item) {
 				'@babel/plugin-proposal-object-rest-spread'
 			],
 			exclude: 'node_modules/**', // only transpile our source code
-			comments: false,
+			comments: item.output.format !== 'iife',
 			// babelHelpers: 'bundled', // only for version 5
 			// babelrc: false,
 		}),

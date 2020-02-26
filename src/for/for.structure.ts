@@ -1,13 +1,8 @@
-import Factory, { ExpressionFunction, IElement } from '../core/factory';
+import Factory from '../core/factory';
 import Structure from '../core/structure';
-import Module, { getContext, IContext } from '../module/module';
+import { ExpressionFunction, IContext, IElement, IExpressionToken } from '../core/types';
+import Module, { getContext } from '../module/module';
 import ForItem from './for.item';
-
-export interface IExpressionToken {
-	key: string;
-	value: string;
-	iterable: string;
-}
 
 export default class ForStructure extends Structure {
 

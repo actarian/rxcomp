@@ -1,108 +1,112 @@
 ﻿{
 	"targets": {
 		"browser": {
-			"compile": [{
-				"input": "test/*.html",
-				"output": "docs/",
-				"minify": true
-			}, {
-				"input": "test/css/main.scss",
-				"output": "docs/css/main.css",
-				"minify": true
-			}, {
-				"input": "test/js/main.ts",
-				"output": {
-					"file": "docs/js/main.js",
-					"format": "iife"
-				},
-				"globals": {
-					"rxjs": "rxjs",
-					"rxjs/operators": "rxjs.operators"
-				},
-				"external": ["rxjs", "rxjs/operators"],
-				"minify": true
-			}, {
-				"input": "test/js/test.for.ts",
-				"output": {
-					"file": "docs/js/test.for.js",
-					"format": "iife"
-				},
-				"globals": {
-					"rxjs": "rxjs",
-					"rxjs/operators": "rxjs.operators"
-				},
-				"external": ["rxjs", "rxjs/operators"],
-				"minify": true
-			}, {
-				"input": "test/js/test.parsing.ts",
-				"output": {
-					"file": "docs/js/test.parsing.js",
-					"format": "iife"
-				},
-				"globals": {
-					"rxjs": "rxjs",
-					"rxjs/operators": "rxjs.operators"
-				},
-				"external": ["rxjs", "rxjs/operators"],
-				"minify": true
-			}, {
-				"input": "test/js/test.pipes.ts",
-				"output": {
-					"file": "docs/js/test.pipes.js",
-					"format": "iife"
-				},
-				"globals": {
-					"rxjs": "rxjs",
-					"rxjs/operators": "rxjs.operators"
-				},
-				"external": ["rxjs", "rxjs/operators"],
-				"minify": true
-			}, {
-				"input": "test/js/test.scope.ts",
-				"output": {
-					"file": "docs/js/test.scope.js",
-					"format": "iife"
-				},
-				"globals": {
-					"rxjs": "rxjs",
-					"rxjs/operators": "rxjs.operators"
-				},
-				"external": ["rxjs", "rxjs/operators"],
-				"minify": true
-			}],
+			"compile": [
+				{
+					"input": "test/*.html",
+					"output": "docs/",
+					"minify": true
+        },
+				{
+					"input": "test/css/main.scss",
+					"output": "docs/css/main.css",
+					"minify": true
+        },
+				{
+					"input": "test/js/main.ts",
+					"output": {
+						"file": "docs/js/main.js",
+						"format": "iife"
+					},
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs", "rxjs/operators"],
+					"minify": true
+        },
+				{
+					"input": "test/js/test.for.ts",
+					"output": {
+						"file": "docs/js/test.for.js",
+						"format": "iife"
+					},
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs", "rxjs/operators"],
+					"minify": true
+        },
+				{
+					"input": "test/js/test.parsing.ts",
+					"output": {
+						"file": "docs/js/test.parsing.js",
+						"format": "iife"
+					},
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs", "rxjs/operators"],
+					"minify": true
+        },
+				{
+					"input": "test/js/test.pipes.ts",
+					"output": {
+						"file": "docs/js/test.pipes.js",
+						"format": "iife"
+					},
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs", "rxjs/operators"],
+					"minify": true
+        },
+				{
+					"input": "test/js/test.scope.ts",
+					"output": {
+						"file": "docs/js/test.scope.js",
+						"format": "iife"
+					},
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"external": ["rxjs", "rxjs/operators"],
+					"minify": true
+        }
+      ],
 			"bundle": []
 		},
 		"dist": {
-			"compile": [{
-				"input": "src/rxcomp.ts",
-				"output": [{
-					"file": "dist/amd/rxcomp.js",
-					"format": "amd"
-				}, {
-					"file": "dist/cjs/",
-					"format": "cjs"
-				}, {
-					"file": "dist/esm/",
-					"format": "esm"
-				}, {
-					"file": "dist/system/rxcomp.js",
-					"format": "system"
-				}, {
-					"file": "dist/iife/rxcomp.js",
-					"format": "iife",
-					"minify": true
-				}, {
-					"file": "dist/umd/rxcomp.js",
-					"format": "umd",
-					"minify": true
-				}],
-				"globals": {
-					"rxjs": "rxjs",
-					"rxjs/operators": "rxjs.operators"
-				},
-				"name": "rxcomp",
-				"external": ["rxjs", "rxjs/operators"]
-			}],
+			"compile": [
+				{
+					"input": "src/rxcomp.ts",
+					"output": [
+						{
+							"file": "dist/cjs/",
+							"format": "cjs"
+            },
+						{
+							"file": "dist/esm/",
+							"format": "esm"
+            },
+						{
+							"file": "dist/iife/rxcomp.js",
+							"format": "iife",
+							"minify": true
+            }
+          ],
+					"globals": {
+						"rxjs": "rxjs",
+						"rxjs/operators": "rxjs.operators"
+					},
+					"name": "rxcomp",
+					"external": ["rxjs", "rxjs/operators"]
+        }
+      ],
 			"bundle": []
 		}
 	},

@@ -110,7 +110,7 @@ function typescriptConfig(item) {
 			moduleResolution: 'node',
 			experimentalDecorators: true,
 			emitDecoratorMetadata: true,
-			removeComments: true,
+			// removeComments: true,
 			importHelpers: true,
 			allowSyntheticDefaultImports: true,
 			esModuleInterop: true,

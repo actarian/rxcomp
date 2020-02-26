@@ -1,9 +1,10 @@
 import Component from '../core/component';
 import Directive from '../core/directive';
-import Factory, { IElement, ISelectorResult, MatchFunction, SelectorFunction } from '../core/factory';
+import Factory from '../core/factory';
 import Pipe from '../core/pipe';
 import Structure from '../core/structure';
-import Module, { IModuleMeta } from '../module/module';
+import { IElement, IModuleMeta, ISelectorResult, MatchFunction, SelectorFunction } from '../core/types';
+import Module from '../module/module';
 
 const ORDER: (typeof Factory)[] = [Structure, Component, Directive];
 

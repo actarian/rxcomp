@@ -1,6 +1,4 @@
-export interface IPipeMeta {
-	name: string;
-}
+import { IPipeMeta } from "./types";
 
 export default class Pipe {
 

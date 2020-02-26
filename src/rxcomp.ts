@@ -5,6 +5,7 @@ export { default as Context } from './core/context';
 export { default as Directive } from './core/directive';
 export { default as Pipe } from './core/pipe';
 export { default as Structure } from './core/structure';
+export { ExpressionFunction, IContext, IElement, IExpressionToken, IFactoryMeta, IModuleMeta, IPipeMeta, ISelectorResult, IText, MatchFunction, SelectorFunction } from './core/types';
 export { default as EventDirective } from './event/event.directive';
 export { default as ForItem } from './for/for.item';
 export { default as ForStructure } from './for/for.structure';
@@ -17,3 +18,4 @@ export { default as Browser } from './platform/browser';
 export { default as Platform } from './platform/platform';
 export { default as SrcDirective } from './src/src.directive';
 export { default as StyleDirective } from './style/style.directive';
+
