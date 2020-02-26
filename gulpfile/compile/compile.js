@@ -19,6 +19,7 @@ const log = require('../logger/logger');
 const { service } = require('../config/config');
 const tfsCheckout = require('../tfs/tfs');
 const { sass } = require('./sass');
+const { mjml } = require('./mjml');
 
 const { rollup, rollupInput, rollupOutput } = require('./rollup');
 const { typescript, typescriptInput, typescriptOutput } = require('./typescript');
@@ -31,13 +32,18 @@ function compile(item, ext, done) {
 			task = compileScssItem(item);
 			break;
 		case '.js':
+		case '.mjs':
 			task = compileJsItem(item);
 			break;
 		case '.ts':
+		case '.tsx':
 			task = compileTsItem(item);
 			break;
 		case '.html':
 			task = compileHtmlItem(item);
+			break;
+		case '.mjml':
+			task = compileMjmlItem(item);
 			break;
 	}
 	return task ? task : (typeof done === 'function' ? done() : null);
@@ -77,7 +83,7 @@ function compileScssItem(item) {
 }
 
 function compileJs(done) {
-	const items = compiles('.js');
+	const items = compiles('.js', '.mjs');
 	const tasks = items.map(item => function compileJs(done) {
 		return compileJsItem(item, done);
 	});
@@ -97,7 +103,7 @@ function compileJsItem(item, done) {
 }
 
 function compileTs(done) {
-	const items = compiles('.ts');
+	const items = compiles('.ts', '.tsx');
 	const tasks = items.map(item => function compileTs(done) {
 		return compileTsItem(item, done);
 	});
@@ -140,6 +146,32 @@ function compileHtmlItem(item) {
 		.pipe(gulpPlumber())
 		.pipe(gulpHtmlExtend({ annotations: true, verbose: false }))
 		.pipe(gulpIf(item.minify, gulpHtmlMin({ collapseWhitespace: true })))
+		.pipe(gulpRename(function(path) {
+			return {
+				dirname: item.output,
+				basename: path.basename,
+				extname: path.extname,
+			};
+		}))
+		.pipe(tfsCheckout())
+		.pipe(dest('.'))
+		.on('end', () => log('Compile', item.output))
+		.pipe(gulpConnect.reload());
+}
+
+function compileMjml(done) {
+	const items = compiles('.mjml');
+	const tasks = items.map(item => function compileMjml() {
+		return compileMjmlItem(item);
+	});
+	return tasks.length ? parallel(...tasks)(done) : done();
+}
+
+function compileMjmlItem(item) {
+	setEntry(item.input, path.extname(item.input));
+	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
+		.pipe(gulpPlumber())
+		.pipe(mjml(item))
 		.pipe(gulpRename(function(path) {
 			return {
 				dirname: item.output,
@@ -203,10 +235,10 @@ function compileTypescript(item) {
 		.pipe(gulpConnect.reload());
 }
 
-function compiles(ext) {
+function compiles(...args) {
 	if (service.config) {
 		return service.config.compile.filter((item) => {
-			return new RegExp(`${ext}$`).test(item.input);
+			return new RegExp(`${args.join('|')}$`).test(item.input);
 		});
 	} else {
 		return [];
@@ -228,6 +260,8 @@ module.exports = {
 	compileTs,
 	compileTsItem,
 	compileHtml,
+	compileMjml,
+	compileMjmlItem,
 };
 
 /*

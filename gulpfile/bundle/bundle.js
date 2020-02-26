@@ -79,10 +79,10 @@ function bundleJsItem(item) {
 		.pipe(gulpFilter('**/*.js'));
 }
 
-function bundles(ext) {
+function bundles(...args) {
 	if (service.config) {
 		return service.config.bundle.filter((item) => {
-			return new RegExp(`${ext}$`).test(item.output);
+			return new RegExp(`${args.join('|')}$`).test(item.output);
 		});
 	} else {
 		return [];

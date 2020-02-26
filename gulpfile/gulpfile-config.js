@@ -1,6 +1,6 @@
 const path = require('path');
 const { parallel, series } = require('gulp');
-const { compile, compileScss, compileJs, compileTs, compileHtml } = require('./compile/compile');
+const { compile, compileScss, compileJs, compileTs, compileHtml, compileMjml } = require('./compile/compile');
 const { bundle, bundleCss, bundleJs } = require('./bundle/bundle');
 const { copy, copyTask } = require('./copy/copy');
 const { serve } = require('./serve/serve');
@@ -10,7 +10,7 @@ const log = require('./logger/logger');
 const { CONFIG_PATH, getConfig } = require('./config/config');
 let config = getConfig();
 
-const compileTask = parallel(compileScss, compileJs, compileTs, compileHtml); // compilePartials, compileSnippets
+const compileTask = parallel(compileScss, compileJs, compileTs, compileHtml, compileMjml);
 
 const compileCssTask = parallel(compileScss);
 
