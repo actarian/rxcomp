@@ -20,11 +20,10 @@ export default class EventDirective extends Directive {
 			event$.pipe(
 				takeUntil(this.unsubscribe$)
 			).subscribe(event => {
-				// console.log(parentInstance);
 				module.resolve(outputFunction, parentInstance, event);
 			});
 		} else {
-			parentInstance[`${event}$`] = event$;
+			(parentInstance as any)[`${event}$`] = event$; // !!! any
 		}
 		// console.log('EventDirective.onInit', 'selector', selector, 'event', event);
 	}

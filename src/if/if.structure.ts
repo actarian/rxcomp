@@ -1,12 +1,12 @@
 import Factory from '../core/factory';
 import Structure from '../core/structure';
-import { ExpressionFunction, IElement, IExpressionToken } from '../core/types';
+import { ExpressionFunction, IComment, IElement, IExpressionToken } from '../core/types';
 import { getContext } from '../module/module';
 
 export default class IfStructure extends Structure {
 
-	ifbegin: Comment;
-	ifend: Comment;
+	ifbegin: IComment;
+	ifend: IComment;
 	instances: Factory[] = [];
 	token: IExpressionToken;
 	ifFunction: ExpressionFunction;
@@ -15,7 +15,7 @@ export default class IfStructure extends Structure {
 
 	onInit() {
 		const { module, node } = getContext(this);
-		const ifbegin = this.ifbegin = document.createComment(`*if begin`);
+		const ifbegin: IComment = this.ifbegin = document.createComment(`*if begin`);
 		ifbegin['rxcompId'] = node.rxcompId;
 		node.parentNode.replaceChild(ifbegin, node);
 		const ifend = this.ifend = document.createComment(`*if end`);
@@ -29,7 +29,7 @@ export default class IfStructure extends Structure {
 		// console.log('IfStructure.expression', expression);
 	}
 
-	onChanges(changes) {
+	onChanges(changes: Factory | Window) {
 		const { module } = getContext(this);
 		// console.log('IfStructure.onChanges', changes);
 		const value = module.resolve(this.ifFunction, changes, this);
@@ -48,8 +48,8 @@ export default class IfStructure extends Structure {
 		}
 	}
 
-}
+	static meta = {
+		selector: '[*if]',
+	};
 
-IfStructure.meta = {
-	selector: '[*if]',
-};
+}

@@ -5,6 +5,8 @@ export default class ForItem extends Context {
 
 	index: number;
 	count: number;
+	[key: string]: any;
+
 	// !!! try with payload options { key, $key, value, $value, index, count } or use onInit()
 
 	constructor(key: string, $key: number | string, value: string, $value: any, index: number, count: number, parentInstance: Factory) {

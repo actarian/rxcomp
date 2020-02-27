@@ -1,4 +1,7 @@
+
 import ClassDirective from './class/class.directive';
+import Factory from './core/factory';
+import Pipe from './core/pipe';
 import EventDirective from './event/event.directive';
 import ForStructure from './for/for.structure';
 import HrefDirective from './href/href.directive';
@@ -9,8 +12,7 @@ import Module from './module/module';
 import SrcDirective from './src/src.directive';
 import StyleDirective from './style/style.directive';
 
-export default class CoreModule extends Module { }
-const factories = [
+const factories: typeof Factory[] = [
 	ClassDirective,
 	EventDirective,
 	ForStructure,
@@ -20,16 +22,22 @@ const factories = [
 	SrcDirective,
 	StyleDirective,
 ];
-const pipes = [
+
+const pipes: typeof Pipe[] = [
 	JsonPipe,
 ];
-CoreModule.meta = {
-	declarations: [
-		...factories,
-		...pipes,
-	],
-	exports: [
-		...factories,
-		...pipes,
-	]
-};
+
+export default class CoreModule extends Module {
+
+	static meta = {
+		declarations: [
+			...factories,
+			...pipes,
+		],
+		exports: [
+			...factories,
+			...pipes,
+		]
+	};
+
+}

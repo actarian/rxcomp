@@ -32,10 +32,9 @@ export default class Context extends Component {
 		while (properties.length) {
 			const key: string = properties.shift();
 			if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
-				// console.log('Context.mergeDescriptors', key, source[key]);
 				const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(source, key);
 				if (typeof descriptor.value == 'function') {
-					descriptor.value = (...args) => {
+					descriptor.value = (...args: any[]) => {
 						return instance[key].apply(instance, args);
 					};
 				}

@@ -1,23 +1,23 @@
 import Factory from '../core/factory';
 import Structure from '../core/structure';
-import { ExpressionFunction, IContext, IElement, IExpressionToken } from '../core/types';
+import { ExpressionFunction, IComment, IContext, IElement, IExpressionToken } from '../core/types';
 import Module, { getContext } from '../module/module';
 import ForItem from './for.item';
 
 export default class ForStructure extends Structure {
 
-	forbegin: Comment;
-	forend: Comment;
+	forbegin: IComment;
+	forend: IComment;
 	instances: Factory[] = [];
 	token: IExpressionToken;
 	forFunction: ExpressionFunction;
 
 	onInit() {
 		const { module, node } = getContext(this);
-		const forbegin: Comment = this.forbegin = document.createComment(`*for begin`);
+		const forbegin: IComment = this.forbegin = document.createComment(`*for begin`);
 		forbegin['rxcompId'] = node.rxcompId;
 		node.parentNode.replaceChild(forbegin, node);
-		const forend: Comment = this.forend = document.createComment(`*for end`);
+		const forend: IComment = this.forend = document.createComment(`*for end`);
 		forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
 		const expression: string = node.getAttribute('*for');
 		// this.expression = expression;
@@ -26,7 +26,7 @@ export default class ForStructure extends Structure {
 		this.forFunction = module.makeFunction(token.iterable);
 	}
 
-	onChanges(changes) {
+	onChanges(changes: Factory | Window) {
 		const context: IContext = getContext(this);
 		const module: Module = context.module;
 		const node: IElement = context.node;
@@ -41,12 +41,12 @@ export default class ForStructure extends Structure {
 		for (let i: number = 0; i < Math.max(previous, total); i++) {
 			if (i < total) {
 				const key: number | string = isArray ? i : array[i];
-				const value: any = isArray ? array[key] : result[key];
+				const value: any = isArray ? array[key as number] : result[key];
 				if (i < previous) {
 					// update
 					const instance: Factory = this.instances[i];
-					instance[token.key] = key;
-					instance[token.value] = value;
+					(instance as any)[token.key] = key;
+					(instance as any)[token.value] = value;
 					/*
 					if (!nextSibling) {
 						const context = getContext(instance);

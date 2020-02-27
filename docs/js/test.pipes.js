@@ -204,7 +204,7 @@
         parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 
         if (!parentInstance) {
-          return;
+          return undefined;
         }
 
         var instance = _construct(factory, args || []);
@@ -234,8 +234,8 @@
             });
           }
 
-          if (typeof instance['onView'] === 'function') {
-            instance['onView']();
+          if (typeof instance.onView === 'function') {
+            instance.onView();
           }
         };
 
@@ -245,8 +245,8 @@
           context.outputs = this.makeOutputs(meta, instance);
         }
 
-        if (typeof instance['onInit'] === 'function') {
-          instance['onInit']();
+        if (typeof instance.onInit === 'function') {
+          instance.onInit();
         }
 
         initialized = true;
@@ -257,8 +257,8 @@
               _this2.resolveInputsOutputs(instance, changes);
             }
 
-            if (typeof instance['onChanges'] === 'function') {
-              instance['onChanges'](changes);
+            if (typeof instance.onChanges === 'function') {
+              instance.onChanges(changes);
             }
 
             instance.pushChanges();
@@ -266,6 +266,8 @@
         }
 
         return instance;
+      } else {
+        return undefined;
       }
     };
 
@@ -300,6 +302,8 @@
 
       if (context) {
         return context.instance;
+      } else {
+        return undefined;
       }
     };
 
@@ -428,6 +432,8 @@
           if (c) {
             return '\"';
           }
+
+          return '';
         });
         expression = "\"" + attribute + "\"";
       }
@@ -539,6 +545,8 @@
     };
 
     Module.parsePipes = function parsePipes(expression) {
+      var l = '┌';
+      var r = '┘';
       var rx1 = /(.*?[^\|])\|([^\|]+)/;
 
       while (expression.match(rx1)) {
@@ -550,7 +558,7 @@
           var value = args[0].trim();
           var params = Module.parsePipeParams(args[1]);
           var func = params.shift().trim();
-          return "$$pipes." + func + ".transform\u250C" + [value].concat(params) + "\u2518";
+          return "$$pipes." + func + ".transform" + l + [value].concat(params) + r;
         });
       }
 
@@ -642,8 +650,8 @@
             instance.unsubscribe$.next();
             instance.unsubscribe$.complete();
 
-            if (typeof instance['onDestroy'] === 'function') {
-              instance['onDestroy']();
+            if (typeof instance.onDestroy === 'function') {
+              instance.onDestroy();
               delete CONTEXTS[instance.rxcompId];
             }
           }
@@ -792,7 +800,7 @@
   }
   function getContextByNode(node) {
     var context;
-    var rxcompId = node['rxcompId'];
+    var rxcompId = node.rxcompId;
 
     if (rxcompId) {
       var nodeContexts = NODES[rxcompId];
@@ -835,6 +843,8 @@
 
     if (node.parentNode) {
       return getHost(instance, factory, node.parentNode);
+    } else {
+      return undefined;
     }
   }
 
@@ -1304,6 +1314,9 @@
     inputs: ['style']
   };
 
+  var factories = [ClassDirective, EventDirective, ForStructure, HrefDirective, IfStructure, InnerHtmlDirective, SrcDirective, StyleDirective];
+  var pipes = [JsonPipe];
+
   var CoreModule = function (_Module) {
     _inheritsLoose(CoreModule, _Module);
 
@@ -1313,8 +1326,6 @@
 
     return CoreModule;
   }(Module);
-  var factories = [ClassDirective, EventDirective, ForStructure, HrefDirective, IfStructure, InnerHtmlDirective, SrcDirective, StyleDirective];
-  var pipes = [JsonPipe];
   CoreModule.meta = {
     declarations: [].concat(factories, pipes),
     exports: [].concat(factories, pipes)
@@ -1340,11 +1351,11 @@
       }
 
       meta.nodeInnerHTML = node.innerHTML;
-      var pipes = meta.pipes = this.resolvePipes(meta);
+      meta.pipes = this.resolvePipes(meta);
       var factories = meta.factories = this.resolveFactories(meta);
       this.sortFactories(factories);
       factories.unshift(bootstrap);
-      var selectors = meta.selectors = this.unwrapSelectors(factories);
+      meta.selectors = this.unwrapSelectors(factories);
       var module = new moduleFactory();
       module.meta = meta;
       var instances = module.compile(node, window);

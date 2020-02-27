@@ -22,11 +22,11 @@ export default class Platform {
 			throw (`missing node ${bootstrap.meta.selector}`);
 		}
 		meta.nodeInnerHTML = node.innerHTML;
-		const pipes = meta.pipes = this.resolvePipes(meta);
+		meta.pipes = this.resolvePipes(meta);
 		const factories = meta.factories = this.resolveFactories(meta);
 		this.sortFactories(factories);
 		factories.unshift(bootstrap);
-		const selectors = meta.selectors = this.unwrapSelectors(factories);
+		meta.selectors = this.unwrapSelectors(factories);
 		const module = new moduleFactory();
 		module.meta = meta;
 		const instances = module.compile(node, window);
@@ -48,15 +48,16 @@ export default class Platform {
 	}
 
 	static resolvePipes(meta: IModuleMeta, exported?: boolean): { [key: string]: typeof Pipe } {
-		const importedPipes = meta.imports.map((importMeta: IModuleMeta) => this.resolvePipes(importMeta, true));
-		const pipes = {};
-		const pipeList: (typeof Pipe)[] = (exported ? meta.exports : meta.declarations).filter((x: typeof Pipe) => x.prototype instanceof Pipe) as (typeof Pipe)[];
+		// !!!
+		const importedPipes: { [key: string]: typeof Pipe }[] = (meta.imports as IModuleMeta[]).map((importMeta: IModuleMeta) => this.resolvePipes(importMeta, true));
+		const pipes: { [key: string]: typeof Pipe } = {};
+		const pipeList: (typeof Pipe)[] = (exported ? meta.exports : meta.declarations).filter((x: any) => x.prototype instanceof Pipe) as (typeof Pipe)[]; // !!! any
 		pipeList.forEach(pipeFactory => pipes[pipeFactory.meta.name] = pipeFactory);
 		return Object.assign({}, ...importedPipes, pipes);
 	}
 
 	static resolveFactories(meta: IModuleMeta, exported?: boolean): (typeof Factory)[] {
-		const importedFactories = meta.imports.map((importMeta: IModuleMeta) => this.resolveFactories(importMeta, true));
+		const importedFactories = meta.imports.map((importMeta: any) => this.resolveFactories(importMeta, true)); // !!! any
 		const factoryList: (typeof Factory | typeof Pipe)[] = (exported ? meta.exports : meta.declarations).filter(x => (x.prototype instanceof Structure || x.prototype instanceof Component || x.prototype instanceof Directive));
 		return Array.prototype.concat.call(factoryList, ...importedFactories);
 	}
@@ -75,7 +76,7 @@ export default class Platform {
 	}
 
 	static getExpressions(selector: string): MatchFunction[] {
-		let matchers = [];
+		let matchers: ((node: HTMLElement) => boolean)[] = [];
 		selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value: string, c1, a2, u3, v4, a5, e6) {
 			if (c1) {
 				matchers.push(function (node) {

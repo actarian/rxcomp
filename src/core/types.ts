@@ -6,7 +6,7 @@ export type MatchFunction = (node: HTMLElement) => boolean;
 
 export type SelectorFunction = (node: HTMLElement) => ISelectorResult | false;
 
-export type ExpressionFunction = () => any;
+export type ExpressionFunction = (payload: any, module: Module) => any;
 
 export interface Type<T> extends Function { new(...args: any[]): T; }
 
@@ -52,6 +52,10 @@ export interface ISelectorResult {
 }
 
 export interface IElement extends HTMLElement {
+	rxcompId?: number;
+}
+
+export interface IComment extends Comment {
 	rxcompId?: number;
 }
 

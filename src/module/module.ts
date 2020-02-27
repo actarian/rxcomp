@@ -20,7 +20,7 @@ export default class Module {
 			if (componentNode && componentNode !== match.node) {
 				parentInstance = undefined;
 			}
-			const instance: Factory | undefined = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+			const instance: Factory | null = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 			if (match.factory.prototype instanceof Component) {
 				componentNode = match.node;
 			}
@@ -38,7 +38,7 @@ export default class Module {
 			// collect parentInstance scope
 			parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 			if (!parentInstance) {
-				return;
+				return undefined;
 			}
 			// creating factory instance
 			const instance = new factory(...(args || []));
@@ -57,7 +57,7 @@ export default class Module {
 					enumerable: false,
 				}
 			});
-			let initialized;
+			let initialized: boolean;
 			// injecting instance pushChanges method
 			const module = this;
 			instance.pushChanges = function () {
@@ -69,9 +69,9 @@ export default class Module {
 					initialized ? module.parse(node, instance) : setTimeout(function () { module.parse(node, instance); });
 				}
 				// calling onView event
-				if (typeof instance['onView'] === 'function') {
+				if (typeof instance.onView === 'function') {
 					// console.log('onView', instance.constructor.name);
-					instance['onView']();
+					instance.onView();
 				}
 			};
 			// creating component input and outputs
@@ -82,8 +82,8 @@ export default class Module {
 				context.outputs = this.makeOutputs(meta, instance);
 			}
 			// calling onInit event
-			if (typeof instance['onInit'] === 'function') {
-				instance['onInit']();
+			if (typeof instance.onInit === 'function') {
+				instance.onInit();
 			}
 			initialized = true;
 			// subscribe to parent changes
@@ -109,16 +109,18 @@ export default class Module {
 						this.resolveInputsOutputs(instance, changes);
 					}
 					// calling onChanges event with changes
-					if (typeof instance['onChanges'] === 'function') {
+					if (typeof instance.onChanges === 'function') {
 						// console.log('onChanges', instance.constructor.name);
 						// console.log('onChanges', instance.constructor.meta.selector, changes);
-						instance['onChanges'](changes);
+						instance.onChanges(changes);
 					}
 					// push instance changes for subscribers
 					instance.pushChanges();
 				});
 			}
 			return instance;
+		} else {
+			return undefined;
 		}
 	}
 
@@ -146,13 +148,15 @@ export default class Module {
 		}
 	}
 
-	getInstance(node: HTMLElement | Document): Factory | Window {
+	getInstance(node: HTMLElement | Document): Factory | Window | undefined {
 		if (node instanceof Document) {
 			return window; // !!! window or global
 		}
-		const context: IContext | void = getContextByNode(node);
+		const context: IContext | undefined = getContextByNode(node);
 		if (context) {
 			return context.instance;
+		} else {
+			return undefined;
 		}
 	}
 
@@ -267,6 +271,7 @@ export default class Module {
 				if (c) {
 					return '\"';
 				}
+				return '';
 			});
 			expression = `"${attribute}"`;
 		}
@@ -343,12 +348,12 @@ export default class Module {
 
 	remove(node: Node, keepInstance?: Factory): Node {
 		const keepContext: IContext = keepInstance ? getContext(keepInstance) : undefined;
-		Module.traverseDown(node, (node: IElement) => {
-			const rxcompId: number = node.rxcompId;
+		Module.traverseDown(node, (node: Node) => {
+			const rxcompId: number = (node as IElement).rxcompId;
 			if (rxcompId) {
 				const keepContexts: IContext[] = Module.deleteContext(rxcompId, keepContext);
 				if (keepContexts.length === 0) {
-					delete node.rxcompId;
+					delete (node as IElement).rxcompId;
 				}
 			}
 		});
@@ -380,7 +385,7 @@ export default class Module {
 				const value: string = args[0].trim();
 				const params: string[] = Module.parsePipeParams(args[1]);
 				const func: string = params.shift().trim();
-				return `$$pipes.${func}.transform┌${[value, ...params]}┘`;
+				return `$$pipes.${func}.transform${l}${[value, ...params]}${r}`;
 			});
 		}
 		return expression;
@@ -452,8 +457,8 @@ export default class Module {
 					const instance: Factory = context.instance;
 					instance.unsubscribe$.next();
 					instance.unsubscribe$.complete();
-					if (typeof instance['onDestroy'] === 'function') {
-						instance['onDestroy']();
+					if (typeof instance.onDestroy === 'function') {
+						instance.onDestroy();
 						delete CONTEXTS[instance.rxcompId];
 					}
 				}
@@ -561,9 +566,9 @@ export function getContext(instance: Factory): IContext {
 	return CONTEXTS[instance.rxcompId];
 }
 
-export function getContextByNode(node: Node): IContext | void {
+export function getContextByNode(node: Node): IContext | undefined {
 	let context: IContext;
-	const rxcompId: number = node['rxcompId'];
+	const rxcompId: number = (node as IElement).rxcompId;
 	if (rxcompId) {
 		const nodeContexts: IContext[] = NODES[rxcompId];
 		if (nodeContexts) {
@@ -582,7 +587,7 @@ export function getContextByNode(node: Node): IContext | void {
 	return context;
 }
 
-export function getHost(instance: Factory, factory: typeof Factory, node: IElement): Factory {
+export function getHost(instance: Factory, factory: typeof Factory, node: IElement): Factory | undefined {
 	if (!node) {
 		node = getContext(instance).node;
 	}
@@ -603,5 +608,7 @@ export function getHost(instance: Factory, factory: typeof Factory, node: IEleme
 	}
 	if (node.parentNode) {
 		return getHost(instance, factory, node.parentNode as IElement);
+	} else {
+		return undefined;
 	}
 }
