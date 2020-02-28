@@ -2,10 +2,6 @@ const typescript = require('typescript'),
 	fs = require('fs'),
 	path = require('path'),
 	process = require('process'),
-	rollupPluginCommonJs = require('@rollup/plugin-commonjs'),
-	rollupPluginSourcemaps = require('rollup-plugin-sourcemaps'),
-	rollupPluginLicense = require('rollup-plugin-license'),
-	rollupPluginTypescript2 = require('rollup-plugin-typescript2'),
 	through2 = require('through2'),
 	vinyl = require('vinyl'),
 	vinylSourcemapsApply = require('vinyl-sourcemaps-apply');
@@ -14,43 +10,15 @@ const log = require('../logger/logger');
 const { service } = require('../config/config');
 const { getObject, extend } = require('../config/json');
 
-const { rollup, rollupInput, rollupOutput } = require('./rollup');
-
-/*
-const RollupFormats = {
-	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
-	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
-	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
-	'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
-	'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
-	'system': 'system', // Native format of the SystemJS loader
-};
-
-const TypescriptTarget = ["ES3", "ES5", "ES6", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ESNext"];
-const TypescriptModule = ["CommonJS", "AMD", "System", "UMD", "ES6", "ES2015", "ESNext", "None"];
-*/
-
-// compile('tsconfig.json');
-
 function typescript_(item) {
 	const output = typescriptOutput(item)[0];
 	switch (output.format) {
 		case 'iife':
 		case 'umd':
-			return rollup(item);
-			break;
+			return;
 		default:
 			return typescriptLib(item, output);
 	}
-	/*
-	'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
-	'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
-
-	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
-	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
-	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
-	'system': 'system', // Native format of the SystemJS loader
-	*/
 }
 
 function typescriptLib(item, output) {
@@ -90,9 +58,7 @@ function typescriptCompile(file, item) {
 }
 
 function typescriptConfig(item) {
-
 	const configFileName = 'tsconfig.json';
-
 	const configDefault = {
 		compilerOptions: {
 			typeRoots: ['node_modules/@types'],
@@ -103,7 +69,6 @@ function typescriptConfig(item) {
 	"baseUrl": "",
 	"mapRoot": "./",
 	*/
-
 	let configOverride = {
 		files: [item.input],
 		compilerOptions: {
@@ -121,7 +86,6 @@ function typescriptConfig(item) {
 			'.npm'
 		]
 	};
-
 	const output = typescriptOutput(item)[0];
 	// console.log(output);
 	switch (output.format) {
@@ -174,33 +138,20 @@ function typescriptConfig(item) {
 			});
 			break;
 	}
-
-	/*
-	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
-	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
-	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
-	'system': 'system', // Native format of the SystemJS loader
-	*/
-
 	const config = getObject(`./${configFileName}`, configDefault, configOverride);
-
 	const configFileText = JSON.stringify(config);
-
 	// Parse JSON, after removing comments. Just fancier JSON.parse
 	const result = typescript.parseConfigFileTextToJson(configFileName, configFileText);
 	const configObject = result.config;
 	if (!configObject) {
 		typescriptDiagnostic([result.error]);
 		return;
-		process.exit(1);
 	}
-
 	// Extract config infromation
 	const configParseResult = typescript.parseJsonConfigFileContent(configObject, typescript.sys, path.dirname(configFileName));
 	if (configParseResult.errors.length > 0) {
 		typescriptDiagnostic(configParseResult.errors);
 		return;
-		process.exit(1);
 	}
 	return configParseResult;
 }
@@ -215,65 +166,6 @@ function typescriptDiagnostic(diagnostics) {
 		message += ': ' + typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
 		console.log(message);
 	});
-}
-
-function typescriptInput(item) {
-	// const watchGlob = path.dirname(item.input) + '/**/*' + path.extname(item.input);
-	// console.log('watchGlob', watchGlob);
-	const plugins = [
-		// Resolve source maps to the original source
-		rollupPluginSourcemaps(),
-		// Compile TypeScript files
-		path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
-			rollupCommonJSResolveHack: true,
-			clean: true,
-			declaration: true
-		}) : null,
-		/*
-		rollupPluginTypescript2({
-			lib: ['es5', 'es6', 'dom'],
-			target: 'es5',
-			tsconfig: false,
-		}),
-		*/
-		// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-		rollupPluginCommonJs({
-			exclude: ['node_modules/**'],
-		}),
-		// Allow node_modules resolution, so you can use 'external' to control
-		// which external modules to include in the bundle
-		// https://github.com/rollup/rollup-plugin-node-resolve#usage
-		// rollupPluginNodeResolve(),
-		/*
-		rollupPluginBabel({
-			presets: [
-				[babelPresetEnv, {
-					modules: false,
-					loose: true
-				}]
-			],
-			exclude: 'node_modules/**' // only transpile our source code
-			// babelrc: false,
-		}),
-		*/
-		rollupPluginLicense({
-			banner: `@license <%= pkg.name %> v<%= pkg.version %>
-			(c) <%= moment().format('YYYY') %> <%= pkg.author %>
-			License: <%= pkg.license %>`,
-		}),
-	].filter(x => x);
-	const input = {
-		input: item.input,
-		plugins: plugins,
-		external: item.external || [],
-		/*
-		external: ['tslib'],
-		watch: {
-			include: watchGlob,
-		},
-		*/
-	};
-	return input;
 }
 
 function typescriptOutput(item) {
@@ -312,6 +204,19 @@ function typescriptOutput(item) {
 
 module.exports = {
 	typescript: typescript_,
-	typescriptInput,
 	typescriptOutput,
 };
+
+/*
+const RollupFormats = {
+	'amd': 'amd', // Asynchronous Module Definition, used with module loaders like RequireJS
+	'cjs': 'cjs', // CommonJS, suitable for Node and other bundlers
+	'esm': 'esm', // Keep the bundle as an ES module file, suitable for other bundlers and inclusion as a <script type=module> tag in modern browsers
+	'iife': 'iife', // A self-executing function, suitable for inclusion as a <script> tag. (If you want to create a bundle for your application, you probably want to use this.)
+	'umd': 'umd', // Universal Module Definition, works as amd, cjs and iife all in one
+	'system': 'system', // Native format of the SystemJS loader
+};
+
+const TypescriptTarget = ["ES3", "ES5", "ES6", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "ESNext"];
+const TypescriptModule = ["CommonJS", "AMD", "System", "UMD", "ES6", "ES2015", "ESNext", "None"];
+*/

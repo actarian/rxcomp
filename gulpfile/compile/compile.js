@@ -11,7 +11,7 @@ const cssnano = require('cssnano'),
 	gulpTerser = require('gulp-terser'),
 	path = require('path');
 
-const { dest, parallel, series, src, watch } = require('gulp');
+const { dest, parallel, series, src } = require('gulp');
 
 const { setEntry } = require('../watch/watch');
 
@@ -21,8 +21,8 @@ const tfsCheckout = require('../tfs/tfs');
 const { sass } = require('./sass');
 const { mjml } = require('./mjml');
 
-const { rollup, rollupInput, rollupOutput } = require('./rollup');
-const { typescript, typescriptInput, typescriptOutput } = require('./typescript');
+const { rollup, rollupOutput } = require('./rollup');
+const { typescript, typescriptOutput } = require('./typescript');
 
 function compile(item, ext, done) {
 	// console.log('compile', ext, item);
@@ -187,7 +187,7 @@ function compileMjmlItem(item) {
 
 function compileRollup(item) {
 	const outputs = rollupOutput(item);
-	const minify = outputs[0].minify || item.minify;
+	const minify = item.minify || outputs[0].minify;
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
 		.pipe(rollup(item))
@@ -214,7 +214,7 @@ function compileRollup(item) {
 
 function compileTypescript(item) {
 	const outputs = typescriptOutput(item);
-	const minify = outputs[0].minify || item.minify;
+	const minify = item.minify || outputs[0].minify;
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
 		.pipe(typescript(item))
