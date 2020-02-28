@@ -187,7 +187,7 @@ function compileMjmlItem(item) {
 
 function compileRollup(item) {
 	const outputs = rollupOutput(item);
-	const minify = item.minify;
+	const minify = outputs[0].minify || item.minify;
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
 		.pipe(rollup(item))
@@ -214,7 +214,7 @@ function compileRollup(item) {
 
 function compileTypescript(item) {
 	const outputs = typescriptOutput(item);
-	const minify = outputs[0].minify;
+	const minify = outputs[0].minify || item.minify;
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())
 		.pipe(typescript(item))

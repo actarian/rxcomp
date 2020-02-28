@@ -13,8 +13,9 @@ rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/rxc
 rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg?compression=gzip)
 rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg)
  
+> [RxComp Api](https://actarian.github.io/rxcomp/api/)   
 > [TodoMvc Demo](https://actarian.github.io/rxcomp-todomvc/)  
-> [TodoMvc Source](https://github.com/actarian/rxcomp-todomvc)  
+> [TodoMvc Source](https://github.com/actarian/rxcomp-todomvc)
 > [TodoMvc Codepen](https://codepen.io/actarian/pen/QWWRZON?editors=0010)
 ___
 

@@ -1,0 +1,64 @@
+{
+  "exclude": [
+    "!src/**/*.ts"
+  ],
+  "out": "docs/api",
+  "mode": "file",
+  "stripInternal": true,
+  "excludePrivate": true,
+  "excludeNotExported": true,
+  "hideGenerator": true,
+  "gaID": "GTM-WL42JM2",
+  "name": "RxCompForm",
+  "toc": [
+    "FormStatus",
+    "FormAttributes",
+
+    "FormModule",
+
+    "FormAbstract",
+    "FormControl",
+
+    "FormAbstractCollection",
+    "FormGroup",
+    "FormArray",
+
+    "FormAbstractDirective",
+    "FormCheckboxDirective",
+    "FormEmailDirective",
+    "FormInputDirective",
+    "FormRadioDirective",
+    "FormSelectDirective",
+
+    "FormAbstractCollectionDirective",
+    "FormGroupDirective",
+    "FormArrayDirective",
+    "FormFieldComponent",
+
+    "FormSubmitDirective",
+    "FormPlaceholderDirective",
+
+    "FormMaxDirective",
+    "FormMaxLengthDirective",
+    "FormMinDirective",
+    "FormMinLengthDirective",
+    "FormPatternDirective",
+    "FormRequiredDirective",
+    "FormRequiredTrueDirective",
+
+    "FormValidator",
+    "EmailValidator",
+    "MaxLengthValidator",
+    "MaxValidator",
+    "MinLengthValidator",
+    "MinValidator",
+    "NullValidator",
+    "PatternValidator",
+    "RequiredTrueValidator",
+    "RequiredValidator",
+
+    "formArray",
+    "formControl",
+    "formGroup"
+  ]
+}

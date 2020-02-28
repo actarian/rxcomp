@@ -1364,6 +1364,10 @@
       return module;
     };
 
+    Platform.isBrowser = function isBrowser() {
+      return Boolean(window);
+    };
+
     Platform.querySelector = function querySelector(selector) {
       return document.querySelector(selector);
     };
@@ -1498,10 +1502,6 @@
         });
       });
       return selectors;
-    };
-
-    Platform.isBrowser = function isBrowser() {
-      return Boolean(window);
     };
 
     return Platform;

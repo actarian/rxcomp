@@ -2,6 +2,12 @@ import Module from '../module/module';
 import Factory from './factory';
 import Pipe from './pipe';
 
+export type PipeMap = { [key: string]: typeof Pipe };
+
+export type PipeList = (typeof Pipe)[];
+
+export type FactoryList = (typeof Factory)[];
+
 export type MatchFunction = (node: HTMLElement) => boolean;
 
 export type SelectorFunction = (node: HTMLElement) => ISelectorResult | false;

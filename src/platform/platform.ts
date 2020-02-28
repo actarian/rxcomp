@@ -3,10 +3,10 @@ import Directive from '../core/directive';
 import Factory from '../core/factory';
 import Pipe from '../core/pipe';
 import Structure from '../core/structure';
-import { IElement, IModuleMeta, ISelectorResult, MatchFunction, SelectorFunction } from '../core/types';
+import { FactoryList, IElement, IModuleMeta, ISelectorResult, MatchFunction, PipeList, PipeMap, SelectorFunction } from '../core/types';
 import Module from '../module/module';
 
-const ORDER: (typeof Factory)[] = [Structure, Component, Directive];
+const ORDER: FactoryList = [Structure, Component, Directive];
 
 export default class Platform {
 
@@ -37,32 +37,38 @@ export default class Platform {
 		return module;
 	}
 
-	static querySelector(selector: string): IElement | null {
+	static isBrowser(): boolean {
+		return Boolean(window);
+	}
+
+	// static isServer() {}
+
+	protected static querySelector(selector: string): IElement | null {
 		return document.querySelector(selector);
 	}
 
-	static resolveMeta(moduleFactory: typeof Module): IModuleMeta {
+	protected static resolveMeta(moduleFactory: typeof Module): IModuleMeta {
 		const meta = Object.assign({ imports: [], declarations: [], pipes: [], exports: [] }, moduleFactory.meta);
 		meta.imports = meta.imports.map(moduleFactory => this.resolveMeta(moduleFactory));
 		return meta;
 	}
 
-	static resolvePipes(meta: IModuleMeta, exported?: boolean): { [key: string]: typeof Pipe } {
+	protected static resolvePipes(meta: IModuleMeta, exported?: boolean): PipeMap {
 		// !!!
-		const importedPipes: { [key: string]: typeof Pipe }[] = (meta.imports as IModuleMeta[]).map((importMeta: IModuleMeta) => this.resolvePipes(importMeta, true));
-		const pipes: { [key: string]: typeof Pipe } = {};
-		const pipeList: (typeof Pipe)[] = (exported ? meta.exports : meta.declarations).filter((x: any) => x.prototype instanceof Pipe) as (typeof Pipe)[]; // !!! any
+		const importedPipes: PipeMap[] = (meta.imports as IModuleMeta[]).map((importMeta: IModuleMeta) => this.resolvePipes(importMeta, true));
+		const pipes: PipeMap = {};
+		const pipeList: PipeList = (exported ? meta.exports : meta.declarations).filter((x: any) => x.prototype instanceof Pipe) as PipeList; // !!! any
 		pipeList.forEach(pipeFactory => pipes[pipeFactory.meta.name] = pipeFactory);
 		return Object.assign({}, ...importedPipes, pipes);
 	}
 
-	static resolveFactories(meta: IModuleMeta, exported?: boolean): (typeof Factory)[] {
-		const importedFactories = meta.imports.map((importMeta: any) => this.resolveFactories(importMeta, true)); // !!! any
-		const factoryList: (typeof Factory | typeof Pipe)[] = (exported ? meta.exports : meta.declarations).filter(x => (x.prototype instanceof Structure || x.prototype instanceof Component || x.prototype instanceof Directive));
+	protected static resolveFactories(meta: IModuleMeta, exported?: boolean): FactoryList {
+		const importedFactories: FactoryList[] = meta.imports.map((importMeta: any) => this.resolveFactories(importMeta, true)); // !!! any
+		const factoryList: FactoryList = (exported ? meta.exports : meta.declarations).filter((x: any) => x.prototype instanceof Factory) as FactoryList;
 		return Array.prototype.concat.call(factoryList, ...importedFactories);
 	}
 
-	static sortFactories(factories: (typeof Factory)[]): void {
+	protected static sortFactories(factories: FactoryList): void {
 		factories.sort((a, b) => {
 			const ai = ORDER.reduce((p, c, i) => a.prototype instanceof c ? i : p, -1);
 			const bi = ORDER.reduce((p, c, i) => b.prototype instanceof c ? i : p, -1);
@@ -75,7 +81,7 @@ export default class Platform {
 		});
 	}
 
-	static getExpressions(selector: string): MatchFunction[] {
+	protected static getExpressions(selector: string): MatchFunction[] {
 		let matchers: ((node: HTMLElement) => boolean)[] = [];
 		selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value: string, c1, a2, u3, v4, a5, e6) {
 			if (c1) {
@@ -104,7 +110,7 @@ export default class Platform {
 		return matchers;
 	}
 
-	static unwrapSelectors(factories: (typeof Factory)[]): SelectorFunction[] {
+	protected static unwrapSelectors(factories: FactoryList): SelectorFunction[] {
 		const selectors: SelectorFunction[] = [];
 		factories.forEach((factory: typeof Factory) => {
 			factory.meta.selector.split(',').forEach((selector: string) => {
@@ -132,11 +138,5 @@ export default class Platform {
 		});
 		return selectors;
 	}
-
-	static isBrowser(): boolean {
-		return Boolean(window);
-	}
-
-	// static isServer() {}
 
 }

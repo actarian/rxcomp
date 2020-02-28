@@ -8,8 +8,7 @@
 	"types": "dist/cjs/rxcomp.d.ts",
 	"es2015": "dist/esm/rxcomp.js",
 	"files": [
-		"dist/",
-		"src/"
+		"dist/"
 	],
 	"license": "MIT",
 	"keywords": [
@@ -29,7 +28,8 @@
 	"homepage": "https://github.com/actarian/rxcomp",
 	"scripts": {
 		"start": "gulp",
-		"build": "gulp build --target dist"
+		"build": "gulp build --target dist",
+		"docs": "typedoc --options typedoc.json"
 	},
 	"dependencies": {
 		"rxjs": "~6.5.4",
@@ -76,6 +76,7 @@
 		"tslib": "1.10.0",
 		"typescript": "~3.7.5",
 		"vinyl": "~2.2.0",
-		"vinyl-sourcemaps-apply": "~0.2.1"
+		"vinyl-sourcemaps-apply": "~0.2.1",
+		"typedoc": "~0.16.10"
 	}
 }

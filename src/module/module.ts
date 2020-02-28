@@ -14,7 +14,7 @@ export default class Module {
 
 	meta: IModuleMeta;
 
-	compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
+	public compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode: IElement;
 		const instances: Factory[] = Module.querySelectorsAll(node, this.meta.selectors, []).map((match: ISelectorResult) => {
 			if (componentNode && componentNode !== match.node) {
@@ -30,7 +30,7 @@ export default class Module {
 		return instances;
 	}
 
-	makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance: Factory | Window, args?: any[]): Factory | undefined {
+	public makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance: Factory | Window, args?: any[]): Factory | undefined {
 		if (parentInstance || node.parentNode) {
 			const isComponent = factory.prototype instanceof Component;
 			const meta = factory.meta;
@@ -124,13 +124,7 @@ export default class Module {
 		}
 	}
 
-	makeContext(instance: Factory, parentInstance: Factory | Window, node: IElement, selector: string): IContext {
-		const context: IContext = Module.makeContext(this, instance, parentInstance, node, instance.constructor as typeof Factory, selector);
-		// console.log('Module.makeContext', context, context.instance, context.node);
-		return context;
-	}
-
-	makeFunction(expression: string, params: string[] = ['$instance']): ExpressionFunction {
+	public makeFunction(expression: string, params: string[] = ['$instance']): ExpressionFunction {
 		if (expression) {
 			expression = Module.parseExpression(expression);
 			// console.log(expression);
@@ -148,7 +142,37 @@ export default class Module {
 		}
 	}
 
-	getInstance(node: HTMLElement | Document): Factory | Window | undefined {
+	public resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any {
+		// console.log(expression, parentInstance, payload);
+		return expression.apply(parentInstance, [payload, this]);
+	}
+
+	public remove(node: Node, keepInstance?: Factory): Node {
+		const keepContext: IContext = keepInstance ? getContext(keepInstance) : undefined;
+		Module.traverseDown(node, (node: Node) => {
+			const rxcompId: number = (node as IElement).rxcompId;
+			if (rxcompId) {
+				const keepContexts: IContext[] = Module.deleteContext(rxcompId, keepContext);
+				if (keepContexts.length === 0) {
+					delete (node as IElement).rxcompId;
+				}
+			}
+		});
+		return node;
+	}
+
+	public destroy(): void {
+		this.remove(this.meta.node);
+		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
+	}
+
+	protected makeContext(instance: Factory, parentInstance: Factory | Window, node: IElement, selector: string): IContext {
+		const context: IContext = Module.makeContext(this, instance, parentInstance, node, instance.constructor as typeof Factory, selector);
+		// console.log('Module.makeContext', context, context.instance, context.node);
+		return context;
+	}
+
+	protected getInstance(node: HTMLElement | Document): Factory | Window | undefined {
 		if (node instanceof Document) {
 			return window; // !!! window or global
 		}
@@ -160,13 +184,13 @@ export default class Module {
 		}
 	}
 
-	getParentInstance(node: Node): Factory | Window {
+	protected getParentInstance(node: Node): Factory | Window {
 		return Module.traverseUp(node, (node: Node) => {
 			return this.getInstance(node as HTMLElement);
 		});
 	}
 
-	parse(node: IElement, instance: Factory): void {
+	protected parse(node: IElement, instance: Factory): void {
 		for (let i: number = 0; i < node.childNodes.length; i++) {
 			const child: ChildNode = node.childNodes[i];
 			if (child.nodeType === 1) {
@@ -184,7 +208,7 @@ export default class Module {
 
 	// reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T): T;
 
-	parseTextNode(node: IText, instance: Factory): void {
+	protected parseTextNode(node: IText, instance: Factory): void {
 		let expressions: (ExpressionFunction | string)[] = node.nodeExpressions;
 		if (!expressions) {
 			expressions = this.parseTextNodeExpression(node.nodeValue);
@@ -208,12 +232,12 @@ export default class Module {
 		}
 	}
 
-	pushFragment(nodeValue: string, from: number, to: number, expressions: (ExpressionFunction | string)[]): void {
+	protected pushFragment(nodeValue: string, from: number, to: number, expressions: (ExpressionFunction | string)[]): void {
 		const fragment: string = nodeValue.substring(from, to);
 		expressions.push(fragment);
 	};
 
-	parseTextNodeExpression(nodeValue: string): (ExpressionFunction | string)[] {
+	protected parseTextNodeExpression(nodeValue: string): (ExpressionFunction | string)[] {
 		const expressions: (ExpressionFunction | string)[] = [];
 		const regex: RegExp = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
 		let lastIndex: number = 0,
@@ -240,12 +264,7 @@ export default class Module {
 		return expressions;
 	}
 
-	resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any {
-		// console.log(expression, parentInstance, payload);
-		return expression.apply(parentInstance, [payload, this]);
-	}
-
-	makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void {
+	protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void {
 		if (meta.hosts) {
 			Object.keys(meta.hosts).forEach((key: string) => {
 				const factory: typeof Factory = meta.hosts[key];
@@ -254,7 +273,7 @@ export default class Module {
 		}
 	}
 
-	makeInput(instance: Factory, key: string): ExpressionFunction {
+	protected makeInput(instance: Factory, key: string): ExpressionFunction {
 		const { node } = getContext(instance);
 		let input: ExpressionFunction, expression: string = null;
 		if (node.hasAttribute(`[${key}]`)) {
@@ -281,7 +300,7 @@ export default class Module {
 		return input;
 	}
 
-	makeInputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
+	protected makeInputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
 		const inputs: { [key: string]: ExpressionFunction } = {};
 		if (meta.inputs) {
 			meta.inputs.forEach((key: string, i: number) => {
@@ -294,7 +313,7 @@ export default class Module {
 		return inputs;
 	}
 
-	makeOutput(instance: Factory, key: string): ExpressionFunction {
+	protected makeOutput(instance: Factory, key: string): ExpressionFunction {
 		const context: IContext = getContext(instance);
 		const node: IElement = context.node;
 		const parentInstance: Factory | Window = context.parentInstance;
@@ -312,7 +331,7 @@ export default class Module {
 		return outputFunction;
 	}
 
-	makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
+	protected makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
 		const outputs: { [key: string]: ExpressionFunction } = {};
 		if (meta.outputs) {
 			meta.outputs.forEach((key: string, i: number) => {
@@ -322,7 +341,7 @@ export default class Module {
 		return outputs;
 	}
 
-	resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
+	protected resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
 		const context: IContext = getContext(instance);
 		const parentInstance: Factory | Window = context.parentInstance;
 		const inputs: { [key: string]: ExpressionFunction } = context.inputs;
@@ -341,26 +360,7 @@ export default class Module {
 		*/
 	}
 
-	destroy(): void {
-		this.remove(this.meta.node);
-		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
-	}
-
-	remove(node: Node, keepInstance?: Factory): Node {
-		const keepContext: IContext = keepInstance ? getContext(keepInstance) : undefined;
-		Module.traverseDown(node, (node: Node) => {
-			const rxcompId: number = (node as IElement).rxcompId;
-			if (rxcompId) {
-				const keepContexts: IContext[] = Module.deleteContext(rxcompId, keepContext);
-				if (keepContexts.length === 0) {
-					delete (node as IElement).rxcompId;
-				}
-			}
-		});
-		return node;
-	}
-
-	static parseExpression(expression: string): string {
+	protected static parseExpression(expression: string): string {
 		const l: string = '┌';
 		const r: string = '┘';
 		const rx1: RegExp = /(\()([^\(\)]*)(\))/;
@@ -376,7 +376,7 @@ export default class Module {
 		return Module.parseOptionalChaining(expression);
 	}
 
-	static parsePipes(expression: string): string {
+	protected static parsePipes(expression: string): string {
 		const l: string = '┌';
 		const r: string = '┘';
 		const rx1: RegExp = /(.*?[^\|])\|([^\|]+)/;
@@ -391,7 +391,7 @@ export default class Module {
 		return expression;
 	}
 
-	static parsePipeParams(expression: string): string[] {
+	protected static parsePipeParams(expression: string): string[] {
 		const segments: string[] = [];
 		let i: number = 0,
 			word: string = '',
@@ -421,7 +421,7 @@ export default class Module {
 		return segments;
 	}
 
-	static parseOptionalChaining(expression: string): string {
+	protected static parseOptionalChaining(expression: string): string {
 		const regex: RegExp = /(\w+(\?\.))+([\.|\w]+)/g;
 		let previous: string;
 		expression = expression.replace(regex, function (substring: string, ...args: any[]) {
@@ -436,7 +436,7 @@ export default class Module {
 		return expression;
 	}
 
-	static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: IElement, factory: typeof Factory, selector: string): IContext {
+	protected static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: IElement, factory: typeof Factory, selector: string): IContext {
 		instance.rxcompId = ++ID;
 		const context: IContext = { module, instance, parentInstance, node, factory, selector };
 		const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
@@ -446,7 +446,7 @@ export default class Module {
 		return context;
 	}
 
-	static deleteContext(id: number, keepContext: IContext): IContext[] {
+	protected static deleteContext(id: number, keepContext: IContext): IContext[] {
 		const keepContexts: IContext[] = [];
 		const nodeContexts: IContext[] = NODES[id];
 		if (nodeContexts) {
@@ -472,7 +472,7 @@ export default class Module {
 		return keepContexts;
 	}
 
-	static matchSelectors(node: HTMLElement, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
+	protected static matchSelectors(node: HTMLElement, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
 		for (let i: number = 0; i < selectors.length; i++) {
 			const selectorResult: ISelectorResult | false = selectors[i](node);
 			if (selectorResult) {
@@ -490,7 +490,7 @@ export default class Module {
 		return results;
 	}
 
-	static querySelectorsAll(node: Node, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
+	protected static querySelectorsAll(node: Node, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
 		if (node.nodeType === 1) {
 			const selectorResults: ISelectorResult[] = this.matchSelectors(node as HTMLElement, selectors, []);
 			results = results.concat(selectorResults);
@@ -506,7 +506,7 @@ export default class Module {
 		return results;
 	}
 
-	static traverseUp(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
+	protected static traverseUp(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
 		}
@@ -517,7 +517,7 @@ export default class Module {
 		return this.traverseUp(node.parentNode, callback, i + 1);
 	}
 
-	static traverseDown(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
+	protected static traverseDown(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
 		}
@@ -536,7 +536,7 @@ export default class Module {
 		return result;
 	}
 
-	static traversePrevious(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
+	protected static traversePrevious(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
 		}
@@ -547,7 +547,7 @@ export default class Module {
 		return this.traversePrevious(node.previousSibling, callback, i + 1);
 	}
 
-	static traverseNext(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
+	protected static traverseNext(node: Node, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
 		}

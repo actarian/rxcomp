@@ -271,11 +271,6 @@ var rxcomp = (function (exports, rxjs, operators) {
       }
     };
 
-    _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
-      var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
-      return context;
-    };
-
     _proto.makeFunction = function makeFunction(expression, params) {
       if (params === void 0) {
         params = ['$instance'];
@@ -291,6 +286,36 @@ var rxcomp = (function (exports, rxjs, operators) {
           return null;
         };
       }
+    };
+
+    _proto.resolve = function resolve(expression, parentInstance, payload) {
+      return expression.apply(parentInstance, [payload, this]);
+    };
+
+    _proto.remove = function remove(node, keepInstance) {
+      var keepContext = keepInstance ? getContext(keepInstance) : undefined;
+      Module.traverseDown(node, function (node) {
+        var rxcompId = node.rxcompId;
+
+        if (rxcompId) {
+          var keepContexts = Module.deleteContext(rxcompId, keepContext);
+
+          if (keepContexts.length === 0) {
+            delete node.rxcompId;
+          }
+        }
+      });
+      return node;
+    };
+
+    _proto.destroy = function destroy() {
+      this.remove(this.meta.node);
+      this.meta.node.innerHTML = this.meta.nodeInnerHTML;
+    };
+
+    _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
+      var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
+      return context;
     };
 
     _proto.getInstance = function getInstance(node) {
@@ -397,10 +422,6 @@ var rxcomp = (function (exports, rxjs, operators) {
       return expressions;
     };
 
-    _proto.resolve = function resolve(expression, parentInstance, payload) {
-      return expression.apply(parentInstance, [payload, this]);
-    };
-
     _proto.makeHosts = function makeHosts(meta, instance, node) {
       if (meta.hosts) {
         Object.keys(meta.hosts).forEach(function (key) {
@@ -503,27 +524,6 @@ var rxcomp = (function (exports, rxjs, operators) {
         var value = this.resolve(inputFunction, parentInstance, instance);
         instance[key] = value;
       }
-    };
-
-    _proto.destroy = function destroy() {
-      this.remove(this.meta.node);
-      this.meta.node.innerHTML = this.meta.nodeInnerHTML;
-    };
-
-    _proto.remove = function remove(node, keepInstance) {
-      var keepContext = keepInstance ? getContext(keepInstance) : undefined;
-      Module.traverseDown(node, function (node) {
-        var rxcompId = node.rxcompId;
-
-        if (rxcompId) {
-          var keepContexts = Module.deleteContext(rxcompId, keepContext);
-
-          if (keepContexts.length === 0) {
-            delete node.rxcompId;
-          }
-        }
-      });
-      return node;
     };
 
     Module.parseExpression = function parseExpression(expression) {
@@ -1364,6 +1364,10 @@ var rxcomp = (function (exports, rxjs, operators) {
       return module;
     };
 
+    Platform.isBrowser = function isBrowser() {
+      return Boolean(window);
+    };
+
     Platform.querySelector = function querySelector(selector) {
       return document.querySelector(selector);
     };
@@ -1407,7 +1411,7 @@ var rxcomp = (function (exports, rxjs, operators) {
         return _this3.resolveFactories(importMeta, true);
       });
       var factoryList = (exported ? meta.exports : meta.declarations).filter(function (x) {
-        return x.prototype instanceof Structure || x.prototype instanceof Component || x.prototype instanceof Directive;
+        return x.prototype instanceof Factory;
       });
       return (_Array$prototype$conc = Array.prototype.concat).call.apply(_Array$prototype$conc, [factoryList].concat(importedFactories));
     };
@@ -1500,10 +1504,6 @@ var rxcomp = (function (exports, rxjs, operators) {
       return selectors;
     };
 
-    Platform.isBrowser = function isBrowser() {
-      return Boolean(window);
-    };
-
     return Platform;
   }();
 
@@ -1544,4 +1544,3 @@ var rxcomp = (function (exports, rxjs, operators) {
   return exports;
 
 }({}, rxjs, rxjs.operators));
-//# sourceMappingURL=rxcomp.js.map
