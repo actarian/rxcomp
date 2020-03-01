@@ -136,12 +136,12 @@
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="meta" class="tsd-anchor"></a>
-					<h3>meta</h3>
-					<div class="tsd-signature tsd-kind-icon">meta<span class="tsd-signature-symbol">:</span> <a href="../interfaces/imodulemeta.html" class="tsd-signature-type">IModuleMeta</a></div>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> meta</h3>
+					<div class="tsd-signature tsd-kind-icon">meta<span class="tsd-signature-symbol">:</span> <a href="../interfaces/imoduleparsedmeta.html" class="tsd-signature-type">IModuleParsedMeta</a></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#meta">meta</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L15">src/module/module.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L15">src/module/module.ts:15</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -159,7 +159,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#compile">compile</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L17">src/module/module.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L17">src/module/module.ts:17</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -186,7 +186,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#destroy">destroy</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L164">src/module/module.ts:164</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L165">src/module/module.ts:165</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -204,7 +204,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#getinstance">getInstance</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L175">src/module/module.ts:175</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L176">src/module/module.ts:176</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -221,20 +221,20 @@
 					<a name="getparentinstance" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagProtected">Protected</span> get<wbr>Parent<wbr>Instance</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Parent<wbr>Instance<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Parent<wbr>Instance<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#getparentinstance">getParentInstance</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L187">src/module/module.ts:187</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L188">src/module/module.ts:188</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>node: <span class="tsd-signature-type">Node</span></h5>
+									<h5>node: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span></h4>
@@ -252,7 +252,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makecontext">makeContext</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L169">src/module/module.ts:169</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L170">src/module/module.ts:170</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -285,7 +285,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makefunction">makeFunction</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L127">src/module/module.ts:127</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L127">src/module/module.ts:127</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -305,20 +305,20 @@
 					<a name="makehosts" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagProtected">Protected</span> make<wbr>Hosts</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">make<wbr>Hosts<span class="tsd-signature-symbol">(</span>meta<span class="tsd-signature-symbol">: </span><a href="../interfaces/ifactorymeta.html" class="tsd-signature-type">IFactoryMeta</a>, instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a>, node<span class="tsd-signature-symbol">: </span><a href="../interfaces/ielement.html" class="tsd-signature-type">IElement</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Hosts<span class="tsd-signature-symbol">(</span>meta<span class="tsd-signature-symbol">: </span><a href="../interfaces/ifactoryparsedmeta.html" class="tsd-signature-type">IFactoryParsedMeta</a>, instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a>, node<span class="tsd-signature-symbol">: </span><a href="../interfaces/ielement.html" class="tsd-signature-type">IElement</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makehosts">makeHosts</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L267">src/module/module.ts:267</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L268">src/module/module.ts:268</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>meta: <a href="../interfaces/ifactorymeta.html" class="tsd-signature-type">IFactoryMeta</a></h5>
+									<h5>meta: <a href="../interfaces/ifactoryparsedmeta.html" class="tsd-signature-type">IFactoryParsedMeta</a></h5>
 								</li>
 								<li>
 									<h5>instance: <a href="factory.html" class="tsd-signature-type">Factory</a></h5>
@@ -335,14 +335,14 @@
 					<a name="makeinput" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagProtected">Protected</span> make<wbr>Input</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">make<wbr>Input<span class="tsd-signature-symbol">(</span>instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a></li>
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Input<span class="tsd-signature-symbol">(</span>instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makeinput">makeInput</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L276">src/module/module.ts:276</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L277">src/module/module.ts:277</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -354,7 +354,7 @@
 									<h5>key: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -362,20 +362,20 @@
 					<a name="makeinputs" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagProtected">Protected</span> make<wbr>Inputs</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">make<wbr>Inputs<span class="tsd-signature-symbol">(</span>meta<span class="tsd-signature-symbol">: </span><a href="../interfaces/ifactorymeta.html" class="tsd-signature-type">IFactoryMeta</a>, instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></li>
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Inputs<span class="tsd-signature-symbol">(</span>meta<span class="tsd-signature-symbol">: </span><a href="../interfaces/ifactoryparsedmeta.html" class="tsd-signature-type">IFactoryParsedMeta</a>, instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makeinputs">makeInputs</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L303">src/module/module.ts:303</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L305">src/module/module.ts:305</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>meta: <a href="../interfaces/ifactorymeta.html" class="tsd-signature-type">IFactoryMeta</a></h5>
+									<h5>meta: <a href="../interfaces/ifactoryparsedmeta.html" class="tsd-signature-type">IFactoryParsedMeta</a></h5>
 								</li>
 								<li>
 									<h5>instance: <a href="factory.html" class="tsd-signature-type">Factory</a></h5>
@@ -394,14 +394,14 @@
 					<a name="makeinstance" class="tsd-anchor"></a>
 					<h3>make<wbr>Instance</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">make<wbr>Instance<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="../interfaces/ielement.html" class="tsd-signature-type">IElement</a>, factory<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type">Factory</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, parentInstance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span>, args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Instance<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="../interfaces/ielement.html" class="tsd-signature-type">IElement</a>, factory<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type">Factory</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, parentInstance<span class="tsd-signature-symbol">?: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span>, args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makeinstance">makeInstance</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L33">src/module/module.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L33">src/module/module.ts:33</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -416,7 +416,7 @@
 									<h5>selector: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5>parentInstance: <a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> parentInstance: <a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> args: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5>
@@ -430,14 +430,14 @@
 					<a name="makeoutput" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagProtected">Protected</span> make<wbr>Output</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">make<wbr>Output<span class="tsd-signature-symbol">(</span>instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a></li>
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Output<span class="tsd-signature-symbol">(</span>instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makeoutput">makeOutput</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L316">src/module/module.ts:316</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L318">src/module/module.ts:318</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -449,7 +449,7 @@
 									<h5>key: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -457,20 +457,20 @@
 					<a name="makeoutputs" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagProtected">Protected</span> make<wbr>Outputs</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
-						<li class="tsd-signature tsd-kind-icon">make<wbr>Outputs<span class="tsd-signature-symbol">(</span>meta<span class="tsd-signature-symbol">: </span><a href="../interfaces/ifactorymeta.html" class="tsd-signature-type">IFactoryMeta</a>, instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></li>
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Outputs<span class="tsd-signature-symbol">(</span>meta<span class="tsd-signature-symbol">: </span><a href="../interfaces/ifactoryparsedmeta.html" class="tsd-signature-type">IFactoryParsedMeta</a>, instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makeoutputs">makeOutputs</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L334">src/module/module.ts:334</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L338">src/module/module.ts:338</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>meta: <a href="../interfaces/ifactorymeta.html" class="tsd-signature-type">IFactoryMeta</a></h5>
+									<h5>meta: <a href="../interfaces/ifactoryparsedmeta.html" class="tsd-signature-type">IFactoryParsedMeta</a></h5>
 								</li>
 								<li>
 									<h5>instance: <a href="factory.html" class="tsd-signature-type">Factory</a></h5>
@@ -496,7 +496,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#parse">parse</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L193">src/module/module.ts:193</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L194">src/module/module.ts:194</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -523,7 +523,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#parsetextnode">parseTextNode</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L211">src/module/module.ts:211</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L212">src/module/module.ts:212</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -550,7 +550,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#parsetextnodeexpression">parseTextNodeExpression</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L240">src/module/module.ts:240</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L241">src/module/module.ts:241</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -574,7 +574,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#pushfragment">pushFragment</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L235">src/module/module.ts:235</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L236">src/module/module.ts:236</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -607,7 +607,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#remove">remove</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L150">src/module/module.ts:150</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L151">src/module/module.ts:151</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -634,7 +634,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#resolve">resolve</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L145">src/module/module.ts:145</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L146">src/module/module.ts:146</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -664,7 +664,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#resolveinputsoutputs">resolveInputsOutputs</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L344">src/module/module.ts:344</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L351">src/module/module.ts:351</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -684,14 +684,14 @@
 					<a name="deletecontext" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagProtected">Protected</span> delete<wbr>Context</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">delete<wbr>Context<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, keepContext<span class="tsd-signature-symbol">: </span><a href="../interfaces/icontext.html" class="tsd-signature-type">IContext</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/icontext.html" class="tsd-signature-type">IContext</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">delete<wbr>Context<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, keepContext<span class="tsd-signature-symbol">: </span><a href="../interfaces/icontext.html" class="tsd-signature-type">IContext</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/icontext.html" class="tsd-signature-type">IContext</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#deletecontext">deleteContext</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L449">src/module/module.ts:449</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L456">src/module/module.ts:456</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -700,7 +700,7 @@
 									<h5>id: <span class="tsd-signature-type">number</span></h5>
 								</li>
 								<li>
-									<h5>keepContext: <a href="../interfaces/icontext.html" class="tsd-signature-type">IContext</a></h5>
+									<h5>keepContext: <a href="../interfaces/icontext.html" class="tsd-signature-type">IContext</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/icontext.html" class="tsd-signature-type">IContext</a><span class="tsd-signature-symbol">[]</span></h4>
@@ -718,7 +718,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#makecontext">makeContext</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L439">src/module/module.ts:439</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L446">src/module/module.ts:446</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -757,7 +757,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#matchselectors">matchSelectors</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L475">src/module/module.ts:475</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L482">src/module/module.ts:482</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -787,7 +787,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#parseexpression">parseExpression</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L363">src/module/module.ts:363</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L370">src/module/module.ts:370</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -811,7 +811,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#parseoptionalchaining">parseOptionalChaining</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L424">src/module/module.ts:424</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L431">src/module/module.ts:431</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -835,7 +835,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#parsepipeparams">parsePipeParams</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L394">src/module/module.ts:394</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L401">src/module/module.ts:401</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -859,7 +859,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#parsepipes">parsePipes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L379">src/module/module.ts:379</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L386">src/module/module.ts:386</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -883,7 +883,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#queryselectorsall">querySelectorsAll</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L493">src/module/module.ts:493</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L500">src/module/module.ts:500</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -906,20 +906,20 @@
 					<a name="traversedown" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagProtected">Protected</span> traverse<wbr>Down</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Down<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Down<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#traversedown">traverseDown</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L520">src/module/module.ts:520</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L527">src/module/module.ts:527</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>node: <span class="tsd-signature-type">Node</span></h5>
+									<h5>node: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 								<li>
 									<h5>callback: <span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span></h5>
@@ -957,20 +957,20 @@
 					<a name="traversenext" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagProtected">Protected</span> traverse<wbr>Next</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Next<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Next<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#traversenext">traverseNext</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L550">src/module/module.ts:550</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L557">src/module/module.ts:557</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>node: <span class="tsd-signature-type">Node</span></h5>
+									<h5>node: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 								<li>
 									<h5>callback: <span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span></h5>
@@ -1008,20 +1008,20 @@
 					<a name="traverseprevious" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagProtected">Protected</span> traverse<wbr>Previous</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Previous<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Previous<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#traverseprevious">traversePrevious</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L539">src/module/module.ts:539</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L546">src/module/module.ts:546</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>node: <span class="tsd-signature-type">Node</span></h5>
+									<h5>node: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 								<li>
 									<h5>callback: <span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span></h5>
@@ -1059,20 +1059,20 @@
 					<a name="traverseup" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagProtected">Protected</span> traverse<wbr>Up</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Up<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">traverse<wbr>Up<span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span>, i<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="module.html">Module</a>.<a href="module.html#traverseup">traverseUp</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/module/module.ts#L509">src/module/module.ts:509</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/module/module.ts#L516">src/module/module.ts:516</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>node: <span class="tsd-signature-type">Node</span></h5>
+									<h5>node: <span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 								<li>
 									<h5>callback: <span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span>, i<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span></h5>
@@ -1116,7 +1116,7 @@
 					<aside class="tsd-sources">
 						<p>Overrides <a href="module.html">Module</a>.<a href="module.html#meta">meta</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/core.module.ts#L32">src/core.module.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core.module.ts#L32">src/core.module.ts:32</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -1125,7 +1125,7 @@
 						<div class="tsd-signature tsd-kind-icon">declarations<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><a href="pipe.html" class="tsd-signature-type">Pipe</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = [...factories,...pipes,]</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/core.module.ts#L33">src/core.module.ts:33</a></li>
+								<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core.module.ts#L33">src/core.module.ts:33</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1135,7 +1135,7 @@
 						<div class="tsd-signature tsd-kind-icon">exports<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><a href="pipe.html" class="tsd-signature-type">Pipe</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = [...factories,...pipes,]</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/36ea2a1/src/core.module.ts#L37">src/core.module.ts:37</a></li>
+								<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core.module.ts#L37">src/core.module.ts:37</a></li>
 							</ul>
 						</aside>
 					</section>

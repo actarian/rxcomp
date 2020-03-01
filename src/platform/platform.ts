@@ -3,36 +3,36 @@ import Directive from '../core/directive';
 import Factory from '../core/factory';
 import Pipe from '../core/pipe';
 import Structure from '../core/structure';
-import { FactoryList, IElement, IModuleMeta, ISelectorResult, MatchFunction, PipeList, PipeMap, SelectorFunction } from '../core/types';
+import { FactoryList, IElement, IModuleParsedImportedMeta, IModuleParsedMeta, ISelectorResult, MatchFunction, PipeList, PipeMap, SelectorFunction } from '../core/types';
 import Module from '../module/module';
 
 const ORDER: FactoryList = [Structure, Component, Directive];
 
 export default class Platform {
 
-	static bootstrap(moduleFactory: typeof Module): Module {
-		const meta = this.resolveMeta(moduleFactory);
-		// console.log(meta);
-		const bootstrap = meta.bootstrap;
-		if (!bootstrap) {
+	static bootstrap(moduleFactory?: typeof Module): Module {
+		if (!moduleFactory) {
+			throw ('missing moduleFactory');
+		}
+		if (!moduleFactory.meta) {
+			throw ('missing moduleFactory meta');
+		}
+		if (!moduleFactory.meta.bootstrap) {
 			throw ('missing bootstrap');
 		}
-		const node = meta.node = this.querySelector(bootstrap.meta.selector);
-		if (!node) {
-			throw (`missing node ${bootstrap.meta.selector}`);
+		if (!moduleFactory.meta.bootstrap.meta) {
+			throw ('missing bootstrap meta');
 		}
-		meta.nodeInnerHTML = node.innerHTML;
-		meta.pipes = this.resolvePipes(meta);
-		const factories = meta.factories = this.resolveFactories(meta);
-		this.sortFactories(factories);
-		factories.unshift(bootstrap);
-		meta.selectors = this.unwrapSelectors(factories);
+		if (!moduleFactory.meta.bootstrap.meta.selector) {
+			throw ('missing bootstrap meta selector');
+		}
+		const meta: IModuleParsedMeta = this.resolveMeta(moduleFactory!);
 		const module = new moduleFactory();
 		module.meta = meta;
-		const instances = module.compile(node, window);
+		const instances = module.compile(meta.node, window);
 		const root = instances[0];
 		// if (root instanceof module.meta.bootstrap) {
-		root.pushChanges();
+		root.pushChanges!();
 		// }
 		return module;
 	}
@@ -47,24 +47,44 @@ export default class Platform {
 		return document.querySelector(selector);
 	}
 
-	protected static resolveMeta(moduleFactory: typeof Module): IModuleMeta {
-		const meta = Object.assign({ imports: [], declarations: [], pipes: [], exports: [] }, moduleFactory.meta);
-		meta.imports = meta.imports.map(moduleFactory => this.resolveMeta(moduleFactory));
+	protected static resolveMeta(moduleFactory: typeof Module): IModuleParsedMeta {
+		const meta: IModuleParsedImportedMeta = this.resolveImportedMeta(moduleFactory);
+		const bootstrap: typeof Factory = moduleFactory.meta.bootstrap!;
+		const node = this.querySelector(bootstrap.meta.selector!);
+		if (!node) {
+			throw (`missing node ${bootstrap.meta.selector}`);
+		}
+		const nodeInnerHTML = node.innerHTML;
+		const pipes = this.resolvePipes(meta);
+		const factories = this.resolveFactories(meta);
+		this.sortFactories(factories);
+		factories.unshift(bootstrap);
+		const selectors = this.unwrapSelectors(factories);
+		return { factories, pipes, selectors, bootstrap, node, nodeInnerHTML };
+	}
+
+	protected static resolveImportedMeta(moduleFactory: typeof Module): IModuleParsedImportedMeta {
+		const meta: IModuleParsedImportedMeta = Object.assign({
+			imports: [],
+			declarations: [],
+			pipes: [],
+			exports: []
+		}, moduleFactory.meta);
+		meta.imports = (moduleFactory.meta.imports || []).map(moduleFactory => this.resolveImportedMeta(moduleFactory));
 		return meta;
 	}
 
-	protected static resolvePipes(meta: IModuleMeta, exported?: boolean): PipeMap {
-		// !!!
-		const importedPipes: PipeMap[] = (meta.imports as IModuleMeta[]).map((importMeta: IModuleMeta) => this.resolvePipes(importMeta, true));
+	protected static resolvePipes(meta: IModuleParsedImportedMeta, exported?: boolean): PipeMap {
+		const importedPipes: PipeMap[] = meta.imports.map((importMeta: IModuleParsedImportedMeta) => this.resolvePipes(importMeta, true));
 		const pipes: PipeMap = {};
-		const pipeList: PipeList = (exported ? meta.exports : meta.declarations).filter((x: any) => x.prototype instanceof Pipe) as PipeList; // !!! any
+		const pipeList: PipeList = (exported ? meta.exports : meta.declarations).filter((x): x is typeof Pipe => x.prototype instanceof Pipe);
 		pipeList.forEach(pipeFactory => pipes[pipeFactory.meta.name] = pipeFactory);
 		return Object.assign({}, ...importedPipes, pipes);
 	}
 
-	protected static resolveFactories(meta: IModuleMeta, exported?: boolean): FactoryList {
-		const importedFactories: FactoryList[] = meta.imports.map((importMeta: any) => this.resolveFactories(importMeta, true)); // !!! any
-		const factoryList: FactoryList = (exported ? meta.exports : meta.declarations).filter((x: any) => x.prototype instanceof Factory) as FactoryList;
+	protected static resolveFactories(meta: IModuleParsedImportedMeta, exported?: boolean): FactoryList {
+		const importedFactories: FactoryList[] = meta.imports.map((importMeta: any) => this.resolveFactories(importMeta, true));
+		const factoryList: FactoryList = (exported ? meta.exports : meta.declarations).filter((x): x is typeof Factory => x.prototype instanceof Factory);
 		return Array.prototype.concat.call(factoryList, ...importedFactories);
 	}
 
@@ -113,28 +133,30 @@ export default class Platform {
 	protected static unwrapSelectors(factories: FactoryList): SelectorFunction[] {
 		const selectors: SelectorFunction[] = [];
 		factories.forEach((factory: typeof Factory) => {
-			factory.meta.selector.split(',').forEach((selector: string) => {
-				selector = selector.trim();
-				let excludes: MatchFunction[] = [];
-				const matchSelector = selector.replace(/\:not\((.+?)\)/g, (value, unmatchSelector) => {
-					excludes = this.getExpressions(unmatchSelector);
-					return '';
+			if (factory.meta && factory.meta.selector) {
+				factory.meta.selector.split(',').forEach((selector: string) => {
+					selector = selector.trim();
+					let excludes: MatchFunction[] = [];
+					const matchSelector = selector.replace(/\:not\((.+?)\)/g, (value, unmatchSelector) => {
+						excludes = this.getExpressions(unmatchSelector);
+						return '';
+					});
+					const includes: MatchFunction[] = this.getExpressions(matchSelector);
+					selectors.push((node) => {
+						const included = includes.reduce((p, match) => {
+							return p && match(node);
+						}, true);
+						const excluded = excludes.reduce((p, match) => {
+							return p || match(node);
+						}, false);
+						if (included && !excluded) {
+							return { node, factory, selector } as ISelectorResult;
+						} else {
+							return false;
+						}
+					});
 				});
-				const includes: MatchFunction[] = this.getExpressions(matchSelector);
-				selectors.push((node) => {
-					const included = includes.reduce((p, match) => {
-						return p && match(node);
-					}, true);
-					const excluded = excludes.reduce((p, match) => {
-						return p || match(node);
-					}, false);
-					if (included && !excluded) {
-						return { node, factory, selector } as ISelectorResult;
-					} else {
-						return false;
-					}
-				});
-			});
+			}
 		});
 		return selectors;
 	}

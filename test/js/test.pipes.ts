@@ -9,7 +9,7 @@ RootComponent.meta = {
 };
 
 class TimePipe extends Pipe {
-	static transform(value, options = 1) {
+	static transform(value: Date | string, options: number = 1): string {
 		const date = new Date(value);
 		return `${date.getHours()}:${date.getMinutes()}`;
 	}
@@ -19,7 +19,7 @@ TimePipe.meta = {
 };
 
 class MultPipe extends Pipe {
-	static transform(value, mult1 = 2, mult2 = 1) {
+	static transform(value: string | number, mult1: number = 2, mult2: number = 1): number {
 		return Number(value) * Number(mult1) * Number(mult2);
 	}
 }

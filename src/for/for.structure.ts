@@ -6,21 +6,19 @@ import ForItem from './for.item';
 
 export default class ForStructure extends Structure {
 
-	forbegin: IComment;
-	forend: IComment;
 	instances: Factory[] = [];
-	token: IExpressionToken;
-	forFunction: ExpressionFunction;
+	forend?: IComment;
+	token?: IExpressionToken;
+	forFunction?: ExpressionFunction;
 
 	onInit() {
 		const { module, node } = getContext(this);
-		const forbegin: IComment = this.forbegin = document.createComment(`*for begin`);
+		const forbegin: IComment = document.createComment(`*for begin`);
 		forbegin['rxcompId'] = node.rxcompId;
-		node.parentNode.replaceChild(forbegin, node);
+		node.parentNode!.replaceChild(forbegin, node);
 		const forend: IComment = this.forend = document.createComment(`*for end`);
-		forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
-		const expression: string = node.getAttribute('*for');
-		// this.expression = expression;
+		forbegin.parentNode!.insertBefore(forend, forbegin.nextSibling);
+		const expression: string = node.getAttribute('*for')!;
 		node.removeAttribute('*for');
 		const token = this.token = this.getExpressionToken(expression);
 		this.forFunction = module.makeFunction(token.iterable);
@@ -31,13 +29,12 @@ export default class ForStructure extends Structure {
 		const module: Module = context.module;
 		const node: IElement = context.node;
 		// resolve
-		const token: IExpressionToken = this.token;
-		let result = module.resolve(this.forFunction, changes, this) || [];
+		const token: IExpressionToken = this.token!;
+		let result = module.resolve(this.forFunction!, changes, this) || [];
 		const isArray = Array.isArray(result);
 		const array: any[] = isArray ? result : Object.keys(result);
 		const total: number = array.length;
 		const previous: number = this.instances.length;
-		// let nextSibling = this.forbegin.nextSibling;
 		for (let i: number = 0; i < Math.max(previous, total); i++) {
 			if (i < total) {
 				const key: number | string = isArray ? i : array[i];
@@ -45,8 +42,8 @@ export default class ForStructure extends Structure {
 				if (i < previous) {
 					// update
 					const instance: Factory = this.instances[i];
-					(instance as any)[token.key] = key;
-					(instance as any)[token.value] = value;
+					instance[token.key] = key;
+					instance[token.value] = value;
 					/*
 					if (!nextSibling) {
 						const context = getContext(instance);
@@ -60,7 +57,7 @@ export default class ForStructure extends Structure {
 					// create
 					const clonedNode: IElement = node.cloneNode(true) as IElement;
 					delete clonedNode['rxcompId'];
-					this.forend.parentNode.insertBefore(clonedNode, this.forend);
+					this.forend!.parentNode!.insertBefore(clonedNode, this.forend!);
 					const args = [token.key, key, token.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 					if (instance) {
@@ -75,7 +72,7 @@ export default class ForStructure extends Structure {
 				// remove
 				const instance: Factory = this.instances[i];
 				const { node } = getContext(instance);
-				node.parentNode.removeChild(node);
+				node.parentNode!.removeChild(node);
 				module.remove(node);
 			}
 		}
@@ -95,7 +92,7 @@ export default class ForStructure extends Structure {
 		let value: string = forExpressions[0].replace(/\s*let\s*/, '');
 		const iterable: string = forExpressions[1];
 		let key: string = 'index';
-		const keyValueMatches: RegExpMatchArray = value.match(/\[(.+)\s*,\s*(.+)\]/);
+		const keyValueMatches: RegExpMatchArray | null = value.match(/\[(.+)\s*,\s*(.+)\]/);
 		if (keyValueMatches) {
 			key = keyValueMatches[1];
 			value = keyValueMatches[2];

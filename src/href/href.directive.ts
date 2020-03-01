@@ -3,11 +3,11 @@ import { getContext } from '../module/module';
 
 export default class HrefDirective extends Directive {
 
-	href: string;
+	href?: string;
 
 	onChanges() {
 		const { node } = getContext(this);
-		node.setAttribute('href', this.href);
+		node.setAttribute('href', this.href || '');
 	}
 
 }

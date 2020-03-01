@@ -8,9 +8,10 @@
 		"emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "strict": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
+    "noImplicitAny": true,
     "noUnusedLocals": true
 	}
 }

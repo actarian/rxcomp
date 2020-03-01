@@ -1,18 +1,22 @@
 export default class LocalStorageService {
 
-	static delete(name) {
+	static supported = false;
+
+	static delete(name: string) {
 		if (this.isLocalStorageSupported()) {
 			window.localStorage.removeItem(name);
 		}
 	}
 
-	static exist(name) {
+	static exist(name: string): boolean {
 		if (this.isLocalStorageSupported()) {
 			return window.localStorage[name] !== undefined;
+		} else {
+			return false;
 		}
 	}
 
-	static get(name) {
+	static get(name: string): any {
 		let value = null;
 		if (this.isLocalStorageSupported() && window.localStorage[name] !== undefined) {
 			try {
@@ -24,11 +28,11 @@ export default class LocalStorageService {
 		return value;
 	}
 
-	static set(name, value) {
+	static set(name: string, value: any) {
 		if (this.isLocalStorageSupported()) {
 			try {
-				const cache = [];
-				const json = JSON.stringify(value, function(key, value) {
+				const cache: any[] = [];
+				const json = JSON.stringify(value, function (key, value) {
 					if (typeof value === 'object' && value !== null) {
 						if (cache.indexOf(value) !== -1) {
 							// Circular reference found, discard key
@@ -45,7 +49,7 @@ export default class LocalStorageService {
 		}
 	}
 
-	static isLocalStorageSupported() {
+	static isLocalStorageSupported(): boolean {
 		if (this.supported) {
 			return true;
 		}

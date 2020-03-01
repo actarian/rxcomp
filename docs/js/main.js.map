@@ -1,1 +1,0 @@
-{"version":3,"names":[],"mappings":"","sources":["test/js/main.ts"],"sourcesContent":["import { Browser } from '../../src/rxcomp';\nimport AppModule from './app.module';\n\nBrowser.bootstrap(AppModule);\n"],"file":"test/js/main.ts"}

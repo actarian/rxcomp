@@ -4,7 +4,7 @@ import { getContext } from '../module/module';
 
 export default class ClassDirective extends Directive {
 
-	class: { [key: string]: string } | string | null;
+	class: { [key: string]: string } | string | null = '';
 	keys: string[] = [];
 
 	onInit() {
@@ -14,10 +14,9 @@ export default class ClassDirective extends Directive {
 
 	onChanges() {
 		const { node } = getContext(this);
-		let keys: string[];
+		let keys: string[] = [];
 		const object = this.class;
 		if (typeof object === 'object') {
-			keys = [];
 			for (let key in object) {
 				if (object[key]) {
 					keys.push(key);
@@ -26,7 +25,7 @@ export default class ClassDirective extends Directive {
 		} else if (typeof object === 'string') {
 			keys = object.split(/\s+/);
 		}
-		keys = (keys || []).concat(this.keys);
+		keys = keys.concat(this.keys);
 		// console.log(keys);
 		node.setAttribute('class', keys.join(' '));
 		// console.log('ClassDirective.onChanges', keys);

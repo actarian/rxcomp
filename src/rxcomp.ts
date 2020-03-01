@@ -6,7 +6,7 @@ export { default as Directive } from './core/directive';
 export { default as Factory } from './core/factory';
 export { default as Pipe } from './core/pipe';
 export { default as Structure } from './core/structure';
-export { ExpressionFunction, FactoryList, IComment, IContext, IElement, IExpressionToken, IFactoryMeta, IModuleMeta, IPipeMeta, ISelectorResult, IText, MatchFunction, PipeList, PipeMap, SelectorFunction } from './core/types';
+export { ExpressionFunction, FactoryList, IComment, IContext, IElement, IExpressionToken, IFactoryMeta, IModuleMeta, IModuleParsedImportedMeta, IModuleParsedMeta, IPipeMeta, ISelectorResult, IText, MatchFunction, PipeList, PipeMap, SelectorFunction } from './core/types';
 export { default as EventDirective } from './event/event.directive';
 export { default as ForItem } from './for/for.item';
 export { default as ForStructure } from './for/for.structure';
@@ -19,4 +19,3 @@ export { default as Browser } from './platform/browser';
 export { default as Platform } from './platform/platform';
 export { default as SrcDirective } from './src/src.directive';
 export { default as StyleDirective } from './style/style.directive';
-

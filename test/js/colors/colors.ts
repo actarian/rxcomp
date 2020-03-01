@@ -5,48 +5,48 @@ export const colors = [
 	{ hex: '#003adc', background: '#003adc', foreground: '#ffffff', accent: '#212121' },
 ];
 
-export function hexToInt(hex) {
+export function hexToInt(hex: string): number {
 	return parseInt(hex.replace(/^#/, ''), 16);
 }
 
-export function randomHex() {
+export function randomHex(): string {
 	return colors[Math.floor(Math.random() * colors.length)].hex;
 }
 
-export function randomColor() {
+export function randomColor(): number {
 	const hex = randomHex();
 	return hexToInt(hex);
 }
 
-export function color(index, alpha) {
+export function color(index: number, alpha: number): string {
 	return hexToRgb(colors[index % colors.length].hex, alpha);
 }
 
-export function background(index, alpha) {
+export function background(index: number, alpha?: number): string {
 	return hexToRgb(colors[index % colors.length].background, alpha);
 }
 
-export function foreground(index, alpha) {
+export function foreground(index: number, alpha?: number): string {
 	return hexToRgb(colors[index % colors.length].foreground, alpha);
 }
 
-export function accent(index, alpha) {
+export function accent(index: number, alpha?: number): string {
 	return hexToRgb(colors[index % colors.length].accent, alpha);
 }
 
-let index = -1;
+let index: number = -1;
 
 export function nextHex() {
 	index++;
 	return colors[index % colors.length].hex;
 }
 
-export function nextColor() {
+export function nextColor(): number {
 	const hex = nextHex();
 	return hexToInt(hex);
 }
 
-export function hexToRgb(hex, a) {
+export function hexToRgb(hex: string, a?: number): string {
 	const r = parseInt(hex.slice(1, 3), 16);
 	const g = parseInt(hex.slice(3, 5), 16);
 	const b = parseInt(hex.slice(5, 7), 16);

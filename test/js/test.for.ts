@@ -18,12 +18,13 @@ class RootComponent extends Component {
 		if (true) {
 			interval(1000).pipe(
 				take(1000),
-				takeUntil(this.unsubscribe$)
+				takeUntil(this.unsubscribe$!)
 			).subscribe(items => {
 				this.flag = !this.flag;
-				this.pushChanges();
+				this.pushChanges!();
 			});
 		}
+
 		/*
 		interval(50).pipe(
 			take(1000),
@@ -35,7 +36,7 @@ class RootComponent extends Component {
 		*/
 	}
 
-	getColor(index) {
+	getColor(index: number): string {
 		return ['red', 'green', 'blue'][index % 3];
 	}
 }
@@ -45,7 +46,7 @@ RootComponent.meta = {
 
 // pipe
 class ExamplePipe extends Pipe {
-	static transform(value) {
+	static transform(value: number): number {
 		return value * 2;
 	}
 }
@@ -64,4 +65,4 @@ AppModule.meta = {
 	bootstrap: RootComponent,
 };
 
-const module = Browser.bootstrap(AppModule);
+Browser.bootstrap(AppModule);

@@ -7,18 +7,18 @@ const EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouse
 
 export default class EventDirective extends Directive {
 
-	event: string;
-	event$: Observable<Event>;
+	event: string = '';
 
 	onInit() {
 		const { module, node, parentInstance, selector } = getContext(this);
+		// console.log('parentInstance', parentInstance);
 		const event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
-		const event$ = this.event$ = fromEvent<Event>(node, event).pipe(shareReplay(1));
+		const event$: Observable<Event> = fromEvent<Event>(node, event).pipe(shareReplay(1));
 		const expression = node.getAttribute(`(${event})`);
 		if (expression) {
 			const outputFunction = module.makeFunction(expression, ['$event']);
 			event$.pipe(
-				takeUntil(this.unsubscribe$)
+				takeUntil(this.unsubscribe$!)
 			).subscribe(event => {
 				module.resolve(outputFunction, parentInstance, event);
 			});

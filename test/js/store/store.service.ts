@@ -1,21 +1,22 @@
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import LocalStorageService from '../local-storage/local-storage.service';
+import ITodoItem from '../todo-item/todo-item';
 
 export default class StoreService {
 
 	static store$: BehaviorSubject<any>;
 
-	static set(items) {
+	static set(items: ITodoItem[]) {
 		LocalStorageService.set('items', items);
 		return this.get$().next(items);
 	}
 
-	static get$(): BehaviorSubject<any> {
+	static get$(): BehaviorSubject<ITodoItem[]> {
 		if (this.store$) {
 			return this.store$;
 		}
-		let items = LocalStorageService.get('items');
+		let items: ITodoItem[] = LocalStorageService.get('items');
 		if (!items) {
 			items = [
 				{ id: 5, name: 'Cookies', date: new Date(Date.now()) },
@@ -26,13 +27,13 @@ export default class StoreService {
 			];
 			LocalStorageService.set('items', items);
 		}
-		this.store$ = new BehaviorSubject(items);
+		this.store$ = new BehaviorSubject<ITodoItem[]>(items);
 		return this.store$.pipe(
 			delay(1) // simulate http
-		) as BehaviorSubject<any>;
+		) as BehaviorSubject<ITodoItem[]>;
 	}
 
-	static add$(patch) {
+	static add$(patch: ITodoItem): Observable<ITodoItem> {
 		const item = Object.assign({
 			id: Date.now(),
 			date: new Date(Date.now())
@@ -45,9 +46,9 @@ export default class StoreService {
 		);
 	}
 
-	static patch$(patch) {
+	static patch$(patch: ITodoItem): Observable<ITodoItem> {
 		const items = this.store$.getValue();
-		const item = items.find(x => x.id === patch.id);
+		const item = items.find((x: ITodoItem) => x.id === patch.id);
 		if (item) {
 			Object.assign(item, patch);
 			this.set(items);
@@ -57,7 +58,7 @@ export default class StoreService {
 		);
 	}
 
-	static delete$(item) {
+	static delete$(item: ITodoItem): Observable<ITodoItem> {
 		const items = this.store$.getValue();
 		const index = items.indexOf(item);
 		if (index !== -1) {

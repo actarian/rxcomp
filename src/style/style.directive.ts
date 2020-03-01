@@ -3,8 +3,8 @@ import { getContext } from '../module/module';
 
 export default class StyleDirective extends Directive {
 
-	style: { [key: string]: string } | null;
-	previousStyle: { [key: string]: string } | null;
+	style?: { [key: string]: string } | null;
+	previousStyle?: { [key: string]: string } | null;
 
 	onChanges() {
 		const { node } = getContext(this);
@@ -15,7 +15,7 @@ export default class StyleDirective extends Directive {
 				if (!style || !style[key]) {
 					const splitted: string[] = key.split('.');
 					const propertyName = splitted.shift();
-					node.style.removeProperty(propertyName);
+					node.style.removeProperty(propertyName!);
 				}
 			}
 		}
@@ -26,7 +26,7 @@ export default class StyleDirective extends Directive {
 					const propertyName = splitted.shift();
 					const value = style[key] + (splitted.length ? splitted[0] : '');
 					// console.log(propertyName, value, style, key, style[key]);
-					node.style.setProperty(propertyName, value);
+					node.style.setProperty(propertyName!, value);
 				}
 			}
 		}

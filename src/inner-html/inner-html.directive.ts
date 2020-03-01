@@ -3,7 +3,7 @@ import { getContext } from '../module/module';
 
 export default class InnerHtmlDirective extends Directive {
 
-	innerHTML: string;
+	innerHTML?: string;
 
 	onChanges() {
 		const { node } = getContext(this);

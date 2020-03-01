@@ -15,10 +15,10 @@ class RootComponent extends Component {
 	onInit() {
 		// console.log('RootComponent.onInit');
 		interval(1000).pipe(
-			takeUntil(this.unsubscribe$)
+			takeUntil(this.unsubscribe$!)
 		).subscribe(ticks => {
 			this.ticks = ticks;
-			this.pushChanges();
+			this.pushChanges!();
 		});
 	}
 
@@ -39,10 +39,10 @@ class Root2Component extends Component {
 	onInit() {
 		// console.log('RootComponent.onInit');
 		interval(1000).pipe(
-			takeUntil(this.unsubscribe$)
+			takeUntil(this.unsubscribe$!)
 		).subscribe(ticks => {
 			this.ticks = ticks;
-			this.pushChanges();
+			this.pushChanges!();
 		});
 	}
 

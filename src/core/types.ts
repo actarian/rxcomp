@@ -30,7 +30,7 @@ export interface IContext {
 export interface IModuleMeta {
 	declarations?: (typeof Factory | typeof Pipe)[];
 	exports?: (typeof Factory | typeof Pipe)[];
-	imports?: (typeof Module | IModuleMeta)[];
+	imports?: typeof Module[];
 	pipes?: { [key: string]: typeof Pipe };
 	factories?: typeof Factory[];
 	selectors?: SelectorFunction[];
@@ -39,8 +39,24 @@ export interface IModuleMeta {
 	nodeInnerHTML?: string;
 }
 
+export interface IModuleParsedImportedMeta {
+	imports: IModuleParsedImportedMeta[];
+	declarations: (typeof Factory | typeof Pipe)[];
+	pipes: { [key: string]: typeof Pipe };
+	exports: (typeof Factory | typeof Pipe)[];
+}
+
+export interface IModuleParsedMeta {
+	factories: typeof Factory[];
+	pipes: { [key: string]: typeof Pipe };
+	selectors: SelectorFunction[];
+	bootstrap: typeof Factory;
+	node: IElement;
+	nodeInnerHTML: string;
+}
+
 export interface IFactoryMeta {
-	selector: string;
+	selector?: string;
 	hosts?: { [key: string]: typeof Factory };
 	inputs?: string[];
 	outputs?: string[];

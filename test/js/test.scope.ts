@@ -6,7 +6,7 @@ class RootComponent extends Component {
 	items = [1, 2, 3];
 	href = 'https://github.com/actarian/rxcomp';
 
-	onItem(item) {
+	onItem(item: number) {
 		console.log('RootComponent.item', item);
 	}
 }
@@ -16,12 +16,12 @@ RootComponent.meta = {
 
 class SubComponent extends Component {
 	background = '#ffb9b9';
-	toggle: BehaviorSubject<any>;
-	item: number;
+	toggle?: BehaviorSubject<any>;
+	item?: number;
 
 	onToggle() {
 		// console.log(this.item);
-		this.toggle.next(this.item);
+		this.toggle!.next(this.item);
 	}
 }
 SubComponent.meta = {
@@ -44,7 +44,7 @@ HostDirective.meta = {
 };
 
 class HostedDirective extends Directive {
-	host: HostDirective;
+	host?: HostDirective;
 
 	onInit() {
 		console.log('host', this.host);

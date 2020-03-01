@@ -1,11 +1,15 @@
-import { Component } from '../../../src/rxcomp';
+import { Component, Factory } from '../../../src/rxcomp';
 import { accent, background, foreground } from '../colors/colors';
 
 export default class TodoItemComponent extends Component {
 
+	background: string | null = null;
+	foreground: string | null = null;
+	accent: string | null = null;
+
 	// onInit() {}
 
-	onChanges(changes) {
+	onChanges(changes: Factory | Window) {
 		// console.log('onChanges', changes);
 		this.background = background(this.item.id);
 		this.foreground = foreground(this.item.id);
@@ -16,12 +20,12 @@ export default class TodoItemComponent extends Component {
 
 	// onDestroy() {}
 
-	onToggle($event) {
+	onToggle($event: MouseEvent) {
 		// console.log('onToggle', $event);
 		this.toggle.next($event);
 	}
 
-	onRemove($event) {
+	onRemove($event: MouseEvent) {
 		// console.log('onRemove', $event);
 		this.remove.next($event);
 	}
