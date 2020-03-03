@@ -22,7 +22,7 @@ const { sass } = require('./sass');
 const { mjml } = require('./mjml');
 
 const { rollup, rollupOutput } = require('./rollup');
-const { typescript, typescriptOutput } = require('./typescript');
+const { typescript } = require('./typescript');
 
 function compile(item, ext, done) {
 	// console.log('compile', ext, item);
@@ -112,11 +112,11 @@ function compileTs(done) {
 
 function compileTsItem(item, done) {
 	const tasks = [];
-	const outputs = typescriptOutput(item);
+	const outputs = rollupOutput(item);
 	outputs.forEach((output, i) => {
 		tasks.push(function compileTsItem(done) {
 			const item_ = Object.assign({}, item, { output });
-			const output_ = typescriptOutput(item_)[0];
+			const output_ = rollupOutput(item_)[0];
 			let task;
 			switch (output_.format) {
 				case 'iife':
@@ -213,7 +213,7 @@ function compileRollup(item) {
 }
 
 function compileTypescript(item) {
-	const outputs = typescriptOutput(item);
+	const outputs = rollupOutput(item);
 	const minify = item.minify || outputs[0].minify;
 	return src(item.input, { base: '.', allowEmpty: true, sourcemaps: true })
 		.pipe(gulpPlumber())

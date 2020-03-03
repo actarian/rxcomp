@@ -1,7 +1,6 @@
-import Factory from '../core/factory';
+import Factory, { getContext } from '../core/factory';
 import Structure from '../core/structure';
 import { ExpressionFunction, IComment, IElement } from '../core/types';
-import { getContext } from '../module/module';
 
 export default class IfStructure extends Structure {
 

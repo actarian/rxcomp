@@ -1,7 +1,7 @@
 import { fromEvent, Observable } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
 import Directive from '../core/directive';
-import { getContext } from '../module/module';
+import { getContext } from '../core/factory';
 
 const EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
@@ -18,7 +18,7 @@ export default class EventDirective extends Directive {
 		if (expression) {
 			const outputFunction = module.makeFunction(expression, ['$event']);
 			event$.pipe(
-				takeUntil(this.unsubscribe$!)
+				takeUntil(this.unsubscribe$)
 			).subscribe(event => {
 				module.resolve(outputFunction, parentInstance, event);
 			});

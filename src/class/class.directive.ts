@@ -1,6 +1,6 @@
 // import Factory, { ExpressionFunction } from '../core/factory';
 import Directive from '../core/directive';
-import { getContext } from '../module/module';
+import { getContext } from '../core/factory';
 
 export default class ClassDirective extends Directive {
 

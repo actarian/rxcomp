@@ -20,10 +20,10 @@ const bundleTask = parallel(bundleCss, bundleJs);
 
 function watchTask(done, filters) {
 	setEntry(CONFIG_PATH, CONFIG_PATH);
-	watchEntries((path_, entry, done) => {
+	watchEntries((path_, entry) => {
 		if (entry === CONFIG_PATH) {
 			config = getConfig();
-			return series(compileTask, bundleTask, copyTask)(done);
+			return series(compileTask, bundleTask, copyTask);
 		}
 		config.target.compile.forEach(x => {
 			// console.log(entry, x.input);
@@ -32,7 +32,7 @@ function watchTask(done, filters) {
 				if (!filters || filters.indexOf(ext) !== -1) {
 					log('Watch', path_, '>', entry);
 					// console.log('compile', ext, x);
-					compile(x, ext, done);
+					compile(x, ext);
 				}
 			}
 		});
@@ -44,7 +44,7 @@ function watchTask(done, filters) {
 				if (!filters || filters.indexOf(ext) !== -1) {
 					log('Watch', path_, '>', entry);
 					// console.log('bundle', ext, x);
-					bundle(x, ext, done);
+					bundle(x, ext);
 				}
 			}
 		});

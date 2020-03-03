@@ -1,7 +1,7 @@
-import Factory from '../core/factory';
+import Factory, { getContext } from '../core/factory';
 import Structure from '../core/structure';
 import { ExpressionFunction, IComment, IContext, IElement, IExpressionToken } from '../core/types';
-import Module, { getContext } from '../module/module';
+import Module from '../module/module';
 import ForItem from './for.item';
 
 export default class ForStructure extends Structure {

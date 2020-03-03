@@ -25,11 +25,7 @@ function watchEntries(callback) {
 	if (watcher && typeof watcher.close === 'function') {
 		watcher.close();
 	}
-	let complete;
-	watcher = watch(['**/*.*', '!node_modules/**/*.*'], function watch(done) {
-		complete = done;
-		// console.log('done');
-	}).on('change', (path_) => {
+	watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', (path_) => {
 		const entry = Object.keys(entries).reduce((p, key) => {
 			const imports = entries[key];
 			if (isGlob(key)) {
@@ -60,13 +56,8 @@ function watchEntries(callback) {
 			// console.log('entry', entry);
 			// log('watch.changed', path_, '>', entry);
 			if (typeof callback === 'function') {
-				callback(path_, entry, complete);
+				callback(path_, entry);
 			}
-		} else {
-			if (typeof complete === 'function') {
-				return complete();
-			}
-			// console.log('change');
 		}
 	});
 }

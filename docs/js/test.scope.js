@@ -76,7 +76,36 @@
     return self;
   }
 
-  var Factory = function Factory() {};
+  var CONTEXTS = {};
+  var NODES = {};
+
+  var Factory = function () {
+    function Factory() {
+      this.rxcompId = -1;
+      this.unsubscribe$ = new rxjs.Subject();
+      this.changes$ = new rxjs.ReplaySubject();
+    }
+
+    var _proto = Factory.prototype;
+
+    _proto.onInit = function onInit() {};
+
+    _proto.onChanges = function onChanges(changes) {};
+
+    _proto.onView = function onView() {};
+
+    _proto.onDestroy = function onDestroy() {};
+
+    _proto.pushChanges = function pushChanges() {
+      this.changes$.next(this);
+      this.onView();
+    };
+
+    return Factory;
+  }();
+  function getContext(instance) {
+    return CONTEXTS[instance.rxcompId];
+  }
 
   var Directive = function (_Factory) {
     _inheritsLoose(Directive, _Factory);
@@ -88,12 +117,129 @@
     return Directive;
   }(Factory);
 
+  var ClassDirective = function (_Directive) {
+    _inheritsLoose(ClassDirective, _Directive);
+
+    function ClassDirective() {
+      var _this;
+
+      _this = _Directive.apply(this, arguments) || this;
+      _this.class = '';
+      _this.keys = [];
+      return _this;
+    }
+
+    var _proto = ClassDirective.prototype;
+
+    _proto.onInit = function onInit() {
+      var _this2 = this;
+
+      var _getContext = getContext(this),
+          node = _getContext.node;
+
+      node.classList.forEach(function (x) {
+        return _this2.keys.push(x);
+      });
+    };
+
+    _proto.onChanges = function onChanges() {
+      var _getContext2 = getContext(this),
+          node = _getContext2.node;
+
+      var keys = [];
+      var object = this.class;
+
+      if (typeof object === 'object') {
+        for (var key in object) {
+          if (object[key]) {
+            keys.push(key);
+          }
+        }
+      } else if (typeof object === 'string') {
+        keys = object.split(/\s+/);
+      }
+
+      keys = keys.concat(this.keys);
+      node.setAttribute('class', keys.join(' '));
+    };
+
+    return ClassDirective;
+  }(Directive);
+  ClassDirective.meta = {
+    selector: "[[class]]",
+    inputs: ['class']
+  };
+
+  var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
+
+  var EventDirective = function (_Directive) {
+    _inheritsLoose(EventDirective, _Directive);
+
+    function EventDirective() {
+      var _this;
+
+      _this = _Directive.apply(this, arguments) || this;
+      _this.event = '';
+      return _this;
+    }
+
+    var _proto = EventDirective.prototype;
+
+    _proto.onInit = function onInit() {
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node,
+          parentInstance = _getContext.parentInstance,
+          selector = _getContext.selector;
+
+      var event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
+      var event$ = rxjs.fromEvent(node, event).pipe(operators.shareReplay(1));
+      var expression = node.getAttribute("(" + event + ")");
+
+      if (expression) {
+        var outputFunction = module.makeFunction(expression, ['$event']);
+        event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+          module.resolve(outputFunction, parentInstance, event);
+        });
+      } else {
+        parentInstance[event + "$"] = event$;
+      }
+    };
+
+    return EventDirective;
+  }(Directive);
+  EventDirective.meta = {
+    selector: "[(" + EVENTS.join(')],[(') + ")]"
+  };
+
+  var Structure = function (_Factory) {
+    _inheritsLoose(Structure, _Factory);
+
+    function Structure() {
+      return _Factory.apply(this, arguments) || this;
+    }
+
+    return Structure;
+  }(Factory);
+
   var Component = function (_Factory) {
     _inheritsLoose(Component, _Factory);
 
     function Component() {
       return _Factory.apply(this, arguments) || this;
     }
+
+    var _proto = Component.prototype;
+
+    _proto.pushChanges = function pushChanges() {
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node;
+
+      this.changes$.next(this);
+      module.parse(node, this);
+      this.onView();
+    };
 
     return Component;
   }(Factory);
@@ -154,19 +300,302 @@
     return Context;
   }(Component);
 
-  var Structure = function (_Factory) {
-    _inheritsLoose(Structure, _Factory);
+  var ForItem = function (_Context) {
+    _inheritsLoose(ForItem, _Context);
 
-    function Structure() {
-      return _Factory.apply(this, arguments) || this;
+    function ForItem(key, $key, value, $value, index, count, parentInstance) {
+      var _this;
+
+      _this = _Context.call(this, parentInstance) || this;
+      _this[key] = $key;
+      _this[value] = $value;
+      _this.index = index;
+      _this.count = count;
+      return _this;
     }
 
-    return Structure;
-  }(Factory);
+    _createClass(ForItem, [{
+      key: "first",
+      get: function get() {
+        return this.index === 0;
+      }
+    }, {
+      key: "last",
+      get: function get() {
+        return this.index === this.count - 1;
+      }
+    }, {
+      key: "even",
+      get: function get() {
+        return this.index % 2 === 0;
+      }
+    }, {
+      key: "odd",
+      get: function get() {
+        return !this.even;
+      }
+    }]);
+
+    return ForItem;
+  }(Context);
+
+  var ForStructure = function (_Structure) {
+    _inheritsLoose(ForStructure, _Structure);
+
+    function ForStructure() {
+      var _this;
+
+      _this = _Structure.apply(this, arguments) || this;
+      _this.instances = [];
+      return _this;
+    }
+
+    var _proto = ForStructure.prototype;
+
+    _proto.onInit = function onInit() {
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node;
+
+      var forbegin = document.createComment("*for begin");
+      forbegin['rxcompId'] = node.rxcompId;
+      node.parentNode.replaceChild(forbegin, node);
+      var forend = this.forend = document.createComment("*for end");
+      forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
+      var expression = node.getAttribute('*for');
+      node.removeAttribute('*for');
+      var token = this.token = this.getExpressionToken(expression);
+      this.forFunction = module.makeFunction(token.iterable);
+    };
+
+    _proto.onChanges = function onChanges(changes) {
+      var context = getContext(this);
+      var module = context.module;
+      var node = context.node;
+      var token = this.token;
+      var result = module.resolve(this.forFunction, changes, this) || [];
+      var isArray = Array.isArray(result);
+      var array = isArray ? result : Object.keys(result);
+      var total = array.length;
+      var previous = this.instances.length;
+
+      for (var i = 0; i < Math.max(previous, total); i++) {
+        if (i < total) {
+          var key = isArray ? i : array[i];
+          var value = isArray ? array[key] : result[key];
+
+          if (i < previous) {
+            var instance = this.instances[i];
+            instance[token.key] = key;
+            instance[token.value] = value;
+          } else {
+            var clonedNode = node.cloneNode(true);
+            delete clonedNode['rxcompId'];
+            this.forend.parentNode.insertBefore(clonedNode, this.forend);
+            var args = [token.key, key, token.value, value, i, total, context.parentInstance];
+
+            var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
+
+            if (_instance) {
+              var forItemContext = getContext(_instance);
+              module.compile(clonedNode, forItemContext.instance);
+              this.instances.push(_instance);
+            }
+          }
+        } else {
+          var _instance2 = this.instances[i];
+
+          var _getContext2 = getContext(_instance2),
+              _node = _getContext2.node;
+
+          _node.parentNode.removeChild(_node);
+
+          module.remove(_node);
+        }
+      }
+
+      this.instances.length = array.length;
+    };
+
+    _proto.getExpressionToken = function getExpressionToken(expression) {
+      if (expression === null) {
+        throw 'invalid for';
+      }
+
+      if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
+        throw 'invalid for';
+      }
+
+      var expressions = expression.split(';').map(function (x) {
+        return x.trim();
+      }).filter(function (x) {
+        return x !== '';
+      });
+      var forExpressions = expressions[0].split(' of ').map(function (x) {
+        return x.trim();
+      });
+      var value = forExpressions[0].replace(/\s*let\s*/, '');
+      var iterable = forExpressions[1];
+      var key = 'index';
+      var keyValueMatches = value.match(/\[(.+)\s*,\s*(.+)\]/);
+
+      if (keyValueMatches) {
+        key = keyValueMatches[1];
+        value = keyValueMatches[2];
+      }
+
+      if (expressions.length > 1) {
+        var indexExpressions = expressions[1].split(/\s*let\s*|\s*=\s*index/).map(function (x) {
+          return x.trim();
+        });
+
+        if (indexExpressions.length === 3) {
+          key = indexExpressions[1];
+        }
+      }
+
+      return {
+        key: key,
+        value: value,
+        iterable: iterable
+      };
+    };
+
+    return ForStructure;
+  }(Structure);
+  ForStructure.meta = {
+    selector: '[*for]'
+  };
+
+  var HrefDirective = function (_Directive) {
+    _inheritsLoose(HrefDirective, _Directive);
+
+    function HrefDirective() {
+      return _Directive.apply(this, arguments) || this;
+    }
+
+    var _proto = HrefDirective.prototype;
+
+    _proto.onChanges = function onChanges() {
+      var _getContext = getContext(this),
+          node = _getContext.node;
+
+      node.setAttribute('href', this.href || '');
+    };
+
+    return HrefDirective;
+  }(Directive);
+  HrefDirective.meta = {
+    selector: '[[href]]',
+    inputs: ['href']
+  };
+
+  var IfStructure = function (_Structure) {
+    _inheritsLoose(IfStructure, _Structure);
+
+    function IfStructure() {
+      return _Structure.apply(this, arguments) || this;
+    }
+
+    var _proto = IfStructure.prototype;
+
+    _proto.onInit = function onInit() {
+      var _getContext = getContext(this),
+          module = _getContext.module,
+          node = _getContext.node;
+
+      var ifbegin = this.ifbegin = document.createComment("*if begin");
+      ifbegin['rxcompId'] = node.rxcompId;
+      node.parentNode.replaceChild(ifbegin, node);
+      var ifend = this.ifend = document.createComment("*if end");
+      ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
+      var expression = node.getAttribute('*if');
+      this.ifFunction = module.makeFunction(expression);
+      var clonedNode = node.cloneNode(true);
+      clonedNode.removeAttribute('*if');
+      this.clonedNode = clonedNode;
+      this.element = clonedNode.cloneNode(true);
+    };
+
+    _proto.onChanges = function onChanges(changes) {
+      var _getContext2 = getContext(this),
+          module = _getContext2.module;
+
+      var value = module.resolve(this.ifFunction, changes, this);
+      var element = this.element;
+
+      if (value) {
+        if (!element.parentNode) {
+          var ifend = this.ifend;
+          ifend.parentNode.insertBefore(element, ifend);
+          module.compile(element);
+        }
+      } else {
+        if (element.parentNode) {
+          module.remove(element, this);
+          element.parentNode.removeChild(element);
+          this.element = this.clonedNode.cloneNode(true);
+        }
+      }
+    };
+
+    return IfStructure;
+  }(Structure);
+  IfStructure.meta = {
+    selector: '[*if]'
+  };
+
+  var InnerHtmlDirective = function (_Directive) {
+    _inheritsLoose(InnerHtmlDirective, _Directive);
+
+    function InnerHtmlDirective() {
+      return _Directive.apply(this, arguments) || this;
+    }
+
+    var _proto = InnerHtmlDirective.prototype;
+
+    _proto.onChanges = function onChanges() {
+      var _getContext = getContext(this),
+          node = _getContext.node;
+
+      node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML;
+    };
+
+    return InnerHtmlDirective;
+  }(Directive);
+  InnerHtmlDirective.meta = {
+    selector: "[innerHTML]",
+    inputs: ['innerHTML']
+  };
+
+  var Pipe = function () {
+    function Pipe() {}
+
+    Pipe.transform = function transform(value) {
+      return value;
+    };
+
+    return Pipe;
+  }();
+
+  var JsonPipe = function (_Pipe) {
+    _inheritsLoose(JsonPipe, _Pipe);
+
+    function JsonPipe() {
+      return _Pipe.apply(this, arguments) || this;
+    }
+
+    JsonPipe.transform = function transform(value) {
+      return JSON.stringify(value, null, '\t');
+    };
+
+    return JsonPipe;
+  }(Pipe);
+  JsonPipe.meta = {
+    name: 'json'
+  };
 
   var ID = 0;
-  var CONTEXTS = {};
-  var NODES = {};
 
   var Module = function () {
     function Module() {}
@@ -199,7 +628,6 @@
       var _this2 = this;
 
       if (parentInstance || node.parentNode) {
-        var isComponent = factory.prototype instanceof Component;
         var meta = factory.meta;
         parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 
@@ -210,34 +638,6 @@
         var instance = _construct(factory, args || []);
 
         var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
-        Object.defineProperties(instance, {
-          changes$: {
-            value: new rxjs.BehaviorSubject(instance),
-            writable: false,
-            enumerable: false
-          },
-          unsubscribe$: {
-            value: new rxjs.Subject(),
-            writable: false,
-            enumerable: false
-          }
-        });
-        var initialized;
-        var module = this;
-
-        instance.pushChanges = function () {
-          this.changes$.next(this);
-
-          if (isComponent) {
-            initialized ? module.parse(node, instance) : setTimeout(function () {
-              module.parse(node, instance);
-            });
-          }
-
-          if (typeof instance.onView === 'function') {
-            instance.onView();
-          }
-        };
 
         if (meta) {
           this.makeHosts(meta, instance, node);
@@ -245,22 +645,15 @@
           context.outputs = this.makeOutputs(meta, instance);
         }
 
-        if (typeof instance.onInit === 'function') {
-          instance.onInit();
-        }
+        instance.onInit();
 
-        initialized = true;
-
-        if (parentInstance instanceof Factory && parentInstance.changes$) {
+        if (parentInstance instanceof Factory) {
           parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
             if (meta) {
               _this2.resolveInputsOutputs(instance, changes);
             }
 
-            if (typeof instance.onChanges === 'function') {
-              instance.onChanges(changes);
-            }
-
+            instance.onChanges(changes);
             instance.pushChanges();
           });
         }
@@ -290,6 +683,24 @@
 
     _proto.resolve = function resolve(expression, parentInstance, payload) {
       return expression.apply(parentInstance, [payload, this]);
+    };
+
+    _proto.parse = function parse(node, instance) {
+      for (var i = 0; i < node.childNodes.length; i++) {
+        var child = node.childNodes[i];
+
+        if (child.nodeType === 1) {
+          var element = child;
+          var context = getContextByNode(element);
+
+          if (!context) {
+            this.parse(element, instance);
+          }
+        } else if (child.nodeType === 3) {
+          var text = child;
+          this.parseTextNode(text, instance);
+        }
+      }
     };
 
     _proto.remove = function remove(node, keepInstance) {
@@ -338,24 +749,6 @@
       return Module.traverseUp(node, function (node) {
         return _this3.getInstance(node);
       });
-    };
-
-    _proto.parse = function parse(node, instance) {
-      for (var i = 0; i < node.childNodes.length; i++) {
-        var child = node.childNodes[i];
-
-        if (child.nodeType === 1) {
-          var element = child;
-          var context = getContextByNode(element);
-
-          if (!context) {
-            this.parse(element, instance);
-          }
-        } else if (child.nodeType === 3) {
-          var text = child;
-          this.parseTextNode(text, instance);
-        }
-      }
     };
 
     _proto.parseTextNode = function parseTextNode(node, instance) {
@@ -657,11 +1050,8 @@
             var instance = context.instance;
             instance.unsubscribe$.next();
             instance.unsubscribe$.complete();
-
-            if (typeof instance.onDestroy === 'function') {
-              instance.onDestroy();
-              delete CONTEXTS[instance.rxcompId];
-            }
+            instance.onDestroy();
+            delete CONTEXTS[instance.rxcompId];
           }
         });
 
@@ -803,9 +1193,6 @@
 
     return Module;
   }();
-  function getContext(instance) {
-    return CONTEXTS[instance.rxcompId];
-  }
   function getContextByNode(node) {
     var context;
     var rxcompId = node.rxcompId;
@@ -855,396 +1242,6 @@
       return undefined;
     }
   }
-
-  var ClassDirective = function (_Directive) {
-    _inheritsLoose(ClassDirective, _Directive);
-
-    function ClassDirective() {
-      var _this;
-
-      _this = _Directive.apply(this, arguments) || this;
-      _this.class = '';
-      _this.keys = [];
-      return _this;
-    }
-
-    var _proto = ClassDirective.prototype;
-
-    _proto.onInit = function onInit() {
-      var _this2 = this;
-
-      var _getContext = getContext(this),
-          node = _getContext.node;
-
-      node.classList.forEach(function (x) {
-        return _this2.keys.push(x);
-      });
-    };
-
-    _proto.onChanges = function onChanges() {
-      var _getContext2 = getContext(this),
-          node = _getContext2.node;
-
-      var keys = [];
-      var object = this.class;
-
-      if (typeof object === 'object') {
-        for (var key in object) {
-          if (object[key]) {
-            keys.push(key);
-          }
-        }
-      } else if (typeof object === 'string') {
-        keys = object.split(/\s+/);
-      }
-
-      keys = keys.concat(this.keys);
-      node.setAttribute('class', keys.join(' '));
-    };
-
-    return ClassDirective;
-  }(Directive);
-  ClassDirective.meta = {
-    selector: "[[class]]",
-    inputs: ['class']
-  };
-
-  var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
-
-  var EventDirective = function (_Directive) {
-    _inheritsLoose(EventDirective, _Directive);
-
-    function EventDirective() {
-      var _this;
-
-      _this = _Directive.apply(this, arguments) || this;
-      _this.event = '';
-      return _this;
-    }
-
-    var _proto = EventDirective.prototype;
-
-    _proto.onInit = function onInit() {
-      var _getContext = getContext(this),
-          module = _getContext.module,
-          node = _getContext.node,
-          parentInstance = _getContext.parentInstance,
-          selector = _getContext.selector;
-
-      var event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
-      var event$ = rxjs.fromEvent(node, event).pipe(operators.shareReplay(1));
-      var expression = node.getAttribute("(" + event + ")");
-
-      if (expression) {
-        var outputFunction = module.makeFunction(expression, ['$event']);
-        event$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
-          module.resolve(outputFunction, parentInstance, event);
-        });
-      } else {
-        parentInstance[event + "$"] = event$;
-      }
-    };
-
-    return EventDirective;
-  }(Directive);
-  EventDirective.meta = {
-    selector: "[(" + EVENTS.join(')],[(') + ")]"
-  };
-
-  var ForItem = function (_Context) {
-    _inheritsLoose(ForItem, _Context);
-
-    function ForItem(key, $key, value, $value, index, count, parentInstance) {
-      var _this;
-
-      _this = _Context.call(this, parentInstance) || this;
-      _this[key] = $key;
-      _this[value] = $value;
-      _this.index = index;
-      _this.count = count;
-      return _this;
-    }
-
-    _createClass(ForItem, [{
-      key: "first",
-      get: function get() {
-        return this.index === 0;
-      }
-    }, {
-      key: "last",
-      get: function get() {
-        return this.index === this.count - 1;
-      }
-    }, {
-      key: "even",
-      get: function get() {
-        return this.index % 2 === 0;
-      }
-    }, {
-      key: "odd",
-      get: function get() {
-        return !this.even;
-      }
-    }]);
-
-    return ForItem;
-  }(Context);
-
-  var ForStructure = function (_Structure) {
-    _inheritsLoose(ForStructure, _Structure);
-
-    function ForStructure() {
-      var _this;
-
-      _this = _Structure.apply(this, arguments) || this;
-      _this.instances = [];
-      return _this;
-    }
-
-    var _proto = ForStructure.prototype;
-
-    _proto.onInit = function onInit() {
-      var _getContext = getContext(this),
-          module = _getContext.module,
-          node = _getContext.node;
-
-      var forbegin = document.createComment("*for begin");
-      forbegin['rxcompId'] = node.rxcompId;
-      node.parentNode.replaceChild(forbegin, node);
-      var forend = this.forend = document.createComment("*for end");
-      forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
-      var expression = node.getAttribute('*for');
-      node.removeAttribute('*for');
-      var token = this.token = this.getExpressionToken(expression);
-      this.forFunction = module.makeFunction(token.iterable);
-    };
-
-    _proto.onChanges = function onChanges(changes) {
-      var context = getContext(this);
-      var module = context.module;
-      var node = context.node;
-      var token = this.token;
-      var result = module.resolve(this.forFunction, changes, this) || [];
-      var isArray = Array.isArray(result);
-      var array = isArray ? result : Object.keys(result);
-      var total = array.length;
-      var previous = this.instances.length;
-
-      for (var i = 0; i < Math.max(previous, total); i++) {
-        if (i < total) {
-          var key = isArray ? i : array[i];
-          var value = isArray ? array[key] : result[key];
-
-          if (i < previous) {
-            var instance = this.instances[i];
-            instance[token.key] = key;
-            instance[token.value] = value;
-          } else {
-            var clonedNode = node.cloneNode(true);
-            delete clonedNode['rxcompId'];
-            this.forend.parentNode.insertBefore(clonedNode, this.forend);
-            var args = [token.key, key, token.value, value, i, total, context.parentInstance];
-
-            var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
-
-            if (_instance) {
-              var forItemContext = getContext(_instance);
-              module.compile(clonedNode, forItemContext.instance);
-              this.instances.push(_instance);
-            }
-          }
-        } else {
-          var _instance2 = this.instances[i];
-
-          var _getContext2 = getContext(_instance2),
-              _node = _getContext2.node;
-
-          _node.parentNode.removeChild(_node);
-
-          module.remove(_node);
-        }
-      }
-
-      this.instances.length = array.length;
-    };
-
-    _proto.getExpressionToken = function getExpressionToken(expression) {
-      if (expression === null) {
-        throw 'invalid for';
-      }
-
-      if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
-        throw 'invalid for';
-      }
-
-      var expressions = expression.split(';').map(function (x) {
-        return x.trim();
-      }).filter(function (x) {
-        return x !== '';
-      });
-      var forExpressions = expressions[0].split(' of ').map(function (x) {
-        return x.trim();
-      });
-      var value = forExpressions[0].replace(/\s*let\s*/, '');
-      var iterable = forExpressions[1];
-      var key = 'index';
-      var keyValueMatches = value.match(/\[(.+)\s*,\s*(.+)\]/);
-
-      if (keyValueMatches) {
-        key = keyValueMatches[1];
-        value = keyValueMatches[2];
-      }
-
-      if (expressions.length > 1) {
-        var indexExpressions = expressions[1].split(/\s*let\s*|\s*=\s*index/).map(function (x) {
-          return x.trim();
-        });
-
-        if (indexExpressions.length === 3) {
-          key = indexExpressions[1];
-        }
-      }
-
-      return {
-        key: key,
-        value: value,
-        iterable: iterable
-      };
-    };
-
-    return ForStructure;
-  }(Structure);
-  ForStructure.meta = {
-    selector: '[*for]'
-  };
-
-  var HrefDirective = function (_Directive) {
-    _inheritsLoose(HrefDirective, _Directive);
-
-    function HrefDirective() {
-      return _Directive.apply(this, arguments) || this;
-    }
-
-    var _proto = HrefDirective.prototype;
-
-    _proto.onChanges = function onChanges() {
-      var _getContext = getContext(this),
-          node = _getContext.node;
-
-      node.setAttribute('href', this.href || '');
-    };
-
-    return HrefDirective;
-  }(Directive);
-  HrefDirective.meta = {
-    selector: '[[href]]',
-    inputs: ['href']
-  };
-
-  var IfStructure = function (_Structure) {
-    _inheritsLoose(IfStructure, _Structure);
-
-    function IfStructure() {
-      return _Structure.apply(this, arguments) || this;
-    }
-
-    var _proto = IfStructure.prototype;
-
-    _proto.onInit = function onInit() {
-      var _getContext = getContext(this),
-          module = _getContext.module,
-          node = _getContext.node;
-
-      var ifbegin = this.ifbegin = document.createComment("*if begin");
-      ifbegin['rxcompId'] = node.rxcompId;
-      node.parentNode.replaceChild(ifbegin, node);
-      var ifend = this.ifend = document.createComment("*if end");
-      ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
-      var expression = node.getAttribute('*if');
-      this.ifFunction = module.makeFunction(expression);
-      var clonedNode = node.cloneNode(true);
-      clonedNode.removeAttribute('*if');
-      this.clonedNode = clonedNode;
-      this.element = clonedNode.cloneNode(true);
-    };
-
-    _proto.onChanges = function onChanges(changes) {
-      var _getContext2 = getContext(this),
-          module = _getContext2.module;
-
-      var value = module.resolve(this.ifFunction, changes, this);
-      var element = this.element;
-
-      if (value) {
-        if (!element.parentNode) {
-          var ifend = this.ifend;
-          ifend.parentNode.insertBefore(element, ifend);
-          module.compile(element);
-        }
-      } else {
-        if (element.parentNode) {
-          module.remove(element, this);
-          element.parentNode.removeChild(element);
-          this.element = this.clonedNode.cloneNode(true);
-        }
-      }
-    };
-
-    return IfStructure;
-  }(Structure);
-  IfStructure.meta = {
-    selector: '[*if]'
-  };
-
-  var InnerHtmlDirective = function (_Directive) {
-    _inheritsLoose(InnerHtmlDirective, _Directive);
-
-    function InnerHtmlDirective() {
-      return _Directive.apply(this, arguments) || this;
-    }
-
-    var _proto = InnerHtmlDirective.prototype;
-
-    _proto.onChanges = function onChanges() {
-      var _getContext = getContext(this),
-          node = _getContext.node;
-
-      node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML;
-    };
-
-    return InnerHtmlDirective;
-  }(Directive);
-  InnerHtmlDirective.meta = {
-    selector: "[innerHTML]",
-    inputs: ['innerHTML']
-  };
-
-  var Pipe = function () {
-    function Pipe() {}
-
-    Pipe.transform = function transform(value) {
-      return value;
-    };
-
-    return Pipe;
-  }();
-
-  var JsonPipe = function (_Pipe) {
-    _inheritsLoose(JsonPipe, _Pipe);
-
-    function JsonPipe() {
-      return _Pipe.apply(this, arguments) || this;
-    }
-
-    JsonPipe.transform = function transform(value) {
-      return JSON.stringify(value, null, '\t');
-    };
-
-    return JsonPipe;
-  }(Pipe);
-  JsonPipe.meta = {
-    name: 'json'
-  };
 
   var SrcDirective = function (_Directive) {
     _inheritsLoose(SrcDirective, _Directive);

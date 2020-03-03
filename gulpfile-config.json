@@ -22,10 +22,6 @@
             "rxjs": "rxjs",
             "rxjs/operators": "rxjs.operators"
           },
-          "external": [
-            "rxjs",
-            "rxjs/operators"
-          ],
           "minify": true
         },
         {
@@ -38,10 +34,6 @@
             "rxjs": "rxjs",
             "rxjs/operators": "rxjs.operators"
           },
-          "external": [
-            "rxjs",
-            "rxjs/operators"
-          ],
           "minify": true
         },
         {
@@ -54,10 +46,6 @@
             "rxjs": "rxjs",
             "rxjs/operators": "rxjs.operators"
           },
-          "external": [
-            "rxjs",
-            "rxjs/operators"
-          ],
           "minify": true
         },
         {
@@ -70,10 +58,6 @@
             "rxjs": "rxjs",
             "rxjs/operators": "rxjs.operators"
           },
-          "external": [
-            "rxjs",
-            "rxjs/operators"
-          ],
           "minify": true
         },
         {
@@ -86,10 +70,6 @@
             "rxjs": "rxjs",
             "rxjs/operators": "rxjs.operators"
           },
-          "external": [
-            "rxjs",
-            "rxjs/operators"
-          ],
           "minify": true
         }
       ],
@@ -118,11 +98,7 @@
             "rxjs": "rxjs",
             "rxjs/operators": "rxjs.operators"
           },
-          "name": "rxcomp",
-          "external": [
-            "rxjs",
-            "rxjs/operators"
-          ]
+          "name": "rxcomp"
         }
       ],
       "bundle": []

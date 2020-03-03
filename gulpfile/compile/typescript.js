@@ -9,9 +9,10 @@ const typescript = require('typescript'),
 const log = require('../logger/logger');
 const { service } = require('../config/config');
 const { getObject, extend } = require('../config/json');
+const { rollupOutput } = require('./rollup');
 
 function typescript_(item) {
-	const output = typescriptOutput(item)[0];
+	const output = rollupOutput(item)[0];
 	switch (output.format) {
 		case 'iife':
 		case 'umd':
@@ -86,7 +87,7 @@ function typescriptConfig(item) {
 			'.npm'
 		]
 	};
-	const output = typescriptOutput(item)[0];
+	const output = rollupOutput(item)[0];
 	// console.log(output);
 	switch (output.format) {
 		case 'amd':
@@ -168,43 +169,8 @@ function typescriptDiagnostic(diagnostics) {
 	});
 }
 
-function typescriptOutput(item) {
-	const input = item.input;
-	const output = item.output;
-	const outputs = Array.isArray(output) ? output : [output];
-	const default_ = {
-		format: 'iife',
-		name: item.name || null,
-		globals: item.globals || {},
-		sourcemap: true,
-		minify: item.minify || false,
-	};
-	return outputs.map(x => {
-		let output = Object.assign({}, default_);
-		if (typeof x === 'string') {
-			output.file = x;
-		} else if (typeof x === 'object') {
-			output = Object.assign(output, x);
-		}
-		output.name = output.name || path.basename(output.file, '.js');
-		/*
-		const plugins = [
-			path.extname(input) === '.ts' ? rollupPluginTypescript2({
-				target: output.format === 'es' ? 'ESNext' : 'ES5',
-				module: output.format === 'es' ? 'ES6' : 'ES5',
-				moduleResolution: output.format === 'iife' ? 'classic' : 'node',
-				declaration: true
-			}) : null,
-		].filter(x => x);
-		output.plugins = plugins;
-		*/
-		return output;
-	});
-}
-
 module.exports = {
 	typescript: typescript_,
-	typescriptOutput,
 };
 
 /*

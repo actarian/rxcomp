@@ -121,11 +121,12 @@ function rollup_(item) {
 }
 
 function rollupInput(item) {
+	const output = rollupOutput(item)[0];
 	const presetEnvOptions = {
 		modules: false,
 		loose: true,
 	};
-	if ((typeof item.output === 'object' && item.output.format === 'esm') || item.target === 'esm') {
+	if (output.format === 'esm') {
 		presetEnvOptions.targets = {
 			esmodules: true
 		};
@@ -143,7 +144,7 @@ function rollupInput(item) {
 			allowJs: true,
 			declaration: false,
 			sourceMap: true,
-			removeComments: item.output.format === 'iife',
+			removeComments: output.format === 'iife',
 		},
 		exclude: [
 			'./node_modules/*',
@@ -158,7 +159,7 @@ function rollupInput(item) {
 			allowJs: true,
 			declaration: false,
 			sourceMap: true,
-			removeComments: item.output.format === 'iife',
+			removeComments: output.format === 'iife',
 		},
 		exclude: [
 			'./node_modules/*',
@@ -170,16 +171,15 @@ function rollupInput(item) {
 	const plugins = [
 		// Resolve source maps to the original source
 		rollupPluginSourcemaps(),
-		/*
 		// Allow node_modules resolution, so you can use 'external' to control
 		// which external modules to include in the bundle
 		// https://github.com/rollup/rollup-plugin-node-resolve#usage
 		// import node modules
-		rollupPluginNodeResolve(),
-		*/
+		output.format === 'cjs' ? null : rollupPluginNodeResolve(),
+		// exclude: Object.keys(output.globals).map(x => `node_module/${x}/**`),
 		// Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
 		rollupPluginCommonJs({
-			exclude: ['node_modules/**'],
+			exclude: output.format === 'cjs' ? ['node_modules/**'] : undefined,
 		}),
 		// Compile TypeScript files
 		path.extname(item.input) === '.ts' ? rollupPluginTypescript2({
@@ -206,7 +206,7 @@ function rollupInput(item) {
 				'@babel/plugin-proposal-object-rest-spread'
 			],
 			exclude: 'node_modules/**', // only transpile our source code
-			comments: item.output.format !== 'iife',
+			comments: output.format !== 'iife',
 			// babelHelpers: 'bundled', // only for version 5
 			// babelrc: false,
 		}),
@@ -217,10 +217,11 @@ function rollupInput(item) {
 		}),
 
 	].filter(x => x);
+	const globals = Object.keys(output.globals);
 	const input = {
 		input: item.input,
 		plugins: plugins,
-		external: item.external || [],
+		external: globals.length ? globals : (item.external || []),
 		cache: false, // !! break babel if true
 		treeshake: true,
 		/*
@@ -233,9 +234,8 @@ function rollupInput(item) {
 }
 
 function rollupOutput(item) {
-	const input = item.input;
-	const output = item.output;
-	const outputs = Array.isArray(output) ? output : [output];
+	const outputs = Array.isArray(item.output) ? item.output : [item.output];
+	const output = outputs[0];
 	const default_ = {
 		format: 'iife',
 		name: item.name || null,

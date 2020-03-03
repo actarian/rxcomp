@@ -1,5 +1,5 @@
 import Directive from '../core/directive';
-import { getContext } from '../module/module';
+import { getContext } from '../core/factory';
 
 export default class SrcDirective extends Directive {
 
