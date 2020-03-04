@@ -1,5 +1,6 @@
-import { BehaviorSubject } from 'rxjs';
-import { Browser, Component, CoreModule, Directive, Module, StyleDirective } from '../../src/rxcomp';
+import { BehaviorSubject, fromEvent } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { Browser, Component, CoreModule, Directive, Factory, getContext, Module, StyleDirective } from '../../src/rxcomp';
 
 class RootComponent extends Component {
 	background = '#b9dbff';
@@ -7,7 +8,11 @@ class RootComponent extends Component {
 	href = 'https://github.com/actarian/rxcomp';
 
 	onItem(item: number) {
-		console.log('RootComponent.item', item);
+		console.log('RootComponent.onItem.item', item);
+	}
+
+	onHandled(event: any) {
+		console.log('RootComponent.onHandled', event);
 	}
 }
 RootComponent.meta = {
@@ -18,6 +23,14 @@ class SubComponent extends Component {
 	background = '#ffb9b9';
 	toggle?: BehaviorSubject<any>;
 	item?: number;
+
+	onInit() {
+		console.log('SubComponent.onInit.item', this.item);
+	}
+
+	onChanges(changes: Factory) {
+		console.log('SubComponent.onChanges.item', this.item);
+	}
 
 	onToggle() {
 		// console.log(this.item);
@@ -35,11 +48,17 @@ class HostDirective extends Directive {
 	style: any;
 
 	onInit() {
-		console.log('style', this.style);
+		console.log('HostDirective.onInit.style', this.style);
+		console.log('HostDirective.onInit.input', this.input);
+	}
+
+	onChanges(changes: Factory) {
+		console.log('HostDirective.onChanges.input', this.input);
 	}
 }
 HostDirective.meta = {
 	selector: '[host]',
+	inputs: ['input'],
 	hosts: { style: StyleDirective }
 };
 
@@ -48,10 +67,23 @@ class HostedDirective extends Directive {
 
 	onInit() {
 		console.log('host', this.host);
+		const { node } = getContext(this);
+		fromEvent(node, 'click').pipe(
+			takeUntil(this.unsubscribe$)
+		).subscribe(event => {
+			this.handled.next(event);
+			this.unhandled.next(event);
+		});
+		console.log('HostedDirective.onInit.host.input', this.host!.input);
+	}
+
+	onChanges(changes: Factory) {
+		console.log('HostedDirective.onChanges.host.input', this.host!.input);
 	}
 }
 HostedDirective.meta = {
 	selector: '[hosted]',
+	outputs: ['handled', 'unhandled'],
 	hosts: { host: HostDirective }
 };
 

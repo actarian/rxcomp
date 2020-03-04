@@ -3,7 +3,7 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
-## [1.0.0-beta.7] - 2020-03-04
+## [1.0.0-beta.8] - 2020-03-04
 ### Refactoring
 - Typescript version
 

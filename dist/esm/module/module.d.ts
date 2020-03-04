@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import Factory from '../core/factory';
 import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, IModuleParsedMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
 export default class Module {
@@ -20,9 +21,9 @@ export default class Module {
     protected makeInputs(meta: IFactoryMeta, instance: Factory): {
         [key: string]: ExpressionFunction;
     };
-    protected makeOutput(instance: Factory, key: string): ExpressionFunction | null;
+    protected makeOutput(instance: Factory, key: string): Observable<any>;
     protected makeOutputs(meta: IFactoryMeta, instance: Factory): {
-        [key: string]: ExpressionFunction;
+        [key: string]: Observable<any>;
     };
     protected resolveInputsOutputs(instance: Factory, changes: Factory | Window): void;
     protected static parseExpression(expression: string): string;

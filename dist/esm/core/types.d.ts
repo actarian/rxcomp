@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import Module from '../module/module';
 import Factory from './factory';
 import Pipe from './pipe';
@@ -23,7 +24,7 @@ export interface IContext {
         [key: string]: ExpressionFunction;
     };
     outputs?: {
-        [key: string]: ExpressionFunction;
+        [key: string]: Observable<any>;
     };
 }
 export interface IModuleMeta {

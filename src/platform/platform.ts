@@ -32,7 +32,7 @@ export default class Platform {
 		const instances = module.compile(meta.node, window);
 		const root = instances[0];
 		// if (root instanceof module.meta.bootstrap) {
-		root.pushChanges!();
+		root.pushChanges();
 		// }
 		return module;
 	}

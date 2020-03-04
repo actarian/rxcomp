@@ -38,6 +38,9 @@ export default class Module {
                 this.makeHosts(meta, instance, node);
                 context.inputs = this.makeInputs(meta, instance);
                 context.outputs = this.makeOutputs(meta, instance);
+                if (parentInstance instanceof Factory) {
+                    this.resolveInputsOutputs(instance, parentInstance);
+                }
             }
             // calling onInit event
             instance.onInit();
@@ -70,7 +73,8 @@ export default class Module {
                     instance.pushChanges();
                 });
             }
-            instance.changes$.next(instance);
+            // !!! pushChanges
+            // instance.changes$.next(instance);
             return instance;
         }
         else {
@@ -256,19 +260,20 @@ export default class Module {
         const parentInstance = context.parentInstance;
         const expression = node.getAttribute(`(${key})`);
         const outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
-        if (outputFunction) {
-            const output$ = new Subject().pipe(tap((event) => {
+        const output$ = new Subject().pipe(tap((event) => {
+            if (outputFunction) {
+                // console.log(expression, parentInstance);
                 this.resolve(outputFunction, parentInstance, event);
-            }));
-            output$.pipe(takeUntil(instance.unsubscribe$)).subscribe();
-            instance[key] = output$;
-        }
-        return outputFunction;
+            }
+        }));
+        output$.pipe(takeUntil(instance.unsubscribe$)).subscribe();
+        instance[key] = output$;
+        return output$;
     }
     makeOutputs(meta, instance) {
         const outputs = {};
         if (meta.outputs) {
-            meta.outputs.forEach((key, i) => {
+            meta.outputs.forEach((key) => {
                 const output = this.makeOutput(instance, key);
                 if (output) {
                     outputs[key] = output;
@@ -286,14 +291,6 @@ export default class Module {
             const value = this.resolve(inputFunction, parentInstance, instance);
             instance[key] = value;
         }
-        /*
-        const outputs = context.outputs;
-        for (let key in outputs) {
-            const inpuoutputFunctiontFunction = outputs[key];
-            const value = this.resolve(outputFunction, parentInstance, null);
-            // console.log(`setted -> ${key}`, value);
-        }
-        */
     }
     static parseExpression(expression) {
         const l = '┌';

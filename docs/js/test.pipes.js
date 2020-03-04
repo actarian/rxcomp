@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.7
+ * @license rxcomp v1.0.0-beta.8
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -643,6 +643,10 @@
           this.makeHosts(meta, instance, node);
           context.inputs = this.makeInputs(meta, instance);
           context.outputs = this.makeOutputs(meta, instance);
+
+          if (parentInstance instanceof Factory) {
+            this.resolveInputsOutputs(instance, parentInstance);
+          }
         }
 
         instance.onInit();
@@ -658,7 +662,6 @@
           });
         }
 
-        instance.changes$.next(instance);
         return instance;
       } else {
         return undefined;
@@ -886,16 +889,14 @@
       var parentInstance = context.parentInstance;
       var expression = node.getAttribute("(" + key + ")");
       var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
-
-      if (outputFunction) {
-        var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
+      var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
+        if (outputFunction) {
           _this6.resolve(outputFunction, parentInstance, event);
-        }));
-        output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
-        instance[key] = output$;
-      }
-
-      return outputFunction;
+        }
+      }));
+      output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
+      instance[key] = output$;
+      return output$;
     };
 
     _proto.makeOutputs = function makeOutputs(meta, instance) {
@@ -904,7 +905,7 @@
       var outputs = {};
 
       if (meta.outputs) {
-        meta.outputs.forEach(function (key, i) {
+        meta.outputs.forEach(function (key) {
           var output = _this7.makeOutput(instance, key);
 
           if (output) {

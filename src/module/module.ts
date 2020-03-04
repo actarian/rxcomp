@@ -45,6 +45,9 @@ export default class Module {
 				this.makeHosts(meta, instance, node);
 				context.inputs = this.makeInputs(meta, instance);
 				context.outputs = this.makeOutputs(meta, instance);
+				if (parentInstance instanceof Factory) {
+					this.resolveInputsOutputs(instance, parentInstance);
+				}
 			}
 			// calling onInit event
 			instance.onInit();
@@ -66,20 +69,15 @@ export default class Module {
 					takeUntil(instance.unsubscribe$)
 				).subscribe((changes: Factory | Window) => {
 					// resolve component input outputs
-					// if (isComponent && meta) {
 					if (meta) {
 						this.resolveInputsOutputs(instance, changes);
 					}
 					// calling onChanges event with changes
-					// console.log('onChanges', instance.constructor.name);
-					// console.log('onChanges', instance.constructor.meta.selector, changes);
 					instance.onChanges(changes);
 					// push instance changes for subscribers
 					instance.pushChanges();
 				});
 			}
-			// !!! pushChanges
-			instance.changes$.next(instance);
 			return instance;
 		} else {
 			return undefined;
@@ -271,30 +269,31 @@ export default class Module {
 		return inputs;
 	}
 
-	protected makeOutput(instance: Factory, key: string): ExpressionFunction | null {
+	protected makeOutput(instance: Factory, key: string): Observable<any> {
 		const context: IContext = getContext(instance);
 		const node: IElement = context.node;
 		const parentInstance: Factory | Window = context.parentInstance;
 		const expression: string | null = node.getAttribute(`(${key})`);
 		const outputFunction: ExpressionFunction | null = expression ? this.makeFunction(expression, ['$event']) : null;
-		if (outputFunction) {
-			const output$: Observable<any> = new Subject<any>().pipe(
-				tap((event) => {
+		const output$: Observable<any> = new Subject<any>().pipe(
+			tap((event) => {
+				if (outputFunction) {
+					// console.log(expression, parentInstance);
 					this.resolve(outputFunction, parentInstance, event);
-				})
-			);
-			output$.pipe(
-				takeUntil(instance.unsubscribe$)
-			).subscribe();
-			instance[key] = output$;
-		}
-		return outputFunction;
+				}
+			})
+		);
+		output$.pipe(
+			takeUntil(instance.unsubscribe$)
+		).subscribe();
+		instance[key] = output$;
+		return output$;
 	}
 
-	protected makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
-		const outputs: { [key: string]: ExpressionFunction } = {};
+	protected makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: Observable<any> } {
+		const outputs: { [key: string]: Observable<any> } = {};
 		if (meta.outputs) {
-			meta.outputs.forEach((key: string, i: number) => {
+			meta.outputs.forEach((key: string) => {
 				const output = this.makeOutput(instance, key);
 				if (output) {
 					outputs[key] = output;
@@ -313,14 +312,6 @@ export default class Module {
 			const value: any = this.resolve(inputFunction, parentInstance, instance);
 			instance[key] = value;
 		}
-		/*
-		const outputs = context.outputs;
-		for (let key in outputs) {
-			const inpuoutputFunctiontFunction = outputs[key];
-			const value = this.resolve(outputFunction, parentInstance, null);
-			// console.log(`setted -> ${key}`, value);
-		}
-		*/
 	}
 
 	protected static parseExpression(expression: string): string {

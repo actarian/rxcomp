@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.7
+ * @license rxcomp v1.0.0-beta.8
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -643,6 +643,10 @@
           this.makeHosts(meta, instance, node);
           context.inputs = this.makeInputs(meta, instance);
           context.outputs = this.makeOutputs(meta, instance);
+
+          if (parentInstance instanceof Factory) {
+            this.resolveInputsOutputs(instance, parentInstance);
+          }
         }
 
         instance.onInit();
@@ -658,7 +662,6 @@
           });
         }
 
-        instance.changes$.next(instance);
         return instance;
       } else {
         return undefined;
@@ -886,16 +889,14 @@
       var parentInstance = context.parentInstance;
       var expression = node.getAttribute("(" + key + ")");
       var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
-
-      if (outputFunction) {
-        var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
+      var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
+        if (outputFunction) {
           _this6.resolve(outputFunction, parentInstance, event);
-        }));
-        output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
-        instance[key] = output$;
-      }
-
-      return outputFunction;
+        }
+      }));
+      output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
+      instance[key] = output$;
+      return output$;
     };
 
     _proto.makeOutputs = function makeOutputs(meta, instance) {
@@ -904,7 +905,7 @@
       var outputs = {};
 
       if (meta.outputs) {
-        meta.outputs.forEach(function (key, i) {
+        meta.outputs.forEach(function (key) {
           var output = _this7.makeOutput(instance, key);
 
           if (output) {
@@ -1568,7 +1569,11 @@
     var _proto = RootComponent.prototype;
 
     _proto.onItem = function onItem(item) {
-      console.log('RootComponent.item', item);
+      console.log('RootComponent.onItem.item', item);
+    };
+
+    _proto.onHandled = function onHandled(event) {
+      console.log('RootComponent.onHandled', event);
     };
 
     return RootComponent;
@@ -1590,6 +1595,14 @@
     }
 
     var _proto2 = SubComponent.prototype;
+
+    _proto2.onInit = function onInit() {
+      console.log('SubComponent.onInit.item', this.item);
+    };
+
+    _proto2.onChanges = function onChanges(changes) {
+      console.log('SubComponent.onChanges.item', this.item);
+    };
 
     _proto2.onToggle = function onToggle() {
       this.toggle.next(this.item);
@@ -1615,7 +1628,12 @@
     var _proto3 = HostDirective.prototype;
 
     _proto3.onInit = function onInit() {
-      console.log('style', this.style);
+      console.log('HostDirective.onInit.style', this.style);
+      console.log('HostDirective.onInit.input', this.input);
+    };
+
+    _proto3.onChanges = function onChanges(changes) {
+      console.log('HostDirective.onChanges.input', this.input);
     };
 
     return HostDirective;
@@ -1623,6 +1641,7 @@
 
   HostDirective.meta = {
     selector: '[host]',
+    inputs: ['input'],
     hosts: {
       style: StyleDirective
     }
@@ -1638,7 +1657,23 @@
     var _proto4 = HostedDirective.prototype;
 
     _proto4.onInit = function onInit() {
+      var _this3 = this;
+
       console.log('host', this.host);
+
+      var _getContext = getContext(this),
+          node = _getContext.node;
+
+      rxjs.fromEvent(node, 'click').pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+        _this3.handled.next(event);
+
+        _this3.unhandled.next(event);
+      });
+      console.log('HostedDirective.onInit.host.input', this.host.input);
+    };
+
+    _proto4.onChanges = function onChanges(changes) {
+      console.log('HostedDirective.onChanges.host.input', this.host.input);
     };
 
     return HostedDirective;
@@ -1646,6 +1681,7 @@
 
   HostedDirective.meta = {
     selector: '[hosted]',
+    outputs: ['handled', 'unhandled'],
     hosts: {
       host: HostDirective
     }

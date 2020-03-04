@@ -45,6 +45,9 @@ var Module = /** @class */ (function () {
                 this.makeHosts(meta_1, instance_1, node);
                 context.inputs = this.makeInputs(meta_1, instance_1);
                 context.outputs = this.makeOutputs(meta_1, instance_1);
+                if (parentInstance instanceof factory_1.default) {
+                    this.resolveInputsOutputs(instance_1, parentInstance);
+                }
             }
             // calling onInit event
             instance_1.onInit();
@@ -77,7 +80,8 @@ var Module = /** @class */ (function () {
                     instance_1.pushChanges();
                 });
             }
-            instance_1.changes$.next(instance_1);
+            // !!! pushChanges
+            // instance.changes$.next(instance);
             return instance_1;
         }
         else {
@@ -263,20 +267,21 @@ var Module = /** @class */ (function () {
         var parentInstance = context.parentInstance;
         var expression = node.getAttribute("(" + key + ")");
         var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
-        if (outputFunction) {
-            var output$ = new rxjs_1.Subject().pipe(operators_1.tap(function (event) {
+        var output$ = new rxjs_1.Subject().pipe(operators_1.tap(function (event) {
+            if (outputFunction) {
+                // console.log(expression, parentInstance);
                 _this.resolve(outputFunction, parentInstance, event);
-            }));
-            output$.pipe(operators_1.takeUntil(instance.unsubscribe$)).subscribe();
-            instance[key] = output$;
-        }
-        return outputFunction;
+            }
+        }));
+        output$.pipe(operators_1.takeUntil(instance.unsubscribe$)).subscribe();
+        instance[key] = output$;
+        return output$;
     };
     Module.prototype.makeOutputs = function (meta, instance) {
         var _this = this;
         var outputs = {};
         if (meta.outputs) {
-            meta.outputs.forEach(function (key, i) {
+            meta.outputs.forEach(function (key) {
                 var output = _this.makeOutput(instance, key);
                 if (output) {
                     outputs[key] = output;
@@ -294,14 +299,6 @@ var Module = /** @class */ (function () {
             var value = this.resolve(inputFunction, parentInstance, instance);
             instance[key] = value;
         }
-        /*
-        const outputs = context.outputs;
-        for (let key in outputs) {
-            const inpuoutputFunctiontFunction = outputs[key];
-            const value = this.resolve(outputFunction, parentInstance, null);
-            // console.log(`setted -> ${key}`, value);
-        }
-        */
     };
     Module.parseExpression = function (expression) {
         var l = '┌';

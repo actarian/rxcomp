@@ -2,12 +2,12 @@
 <!-- @@block = main-->
 <main root-component>
 	<!-- @@include ./templates/shared/header.html -->
-	<div host [style]="{ 'color': 'red' }">
+	<div host [input]="items" [style]="{ 'color': 'red' }">
 		<ul class="list">
 			<li class="list__item" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items">
 				<div sub-component [item]="item"></div>
 			</li>
-			<li class="list__item" hosted [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" sub-component [item]="item"></li>
+			<li class="list__item" hosted (handled)="onHandled($event)" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" sub-component [item]="item"></li>
 		</ul>
 	</div>
 	<div [style]="{ 'background-color': background }" (click)="onItem(4)" sub-component [item]="4"></div>
@@ -16,5 +16,5 @@
 </main>
 <!-- @@close-->
 <!-- @@block = js-->
-<script src="/rxcomp/js/test.scope.min.js"></script>
+<script src="/rxcomp/js/test.scope.js"></script>
 <!-- @@close-->
