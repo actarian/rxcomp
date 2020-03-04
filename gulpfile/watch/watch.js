@@ -26,37 +26,23 @@ function watchEntries(callback) {
 		watcher.close();
 	}
 	watcher = watch(['**/*.*', '!node_modules/**/*.*']).on('change', (path_) => {
-		const entry = Object.keys(entries).reduce((p, key) => {
+		const matchedEntries = Object.keys(entries).filter(key => {
 			const imports = entries[key];
 			if (isGlob(key)) {
-				if (isExt(path_, imports) && sameRoot(path_, key)) {
-					return key;
-				} else {
-					return p;
-				}
+				return isExt(path_, imports) && sameRoot(path_, key);
 			} else if (isPath(imports)) {
-				if (key.indexOf(path_) !== -1) {
-					return key;
-				} else {
-					return p;
-				}
+				return key.indexOf(path_) !== -1;
 			} else {
 				const found = imports.find(i => {
 					// console.log(i, path_);
 					return i.indexOf(path_) !== -1;
 				}) || key.indexOf(path_) !== -1;
-				if (found) {
-					return key;
-				} else {
-					return p;
-				}
+				return found;
 			}
-		}, null);
-		if (entry) {
-			// console.log('entry', entry);
-			// log('watch.changed', path_, '>', entry);
+		});
+		if (matchedEntries.length) {
 			if (typeof callback === 'function') {
-				callback(path_, entry);
+				matchedEntries.forEach(entry => callback(path_, entry));
 			}
 		}
 	});
