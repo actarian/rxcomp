@@ -78,6 +78,7 @@ export default class Module {
 					instance.pushChanges();
 				});
 			}
+			// !!! pushChanges
 			instance.changes$.next(instance);
 			return instance;
 		} else {
@@ -283,7 +284,7 @@ export default class Module {
 				})
 			);
 			output$.pipe(
-				takeUntil(instance.unsubscribe$!)
+				takeUntil(instance.unsubscribe$)
 			).subscribe();
 			instance[key] = output$;
 		}

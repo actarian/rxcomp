@@ -8,7 +8,8 @@
 	"types": "dist/cjs/rxcomp.d.ts",
 	"es2015": "dist/esm/rxcomp.js",
 	"files": [
-		"dist/"
+    "dist/",
+    "!.DS_Store"
 	],
 	"license": "MIT",
 	"keywords": [
