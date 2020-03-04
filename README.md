@@ -8,8 +8,8 @@ If you like Angular declarative syntax but you just want go Vanilla, RxComp libr
 
  lib & dependancy | size
 :-----------------|:----------------------------------------------------------------------------------------------|
-rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/rxcomp.min.js.svg?compression=gzip)
-rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/rxcomp.min.js.svg)
+rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/iife/rxcomp.min.js.svg?compression=gzip)
+rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/iife/rxcomp.min.js.svg)
 rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg?compression=gzip)
 rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg)
  
@@ -70,7 +70,7 @@ For CDN, you can use unpkg
 
 ```html
 <script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
-<script src="https://unpkg.com/rxcomp@1.0.0-beta.5/dist/rxcomp.min.js"></script>  
+<script src="https://unpkg.com/rxcomp@1.0.0-beta.5/dist/iife/rxcomp.min.js"></script>  
 ```
 
 The global namespace for RxComp is `rxcomp`

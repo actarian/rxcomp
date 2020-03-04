@@ -78,6 +78,7 @@ export default class Module {
 					instance.pushChanges();
 				});
 			}
+			instance.changes$.next(instance);
 			return instance;
 		} else {
 			return undefined;

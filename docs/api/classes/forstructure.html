@@ -98,7 +98,6 @@
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="forstructure.html#forfunction" class="tsd-kind-icon">for<wbr>Function</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="forstructure.html#forend" class="tsd-kind-icon">forend</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="forstructure.html#instances" class="tsd-kind-icon">instances</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="forstructure.html#pushchanges" class="tsd-kind-icon">push<wbr>Changes</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="forstructure.html#rxcompid" class="tsd-kind-icon">rxcomp<wbr>Id</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="forstructure.html#token" class="tsd-kind-icon">token</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="forstructure.html#unsubscribe_" class="tsd-kind-icon">unsubscribe$</a></li>
@@ -109,8 +108,11 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="forstructure.html#getexpressiontoken" class="tsd-kind-icon">get<wbr>Expression<wbr>Token</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="forstructure.html#onchanges" class="tsd-kind-icon">on<wbr>Changes</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="forstructure.html#oninit" class="tsd-kind-icon">on<wbr>Init</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="forstructure.html#onchanges" class="tsd-kind-icon">on<wbr>Changes</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="forstructure.html#ondestroy" class="tsd-kind-icon">on<wbr>Destroy</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="forstructure.html#oninit" class="tsd-kind-icon">on<wbr>Init</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="forstructure.html#onview" class="tsd-kind-icon">on<wbr>View</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="forstructure.html#pushchanges" class="tsd-kind-icon">push<wbr>Changes</a></li>
 							</ul>
 						</section>
 					</div>
@@ -129,7 +131,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core/factory.ts#L19">src/core/factory.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L26">src/core/factory.ts:26</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -147,12 +149,12 @@
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="changes_" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> changes$</h3>
-					<div class="tsd-signature tsd-kind-icon">changes$<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BehaviorSubject</span><span class="tsd-signature-symbol">&lt;</span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">&gt;</span></div>
+					<h3>changes$</h3>
+					<div class="tsd-signature tsd-kind-icon">changes$<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReplaySubject</span><span class="tsd-signature-symbol">&lt;</span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new ReplaySubject(1)</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#changes_">changes$</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core/factory.ts#L7">src/core/factory.ts:7</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L14">src/core/factory.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -162,7 +164,7 @@
 					<div class="tsd-signature tsd-kind-icon">for<wbr>Function<span class="tsd-signature-symbol">:</span> <a href="../globals.html#expressionfunction" class="tsd-signature-type">ExpressionFunction</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/for/for.structure.ts#L12">src/for/for.structure.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/for/for.structure.ts#L12">src/for/for.structure.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -172,7 +174,7 @@
 					<div class="tsd-signature tsd-kind-icon">forend<span class="tsd-signature-symbol">:</span> <a href="../interfaces/icomment.html" class="tsd-signature-type">IComment</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/for/for.structure.ts#L10">src/for/for.structure.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/for/for.structure.ts#L10">src/for/for.structure.ts:10</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -182,29 +184,18 @@
 					<div class="tsd-signature tsd-kind-icon">instances<span class="tsd-signature-symbol">:</span> <a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/for/for.structure.ts#L9">src/for/for.structure.ts:9</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-					<a name="pushchanges" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> push<wbr>Changes</h3>
-					<div class="tsd-signature tsd-kind-icon">push<wbr>Changes<span class="tsd-signature-symbol">:</span> <a href="../interfaces/type.html#function" class="tsd-signature-type">Function</a></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#pushchanges">pushChanges</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core/factory.ts#L9">src/core/factory.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/for/for.structure.ts#L9">src/for/for.structure.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="rxcompid" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> rxcomp<wbr>Id</h3>
-					<div class="tsd-signature tsd-kind-icon">rxcomp<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+					<h3>rxcomp<wbr>Id</h3>
+					<div class="tsd-signature tsd-kind-icon">rxcomp<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = -1</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#rxcompid">rxcompId</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core/factory.ts#L6">src/core/factory.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L11">src/core/factory.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -214,18 +205,18 @@
 					<div class="tsd-signature tsd-kind-icon">token<span class="tsd-signature-symbol">:</span> <a href="../interfaces/iexpressiontoken.html" class="tsd-signature-type">IExpressionToken</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/for/for.structure.ts#L11">src/for/for.structure.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/for/for.structure.ts#L11">src/for/for.structure.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="unsubscribe_" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> unsubscribe$</h3>
-					<div class="tsd-signature tsd-kind-icon">unsubscribe$<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Subject</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<h3>unsubscribe$</h3>
+					<div class="tsd-signature tsd-kind-icon">unsubscribe$<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Subject</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Subject()</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#unsubscribe_">unsubscribe$</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core/factory.ts#L8">src/core/factory.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L13">src/core/factory.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -236,7 +227,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#meta">meta</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/core/factory.ts#L10">src/core/factory.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L9">src/core/factory.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -253,7 +244,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/for/for.structure.ts#L83">src/for/for.structure.ts:83</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/for/for.structure.ts#L83">src/for/for.structure.ts:83</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -266,17 +257,18 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 					<a name="onchanges" class="tsd-anchor"></a>
 					<h3>on<wbr>Changes</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 						<li class="tsd-signature tsd-kind-icon">on<wbr>Changes<span class="tsd-signature-symbol">(</span>changes<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Window</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Overrides <a href="component.html">Component</a>.<a href="component.html#onchanges">onChanges</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/for/for.structure.ts#L27">src/for/for.structure.ts:27</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/for/for.structure.ts#L27">src/for/for.structure.ts:27</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -289,17 +281,72 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="ondestroy" class="tsd-anchor"></a>
+					<h3>on<wbr>Destroy</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">on<wbr>Destroy<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#ondestroy">onDestroy</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L19">src/core/factory.ts:19</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 					<a name="oninit" class="tsd-anchor"></a>
 					<h3>on<wbr>Init</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 						<li class="tsd-signature tsd-kind-icon">on<wbr>Init<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Overrides <a href="component.html">Component</a>.<a href="component.html#oninit">onInit</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/53e5fdd/src/for/for.structure.ts#L14">src/for/for.structure.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/for/for.structure.ts#L14">src/for/for.structure.ts:14</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="onview" class="tsd-anchor"></a>
+					<h3>on<wbr>View</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">on<wbr>View<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="component.html">Component</a>.<a href="component.html#onview">onView</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L18">src/core/factory.ts:18</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="pushchanges" class="tsd-anchor"></a>
+					<h3>push<wbr>Changes</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">push<wbr>Changes<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="structure.html">Structure</a>.<a href="structure.html#pushchanges">pushChanges</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a3cb818/src/core/factory.ts#L21">src/core/factory.ts:21</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -339,9 +386,6 @@
 								<a href="forstructure.html#instances" class="tsd-kind-icon">instances</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="forstructure.html#pushchanges" class="tsd-kind-icon">push<wbr>Changes</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="forstructure.html#rxcompid" class="tsd-kind-icon">rxcomp<wbr>Id</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
@@ -356,11 +400,20 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="forstructure.html#getexpressiontoken" class="tsd-kind-icon">get<wbr>Expression<wbr>Token</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 								<a href="forstructure.html#onchanges" class="tsd-kind-icon">on<wbr>Changes</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="forstructure.html#ondestroy" class="tsd-kind-icon">on<wbr>Destroy</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 								<a href="forstructure.html#oninit" class="tsd-kind-icon">on<wbr>Init</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="forstructure.html#onview" class="tsd-kind-icon">on<wbr>View</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="forstructure.html#pushchanges" class="tsd-kind-icon">push<wbr>Changes</a>
 							</li>
 						</ul>
 					</li>

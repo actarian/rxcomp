@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.6
+ * @license rxcomp v1.0.0-beta.7
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -83,7 +83,7 @@
     function Factory() {
       this.rxcompId = -1;
       this.unsubscribe$ = new rxjs.Subject();
-      this.changes$ = new rxjs.ReplaySubject();
+      this.changes$ = new rxjs.ReplaySubject(1);
     }
 
     var _proto = Factory.prototype;
@@ -658,6 +658,7 @@
           });
         }
 
+        instance.changes$.next(instance);
         return instance;
       } else {
         return undefined;

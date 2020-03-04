@@ -11,7 +11,7 @@ var Factory = /** @class */ (function () {
         }
         this.rxcompId = -1;
         this.unsubscribe$ = new rxjs_1.Subject();
-        this.changes$ = new rxjs_1.ReplaySubject();
+        this.changes$ = new rxjs_1.ReplaySubject(1);
     }
     Factory.prototype.onInit = function () { };
     Factory.prototype.onChanges = function (changes) { };

@@ -5,7 +5,7 @@ export default class Factory {
     constructor(...args) {
         this.rxcompId = -1;
         this.unsubscribe$ = new Subject();
-        this.changes$ = new ReplaySubject();
+        this.changes$ = new ReplaySubject(1);
     }
     onInit() { }
     onChanges(changes) { }

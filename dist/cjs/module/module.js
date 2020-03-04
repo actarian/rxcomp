@@ -77,6 +77,7 @@ var Module = /** @class */ (function () {
                     instance_1.pushChanges();
                 });
             }
+            instance_1.changes$.next(instance_1);
             return instance_1;
         }
         else {

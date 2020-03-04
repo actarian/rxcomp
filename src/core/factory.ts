@@ -11,7 +11,7 @@ export default class Factory {
 	rxcompId: number = -1;
 
 	unsubscribe$: Subject<void> = new Subject();
-	changes$: ReplaySubject<Factory> = new ReplaySubject();
+	changes$: ReplaySubject<Factory> = new ReplaySubject(1);
 
 	onInit(): void { }
 	onChanges(changes: Factory | Window): void { }
