@@ -10,20 +10,6 @@ export default class Context extends Component {
 		super();
 		descriptors = Context.mergeDescriptors(instance, instance, descriptors);
 		descriptors = Context.mergeDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
-		/*
-		const subjects = {
-			changes$: {
-				value: new BehaviorSubject(this),
-				writable: false,
-				enumerable: false,
-			},
-			unsubscribe$: {
-				value: new Subject(),
-				writable: false,
-				enumerable: false,
-			}
-		};
-		*/
 		Object.defineProperties(this, descriptors);
 	}
 

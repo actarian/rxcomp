@@ -12,7 +12,7 @@ export default class IfStructure extends Structure {
 	onInit() {
 		const { module, node } = getContext(this);
 		const ifbegin: IComment = this.ifbegin = document.createComment(`*if begin`);
-		ifbegin['rxcompId'] = node.rxcompId;
+		ifbegin.rxcompId = node.rxcompId;
 		node.parentNode!.replaceChild(ifbegin, node);
 		const ifend = this.ifend = document.createComment(`*if end`);
 		ifbegin.parentNode!.insertBefore(ifend, ifbegin.nextSibling);

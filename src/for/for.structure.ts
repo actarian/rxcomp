@@ -14,7 +14,7 @@ export default class ForStructure extends Structure {
 	onInit() {
 		const { module, node } = getContext(this);
 		const forbegin: IComment = document.createComment(`*for begin`);
-		forbegin['rxcompId'] = node.rxcompId;
+		forbegin.rxcompId = node.rxcompId;
 		node.parentNode!.replaceChild(forbegin, node);
 		const forend: IComment = this.forend = document.createComment(`*for end`);
 		forbegin.parentNode!.insertBefore(forend, forbegin.nextSibling);
@@ -56,7 +56,7 @@ export default class ForStructure extends Structure {
 				} else {
 					// create
 					const clonedNode: IElement = node.cloneNode(true) as IElement;
-					delete clonedNode['rxcompId'];
+					delete clonedNode.rxcompId;
 					this.forend!.parentNode!.insertBefore(clonedNode, this.forend!);
 					const args = [token.key, key, token.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);

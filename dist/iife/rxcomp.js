@@ -358,7 +358,7 @@ var rxcomp = (function (exports, rxjs, operators) {
           node = _getContext.node;
 
       var forbegin = document.createComment("*for begin");
-      forbegin['rxcompId'] = node.rxcompId;
+      forbegin.rxcompId = node.rxcompId;
       node.parentNode.replaceChild(forbegin, node);
       var forend = this.forend = document.createComment("*for end");
       forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
@@ -390,7 +390,7 @@ var rxcomp = (function (exports, rxjs, operators) {
             instance[token.value] = value;
           } else {
             var clonedNode = node.cloneNode(true);
-            delete clonedNode['rxcompId'];
+            delete clonedNode.rxcompId;
             this.forend.parentNode.insertBefore(clonedNode, this.forend);
             var args = [token.key, key, token.value, value, i, total, context.parentInstance];
 
@@ -505,7 +505,7 @@ var rxcomp = (function (exports, rxjs, operators) {
           node = _getContext.node;
 
       var ifbegin = this.ifbegin = document.createComment("*if begin");
-      ifbegin['rxcompId'] = node.rxcompId;
+      ifbegin.rxcompId = node.rxcompId;
       node.parentNode.replaceChild(ifbegin, node);
       var ifend = this.ifend = document.createComment("*if end");
       ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);

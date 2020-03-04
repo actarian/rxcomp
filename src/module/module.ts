@@ -55,7 +55,7 @@ export default class Module {
 					// debounceTime(1),
 					/*
 					distinctUntilChanged(function(prev, curr) {
-						console.log(isComponent, context.inputs);
+						// console.log(isComponent, context.inputs);
 						if (isComponent && meta && Object.keys(context.inputs).length === 0) {
 							return true; // same
 						} else {
@@ -196,19 +196,13 @@ export default class Module {
 	protected pushFragment(nodeValue: string, from: number, to: number, expressions: (ExpressionFunction | string)[]): void {
 		const fragment: string = nodeValue.substring(from, to);
 		expressions.push(fragment);
-	};
+	}
 
 	protected parseTextNodeExpression(nodeValue: string): (ExpressionFunction | string)[] {
 		const expressions: (ExpressionFunction | string)[] = [];
 		const regex: RegExp = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
 		let lastIndex: number = 0,
 			matches: RegExpExecArray | null;
-		/*
-		const pushFragment = function (from: number, to: number): void {
-			const fragment = nodeValue.substring(from, to);
-			expressions.push(fragment);
-		};
-		*/
 		while ((matches = regex.exec(nodeValue)) !== null) {
 			const index: number = regex.lastIndex - matches[0].length;
 			if (index > lastIndex) {
