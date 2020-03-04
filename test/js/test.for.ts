@@ -18,10 +18,10 @@ class RootComponent extends Component {
 		if (true) {
 			interval(1000).pipe(
 				take(1000),
-				takeUntil(this.unsubscribe$!)
+				takeUntil(this.unsubscribe$)
 			).subscribe(items => {
 				this.flag = !this.flag;
-				this.pushChanges!();
+				this.pushChanges();
 			});
 		}
 

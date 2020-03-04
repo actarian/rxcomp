@@ -20,17 +20,17 @@ export default class AppComponent extends Component {
 		// store service
 		this.store$ = StoreService.get$();
 		this.store$.pipe(
-			takeUntil(this.unsubscribe$!)
+			takeUntil(this.unsubscribe$)
 		).subscribe(items => {
 			this.items = items;
 			// onpush change detection strategy
-			this.pushChanges!();
+			this.pushChanges();
 		});
 	}
 
 	onInput($event: InputEvent) {
 		// console.log('AppComponent.onInput', $event, this);
-		this.pushChanges!();
+		this.pushChanges();
 	}
 
 	onAddItem($event: MouseEvent) {
