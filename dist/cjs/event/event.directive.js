@@ -26,7 +26,7 @@ var EventDirective = /** @class */ (function (_super) {
             });
         }
         else {
-            parentInstance[event + "$"] = event$; // !!! any
+            parentInstance[event + "$"] = event$;
         }
         // console.log('EventDirective.onInit', 'selector', selector, 'event', event);
     };

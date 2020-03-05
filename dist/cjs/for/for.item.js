@@ -4,7 +4,7 @@ var tslib_1 = require("tslib");
 var context_1 = tslib_1.__importDefault(require("../core/context"));
 var ForItem = /** @class */ (function (_super) {
     tslib_1.__extends(ForItem, _super);
-    // !!! try with payload options { key, $key, value, $value, index, count } or use onInit()
+    // !!! todo: payload options { key, $key, value, $value, index, count }
     function ForItem(key, $key, value, $value, index, count, parentInstance) {
         var _this = 
         // console.log('ForItem', arguments);

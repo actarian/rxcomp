@@ -3,6 +3,12 @@ import Module from '../module/module';
 import Factory from './factory';
 import Pipe from './pipe';
 
+declare global {
+	interface Window {
+		[key: string]: any; // extensible object
+	}
+}
+
 export type PipeMap = { [key: string]: typeof Pipe };
 
 export type PipeList = (typeof Pipe)[];

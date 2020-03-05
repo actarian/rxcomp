@@ -7,7 +7,7 @@ export default class ForItem extends Context {
 	count: number;
 	[key: string]: any;
 
-	// !!! try with payload options { key, $key, value, $value, index, count } or use onInit()
+	// !!! todo: payload options { key, $key, value, $value, index, count }
 
 	constructor(key: string, $key: number | string, value: string, $value: any, index: number, count: number, parentInstance: Factory) {
 		// console.log('ForItem', arguments);

@@ -7,6 +7,7 @@ var JsonPipe = /** @class */ (function (_super) {
     function JsonPipe() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    // !!! todo: Remove circular structures when converting to JSON
     JsonPipe.transform = function (value) {
         return JSON.stringify(value, null, '\t');
     };

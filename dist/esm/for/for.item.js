@@ -1,6 +1,6 @@
 import Context from '../core/context';
 export default class ForItem extends Context {
-    // !!! try with payload options { key, $key, value, $value, index, count } or use onInit()
+    // !!! todo: payload options { key, $key, value, $value, index, count }
     constructor(key, $key, value, $value, index, count, parentInstance) {
         // console.log('ForItem', arguments);
         super(parentInstance);

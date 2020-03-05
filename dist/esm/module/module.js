@@ -61,20 +61,15 @@ export default class Module {
                 */
                 takeUntil(instance.unsubscribe$)).subscribe((changes) => {
                     // resolve component input outputs
-                    // if (isComponent && meta) {
                     if (meta) {
                         this.resolveInputsOutputs(instance, changes);
                     }
                     // calling onChanges event with changes
-                    // console.log('onChanges', instance.constructor.name);
-                    // console.log('onChanges', instance.constructor.meta.selector, changes);
                     instance.onChanges(changes);
                     // push instance changes for subscribers
                     instance.pushChanges();
                 });
             }
-            // !!! pushChanges
-            // instance.changes$.next(instance);
             return instance;
         }
         else {

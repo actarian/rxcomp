@@ -23,7 +23,7 @@ export default class EventDirective extends Directive {
 				module.resolve(outputFunction, parentInstance, event);
 			});
 		} else {
-			(parentInstance as any)[`${event}$`] = event$; // !!! any
+			parentInstance[`${event}$`] = event$;
 		}
 		// console.log('EventDirective.onInit', 'selector', selector, 'event', event);
 	}

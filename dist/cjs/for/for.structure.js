@@ -58,7 +58,8 @@ var ForStructure = /** @class */ (function (_super) {
                     var clonedNode = node.cloneNode(true);
                     delete clonedNode.rxcompId;
                     this.forend.parentNode.insertBefore(clonedNode, this.forend);
-                    var args = [token.key, key, token.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
+                    // !!! todo: check context.parentInstance
+                    var args = [token.key, key, token.value, value, i, total, context.parentInstance];
                     var instance = module.makeInstance(clonedNode, for_item_1.default, context.selector, context.parentInstance, args);
                     if (instance) {
                         var forItemContext = factory_1.getContext(instance);

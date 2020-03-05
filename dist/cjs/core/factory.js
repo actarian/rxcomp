@@ -24,27 +24,6 @@ var Factory = /** @class */ (function () {
     return Factory;
 }());
 exports.default = Factory;
-/*
-export default class Factory {
-
-    rxcompId?: number;
-    changes$?: BehaviorSubject<Factory>;
-    unsubscribe$?: Subject<void>;
-    pushChanges?: Function;
-    static meta: IFactoryMeta;
-
-    // onInit?: () => void;
-    // onChanges?: (changes: Factory | Window) => void;
-    // onView?: () => void;
-    // onDestroy?: () => void;
-
-    [key: string]: any; // extensible object
-
-    constructor(...args: any[]) {
-
-    }
-}
-*/
 function getContext(instance) {
     return exports.CONTEXTS[instance.rxcompId];
 }

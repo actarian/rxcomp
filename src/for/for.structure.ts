@@ -58,7 +58,8 @@ export default class ForStructure extends Structure {
 					const clonedNode: IElement = node.cloneNode(true) as IElement;
 					delete clonedNode.rxcompId;
 					this.forend!.parentNode!.insertBefore(clonedNode, this.forend!);
-					const args = [token.key, key, token.value, value, i, total, context.parentInstance]; // !!! context.parentInstance unused?
+					// !!! todo: check context.parentInstance
+					const args = [token.key, key, token.value, value, i, total, context.parentInstance];
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 					if (instance) {
 						const forItemContext = getContext(instance);

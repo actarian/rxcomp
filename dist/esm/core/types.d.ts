@@ -2,6 +2,11 @@ import { Observable } from 'rxjs';
 import Module from '../module/module';
 import Factory from './factory';
 import Pipe from './pipe';
+declare global {
+    interface Window {
+        [key: string]: any;
+    }
+}
 export declare type PipeMap = {
     [key: string]: typeof Pipe;
 };

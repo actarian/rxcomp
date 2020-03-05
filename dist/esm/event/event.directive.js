@@ -21,7 +21,7 @@ export default class EventDirective extends Directive {
             });
         }
         else {
-            parentInstance[`${event}$`] = event$; // !!! any
+            parentInstance[`${event}$`] = event$;
         }
         // console.log('EventDirective.onInit', 'selector', selector, 'event', event);
     }

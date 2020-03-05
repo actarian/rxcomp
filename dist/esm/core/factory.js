@@ -16,27 +16,6 @@ export default class Factory {
         this.onView();
     }
 }
-/*
-export default class Factory {
-
-    rxcompId?: number;
-    changes$?: BehaviorSubject<Factory>;
-    unsubscribe$?: Subject<void>;
-    pushChanges?: Function;
-    static meta: IFactoryMeta;
-
-    // onInit?: () => void;
-    // onChanges?: (changes: Factory | Window) => void;
-    // onView?: () => void;
-    // onDestroy?: () => void;
-
-    [key: string]: any; // extensible object
-
-    constructor(...args: any[]) {
-
-    }
-}
-*/
 export function getContext(instance) {
     return CONTEXTS[instance.rxcompId];
 }

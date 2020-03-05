@@ -68,20 +68,15 @@ var Module = /** @class */ (function () {
                 */
                 operators_1.takeUntil(instance_1.unsubscribe$)).subscribe(function (changes) {
                     // resolve component input outputs
-                    // if (isComponent && meta) {
                     if (meta_1) {
                         _this.resolveInputsOutputs(instance_1, changes);
                     }
                     // calling onChanges event with changes
-                    // console.log('onChanges', instance.constructor.name);
-                    // console.log('onChanges', instance.constructor.meta.selector, changes);
                     instance_1.onChanges(changes);
                     // push instance changes for subscribers
                     instance_1.pushChanges();
                 });
             }
-            // !!! pushChanges
-            // instance.changes$.next(instance);
             return instance_1;
         }
         else {
