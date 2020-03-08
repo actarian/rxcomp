@@ -24,9 +24,9 @@ var IfStructure = /** @class */ (function (_super) {
         // console.log('IfStructure.expression', expression);
     };
     IfStructure.prototype.onChanges = function (changes) {
-        var module = factory_1.getContext(this).module;
-        // console.log('IfStructure.onChanges', changes);
-        var value = module.resolve(this.ifFunction, changes, this);
+        var _a = factory_1.getContext(this), module = _a.module, parentInstance = _a.parentInstance;
+        // console.log('IfStructure.onChanges', parentInstance);
+        var value = module.resolve(this.ifFunction, parentInstance, this);
         var element = this.element;
         if (value) {
             if (!element.parentNode) {

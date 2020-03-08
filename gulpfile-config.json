@@ -13,6 +13,31 @@
           "minify": true
         },
         {
+          "input": "test/js/test.for.ts",
+          "output": {
+            "file": "docs/js/test.for.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          }
+        }
+      ]
+    },
+    "browser_": {
+      "compile": [
+        {
+          "input": "test/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "test/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
           "input": "test/js/main.ts",
           "output": {
             "file": "docs/js/main.js",
@@ -87,6 +112,11 @@
             {
               "file": "dist/esm/",
               "format": "esm"
+            },
+            {
+              "file": "dist/umd/rxcomp.js",
+              "format": "umd",
+							"minify": true
             },
             {
               "file": "dist/iife/rxcomp.js",

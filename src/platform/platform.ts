@@ -31,8 +31,9 @@ export default class Platform {
 		module.meta = meta;
 		const instances = module.compile(meta.node, window);
 		const root = instances[0];
+		console.log('end', instances);
 		// if (root instanceof module.meta.bootstrap) {
-		root.pushChanges();
+		// root.pushChanges();
 		// }
 		return module;
 	}

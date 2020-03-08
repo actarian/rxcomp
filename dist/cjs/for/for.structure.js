@@ -25,11 +25,12 @@ var ForStructure = /** @class */ (function (_super) {
     };
     ForStructure.prototype.onChanges = function (changes) {
         var context = factory_1.getContext(this);
+        var parentInstance = context.parentInstance;
         var module = context.module;
         var node = context.node;
         // resolve
         var token = this.token;
-        var result = module.resolve(this.forFunction, changes, this) || [];
+        var result = module.resolve(this.forFunction, parentInstance, this) || [];
         var isArray = Array.isArray(result);
         var array = isArray ? result : Object.keys(result);
         var total = array.length;

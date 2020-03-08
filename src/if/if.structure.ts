@@ -26,9 +26,9 @@ export default class IfStructure extends Structure {
 	}
 
 	onChanges(changes: Factory | Window) {
-		const { module } = getContext(this);
-		// console.log('IfStructure.onChanges', changes);
-		const value = module.resolve(this.ifFunction!, changes, this);
+		const { module, parentInstance } = getContext(this);
+		// console.log('IfStructure.onChanges', parentInstance);
+		const value = module.resolve(this.ifFunction!, parentInstance, this);
 		const element: IElement = this.element!;
 		if (value) {
 			if (!element.parentNode) {

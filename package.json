@@ -3,7 +3,7 @@
 	"name": "rxcomp",
 	"description": "Reactive component library for JavaScript",
 	"version": "1.0.0-beta.8",
-	"browser": "dist/iife/rxcomp.js",
+	"browser": "dist/umd/rxcomp.js",
 	"main": "dist/cjs/rxcomp.js",
 	"types": "dist/cjs/rxcomp.d.ts",
 	"es2015": "dist/esm/rxcomp.js",

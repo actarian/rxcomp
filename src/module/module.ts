@@ -20,11 +20,22 @@ export default class Module {
 			}
 			const instance: Factory | undefined = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 			if (match.factory.prototype instanceof Component) {
+				// if (instance) console.log('Component', instance.constructor.name);
+				// if (instance) this.parse(match.node, instance);
 				componentNode = match.node;
 			}
 			return instance;
 		}).filter((x): x is Factory => x !== undefined);
+		// console.log(instances);
+		instances.forEach(x => {
+			if (x instanceof Component) {
+				const context = getContext(x);
+				console.log(context.node !== node);
+				this.parse(context.node, x);
+			}
+		});
 		// console.log('compile', instances, node, parentInstance);
+		console.log('e', instances);
 		return instances;
 	}
 
@@ -38,6 +49,7 @@ export default class Module {
 			}
 			// creating factory instance
 			const instance = new factory(...(args || []));
+			console.log('instance', instance.constructor.name);
 			// creating instance context
 			const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 			// creating component input and outputs
@@ -51,6 +63,8 @@ export default class Module {
 			}
 			// calling onInit event
 			instance.onInit();
+			// calling onChanges event
+			instance.onChanges(parentInstance);
 			// subscribe to parent changes
 			if (parentInstance instanceof Factory) {
 				parentInstance.changes$.pipe(

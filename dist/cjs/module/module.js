@@ -77,6 +77,11 @@ var Module = /** @class */ (function () {
                     instance_1.pushChanges();
                 });
             }
+            /*
+            if (instance instanceof Component) {
+                this.parse(node, instance);
+            }
+            */
             return instance_1;
         }
         else {

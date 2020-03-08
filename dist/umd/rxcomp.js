@@ -4,8 +4,11 @@
  * License: MIT
  */
 
-var rxcomp = (function (exports, rxjs, operators) {
-  'use strict';
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('rxjs'), require('rxjs/operators')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'rxjs', 'rxjs/operators'], factory) :
+  (global = global || self, factory(global.rxcomp = {}, global.rxjs, global.rxjs.operators));
+}(this, (function (exports, rxjs, operators) { 'use strict';
 
   function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -79,7 +82,7 @@ var rxcomp = (function (exports, rxjs, operators) {
   var CONTEXTS = {};
   var NODES = {};
 
-  var Factory = function () {
+  var Factory = /*#__PURE__*/function () {
     function Factory() {
       this.rxcompId = -1;
       this.unsubscribe$ = new rxjs.Subject();
@@ -107,7 +110,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return CONTEXTS[instance.rxcompId];
   }
 
-  var Directive = function (_Factory) {
+  var Directive = /*#__PURE__*/function (_Factory) {
     _inheritsLoose(Directive, _Factory);
 
     function Directive() {
@@ -117,7 +120,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Directive;
   }(Factory);
 
-  var ClassDirective = function (_Directive) {
+  var ClassDirective = /*#__PURE__*/function (_Directive) {
     _inheritsLoose(ClassDirective, _Directive);
 
     function ClassDirective() {
@@ -159,8 +162,9 @@ var rxcomp = (function (exports, rxjs, operators) {
         keys = object.split(/\s+/);
       }
 
-      keys = keys.concat(this.keys);
-      node.setAttribute('class', keys.join(' '));
+      keys = keys.concat(this.keys); // console.log(keys);
+
+      node.setAttribute('class', keys.join(' ')); // console.log('ClassDirective.onChanges', keys);
     };
 
     return ClassDirective;
@@ -172,7 +176,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
-  var EventDirective = function (_Directive) {
+  var EventDirective = /*#__PURE__*/function (_Directive) {
     _inheritsLoose(EventDirective, _Directive);
 
     function EventDirective() {
@@ -190,7 +194,8 @@ var rxcomp = (function (exports, rxjs, operators) {
           module = _getContext.module,
           node = _getContext.node,
           parentInstance = _getContext.parentInstance,
-          selector = _getContext.selector;
+          selector = _getContext.selector; // console.log('parentInstance', parentInstance);
+
 
       var event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
       var event$ = rxjs.fromEvent(node, event).pipe(operators.shareReplay(1));
@@ -203,7 +208,8 @@ var rxcomp = (function (exports, rxjs, operators) {
         });
       } else {
         parentInstance[event + "$"] = event$;
-      }
+      } // console.log('EventDirective.onInit', 'selector', selector, 'event', event);
+
     };
 
     return EventDirective;
@@ -212,7 +218,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     selector: "[(" + EVENTS.join(')],[(') + ")]"
   };
 
-  var Structure = function (_Factory) {
+  var Structure = /*#__PURE__*/function (_Factory) {
     _inheritsLoose(Structure, _Factory);
 
     function Structure() {
@@ -222,7 +228,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Structure;
   }(Factory);
 
-  var Component = function (_Factory) {
+  var Component = /*#__PURE__*/function (_Factory) {
     _inheritsLoose(Component, _Factory);
 
     function Component() {
@@ -234,10 +240,14 @@ var rxcomp = (function (exports, rxjs, operators) {
     _proto.pushChanges = function pushChanges() {
       var _getContext = getContext(this),
           module = _getContext.module,
-          node = _getContext.node;
+          node = _getContext.node; // console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
 
-      this.changes$.next(this);
-      module.parse(node, this);
+
+      this.changes$.next(this); // console.log('Module.parse', instance.constructor.name);
+      // parse component text nodes
+
+      module.parse(node, this); // calling onView event
+
       this.onView();
     };
 
@@ -246,7 +256,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
-  var Context = function (_Component) {
+  var Context = /*#__PURE__*/function (_Component) {
     _inheritsLoose(Context, _Component);
 
     function Context(instance, descriptors) {
@@ -300,13 +310,36 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Context;
   }(Component);
 
-  var ForItem = function (_Context) {
+  var ForItem = /*#__PURE__*/function (_Context) {
     _inheritsLoose(ForItem, _Context);
 
+    // !!! todo: payload options { key, $key, value, $value, index, count }
     function ForItem(key, $key, value, $value, index, count, parentInstance) {
       var _this;
 
+      // console.log('ForItem', arguments);
       _this = _Context.call(this, parentInstance) || this;
+      /*
+      super(parentInstance, {
+          [key]: {
+              get: function() {
+                  return this.$key;
+              },
+              set: function(key) {
+                  this.$key = key;
+              }
+          },
+          [value]: {
+              get: function() {
+                  return this.$value;
+              },
+              set: function(value) {
+                  this.$value = value;
+              }
+          }
+      });
+      */
+
       _this[key] = $key;
       _this[value] = $value;
       _this.index = index;
@@ -339,7 +372,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return ForItem;
   }(Context);
 
-  var ForStructure = function (_Structure) {
+  var ForStructure = /*#__PURE__*/function (_Structure) {
     _inheritsLoose(ForStructure, _Structure);
 
     function ForStructure() {
@@ -372,7 +405,8 @@ var rxcomp = (function (exports, rxjs, operators) {
       var context = getContext(this);
       var parentInstance = context.parentInstance;
       var module = context.module;
-      var node = context.node;
+      var node = context.node; // resolve
+
       var token = this.token;
       var result = module.resolve(this.forFunction, parentInstance, this) || [];
       var isArray = Array.isArray(result);
@@ -386,24 +420,39 @@ var rxcomp = (function (exports, rxjs, operators) {
           var value = isArray ? array[key] : result[key];
 
           if (i < previous) {
+            // update
             var instance = this.instances[i];
             instance[token.key] = key;
             instance[token.value] = value;
+            /*
+            if (!nextSibling) {
+                const context = getContext(instance);
+                const node = context.node;
+                this.forend.parentNode.insertBefore(node, this.forend);
+            } else {
+                nextSibling = nextSibling.nextSibling;
+            }
+            */
           } else {
+            // create
             var clonedNode = node.cloneNode(true);
             delete clonedNode.rxcompId;
-            this.forend.parentNode.insertBefore(clonedNode, this.forend);
+            this.forend.parentNode.insertBefore(clonedNode, this.forend); // !!! todo: check context.parentInstance
+
             var args = [token.key, key, token.value, value, i, total, context.parentInstance];
 
             var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 
             if (_instance) {
-              var forItemContext = getContext(_instance);
-              module.compile(clonedNode, forItemContext.instance);
+              var forItemContext = getContext(_instance); // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
+
+              module.compile(clonedNode, forItemContext.instance); // nextSibling = clonedNode.nextSibling;
+
               this.instances.push(_instance);
             }
           }
         } else {
+          // remove
           var _instance2 = this.instances[i];
 
           var _getContext2 = getContext(_instance2),
@@ -415,7 +464,7 @@ var rxcomp = (function (exports, rxjs, operators) {
         }
       }
 
-      this.instances.length = array.length;
+      this.instances.length = array.length; // console.log('ForStructure', this.instances, token);
     };
 
     _proto.getExpressionToken = function getExpressionToken(expression) {
@@ -468,7 +517,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     selector: '[*for]'
   };
 
-  var HrefDirective = function (_Directive) {
+  var HrefDirective = /*#__PURE__*/function (_Directive) {
     _inheritsLoose(HrefDirective, _Directive);
 
     function HrefDirective() {
@@ -491,7 +540,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     inputs: ['href']
   };
 
-  var IfStructure = function (_Structure) {
+  var IfStructure = /*#__PURE__*/function (_Structure) {
     _inheritsLoose(IfStructure, _Structure);
 
     function IfStructure() {
@@ -515,13 +564,14 @@ var rxcomp = (function (exports, rxjs, operators) {
       var clonedNode = node.cloneNode(true);
       clonedNode.removeAttribute('*if');
       this.clonedNode = clonedNode;
-      this.element = clonedNode.cloneNode(true);
+      this.element = clonedNode.cloneNode(true); // console.log('IfStructure.expression', expression);
     };
 
     _proto.onChanges = function onChanges(changes) {
       var _getContext2 = getContext(this),
           module = _getContext2.module,
-          parentInstance = _getContext2.parentInstance;
+          parentInstance = _getContext2.parentInstance; // console.log('IfStructure.onChanges', parentInstance);
+
 
       var value = module.resolve(this.ifFunction, parentInstance, this);
       var element = this.element;
@@ -547,7 +597,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     selector: '[*if]'
   };
 
-  var InnerHtmlDirective = function (_Directive) {
+  var InnerHtmlDirective = /*#__PURE__*/function (_Directive) {
     _inheritsLoose(InnerHtmlDirective, _Directive);
 
     function InnerHtmlDirective() {
@@ -560,7 +610,7 @@ var rxcomp = (function (exports, rxjs, operators) {
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML;
+      node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML; // !!! keep == loose equality
     };
 
     return InnerHtmlDirective;
@@ -570,7 +620,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     inputs: ['innerHTML']
   };
 
-  var Pipe = function () {
+  var Pipe = /*#__PURE__*/function () {
     function Pipe() {}
 
     Pipe.transform = function transform(value) {
@@ -580,13 +630,14 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Pipe;
   }();
 
-  var JsonPipe = function (_Pipe) {
+  var JsonPipe = /*#__PURE__*/function (_Pipe) {
     _inheritsLoose(JsonPipe, _Pipe);
 
     function JsonPipe() {
       return _Pipe.apply(this, arguments) || this;
     }
 
+    // !!! todo: Remove circular structures when converting to JSON
     JsonPipe.transform = function transform(value) {
       return JSON.stringify(value, null, '\t');
     };
@@ -599,7 +650,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var ID = 0;
 
-  var Module = function () {
+  var Module = /*#__PURE__*/function () {
     function Module() {}
 
     var _proto = Module.prototype;
@@ -622,7 +673,8 @@ var rxcomp = (function (exports, rxjs, operators) {
         return instance;
       }).filter(function (x) {
         return x !== undefined;
-      });
+      }); // console.log('compile', instances, node, parentInstance);
+
       return instances;
     };
 
@@ -630,16 +682,19 @@ var rxcomp = (function (exports, rxjs, operators) {
       var _this2 = this;
 
       if (parentInstance || node.parentNode) {
-        var meta = factory.meta;
+        var meta = factory.meta; // collect parentInstance scope
+
         parentInstance = parentInstance || this.getParentInstance(node.parentNode);
 
         if (!parentInstance) {
           return undefined;
-        }
+        } // creating factory instance
 
-        var instance = _construct(factory, args || []);
 
-        var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
+        var instance = _construct(factory, args || []); // creating instance context
+
+
+        var context = Module.makeContext(this, instance, parentInstance, node, factory, selector); // creating component input and outputs
 
         if (meta) {
           this.makeHosts(meta, instance, node);
@@ -649,20 +704,43 @@ var rxcomp = (function (exports, rxjs, operators) {
           if (parentInstance instanceof Factory) {
             this.resolveInputsOutputs(instance, parentInstance);
           }
-        }
+        } // calling onInit event
 
-        instance.onInit();
+
+        instance.onInit(); // subscribe to parent changes
 
         if (parentInstance instanceof Factory) {
-          parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+          parentInstance.changes$.pipe( // filter(() => node.parentNode),
+          // debounceTime(1),
+
+          /*
+          distinctUntilChanged(function(prev, curr) {
+              // console.log(isComponent, context.inputs);
+              if (isComponent && meta && Object.keys(context.inputs).length === 0) {
+                  return true; // same
+              } else {
+                  return false;
+              }
+          }),
+          */
+          operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+            // resolve component input outputs
             if (meta) {
               _this2.resolveInputsOutputs(instance, changes);
-            }
+            } // calling onChanges event with changes
 
-            instance.onChanges(changes);
+
+            instance.onChanges(changes); // push instance changes for subscribers
+
             instance.pushChanges();
           });
         }
+        /*
+        if (instance instanceof Component) {
+            this.parse(node, instance);
+        }
+        */
+
 
         return instance;
       } else {
@@ -676,9 +754,12 @@ var rxcomp = (function (exports, rxjs, operators) {
       }
 
       if (expression) {
-        expression = Module.parseExpression(expression);
+        expression = Module.parseExpression(expression); // console.log(expression);
+
         var args = params.join(',');
-        var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+        var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}"); // console.log(this, $$module, $$pipes, "${expression}");
+        // console.log(expression_func);
+
         return expression_func;
       } else {
         return function () {
@@ -688,6 +769,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     };
 
     _proto.resolve = function resolve(expression, parentInstance, payload) {
+      // console.log(expression, parentInstance, payload);
       return expression.apply(parentInstance, [payload, this]);
     };
 
@@ -731,13 +813,14 @@ var rxcomp = (function (exports, rxjs, operators) {
     };
 
     _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
-      var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
+      var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector); // console.log('Module.makeContext', context, context.instance, context.node);
+
       return context;
     };
 
     _proto.getInstance = function getInstance(node) {
       if (node instanceof Document) {
-        return window;
+        return window; // !!! window or global
       }
 
       var context = getContextByNode(node);
@@ -755,7 +838,8 @@ var rxcomp = (function (exports, rxjs, operators) {
       return Module.traverseUp(node, function (node) {
         return _this3.getInstance(node);
       });
-    };
+    } // reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T): T;
+    ;
 
     _proto.parseTextNode = function parseTextNode(node, instance) {
       var _this4 = this;
@@ -770,9 +854,11 @@ var rxcomp = (function (exports, rxjs, operators) {
         var text;
 
         if (typeof c === 'function') {
+          // instanceOf ExpressionFunction ?;
           text = _this4.resolve(c, instance, instance);
 
           if (text == undefined) {
+            // !!! keep == loose equality
             text = '';
           }
         } else {
@@ -840,6 +926,7 @@ var rxcomp = (function (exports, rxjs, operators) {
       if (node.hasAttribute("[" + key + "]")) {
         expression = node.getAttribute("[" + key + "]");
       } else if (node.hasAttribute(key)) {
+        // const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
         var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
           if (a) {
             return '"+';
@@ -893,6 +980,7 @@ var rxcomp = (function (exports, rxjs, operators) {
       var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
       var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
         if (outputFunction) {
+          // console.log(expression, parentInstance);
           _this6.resolve(outputFunction, parentInstance, event);
         }
       }));
@@ -1083,6 +1171,7 @@ var rxcomp = (function (exports, rxjs, operators) {
           results.push(selectorResult);
 
           if (factory.prototype instanceof Structure) {
+            // console.log('Structure', node);
             break;
           }
         }
@@ -1213,7 +1302,7 @@ var rxcomp = (function (exports, rxjs, operators) {
           } else {
             return previous;
           }
-        }, undefined);
+        }, undefined); // console.log(node.rxcompId, context);
       }
     }
 
@@ -1228,10 +1317,12 @@ var rxcomp = (function (exports, rxjs, operators) {
       var nodeContexts = NODES[node.rxcompId];
 
       if (nodeContexts) {
+        // console.log(nodeContexts);
         for (var i = 0; i < nodeContexts.length; i++) {
           var context = nodeContexts[i];
 
           if (context.instance !== instance) {
+            // console.log(context.instance, instance);
             if (context.instance instanceof factory) {
               return context.instance;
             }
@@ -1247,7 +1338,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     }
   }
 
-  var SrcDirective = function (_Directive) {
+  var SrcDirective = /*#__PURE__*/function (_Directive) {
     _inheritsLoose(SrcDirective, _Directive);
 
     function SrcDirective() {
@@ -1274,7 +1365,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     inputs: ['src']
   };
 
-  var StyleDirective = function (_Directive) {
+  var StyleDirective = /*#__PURE__*/function (_Directive) {
     _inheritsLoose(StyleDirective, _Directive);
 
     function StyleDirective() {
@@ -1307,13 +1398,14 @@ var rxcomp = (function (exports, rxjs, operators) {
 
             var _propertyName = _splitted.shift();
 
-            var value = style[_key] + (_splitted.length ? _splitted[0] : '');
+            var value = style[_key] + (_splitted.length ? _splitted[0] : ''); // console.log(propertyName, value, style, key, style[key]);
+
             node.style.setProperty(_propertyName, value);
           }
         }
       }
 
-      this.previousStyle = style;
+      this.previousStyle = style; // console.log('StyleDirective.onChanges', style);
     };
 
     return StyleDirective;
@@ -1326,7 +1418,7 @@ var rxcomp = (function (exports, rxjs, operators) {
   var factories = [ClassDirective, EventDirective, ForStructure, HrefDirective, IfStructure, InnerHtmlDirective, SrcDirective, StyleDirective];
   var pipes = [JsonPipe];
 
-  var CoreModule = function (_Module) {
+  var CoreModule = /*#__PURE__*/function (_Module) {
     _inheritsLoose(CoreModule, _Module);
 
     function CoreModule() {
@@ -1342,7 +1434,7 @@ var rxcomp = (function (exports, rxjs, operators) {
 
   var ORDER = [Structure, Component, Directive];
 
-  var Platform = function () {
+  var Platform = /*#__PURE__*/function () {
     function Platform() {}
 
     Platform.bootstrap = function bootstrap(moduleFactory) {
@@ -1370,14 +1462,17 @@ var rxcomp = (function (exports, rxjs, operators) {
       var module = new moduleFactory();
       module.meta = meta;
       var instances = module.compile(meta.node, window);
-      var root = instances[0];
-      root.pushChanges();
+      var root = instances[0]; // if (root instanceof module.meta.bootstrap) {
+
+      root.pushChanges(); // }
+
       return module;
     };
 
     Platform.isBrowser = function isBrowser() {
       return Boolean(window);
-    };
+    } // static isServer() {}
+    ;
 
     Platform.querySelector = function querySelector(selector) {
       return document.querySelector(selector);
@@ -1459,7 +1554,8 @@ var rxcomp = (function (exports, rxjs, operators) {
         }, -1);
         var bi = ORDER.reduce(function (p, c, i) {
           return b.prototype instanceof c ? i : p;
-        }, -1);
+        }, -1); // return ai - bi;
+
         var o = ai - bi;
 
         if (o === 0) {
@@ -1545,7 +1641,7 @@ var rxcomp = (function (exports, rxjs, operators) {
     return Platform;
   }();
 
-  var Browser = function (_Platform) {
+  var Browser = /*#__PURE__*/function (_Platform) {
     _inheritsLoose(Browser, _Platform);
 
     function Browser() {
@@ -1579,6 +1675,6 @@ var rxcomp = (function (exports, rxjs, operators) {
   exports.getContextByNode = getContextByNode;
   exports.getHost = getHost;
 
-  return exports;
+  Object.defineProperty(exports, '__esModule', { value: true });
 
-}({}, rxjs, rxjs.operators));
+})));

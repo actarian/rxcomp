@@ -70,6 +70,11 @@ export default class Module {
                     instance.pushChanges();
                 });
             }
+            /*
+            if (instance instanceof Component) {
+                this.parse(node, instance);
+            }
+            */
             return instance;
         }
         else {

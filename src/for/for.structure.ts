@@ -22,15 +22,17 @@ export default class ForStructure extends Structure {
 		node.removeAttribute('*for');
 		const token = this.token = this.getExpressionToken(expression);
 		this.forFunction = module.makeFunction(token.iterable);
+		// console.log('ForStructure.expression', expression);
 	}
 
 	onChanges(changes: Factory | Window) {
 		const context: IContext = getContext(this);
+		const parentInstance: Factory | Window = context.parentInstance;
 		const module: Module = context.module;
 		const node: IElement = context.node;
 		// resolve
 		const token: IExpressionToken = this.token!;
-		let result = module.resolve(this.forFunction!, changes, this) || [];
+		let result = module.resolve(this.forFunction!, parentInstance, this) || [];
 		const isArray = Array.isArray(result);
 		const array: any[] = isArray ? result : Object.keys(result);
 		const total: number = array.length;
@@ -65,6 +67,7 @@ export default class ForStructure extends Structure {
 						const forItemContext = getContext(instance);
 						// console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
 						module.compile(clonedNode, forItemContext.instance);
+						module.parse(clonedNode, instance); // !!! parse component
 						// nextSibling = clonedNode.nextSibling;
 						this.instances.push(instance);
 					}

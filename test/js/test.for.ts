@@ -15,7 +15,7 @@ class RootComponent extends Component {
 
 	onInit() {
 
-		if (true) {
+		if (false) {
 			interval(1000).pipe(
 				take(1000),
 				takeUntil(this.unsubscribe$)
@@ -25,15 +25,16 @@ class RootComponent extends Component {
 			});
 		}
 
-		/*
-		interval(50).pipe(
-			take(1000),
-			takeUntil(this.unsubscribe$)
-		).subscribe(items => {
-			this.items = new Array(1 + Math.floor(Math.random() * 9)).fill(0).map((x, i) => i + 1);
-			this.pushChanges();
-		});
-		*/
+		if (false) {
+			interval(50).pipe(
+				take(1000),
+				takeUntil(this.unsubscribe$)
+			).subscribe(items => {
+				this.items = new Array(1 + Math.floor(Math.random() * 9)).fill(0).map((x, i) => i + 1);
+				this.pushChanges();
+			});
+		}
+
 	}
 
 	getColor(index: number): string {

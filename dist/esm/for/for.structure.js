@@ -20,11 +20,12 @@ export default class ForStructure extends Structure {
     }
     onChanges(changes) {
         const context = getContext(this);
+        const parentInstance = context.parentInstance;
         const module = context.module;
         const node = context.node;
         // resolve
         const token = this.token;
-        let result = module.resolve(this.forFunction, changes, this) || [];
+        let result = module.resolve(this.forFunction, parentInstance, this) || [];
         const isArray = Array.isArray(result);
         const array = isArray ? result : Object.keys(result);
         const total = array.length;

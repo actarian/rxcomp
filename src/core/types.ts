@@ -21,8 +21,6 @@ export type SelectorFunction = (node: HTMLElement) => ISelectorResult | false;
 
 export type ExpressionFunction = (payload: any, module: Module) => any;
 
-export interface Type<T> extends Function { new(...args: any[]): T; }
-
 export interface IContext {
 	module: Module;
 	instance: Factory;
@@ -80,6 +78,12 @@ export interface ISelectorResult {
 	selector: string;
 }
 
+export interface IExpressionToken {
+	key: string;
+	value: string;
+	iterable: string;
+}
+
 export interface IElement extends HTMLElement {
 	rxcompId?: number;
 }
@@ -92,8 +96,36 @@ export interface IText extends Text {
 	nodeExpressions?: (ExpressionFunction | string)[];
 }
 
-export interface IExpressionToken {
-	key: string;
-	value: string;
-	iterable: string;
+export interface OnInit {
+	onInit: () => void;
 }
+
+export interface OnChanges {
+	onChanges: (changes: Factory | Window) => void;
+}
+
+export interface OnView {
+	onView: () => void;
+}
+
+export interface OnDestroy {
+	onDestroy: () => void;
+}
+
+export function implementsOnInit(object: any): object is OnInit {
+	return 'onInit' in object;
+}
+
+export function implementsOnChanges(object: any): object is OnChanges {
+	return 'onChanges' in object;
+}
+
+export function implementsOnView(object: any): object is OnView {
+	return 'onView' in object;
+}
+
+export function implementsOnDestroy(object: any): object is OnDestroy {
+	return 'onDestroy' in object;
+}
+
+// export interface Type<T> extends Function { new(...args: any[]): T; }
