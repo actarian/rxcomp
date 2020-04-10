@@ -89,6 +89,11 @@
               "format": "esm"
             },
             {
+              "file": "dist/umd/rxcomp.js",
+              "format": "umd",
+              "minify": true
+            },
+            {
               "file": "dist/iife/rxcomp.js",
               "format": "iife",
               "minify": true

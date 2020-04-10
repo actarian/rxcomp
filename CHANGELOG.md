@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.9] - 2020-04-10
+### Fixing
+- IE11 Support
+
+---
+
 ## [1.0.0-beta.8] - 2020-03-05
 ### Fixing
 - Inputs, Outputs

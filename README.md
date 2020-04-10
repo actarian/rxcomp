@@ -10,8 +10,8 @@ If you like Angular declarative syntax but you just want go Vanilla, RxComp libr
 :-----------------|:----------------------------------------------------------------------------------------------|
 rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/iife/rxcomp.min.js.svg?compression=gzip)
 rxcomp.min.js     | ![](https://img.badgesize.io/actarian/rxcomp/master/dist/iife/rxcomp.min.js.svg)
-rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg?compression=gzip)
-rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js.svg)
+rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js.svg?compression=gzip)
+rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js.svg)
  
 > [TodoMvc Demo](https://actarian.github.io/rxcomp-todomvc/)  
 > [TodoMvc Source](https://github.com/actarian/rxcomp-todomvc)  
@@ -69,8 +69,8 @@ ___
 For CDN, you can use unpkg
 
 ```html
-<script src="https://unpkg.com/@reactivex/rxjs@6.5.3/dist/global/rxjs.umd.min.js"></script>
-<script src="https://unpkg.com/rxcomp@1.0.0-beta.8/dist/iife/rxcomp.min.js"></script>  
+<script src="https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js"></script>  
+<script src="https://unpkg.com/rxcomp@1.0.0-beta.9/dist/iife/rxcomp.min.js"></script>  
 ```
 
 The global namespace for RxComp is `rxcomp`
@@ -159,10 +159,10 @@ ___
 onInit() {
 } 
 
-onChanges(changes) {	
+onChanges(changes) {   
 }
 
-onView() {	
+onView() { 
 }
 
 onDestroy() {

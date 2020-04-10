@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.8
+ * @license rxcomp v1.0.0-beta.9
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -137,7 +137,7 @@
       var _getContext = getContext(this),
           node = _getContext.node;
 
-      node.classList.forEach(function (x) {
+      Array.prototype.slice.call(node.classList).forEach(function (x) {
         return _this2.keys.push(x);
       });
     };
