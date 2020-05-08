@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.9
+ * @license rxcomp v1.0.0-beta.10
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -474,14 +474,22 @@
       return _Directive.apply(this, arguments) || this;
     }
 
-    var _proto = HrefDirective.prototype;
+    _createClass(HrefDirective, [{
+      key: "href",
+      set: function set(href) {
+        if (this.href_ !== href) {
+          this.href_ = href;
 
-    _proto.onChanges = function onChanges() {
-      var _getContext = getContext(this),
-          node = _getContext.node;
+          var _getContext = getContext(this),
+              node = _getContext.node;
 
-      node.setAttribute('href', this.href || '');
-    };
+          href ? node.setAttribute('href', href) : node.removeAttribute('href');
+        }
+      },
+      get: function get() {
+        return this.href_;
+      }
+    }]);
 
     return HrefDirective;
   }(Directive);
@@ -552,14 +560,22 @@
       return _Directive.apply(this, arguments) || this;
     }
 
-    var _proto = InnerHtmlDirective.prototype;
+    _createClass(InnerHtmlDirective, [{
+      key: "innerHTML",
+      set: function set(innerHTML) {
+        if (this.innerHTML_ !== innerHTML) {
+          this.innerHTML_ = innerHTML;
 
-    _proto.onChanges = function onChanges() {
-      var _getContext = getContext(this),
-          node = _getContext.node;
+          var _getContext = getContext(this),
+              node = _getContext.node;
 
-      node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML;
-    };
+          node.innerHTML = innerHTML == undefined ? '' : innerHTML;
+        }
+      },
+      get: function get() {
+        return this.innerHTML_;
+      }
+    }]);
 
     return InnerHtmlDirective;
   }(Directive);
@@ -1252,18 +1268,22 @@
       return _Directive.apply(this, arguments) || this;
     }
 
-    var _proto = SrcDirective.prototype;
+    _createClass(SrcDirective, [{
+      key: "src",
+      set: function set(src) {
+        if (this.src_ !== src) {
+          this.src_ = src;
 
-    _proto.onChanges = function onChanges() {
-      var _getContext = getContext(this),
-          node = _getContext.node;
+          var _getContext = getContext(this),
+              node = _getContext.node;
 
-      if (this.src) {
-        node.setAttribute('src', this.src);
-      } else {
-        node.removeAttribute('src');
+          src ? node.setAttribute('src', src) : node.removeAttribute('src');
+        }
+      },
+      get: function get() {
+        return this.src_;
       }
-    };
+    }]);
 
     return SrcDirective;
   }(Directive);

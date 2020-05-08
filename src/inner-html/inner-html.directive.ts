@@ -3,12 +3,24 @@ import { getContext } from '../core/factory';
 
 export default class InnerHtmlDirective extends Directive {
 
-	innerHTML?: string;
+	set innerHTML(innerHTML: string) {
+		if (this.innerHTML_ !== innerHTML) {
+			this.innerHTML_ = innerHTML;
+			const { node } = getContext(this);
+			node.innerHTML = innerHTML == undefined ? '' : innerHTML; // !!! keep == loose equality
+		}
+	}
 
+	get innerHTML(): string {
+		return this.innerHTML_;
+	}
+
+	/*
 	onChanges() {
 		const { node } = getContext(this);
 		node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML; // !!! keep == loose equality
 	}
+	*/
 
 }
 

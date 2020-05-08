@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.10] - 2020-05-08
+### Modified
+- SrcDirective, HrefDirective & InnerHtmlDirective
+
+---
+
 ## [1.0.0-beta.9] - 2020-04-10
 ### Fixing
 - IE11 Support

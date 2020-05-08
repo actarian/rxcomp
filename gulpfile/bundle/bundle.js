@@ -82,7 +82,7 @@ function bundleJsItem(item) {
 function bundles(...args) {
 	if (service.config) {
 		return service.config.bundle.filter((item) => {
-			return new RegExp(`${args.join('|')}$`).test(item.output);
+			return args.find(ext => item.output.lastIndexOf(ext) === item.output.length - ext.length) !== undefined;
 		});
 	} else {
 		return [];

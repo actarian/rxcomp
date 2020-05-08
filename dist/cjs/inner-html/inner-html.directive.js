@@ -8,10 +8,20 @@ var InnerHtmlDirective = /** @class */ (function (_super) {
     function InnerHtmlDirective() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    InnerHtmlDirective.prototype.onChanges = function () {
-        var node = factory_1.getContext(this).node;
-        node.innerHTML = this.innerHTML == undefined ? '' : this.innerHTML; // !!! keep == loose equality
-    };
+    Object.defineProperty(InnerHtmlDirective.prototype, "innerHTML", {
+        get: function () {
+            return this.innerHTML_;
+        },
+        set: function (innerHTML) {
+            if (this.innerHTML_ !== innerHTML) {
+                this.innerHTML_ = innerHTML;
+                var node = factory_1.getContext(this).node;
+                node.innerHTML = innerHTML == undefined ? '' : innerHTML; // !!! keep == loose equality
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
     return InnerHtmlDirective;
 }(directive_1.default));
 exports.default = InnerHtmlDirective;

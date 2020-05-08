@@ -1,14 +1,15 @@
 import Directive from '../core/directive';
 import { getContext } from '../core/factory';
 export default class SrcDirective extends Directive {
-    onChanges() {
-        const { node } = getContext(this);
-        if (this.src) {
-            node.setAttribute('src', this.src);
+    set src(src) {
+        if (this.src_ !== src) {
+            this.src_ = src;
+            const { node } = getContext(this);
+            src ? node.setAttribute('src', src) : node.removeAttribute('src');
         }
-        else {
-            node.removeAttribute('src');
-        }
+    }
+    get src() {
+        return this.src_;
     }
 }
 SrcDirective.meta = {

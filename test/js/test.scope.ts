@@ -6,6 +6,7 @@ class RootComponent extends Component {
 	background = '#b9dbff';
 	items = [1, 2, 3];
 	href = 'https://github.com/actarian/rxcomp';
+	src = 'https://source.unsplash.com/random/400x300';
 
 	onItem(item: number) {
 		console.log('RootComponent.onItem.item', item);

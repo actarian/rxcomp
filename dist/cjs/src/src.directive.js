@@ -8,15 +8,20 @@ var SrcDirective = /** @class */ (function (_super) {
     function SrcDirective() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    SrcDirective.prototype.onChanges = function () {
-        var node = factory_1.getContext(this).node;
-        if (this.src) {
-            node.setAttribute('src', this.src);
-        }
-        else {
-            node.removeAttribute('src');
-        }
-    };
+    Object.defineProperty(SrcDirective.prototype, "src", {
+        get: function () {
+            return this.src_;
+        },
+        set: function (src) {
+            if (this.src_ !== src) {
+                this.src_ = src;
+                var node = factory_1.getContext(this).node;
+                src ? node.setAttribute('src', src) : node.removeAttribute('src');
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
     return SrcDirective;
 }(directive_1.default));
 exports.default = SrcDirective;

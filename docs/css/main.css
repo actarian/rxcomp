@@ -277,6 +277,24 @@ button,
     margin: 0;
     padding: 0;
     list-style: none; }
+    .page--todomvc .list::-webkit-scrollbar {
+      width: 6px;
+      border-radius: 3px; }
+    .page--todomvc .list::-webkit-scrollbar-button {
+      display: none; }
+    .page--todomvc .list::-webkit-scrollbar-button:hover {
+      display: none; }
+    .page--todomvc .list::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.25);
+      box-shadow: none;
+      border-radius: 3px; }
+      .page--todomvc .list::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.25); }
+    .page--todomvc .list::-webkit-scrollbar-track {
+      background-color: transparent;
+      border-radius: 3px; }
+      .page--todomvc .list::-webkit-scrollbar-track:hover {
+        background-color: transparent; }
   .page--todomvc .list__item {
     margin: 0; }
     .page--todomvc .list__item .content {
@@ -385,6 +403,24 @@ button,
     margin: 0;
     padding: 0;
     list-style: none; }
+    .page--test .list::-webkit-scrollbar {
+      width: 6px;
+      border-radius: 3px; }
+    .page--test .list::-webkit-scrollbar-button {
+      display: none; }
+    .page--test .list::-webkit-scrollbar-button:hover {
+      display: none; }
+    .page--test .list::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.25);
+      box-shadow: none;
+      border-radius: 3px; }
+      .page--test .list::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.25); }
+    .page--test .list::-webkit-scrollbar-track {
+      background-color: transparent;
+      border-radius: 3px; }
+      .page--test .list::-webkit-scrollbar-track:hover {
+        background-color: transparent; }
   .page--test .list__item {
     flex: 0 0 50px;
     min-height: 40px;
@@ -406,6 +442,8 @@ button,
       line-height: 1;
       text-align: center;
       color: #fff; }
+  .page--test img {
+    max-width: 100%; }
   .page--test [sub-component] {
     padding: 4px;
     cursor: pointer; }

@@ -1,5 +1,6 @@
 const gulpConnect = require('gulp-connect'),
-	url = require('url');
+	url = require('url'),
+	fs = require('fs');
 
 const log = require('../logger/logger');
 const { service } = require('../config/config');
@@ -16,6 +17,9 @@ function serve(done) {
 			path: '/',
 			livereload: true,
 		}, service.config.server || {});
+		if (options.https && options.https.cert) {
+			options.https.cert = fs.readFileSync(options.https.cert);
+		}
 		options.fallback = `${options.path}index.html`;
 		const middleware = middleware_({
 			logger: options.log ? log : undefined,

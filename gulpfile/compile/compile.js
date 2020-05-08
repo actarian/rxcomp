@@ -238,7 +238,7 @@ function compileTypescript(item) {
 function compiles(...args) {
 	if (service.config) {
 		return service.config.compile.filter((item) => {
-			return new RegExp(`${args.join('|')}$`).test(item.input);
+			return args.find(ext => item.input.lastIndexOf(ext) === item.input.length - ext.length) !== undefined;
 		});
 	} else {
 		return [];
