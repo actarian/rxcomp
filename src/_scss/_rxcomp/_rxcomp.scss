@@ -1,0 +1,106 @@
+$background-dark: #111;
+$background-light: #333;
+
+.rxc-block {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	padding: 0;
+	margin: 10px 0 0 0;
+	overflow: auto;
+	page-break-inside: avoid;
+	word-wrap: break-word;
+	white-space: pre;
+	user-select: none;
+	font-family: monospace;
+	font-size: 13px;
+	line-height: 1.2;
+	border-left: 3px solid rgba($background-primary, 0.5);
+	background: rgba($background-light, 0.05);
+	color: $foreground-secondary;
+}
+
+.rxc-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	&__title,
+	&__remove {
+		flex: 1 1 auto;
+		padding: 5px;
+	}
+
+	&__title {
+		flex: 1 1 calc(100% - 20px);
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		cursor: pointer;
+	}
+
+	&__remove {
+		flex: 1 1 20px;
+		margin-left: 5px;
+		cursor: pointer;
+	}
+}
+
+.rxc-list {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+
+	&__item {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		padding-bottom: 2px;
+		border-bottom: 1px solid #222222;
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	&__title,
+	&__name,
+	&__value,
+	&__remove {
+		flex: 1 1 auto;
+		padding: 5px;
+	}
+
+	&__title,
+	&__name,
+	&__value {
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+
+	&__title {
+		flex: 1 1 calc(100% - 20px);
+		font-family: sans-serif;
+		font-size: 16px;
+		font-weight: 500;
+	}
+
+	&__name {
+		flex: 1 1 30%;
+	}
+
+	&__value {
+		flex: 1 1 calc(70% - 20px);
+		margin-left: 5px;
+	}
+
+	&__remove {
+		flex: 1 1 20px;
+		margin-left: 5px;
+		cursor: pointer;
+	}
+}

@@ -31,6 +31,7 @@ export interface IContext {
     outputs?: {
         [key: string]: Observable<any>;
     };
+    keys?: string[];
 }
 export interface IModuleMeta {
     declarations?: (typeof Factory | typeof Pipe)[];

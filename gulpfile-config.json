@@ -13,6 +13,11 @@
           "minify": true
         },
         {
+          "input": "src/_scss/main.scss",
+          "output": "docs/css/rxcomp.css",
+          "minify": true
+        },
+        {
           "input": "test/js/main.ts",
           "output": {
             "file": "docs/js/main.js",
@@ -104,6 +109,11 @@
             "rxjs/operators": "rxjs.operators"
           },
           "name": "rxcomp"
+        },
+        {
+          "input": "src/_scss/main.scss",
+          "output": "dist/rxcomp.css",
+          "minify": true
         }
       ],
       "bundle": []

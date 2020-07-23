@@ -161,7 +161,7 @@
 				</a>
 				<p>For CDN, you can use unpkg</p>
 				<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/rxcomp@1.0.0-beta.10/dist/iife/rxcomp.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>  </code></pre>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/rxcomp@1.0.0-beta.11/dist/iife/rxcomp.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>  </code></pre>
 				<p>The global namespace for RxComp is <code>rxcomp</code></p>
 				<pre><code class="language-javascript"><span class="hljs-keyword">import</span> { CoreModule, Module } <span class="hljs-keyword">from</span> <span class="hljs-string">'rxcomp'</span>;</code></pre>
 				<hr>
@@ -236,12 +236,12 @@ TodoItemComponent.meta = {
 					<h3>LifeCycle Hooks</h3>
 				</a>
 				<pre><code class="language-javascript">onInit() {
-} 
-
-onChanges(changes) {   
 }
 
-onView() { 
+onChanges(changes) {
+}
+
+onView() {
 }
 
 onDestroy() {

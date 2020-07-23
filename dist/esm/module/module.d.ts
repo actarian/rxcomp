@@ -3,6 +3,7 @@ import Factory from '../core/factory';
 import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, IModuleParsedMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
 export default class Module {
     meta?: IModuleParsedMeta;
+    instances?: Factory[];
     compile(node: IElement, parentInstance?: Factory | Window): Factory[];
     makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[]): Factory | undefined;
     makeFunction(expression: string, params?: string[]): ExpressionFunction;
@@ -40,5 +41,6 @@ export default class Module {
     protected static traverseNext(node: Node | null, callback: (node: Node, i: number) => any, i?: number): any;
     static meta: IModuleMeta;
 }
+export declare function getParsableContextByNode(node: Node): IContext | undefined;
 export declare function getContextByNode(node: Node): IContext | undefined;
 export declare function getHost(instance: Factory, factory: typeof Factory, node: IElement): Factory | undefined;

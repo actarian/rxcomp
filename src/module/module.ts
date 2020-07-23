@@ -11,6 +11,7 @@ let ID: number = 0;
 export default class Module {
 
 	meta?: IModuleParsedMeta;
+	instances?: Factory[];
 
 	public compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode: IElement;
@@ -24,6 +25,7 @@ export default class Module {
 			}
 			return instance;
 		}).filter((x): x is Factory => x !== undefined);
+		// instances.forEach(x => x.onInit());
 		// console.log('compile', instances, node, parentInstance);
 		return instances;
 	}
@@ -113,7 +115,7 @@ export default class Module {
 			const child: ChildNode = node.childNodes[i];
 			if (child.nodeType === 1) {
 				const element: HTMLElement = child as HTMLElement;
-				const context: IContext | void = getContextByNode(element);
+				const context: IContext | void = getParsableContextByNode(element);
 				if (!context) {
 					this.parse(element, instance);
 				}
@@ -174,22 +176,26 @@ export default class Module {
 		if (!expressions) {
 			expressions = this.parseTextNodeExpression(node.wholeText);
 		}
-		const replacedText: string = expressions.reduce((p: string, c: ExpressionFunction | string) => {
-			let text: string;
-			if (typeof c === 'function') { // instanceOf ExpressionFunction ?;
-				text = this.resolve(c as ExpressionFunction, instance, instance);
-				if (text == undefined) { // !!! keep == loose equality
-					text = '';
+		if (expressions.length) {
+			const replacedText: string = expressions.reduce((p: string, c: ExpressionFunction | string) => {
+				let text: string;
+				if (typeof c === 'function') { // instanceOf ExpressionFunction ?;
+					text = this.resolve(c as ExpressionFunction, instance, instance);
+					if (text == undefined) { // !!! keep == loose equality
+						text = '';
+					}
+				} else {
+					text = c;
 				}
-			} else {
-				text = c;
+				return p + text;
+			}, '');
+			if (node.nodeValue !== replacedText) {
+				const textNode: IText = document.createTextNode(replacedText) as IText;
+				textNode.nodeExpressions = expressions;
+				node.parentNode!.replaceChild(textNode, node);
 			}
-			return p + text;
-		}, '');
-		if (node.nodeValue !== replacedText) {
-			const textNode: IText = document.createTextNode(replacedText) as IText;
-			textNode.nodeExpressions = expressions;
-			node.parentNode!.replaceChild(textNode, node);
+		} else {
+			node.nodeExpressions = expressions;
 		}
 	}
 
@@ -216,7 +222,11 @@ export default class Module {
 		if (length > lastIndex) {
 			this.pushFragment(nodeValue, lastIndex, length, expressions);
 		}
-		return expressions;
+		if (expressions.find(x => typeof x === 'function')) {
+			return expressions;
+		} else {
+			return [];
+		}
 	}
 
 	protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void {
@@ -514,7 +524,7 @@ export default class Module {
 
 }
 
-export function getContextByNode(node: Node): IContext | undefined {
+export function getParsableContextByNode(node: Node): IContext | undefined {
 	let context: IContext | undefined;
 	const rxcompId: number | undefined = (node as IElement).rxcompId;
 	if (rxcompId) {
@@ -525,12 +535,24 @@ export function getContextByNode(node: Node): IContext | undefined {
 					return current;
 				} else if (current.factory.prototype instanceof Context) {
 					return previous ? previous : current;
+					/*
+					} else if (current.factory.prototype instanceof Structure) {
+						return previous ? previous : current;
+					*/
 				} else {
 					return previous;
 				}
 			}, undefined);
 			// console.log(node.rxcompId, context);
 		}
+	}
+	return context;
+}
+
+export function getContextByNode(node: Node): IContext | undefined {
+	let context: IContext | undefined = getParsableContextByNode(node);
+	if (context && context.factory.prototype instanceof Structure) {
+		context = undefined;
 	}
 	return context;
 }

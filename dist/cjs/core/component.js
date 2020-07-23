@@ -9,13 +9,15 @@ var Component = /** @class */ (function (_super) {
     }
     Component.prototype.pushChanges = function () {
         var _a = factory_1.getContext(this), module = _a.module, node = _a.node;
-        // console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
-        this.changes$.next(this);
-        // console.log('Module.parse', instance.constructor.name);
-        // parse component text nodes
-        module.parse(node, this);
-        // calling onView event
-        this.onView();
+        if (module.instances) {
+            // console.log(new Error(`pushChanges ${instance.constructor.name}`).stack);
+            this.changes$.next(this);
+            // console.log('Module.parse', instance.constructor.name);
+            // parse component text nodes
+            module.parse(node, this);
+            // calling onView event
+            this.onView();
+        }
     };
     return Component;
 }(factory_1.default));

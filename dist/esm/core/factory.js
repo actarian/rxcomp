@@ -12,8 +12,11 @@ export default class Factory {
     onView() { }
     onDestroy() { }
     pushChanges() {
-        this.changes$.next(this);
-        this.onView();
+        const { module } = getContext(this);
+        if (module.instances) {
+            this.changes$.next(this);
+            this.onView();
+        }
     }
 }
 export function getContext(instance) {

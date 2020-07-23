@@ -5,6 +5,8 @@ import { Browser, Component, CoreModule, Module, Pipe } from '../../src/rxcomp';
 // component
 class RootComponent extends Component {
 	flag = false;
+	red = false;
+	notred = true;
 	nested = [
 		{ items: [1, 2, 3, 4] },
 		{ items: [1, 2, 3, 4] },
@@ -19,8 +21,16 @@ class RootComponent extends Component {
 			interval(1000).pipe(
 				take(1000),
 				takeUntil(this.unsubscribe$)
-			).subscribe(items => {
+			).subscribe(() => {
 				this.flag = !this.flag;
+				this.pushChanges();
+			});
+			interval(500).pipe(
+				take(500),
+				takeUntil(this.unsubscribe$)
+			).subscribe(() => {
+				this.red = !this.red;
+				this.notred = !this.notred;
 				this.pushChanges();
 			});
 		}

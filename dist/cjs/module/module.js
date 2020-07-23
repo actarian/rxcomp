@@ -24,6 +24,7 @@ var Module = /** @class */ (function () {
             }
             return instance;
         }).filter(function (x) { return x !== undefined; });
+        // instances.forEach(x => x.onInit());
         // console.log('compile', instances, node, parentInstance);
         return instances;
     };
@@ -107,7 +108,7 @@ var Module = /** @class */ (function () {
             var child = node.childNodes[i];
             if (child.nodeType === 1) {
                 var element = child;
-                var context = getContextByNode(element);
+                var context = getParsableContextByNode(element);
                 if (!context) {
                     this.parse(element, instance);
                 }
@@ -165,23 +166,28 @@ var Module = /** @class */ (function () {
         if (!expressions) {
             expressions = this.parseTextNodeExpression(node.wholeText);
         }
-        var replacedText = expressions.reduce(function (p, c) {
-            var text;
-            if (typeof c === 'function') { // instanceOf ExpressionFunction ?;
-                text = _this.resolve(c, instance, instance);
-                if (text == undefined) { // !!! keep == loose equality
-                    text = '';
+        if (expressions.length) {
+            var replacedText = expressions.reduce(function (p, c) {
+                var text;
+                if (typeof c === 'function') { // instanceOf ExpressionFunction ?;
+                    text = _this.resolve(c, instance, instance);
+                    if (text == undefined) { // !!! keep == loose equality
+                        text = '';
+                    }
                 }
+                else {
+                    text = c;
+                }
+                return p + text;
+            }, '');
+            if (node.nodeValue !== replacedText) {
+                var textNode = document.createTextNode(replacedText);
+                textNode.nodeExpressions = expressions;
+                node.parentNode.replaceChild(textNode, node);
             }
-            else {
-                text = c;
-            }
-            return p + text;
-        }, '');
-        if (node.nodeValue !== replacedText) {
-            var textNode = document.createTextNode(replacedText);
-            textNode.nodeExpressions = expressions;
-            node.parentNode.replaceChild(textNode, node);
+        }
+        else {
+            node.nodeExpressions = expressions;
         }
     };
     Module.prototype.pushFragment = function (nodeValue, from, to, expressions) {
@@ -205,7 +211,12 @@ var Module = /** @class */ (function () {
         if (length > lastIndex) {
             this.pushFragment(nodeValue, lastIndex, length, expressions);
         }
-        return expressions;
+        if (expressions.find(function (x) { return typeof x === 'function'; })) {
+            return expressions;
+        }
+        else {
+            return [];
+        }
     };
     Module.prototype.makeHosts = function (meta, instance, node) {
         if (meta.hosts) {
@@ -502,7 +513,7 @@ var Module = /** @class */ (function () {
     return Module;
 }());
 exports.default = Module;
-function getContextByNode(node) {
+function getParsableContextByNode(node) {
     var context;
     var rxcompId = node.rxcompId;
     if (rxcompId) {
@@ -514,6 +525,10 @@ function getContextByNode(node) {
                 }
                 else if (current.factory.prototype instanceof context_1.default) {
                     return previous ? previous : current;
+                    /*
+                    } else if (current.factory.prototype instanceof Structure) {
+                        return previous ? previous : current;
+                    */
                 }
                 else {
                     return previous;
@@ -521,6 +536,14 @@ function getContextByNode(node) {
             }, undefined);
             // console.log(node.rxcompId, context);
         }
+    }
+    return context;
+}
+exports.getParsableContextByNode = getParsableContextByNode;
+function getContextByNode(node) {
+    var context = getParsableContextByNode(node);
+    if (context && context.factory.prototype instanceof structure_1.default) {
+        context = undefined;
     }
     return context;
 }

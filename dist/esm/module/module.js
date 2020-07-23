@@ -18,6 +18,7 @@ export default class Module {
             }
             return instance;
         }).filter((x) => x !== undefined);
+        // instances.forEach(x => x.onInit());
         // console.log('compile', instances, node, parentInstance);
         return instances;
     }
@@ -104,7 +105,7 @@ export default class Module {
             const child = node.childNodes[i];
             if (child.nodeType === 1) {
                 const element = child;
-                const context = getContextByNode(element);
+                const context = getParsableContextByNode(element);
                 if (!context) {
                     this.parse(element, instance);
                 }
@@ -160,23 +161,28 @@ export default class Module {
         if (!expressions) {
             expressions = this.parseTextNodeExpression(node.wholeText);
         }
-        const replacedText = expressions.reduce((p, c) => {
-            let text;
-            if (typeof c === 'function') { // instanceOf ExpressionFunction ?;
-                text = this.resolve(c, instance, instance);
-                if (text == undefined) { // !!! keep == loose equality
-                    text = '';
+        if (expressions.length) {
+            const replacedText = expressions.reduce((p, c) => {
+                let text;
+                if (typeof c === 'function') { // instanceOf ExpressionFunction ?;
+                    text = this.resolve(c, instance, instance);
+                    if (text == undefined) { // !!! keep == loose equality
+                        text = '';
+                    }
                 }
+                else {
+                    text = c;
+                }
+                return p + text;
+            }, '');
+            if (node.nodeValue !== replacedText) {
+                const textNode = document.createTextNode(replacedText);
+                textNode.nodeExpressions = expressions;
+                node.parentNode.replaceChild(textNode, node);
             }
-            else {
-                text = c;
-            }
-            return p + text;
-        }, '');
-        if (node.nodeValue !== replacedText) {
-            const textNode = document.createTextNode(replacedText);
-            textNode.nodeExpressions = expressions;
-            node.parentNode.replaceChild(textNode, node);
+        }
+        else {
+            node.nodeExpressions = expressions;
         }
     }
     pushFragment(nodeValue, from, to, expressions) {
@@ -200,7 +206,12 @@ export default class Module {
         if (length > lastIndex) {
             this.pushFragment(nodeValue, lastIndex, length, expressions);
         }
-        return expressions;
+        if (expressions.find(x => typeof x === 'function')) {
+            return expressions;
+        }
+        else {
+            return [];
+        }
     }
     makeHosts(meta, instance, node) {
         if (meta.hosts) {
@@ -472,7 +483,7 @@ export default class Module {
         return this.traverseNext(node.nextSibling, callback, i + 1);
     }
 }
-export function getContextByNode(node) {
+export function getParsableContextByNode(node) {
     let context;
     const rxcompId = node.rxcompId;
     if (rxcompId) {
@@ -484,6 +495,10 @@ export function getContextByNode(node) {
                 }
                 else if (current.factory.prototype instanceof Context) {
                     return previous ? previous : current;
+                    /*
+                    } else if (current.factory.prototype instanceof Structure) {
+                        return previous ? previous : current;
+                    */
                 }
                 else {
                     return previous;
@@ -491,6 +506,13 @@ export function getContextByNode(node) {
             }, undefined);
             // console.log(node.rxcompId, context);
         }
+    }
+    return context;
+}
+export function getContextByNode(node) {
+    let context = getParsableContextByNode(node);
+    if (context && context.factory.prototype instanceof Structure) {
+        context = undefined;
     }
     return context;
 }

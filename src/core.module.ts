@@ -7,6 +7,7 @@ import ForStructure from './for/for.structure';
 import HrefDirective from './href/href.directive';
 import IfStructure from './if/if.structure';
 import InnerHtmlDirective from './inner-html/inner-html.directive';
+import JsonComponent from './json/json.component';
 import JsonPipe from './json/json.pipe';
 import Module from './module/module';
 import SrcDirective from './src/src.directive';
@@ -19,6 +20,7 @@ const factories: typeof Factory[] = [
 	HrefDirective,
 	IfStructure,
 	InnerHtmlDirective,
+	JsonComponent,
 	SrcDirective,
 	StyleDirective,
 ];

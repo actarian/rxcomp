@@ -7,9 +7,19 @@ var JsonPipe = /** @class */ (function (_super) {
     function JsonPipe() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    // !!! todo: Remove circular structures when converting to JSON
     JsonPipe.transform = function (value) {
-        return JSON.stringify(value, null, '\t');
+        var cache = new Map();
+        var json = JSON.stringify(value, function (key, value) {
+            if (typeof value === 'object' && value != null) {
+                if (cache.has(value)) {
+                    // Circular reference found, discard key
+                    return '#ref';
+                }
+                cache.set(value, true);
+            }
+            return value;
+        }, 2);
+        return json;
     };
     return JsonPipe;
 }(pipe_1.default));

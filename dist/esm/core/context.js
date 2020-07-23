@@ -1,12 +1,26 @@
 // import { BehaviorSubject, Subject } from 'rxjs';
 import Component from './component';
+import { getContext } from './factory';
 const RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 export default class Context extends Component {
-    constructor(instance, descriptors = {}) {
+    constructor(parentInstance, descriptors = {}) {
         super();
-        descriptors = Context.mergeDescriptors(instance, instance, descriptors);
-        descriptors = Context.mergeDescriptors(Object.getPrototypeOf(instance), instance, descriptors);
+        descriptors = Context.mergeDescriptors(parentInstance, parentInstance, descriptors);
+        descriptors = Context.mergeDescriptors(Object.getPrototypeOf(parentInstance), parentInstance, descriptors);
         Object.defineProperties(this, descriptors);
+    }
+    pushChanges() {
+        const context = getContext(this);
+        if (!context.keys) {
+            context.keys = Object.keys(context.parentInstance).filter(key => RESERVED_PROPERTIES.indexOf(key) === -1);
+            // console.log(context.keys.join(','));
+        }
+        if (context.module.instances) {
+            context.keys.forEach(key => {
+                this[key] = context.parentInstance[key];
+            });
+        }
+        super.pushChanges();
     }
     static mergeDescriptors(source, instance, descriptors = {}) {
         const properties = Object.getOwnPropertyNames(source);

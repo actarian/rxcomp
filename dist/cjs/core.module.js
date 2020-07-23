@@ -7,6 +7,7 @@ var for_structure_1 = tslib_1.__importDefault(require("./for/for.structure"));
 var href_directive_1 = tslib_1.__importDefault(require("./href/href.directive"));
 var if_structure_1 = tslib_1.__importDefault(require("./if/if.structure"));
 var inner_html_directive_1 = tslib_1.__importDefault(require("./inner-html/inner-html.directive"));
+var json_component_1 = tslib_1.__importDefault(require("./json/json.component"));
 var json_pipe_1 = tslib_1.__importDefault(require("./json/json.pipe"));
 var module_1 = tslib_1.__importDefault(require("./module/module"));
 var src_directive_1 = tslib_1.__importDefault(require("./src/src.directive"));
@@ -18,6 +19,7 @@ var factories = [
     href_directive_1.default,
     if_structure_1.default,
     inner_html_directive_1.default,
+    json_component_1.default,
     src_directive_1.default,
     style_directive_1.default,
 ];

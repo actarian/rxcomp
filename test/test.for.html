@@ -2,6 +2,7 @@
 <!-- @@block = main-->
 <main root-component>
 	<!-- @@include ./templates/shared/header.html -->
+	<json-component [item]="object"></json-component>
 	<div class="list__item" *for="let parent of nested">
 		<span *for="let item of parent.items">
 			<span class="item" [innerHTML]="item"></span>
@@ -11,11 +12,12 @@
 		<div class="item">{{key}} {{value | json}}</div>
 	</div>
 	<div *if="flag">
-		<div class="list__item" *for="let item of items" (click)="alert(item)">
-			<div class="item" [style]="{ color: getColor(index) }">{{item | example}}</div>
+		<div class="list__item" [style]="{ background: red ? '#888' : '#eee', color: notred ? 'red' : 'grey' }" *for="let item of items" (click)="alert(item)">
+			<div class="item" [style]="{ color: red ? 'red' : getColor(index), color: notred ? 'violet' : 'red'  }">{{item | example}}</div>
 		</div>
 	</div>
 </main>
+
 <!-- @@close-->
 <!-- @@block = js-->
 <script src="/rxcomp/js/test.for.min.js"></script>

@@ -1,0 +1,34 @@
+@import 'shared';
+
+body {
+	--font-primary: #{$font-primary};
+	--font-secondary: #{$font-secondary};
+	--font-size: #{$font-size};
+	--line-height: #{$line-height};
+	--font-extralight: #{$font-extralight};
+	--font-light: #{$font-light};
+	--font-regular: #{$font-regular};
+	--font-semibold: #{$font-semibold};
+	--font-bold: #{$font-bold};
+	--font-extrabold: #{$font-extrabold};
+	--font-black: #{$font-black};
+	--btn-radius: #{$btn-radius};
+	--card-radius: #{$card-radius};
+	--bullet-size: #{$bullet-size};
+}
+
+body {
+	--background: #{$background};
+	--background-negative: #{$background-negative};
+	--background-primary: #{$background-primary};
+	// --background-secondary: #{$background-secondary};
+	// --background-tertiary: #{$background-tertiary};
+	--foreground: #{$foreground};
+	--foreground-negative: #{$foreground-negative};
+	--foreground-primary: #{$foreground-primary};
+	// --foreground-secondary: #{$foreground-secondary};
+	// --foreground-tertiary: #{$foreground-tertiary};
+	--border: #{$border};
+}
+
+@import 'cssvars';

@@ -18,8 +18,11 @@ var Factory = /** @class */ (function () {
     Factory.prototype.onView = function () { };
     Factory.prototype.onDestroy = function () { };
     Factory.prototype.pushChanges = function () {
-        this.changes$.next(this);
-        this.onView();
+        var module = getContext(this).module;
+        if (module.instances) {
+            this.changes$.next(this);
+            this.onView();
+        }
     };
     return Factory;
 }());

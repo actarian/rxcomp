@@ -19,8 +19,11 @@ export default class Factory {
 	onDestroy(): void { }
 
 	pushChanges(): void {
-		this.changes$.next(this);
-		this.onView();
+		const { module } = getContext(this);
+		if (module.instances) {
+			this.changes$.next(this);
+			this.onView();
+		}
 	}
 
 	[key: string]: any; // extensible object

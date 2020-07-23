@@ -27,9 +27,10 @@ export default class Platform {
 			throw ('missing bootstrap meta selector');
 		}
 		const meta: IModuleParsedMeta = this.resolveMeta(moduleFactory!);
-		const module = new moduleFactory();
+		const module: Module = new moduleFactory();
 		module.meta = meta;
 		const instances = module.compile(meta.node, window);
+		module.instances = instances;
 		const root = instances[0];
 		// if (root instanceof module.meta.bootstrap) {
 		root.pushChanges();
@@ -162,3 +163,15 @@ export default class Platform {
 	}
 
 }
+
+/* global window self */
+export const PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+/* eslint-disable no-undef */
+export const PLATFORM_JS_DOM = (typeof window !== 'undefined' && window.name === 'nodejs') || navigator.userAgent.includes('Node.js') || navigator.userAgent.includes('jsdom');
+/* eslint-enable no-undef */
+
+export const PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+
+/* eslint-disable no-restricted-globals */
+export const PLATFORM_WEB_WORKER = typeof self === 'object' && self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope';

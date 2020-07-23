@@ -15,10 +15,16 @@
 	<meta name="description" content="<!--@@var=description-->">
 	<meta name="apple-mobile-web-app-title" content="<!--@@var=title-->">
 	<meta name="application-name" content="<!--@@var=title-->">
+	<link rel="apple-touch-icon" sizes="180x180" href="/rxcomp/img/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/rxcomp/img/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/rxcomp/img/favicon-16x16.png">
+	<link rel="shortcut icon" type="image/png" href="/rxcomp/img/favicon.ico" />
+	<link rel="manifest" href="/rxcomp/img/site.webmanifest">
+	<link rel="mask-icon" href="/rxcomp/img/safari-pinned-tab.svg" color="#5bbad5">
 	<meta name="msapplication-TileColor" content="#212121">
 	<meta name="theme-color" content="#ffffff">
-	<link rel="shortcut icon" type="image/png" href="/rxcomp/img/favicon.ico" />
 	<link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/rxcomp/css/rxcomp.min.css" />
 	<link rel="stylesheet" href="/rxcomp/css/main.min.css" />
 	<!-- @@placeholder= css -->
 </head>
@@ -26,8 +32,8 @@
 <body class="<!--@@var=class-->">
 	<!-- @@include ./shared/analytics.html { "code": "GTM-WL42JM2" } -->
 	<!-- @@placeholder= main -->
-	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign"></script>
-	<script src="https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js"></script>
+	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign%2CMap" crossorigin="anonymous" SameSite="none Secure"></script>
+	<script src="https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js" crossorigin="anonymous" SameSite="none Secure"></script>
 	<!-- @@placeholder= js -->
 </body>
 

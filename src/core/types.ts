@@ -32,6 +32,7 @@ export interface IContext {
 	selector: string;
 	inputs?: { [key: string]: ExpressionFunction };
 	outputs?: { [key: string]: Observable<any> };
+	keys?: string[];
 }
 
 export interface IModuleMeta {

@@ -1,0 +1,86 @@
+@mixin aspect-grid($w: 4, $h: 3) {
+	display: grid;
+
+	&:before,
+	&>img,
+	&>svg,
+	&>video,
+	&>* {
+		grid-area: 1 / 1 / 2 / 2;
+	}
+
+	&:before {
+		content: '';
+		display: block;
+		padding-top: calc(#{$h} / #{$w} * 100%);
+	}
+
+	/*
+	&::before {
+		content: url("data:image/svg+xml,%3Csvg viewBox='0 0 #{$w} #{$h}' xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E");
+	}
+	*/
+}
+
+@mixin as-aspect-clip() {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+
+	img,
+	svg,
+	video,
+	canvas,
+	ng-transclude {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+@mixin as-aspect-clip-size($w: 4, $h: 3) {
+	padding-top: 100% / $w * $h;
+}
+
+@mixin aspect-clip($w: 4, $h: 3) {
+	position: relative;
+	width: 100%;
+	padding-top: 100% / $w * $h;
+	overflow: hidden;
+
+	img,
+	svg,
+	video,
+	canvas,
+	ng-transclude {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+@mixin aspect-bottom($w: 4, $h: 3) {
+	position: relative;
+	width: 100%;
+	padding-top: 100% / $w * $h;
+	overflow: hidden;
+
+	img,
+	svg,
+	video,
+	canvas,
+	ng-transclude {
+		position: absolute;
+		bottom: 10px;
+		left: 0;
+		width: 100%;
+		height: auto;
+		object-fit: cover;
+	}
+}

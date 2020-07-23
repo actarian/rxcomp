@@ -12,3 +12,7 @@ export default class Platform {
     protected static getExpressions(selector: string): MatchFunction[];
     protected static unwrapSelectors(factories: FactoryList): SelectorFunction[];
 }
+export declare const PLATFORM_BROWSER: boolean;
+export declare const PLATFORM_JS_DOM: boolean;
+export declare const PLATFORM_NODE: boolean;
+export declare const PLATFORM_WEB_WORKER: boolean;

@@ -3,6 +3,16 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.11] - 2020-08-01
+### Fixing
+- Context, TextNode Parser
+### Modified
+- JsonPipe
+### Added
+- JsonComponent
+
+---
+
 ## [1.0.0-beta.10] - 2020-05-08
 ### Modified
 - SrcDirective, HrefDirective & InnerHtmlDirective

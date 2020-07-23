@@ -30,6 +30,7 @@ var Platform = /** @class */ (function () {
         var module = new moduleFactory();
         module.meta = meta;
         var instances = module.compile(meta.node, window);
+        module.instances = instances;
         var root = instances[0];
         // if (root instanceof module.meta.bootstrap) {
         root.pushChanges();
@@ -159,3 +160,11 @@ var Platform = /** @class */ (function () {
     return Platform;
 }());
 exports.default = Platform;
+/* global window self */
+exports.PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+/* eslint-disable no-undef */
+exports.PLATFORM_JS_DOM = (typeof window !== 'undefined' && window.name === 'nodejs') || navigator.userAgent.includes('Node.js') || navigator.userAgent.includes('jsdom');
+/* eslint-enable no-undef */
+exports.PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+/* eslint-disable no-restricted-globals */
+exports.PLATFORM_WEB_WORKER = typeof self === 'object' && self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope';

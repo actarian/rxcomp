@@ -62,9 +62,10 @@ var ForStructure = /** @class */ (function (_super) {
                     var args = [token.key, key, token.value, value, i, total, context.parentInstance];
                     var instance = module.makeInstance(clonedNode, for_item_1.default, context.selector, context.parentInstance, args);
                     if (instance) {
-                        var forItemContext = factory_1.getContext(instance);
+                        // const forItemContext = getContext(instance);
                         // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
-                        module.compile(clonedNode, forItemContext.instance);
+                        // module.compile(clonedNode, forItemContext.instance);
+                        module.compile(clonedNode, instance);
                         // nextSibling = clonedNode.nextSibling;
                         this.instances.push(instance);
                     }
