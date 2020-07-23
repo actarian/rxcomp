@@ -370,10 +370,11 @@
 
     _proto.onChanges = function onChanges(changes) {
       var context = getContext(this);
+      var parentInstance = context.parentInstance;
       var module = context.module;
       var node = context.node;
       var token = this.token;
-      var result = module.resolve(this.forFunction, changes, this) || [];
+      var result = module.resolve(this.forFunction, parentInstance, this) || [];
       var isArray = Array.isArray(result);
       var array = isArray ? result : Object.keys(result);
       var total = array.length;
@@ -399,6 +400,7 @@
             if (_instance) {
               var forItemContext = getContext(_instance);
               module.compile(clonedNode, forItemContext.instance);
+              module.parse(clonedNode, _instance);
               this.instances.push(_instance);
             }
           }
@@ -519,9 +521,10 @@
 
     _proto.onChanges = function onChanges(changes) {
       var _getContext2 = getContext(this),
-          module = _getContext2.module;
+          module = _getContext2.module,
+          parentInstance = _getContext2.parentInstance;
 
-      var value = module.resolve(this.ifFunction, changes, this);
+      var value = module.resolve(this.ifFunction, parentInstance, this);
       var element = this.element;
 
       if (value) {
@@ -586,7 +589,19 @@
     }
 
     JsonPipe.transform = function transform(value) {
-      return JSON.stringify(value, null, '\t');
+      var cache = new Map();
+      var json = JSON.stringify(value, function (key, value) {
+        if (typeof value === 'object' && value != null) {
+          if (cache.has(value)) {
+            return '#ref';
+          }
+
+          cache.set(value, true);
+        }
+
+        return value;
+      }, 2);
+      return json;
     };
 
     return JsonPipe;
@@ -621,6 +636,15 @@
       }).filter(function (x) {
         return x !== undefined;
       });
+      instances.forEach(function (x) {
+        if (x instanceof Component) {
+          var context = getContext(x);
+          console.log(context.node !== node);
+
+          _this.parse(context.node, x);
+        }
+      });
+      console.log('e', instances);
       return instances;
     };
 
@@ -637,6 +661,7 @@
 
         var instance = _construct(factory, args || []);
 
+        console.log('instance', instance.constructor.name);
         var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 
         if (meta) {
@@ -650,6 +675,7 @@
         }
 
         instance.onInit();
+        instance.onChanges(parentInstance);
 
         if (parentInstance instanceof Factory) {
           parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
@@ -1369,7 +1395,7 @@
       module.meta = meta;
       var instances = module.compile(meta.node, window);
       var root = instances[0];
-      root.pushChanges();
+      console.log('end', instances);
       return module;
     };
 
@@ -1581,15 +1607,6 @@
     var _proto = RootComponent.prototype;
 
     _proto.onInit = function onInit() {
-      var _this2 = this;
-
-      {
-        rxjs.interval(1000).pipe(operators.take(1000), operators.takeUntil(this.unsubscribe$)).subscribe(function (items) {
-          _this2.flag = !_this2.flag;
-
-          _this2.pushChanges();
-        });
-      }
     };
 
     _proto.getColor = function getColor(index) {
@@ -1639,3 +1656,4 @@
   Browser.bootstrap(AppModule);
 
 }(rxjs, rxjs.operators));
+//# sourceMappingURL=test.for.js.map

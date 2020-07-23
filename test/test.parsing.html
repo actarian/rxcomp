@@ -45,8 +45,8 @@
 		<li class="list__item">
 			<div class="item" innerHTML="{{object.a}}"></div>
 		</li>
-		<li class="list__item">
-			<div class="item" innerHTML="{{object['a'] + '  ' + object.b}}"></div>
+		<li class="list__item" *if="object">
+			<div class="item" innerHTML="object { a: {{object['a'] + ', b: ' + object.b}} }"></div>
 		</li>
 		<li class="list__item">
 			<div class="item" [innerHTML]="object.a"></div>
@@ -61,7 +61,7 @@
 			<div class="item" [innerHTML]="date | date : 'it-IT' : { dateStyle: 'short' }"></div>
 		</li>
 		<li class="list__item" *if="object.a">
-			<div class="item">true</div>
+			<div class="item">object.a {{object.a}}</div>
 		</li>
 		<li class="list__item">
 			<div class="item">{{object.a + ' ' + object.b}}</div>
