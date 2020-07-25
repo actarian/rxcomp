@@ -13,8 +13,13 @@
           "minify": true
         },
         {
-          "input": "src/_scss/main.scss",
-          "output": "docs/css/rxcomp.css",
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "docs/css/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "docs/css/rxcomp-dark.css",
           "minify": true
         },
         {
@@ -111,8 +116,13 @@
           "name": "rxcomp"
         },
         {
-          "input": "src/_scss/main.scss",
-          "output": "dist/rxcomp.css",
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "dist/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "dist/rxcomp-dark.css",
           "minify": true
         }
       ],

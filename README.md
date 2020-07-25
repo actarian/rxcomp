@@ -30,7 +30,8 @@ ___
 
 ### What is included
 * Modules *```imports```, ```exports```*
-* Components *```inputs```, ```outputs```, ```hosts```, ```template```*
+* Meta *```inputs```, ```outputs```, ```hosts```, ```template```*
+* Components *```JsonComponent```*
 * Structures *```ForStructure```, ```IfStructure```*
 * Directives *```ClassDirective```, ```EventDirective```, ```HrefDirective```, ```InnerHtmlDirective```, ```SrcDirective```, ```StyleDirective```*
 * Pipes *```JsonPipe```*
@@ -70,7 +71,7 @@ For CDN, you can use unpkg
 
 ```html
 <script src="https://unpkg.com/@reactivex/rxjs@6.5.4/dist/global/rxjs.umd.min.js"></script>  
-<script src="https://unpkg.com/rxcomp@1.0.0-beta.10/dist/iife/rxcomp.min.js"></script>  
+<script src="https://unpkg.com/rxcomp@1.0.0-beta.11/dist/iife/rxcomp.min.js"></script>  
 ```
 
 The global namespace for RxComp is `rxcomp`
