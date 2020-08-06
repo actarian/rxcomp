@@ -223,19 +223,12 @@ button,
     font-size: 28px;
     font-weight: 800;
     color: rgba(33, 33, 33, 0.2); }
-  .control--text::-ms-input-placeholder {
-    font-size: 28px;
-    font-weight: 800;
-    color: rgba(33, 33, 33, 0.2); }
   .control--text::placeholder {
     font-size: 28px;
     font-weight: 800;
     color: rgba(33, 33, 33, 0.2); }
 
 :-ms-input-placeholder {
-  font-family: "Open Sans", sans-serif; }
-
-::-ms-input-placeholder {
   font-family: "Open Sans", sans-serif; }
 
 ::placeholder {

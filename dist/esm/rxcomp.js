@@ -16,6 +16,6 @@ export { default as JsonComponent } from './json/json.component';
 export { default as JsonPipe } from './json/json.pipe';
 export { default as Module, getContextByNode, getHost, getParsableContextByNode } from './module/module';
 export { default as Browser } from './platform/browser';
-export { default as Platform, PLATFORM_BROWSER, PLATFORM_JS_DOM, PLATFORM_NODE, PLATFORM_WEB_WORKER } from './platform/platform';
+export { default as Platform, PLATFORM_BROWSER, PLATFORM_JS_DOM, PLATFORM_NODE, PLATFORM_WEB_WORKER, isPlatformBrowser, isPlatformServer, isPlatformWorker } from './platform/platform';
 export { default as SrcDirective } from './src/src.directive';
 export { default as StyleDirective } from './style/style.directive';

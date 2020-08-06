@@ -4,6 +4,7 @@ import Component from '../core/component';
 import Context from '../core/context';
 import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
 import Structure from '../core/structure';
+import { isPlatformBrowser } from '../platform/platform';
 let ID = 0;
 export default class Module {
     compile(node, parentInstance) {
@@ -139,8 +140,8 @@ export default class Module {
         return context;
     }
     getInstance(node) {
-        if (node instanceof Document) {
-            return window; // !!! window or global
+        if (node === document) {
+            return (isPlatformBrowser ? window : global);
         }
         const context = getContextByNode(node);
         if (context) {

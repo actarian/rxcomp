@@ -19,7 +19,7 @@ var SrcDirective = /** @class */ (function (_super) {
                 src ? node.setAttribute('src', src) : node.removeAttribute('src');
             }
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return SrcDirective;

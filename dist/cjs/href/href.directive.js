@@ -19,7 +19,7 @@ var HrefDirective = /** @class */ (function (_super) {
                 href ? node.setAttribute('href', href) : node.removeAttribute('href');
             }
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return HrefDirective;

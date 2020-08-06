@@ -37,22 +37,22 @@ var ForItem = /** @class */ (function (_super) {
     }
     Object.defineProperty(ForItem.prototype, "first", {
         get: function () { return this.index === 0; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(ForItem.prototype, "last", {
         get: function () { return this.index === this.count - 1; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(ForItem.prototype, "even", {
         get: function () { return this.index % 2 === 0; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(ForItem.prototype, "odd", {
         get: function () { return !this.even; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return ForItem;

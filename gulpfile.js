@@ -10,7 +10,7 @@ const {
 	compile,
 	serve,
 	watch
-} = require('./gulpfile/gulpfile-config');
+} = require('gulpfile-config');
 
 exports.compile = compile;
 exports.bundle = bundle;

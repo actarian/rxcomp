@@ -16,3 +16,6 @@ export declare const PLATFORM_BROWSER: boolean;
 export declare const PLATFORM_JS_DOM: boolean;
 export declare const PLATFORM_NODE: boolean;
 export declare const PLATFORM_WEB_WORKER: boolean;
+export declare const isPlatformServer: boolean;
+export declare const isPlatformBrowser: boolean;
+export declare const isPlatformWorker: boolean;

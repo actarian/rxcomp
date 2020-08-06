@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isPlatformWorker = exports.isPlatformBrowser = exports.isPlatformServer = exports.PLATFORM_WEB_WORKER = exports.PLATFORM_NODE = exports.PLATFORM_JS_DOM = exports.PLATFORM_BROWSER = void 0;
 var tslib_1 = require("tslib");
 var component_1 = tslib_1.__importDefault(require("../core/component"));
 var directive_1 = tslib_1.__importDefault(require("../core/directive"));
@@ -163,8 +164,11 @@ exports.default = Platform;
 /* global window self */
 exports.PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 /* eslint-disable no-undef */
-exports.PLATFORM_JS_DOM = (typeof window !== 'undefined' && window.name === 'nodejs') || navigator.userAgent.includes('Node.js') || navigator.userAgent.includes('jsdom');
+exports.PLATFORM_JS_DOM = (typeof window !== 'undefined' && window.name === 'nodejs') || (typeof navigator !== 'undefined' && navigator.userAgent.includes('Node.js')) || (typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom'));
 /* eslint-enable no-undef */
 exports.PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 /* eslint-disable no-restricted-globals */
 exports.PLATFORM_WEB_WORKER = typeof self === 'object' && self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope';
+exports.isPlatformServer = exports.PLATFORM_NODE;
+exports.isPlatformBrowser = !exports.PLATFORM_NODE && exports.PLATFORM_BROWSER;
+exports.isPlatformWorker = exports.PLATFORM_WEB_WORKER;

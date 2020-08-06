@@ -19,7 +19,7 @@ var InnerHtmlDirective = /** @class */ (function (_super) {
                 node.innerHTML = innerHTML == undefined ? '' : innerHTML; // !!! keep == loose equality
             }
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return InnerHtmlDirective;

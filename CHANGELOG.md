@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.12] - 2020-08-06
+### Updating
+- Dependancies
+
+---
+
 ## [1.0.0-beta.11] - 2020-07-25
 ### Fixing
 - Context, TextNode Parser

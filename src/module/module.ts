@@ -5,6 +5,7 @@ import Context from '../core/context';
 import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
 import Structure from '../core/structure';
 import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, IModuleParsedMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
+import { isPlatformBrowser } from '../platform/platform';
 
 let ID: number = 0;
 
@@ -152,8 +153,8 @@ export default class Module {
 	}
 
 	protected getInstance(node: HTMLElement | Document): Factory | Window | undefined {
-		if (node instanceof Document) {
-			return window; // !!! window or global
+		if (node === document) {
+			return (isPlatformBrowser ? window : global) as Window;
 		}
 		const context: IContext | undefined = getContextByNode(node);
 		if (context) {

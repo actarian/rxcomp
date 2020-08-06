@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getHost = exports.getContextByNode = exports.getParsableContextByNode = void 0;
 var tslib_1 = require("tslib");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
@@ -7,6 +8,7 @@ var component_1 = tslib_1.__importDefault(require("../core/component"));
 var context_1 = tslib_1.__importDefault(require("../core/context"));
 var factory_1 = tslib_1.__importStar(require("../core/factory"));
 var structure_1 = tslib_1.__importDefault(require("../core/structure"));
+var platform_1 = require("../platform/platform");
 var ID = 0;
 var Module = /** @class */ (function () {
     function Module() {
@@ -142,8 +144,8 @@ var Module = /** @class */ (function () {
         return context;
     };
     Module.prototype.getInstance = function (node) {
-        if (node instanceof Document) {
-            return window; // !!! window or global
+        if (node === document) {
+            return (platform_1.isPlatformBrowser ? window : global);
         }
         var context = getContextByNode(node);
         if (context) {
