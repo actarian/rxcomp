@@ -671,15 +671,7 @@ var Platform = function () {
     var meta = this.resolveMeta(moduleFactory);
     var module = new moduleFactory();
     module.meta = meta;
-    var instances = module.compile(meta.node, window);
-    module.instances = instances;
-    var root = instances[0];
-    root.pushChanges();
     return module;
-  };
-
-  Platform.isBrowser = function isBrowser() {
-    return Boolean(window);
   };
 
   Platform.querySelector = function querySelector(selector) {
@@ -1617,6 +1609,57 @@ CoreModule.meta = {
   function Browser() {
     return _Platform.apply(this, arguments) || this;
   }
+
+  Browser.bootstrap = function bootstrap(moduleFactory) {
+    if (!isPlatformBrowser) {
+      throw 'missing platform browser, window not found';
+    }
+
+    if (!moduleFactory) {
+      throw 'missing moduleFactory';
+    }
+
+    if (!moduleFactory.meta) {
+      throw 'missing moduleFactory meta';
+    }
+
+    if (!moduleFactory.meta.bootstrap) {
+      throw 'missing bootstrap';
+    }
+
+    if (!moduleFactory.meta.bootstrap.meta) {
+      throw 'missing bootstrap meta';
+    }
+
+    if (!moduleFactory.meta.bootstrap.meta.selector) {
+      throw 'missing bootstrap meta selector';
+    }
+
+    var meta = this.resolveMeta(moduleFactory);
+    var module = new moduleFactory();
+    module.meta = meta;
+
+    if (window.rxcomp_hydrate_) {
+      var _meta$node$parentNode;
+
+      var clonedNode = meta.node.cloneNode();
+      clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;
+      var instances = module.compile(clonedNode, window);
+      module.instances = instances;
+      var root = instances[0];
+      root.pushChanges();
+      (_meta$node$parentNode = meta.node.parentNode) == null ? void 0 : _meta$node$parentNode.replaceChild(clonedNode, meta.node);
+    } else {
+      var _instances = module.compile(meta.node, window);
+
+      module.instances = _instances;
+      var _root = _instances[0];
+
+      _root.pushChanges();
+    }
+
+    return module;
+  };
 
   return Browser;
 }(Platform);exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.Directive=Directive;exports.EventDirective=EventDirective;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;return exports;}({},rxjs,rxjs.operators));

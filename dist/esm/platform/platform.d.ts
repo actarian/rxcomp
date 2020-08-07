@@ -1,8 +1,11 @@
 import { FactoryList, IElement, IModuleParsedImportedMeta, IModuleParsedMeta, MatchFunction, PipeMap, SelectorFunction } from '../core/types';
 import Module from '../module/module';
 export default class Platform {
+    /**
+     * @param moduleFactory
+     * @description This method returns an uncompiled module
+     */
     static bootstrap(moduleFactory?: typeof Module): Module;
-    static isBrowser(): boolean;
     protected static querySelector(selector: string): IElement | null;
     protected static resolveMeta(moduleFactory: typeof Module): IModuleParsedMeta;
     protected static resolveImportedMeta(moduleFactory: typeof Module): IModuleParsedImportedMeta;

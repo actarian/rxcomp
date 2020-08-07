@@ -10,6 +10,10 @@ const ORDER: FactoryList = [Structure, Component, Directive];
 
 export default class Platform {
 
+	/**
+	 * @param moduleFactory
+	 * @description This method returns an uncompiled module
+	 */
 	static bootstrap(moduleFactory?: typeof Module): Module {
 		if (!moduleFactory) {
 			throw ('missing moduleFactory');
@@ -29,24 +33,10 @@ export default class Platform {
 		const meta: IModuleParsedMeta = this.resolveMeta(moduleFactory!);
 		const module: Module = new moduleFactory();
 		module.meta = meta;
-		if (isPlatformBrowser && window.rxcomp_hydrate_) {
-			const clonedNode = meta.node.cloneNode() as IElement;
-			clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;
-			const instances = module.compile(clonedNode, window);
-			module.instances = instances;
-			const root = instances[0];
-			// if (root instanceof module.meta.bootstrap) {
-			root.pushChanges();
-			meta.node.parentNode?.replaceChild(clonedNode, meta.node);
-			// }
-		} else {
-			const instances = module.compile(meta.node, window);
-			module.instances = instances;
-			const root = instances[0];
-			// if (root instanceof module.meta.bootstrap) {
-			root.pushChanges();
-			// }
-		}
+		// const instances = module.compile(meta.node, window);
+		// module.instances = instances;
+		// const root = instances[0];
+		// root.pushChanges();
 		return module;
 	}
 

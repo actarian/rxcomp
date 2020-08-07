@@ -5,6 +5,10 @@ import Pipe from '../core/pipe';
 import Structure from '../core/structure';
 const ORDER = [Structure, Component, Directive];
 export default class Platform {
+    /**
+     * @param moduleFactory
+     * @description This method returns an uncompiled module
+     */
     static bootstrap(moduleFactory) {
         if (!moduleFactory) {
             throw ('missing moduleFactory');
@@ -24,18 +28,12 @@ export default class Platform {
         const meta = this.resolveMeta(moduleFactory);
         const module = new moduleFactory();
         module.meta = meta;
-        const instances = module.compile(meta.node, window);
-        module.instances = instances;
-        const root = instances[0];
-        // if (root instanceof module.meta.bootstrap) {
-        root.pushChanges();
-        // }
+        // const instances = module.compile(meta.node, window);
+        // module.instances = instances;
+        // const root = instances[0];
+        // root.pushChanges();
         return module;
     }
-    static isBrowser() {
-        return Boolean(window);
-    }
-    // static isServer() {}
     static querySelector(selector) {
         return document.querySelector(selector);
     }

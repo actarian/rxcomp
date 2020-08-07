@@ -11,6 +11,10 @@ var ORDER = [structure_1.default, component_1.default, directive_1.default];
 var Platform = /** @class */ (function () {
     function Platform() {
     }
+    /**
+     * @param moduleFactory
+     * @description This method returns an uncompiled module
+     */
     Platform.bootstrap = function (moduleFactory) {
         if (!moduleFactory) {
             throw ('missing moduleFactory');
@@ -30,18 +34,12 @@ var Platform = /** @class */ (function () {
         var meta = this.resolveMeta(moduleFactory);
         var module = new moduleFactory();
         module.meta = meta;
-        var instances = module.compile(meta.node, window);
-        module.instances = instances;
-        var root = instances[0];
-        // if (root instanceof module.meta.bootstrap) {
-        root.pushChanges();
-        // }
+        // const instances = module.compile(meta.node, window);
+        // module.instances = instances;
+        // const root = instances[0];
+        // root.pushChanges();
         return module;
     };
-    Platform.isBrowser = function () {
-        return Boolean(window);
-    };
-    // static isServer() {}
     Platform.querySelector = function (selector) {
         return document.querySelector(selector);
     };
