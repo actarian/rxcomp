@@ -29,20 +29,26 @@ export default class Platform {
 		const meta: IModuleParsedMeta = this.resolveMeta(moduleFactory!);
 		const module: Module = new moduleFactory();
 		module.meta = meta;
-		const instances = module.compile(meta.node, window);
-		module.instances = instances;
-		const root = instances[0];
-		// if (root instanceof module.meta.bootstrap) {
-		root.pushChanges();
-		// }
+		if (isPlatformBrowser && window.rxcomp_hydrate_) {
+			const clonedNode = meta.node.cloneNode() as IElement;
+			clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;
+			const instances = module.compile(clonedNode, window);
+			module.instances = instances;
+			const root = instances[0];
+			// if (root instanceof module.meta.bootstrap) {
+			root.pushChanges();
+			meta.node.parentNode?.replaceChild(clonedNode, meta.node);
+			// }
+		} else {
+			const instances = module.compile(meta.node, window);
+			module.instances = instances;
+			const root = instances[0];
+			// if (root instanceof module.meta.bootstrap) {
+			root.pushChanges();
+			// }
+		}
 		return module;
 	}
-
-	static isBrowser(): boolean {
-		return Boolean(window);
-	}
-
-	// static isServer() {}
 
 	protected static querySelector(selector: string): IElement | null {
 		return document.querySelector(selector);
