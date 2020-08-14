@@ -1,7 +1,9 @@
 
+import { takeUntil } from 'rxjs/operators';
 import ClassDirective from './class/class.directive';
 import Factory from './core/factory';
 import Pipe from './core/pipe';
+import { errors$ } from './error/error';
 import EventDirective from './event/event.directive';
 import ForStructure from './for/for.structure';
 import HrefDirective from './href/href.directive';
@@ -30,6 +32,14 @@ const pipes: typeof Pipe[] = [
 ];
 
 export default class CoreModule extends Module {
+
+	constructor() {
+		super();
+		// console.log('CoreModule');
+		errors$.pipe(
+			takeUntil(this.unsubscribe$),
+		).subscribe();
+	}
 
 	static meta = {
 		declarations: [

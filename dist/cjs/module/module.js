@@ -8,10 +8,12 @@ var component_1 = tslib_1.__importDefault(require("../core/component"));
 var context_1 = tslib_1.__importDefault(require("../core/context"));
 var factory_1 = tslib_1.__importStar(require("../core/factory"));
 var structure_1 = tslib_1.__importDefault(require("../core/structure"));
+var error_1 = require("../error/error");
 var platform_1 = require("../platform/platform");
 var ID = 0;
 var Module = /** @class */ (function () {
     function Module() {
+        this.unsubscribe$ = new rxjs_1.Subject();
     }
     Module.prototype.compile = function (node, parentInstance) {
         var _this = this;
@@ -92,7 +94,7 @@ var Module = /** @class */ (function () {
             expression = Module.parseExpression(expression);
             // console.log(expression);
             var args = params.join(',');
-            var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+            var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
             // console.log(this, $$module, $$pipes, "${expression}");
             // console.log(expression_func);
             return expression_func;
@@ -100,6 +102,10 @@ var Module = /** @class */ (function () {
         else {
             return function () { return null; };
         }
+    };
+    Module.prototype.nextError = function (error, instance, expression, params) {
+        var expressionError = new error_1.ExpressionError(error, this, instance, expression, params);
+        error_1.nextError$.next(expressionError);
     };
     Module.prototype.resolve = function (expression, parentInstance, payload) {
         // console.log(expression, parentInstance, payload);
@@ -135,6 +141,8 @@ var Module = /** @class */ (function () {
         return node;
     };
     Module.prototype.destroy = function () {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
         this.remove(this.meta.node);
         this.meta.node.innerHTML = this.meta.nodeInnerHTML;
     };

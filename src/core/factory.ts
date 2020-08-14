@@ -9,7 +9,6 @@ export default class Factory {
 	static meta: IFactoryMeta;
 
 	rxcompId: number = -1;
-
 	unsubscribe$: Subject<void> = new Subject();
 	changes$: ReplaySubject<Factory> = new ReplaySubject(1);
 

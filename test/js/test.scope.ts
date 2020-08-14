@@ -1,6 +1,19 @@
-import { BehaviorSubject, fromEvent } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { Browser, Component, CoreModule, Directive, Factory, getContext, Module, StyleDirective } from '../../src/rxcomp';
+import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
+import { Browser, Component, CoreModule, Directive, ErrorInterceptors, Factory, getContext, IErrorHandler, IErrorInterceptor, Module, StyleDirective } from '../../src/rxcomp';
+
+class CustomErrorInterceptor implements IErrorInterceptor {
+	intercept(error: Error, next: IErrorHandler): Observable<Error | void> {
+		return next.handle(error).pipe(
+			map((error: Error | void) => {
+				console.warn(error);
+				return;
+			})
+		);
+	}
+}
+
+ErrorInterceptors.push(new CustomErrorInterceptor());
 
 class RootComponent extends Component {
 	background = '#b9dbff';

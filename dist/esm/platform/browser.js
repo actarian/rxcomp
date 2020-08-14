@@ -1,3 +1,4 @@
+import { ModuleError } from '../error/error';
 import Platform, { isPlatformBrowser } from './platform';
 export default class Browser extends Platform {
     /**
@@ -7,26 +8,29 @@ export default class Browser extends Platform {
     static bootstrap(moduleFactory) {
         var _a;
         if (!isPlatformBrowser) {
-            throw 'missing platform browser, window not found';
+            throw new ModuleError('missing platform browser, window not found');
         }
         if (!moduleFactory) {
-            throw ('missing moduleFactory');
+            throw new ModuleError('missing moduleFactory');
         }
         if (!moduleFactory.meta) {
-            throw ('missing moduleFactory meta');
+            throw new ModuleError('missing moduleFactory meta');
         }
         if (!moduleFactory.meta.bootstrap) {
-            throw ('missing bootstrap');
+            throw new ModuleError('missing bootstrap');
         }
         if (!moduleFactory.meta.bootstrap.meta) {
-            throw ('missing bootstrap meta');
+            throw new ModuleError('missing bootstrap meta');
         }
         if (!moduleFactory.meta.bootstrap.meta.selector) {
-            throw ('missing bootstrap meta selector');
+            throw new ModuleError('missing bootstrap meta selector');
         }
         const meta = this.resolveMeta(moduleFactory);
         const module = new moduleFactory();
         module.meta = meta;
+        meta.imports.forEach((moduleFactory) => {
+            moduleFactory.prototype.constructor.call(module);
+        });
         if (window.rxcomp_hydrate_) {
             const clonedNode = meta.node.cloneNode();
             clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;

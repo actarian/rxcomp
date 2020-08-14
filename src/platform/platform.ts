@@ -4,6 +4,7 @@ import Factory from '../core/factory';
 import Pipe from '../core/pipe';
 import Structure from '../core/structure';
 import { FactoryList, IElement, IModuleParsedImportedMeta, IModuleParsedMeta, ISelectorResult, MatchFunction, PipeList, PipeMap, SelectorFunction } from '../core/types';
+import { ModuleError } from '../error/error';
 import Module from '../module/module';
 
 const ORDER: FactoryList = [Structure, Component, Directive];
@@ -16,23 +17,26 @@ export default class Platform {
 	 */
 	static bootstrap(moduleFactory?: typeof Module): Module {
 		if (!moduleFactory) {
-			throw ('missing moduleFactory');
+			throw new ModuleError('missing moduleFactory');
 		}
 		if (!moduleFactory.meta) {
-			throw ('missing moduleFactory meta');
+			throw new ModuleError('missing moduleFactory meta');
 		}
 		if (!moduleFactory.meta.bootstrap) {
-			throw ('missing bootstrap');
+			throw new ModuleError('missing bootstrap');
 		}
 		if (!moduleFactory.meta.bootstrap.meta) {
-			throw ('missing bootstrap meta');
+			throw new ModuleError('missing bootstrap meta');
 		}
 		if (!moduleFactory.meta.bootstrap.meta.selector) {
-			throw ('missing bootstrap meta selector');
+			throw new ModuleError('missing bootstrap meta selector');
 		}
 		const meta: IModuleParsedMeta = this.resolveMeta(moduleFactory!);
 		const module: Module = new moduleFactory();
 		module.meta = meta;
+		meta.imports.forEach((moduleFactory: typeof Module) => {
+			moduleFactory.prototype.constructor.call(module);
+		});
 		// const instances = module.compile(meta.node, window);
 		// module.instances = instances;
 		// const root = instances[0];
@@ -49,7 +53,7 @@ export default class Platform {
 		const bootstrap: typeof Factory = moduleFactory.meta.bootstrap!;
 		const node = this.querySelector(bootstrap.meta.selector!);
 		if (!node) {
-			throw (`missing node ${bootstrap.meta.selector}`);
+			throw new ModuleError(`missing node ${bootstrap.meta.selector}`);
 		}
 		const nodeInnerHTML = node.innerHTML;
 		const pipes = this.resolvePipes(meta);
@@ -57,7 +61,7 @@ export default class Platform {
 		this.sortFactories(factories);
 		factories.unshift(bootstrap);
 		const selectors = this.unwrapSelectors(factories);
-		return { factories, pipes, selectors, bootstrap, node, nodeInnerHTML };
+		return { factories, pipes, selectors, bootstrap, node, nodeInnerHTML, imports: moduleFactory.meta.imports || [] };
 	}
 
 	protected static resolveImportedMeta(moduleFactory: typeof Module): IModuleParsedImportedMeta {

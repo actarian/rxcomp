@@ -26,6 +26,13 @@ function _inheritsLoose(subClass, superClass) {
   subClass.__proto__ = superClass;
 }
 
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
 function _setPrototypeOf(o, p) {
   _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
     o.__proto__ = p;
@@ -63,6 +70,44 @@ function _construct(Parent, args, Class) {
   }
 
   return _construct.apply(null, arguments);
+}
+
+function _isNativeFunction(fn) {
+  return Function.toString.call(fn).indexOf("[native code]") !== -1;
+}
+
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+
+  _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !_isNativeFunction(Class)) return Class;
+
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+
+      _cache.set(Class, Wrapper);
+    }
+
+    function Wrapper() {
+      return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+    }
+
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return _setPrototypeOf(Wrapper, Class);
+  };
+
+  return _wrapNativeSuper(Class);
 }
 
 function _assertThisInitialized(self) {
@@ -165,7 +210,101 @@ function getContext(instance) {
 ClassDirective.meta = {
   selector: "[[class]]",
   inputs: ['class']
-};var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
+};var ModuleError = /*#__PURE__*/function (_Error) {
+  _inheritsLoose(ModuleError, _Error);
+
+  function ModuleError() {
+    return _Error.apply(this, arguments) || this;
+  }
+
+  return ModuleError;
+}( /*#__PURE__*/_wrapNativeSuper(Error));
+var ExpressionError = /*#__PURE__*/function (_Error2) {
+  _inheritsLoose(ExpressionError, _Error2);
+
+  function ExpressionError(error, module, instance, expression, params) {
+    var _this;
+
+    var message = "ExpressionError in " + instance.constructor.name + " \"" + expression + "\"\n\t\t" + error.message;
+    _this = _Error2.call(this, message) || this;
+    _this.name = error.name; // this.stack = error.stack;
+
+    _this.module = module;
+    _this.instance = instance;
+    _this.expression = expression;
+    _this.params = params;
+
+    var _getContext = getContext(instance),
+        node = _getContext.node;
+
+    _this.template = node.outerHTML;
+    return _this;
+  }
+
+  return ExpressionError;
+}( /*#__PURE__*/_wrapNativeSuper(Error));
+var ErrorInterceptorHandler = /*#__PURE__*/function () {
+  function ErrorInterceptorHandler(next, interceptor) {
+    this.next = next;
+    this.interceptor = interceptor;
+  }
+
+  var _proto = ErrorInterceptorHandler.prototype;
+
+  _proto.handle = function handle(error) {
+    return this.interceptor.intercept(error, this.next);
+  };
+
+  return ErrorInterceptorHandler;
+}();
+/*
+export class NoopErrorInterceptor implements IErrorInterceptor {
+    intercept(error: Error, next: ErrorHandler): Observable<Error> {
+        return of(error);
+    }
+}
+
+const noopInterceptor = new NoopErrorInterceptor();
+*/
+
+var DefaultErrorHandler = /*#__PURE__*/function () {
+  function DefaultErrorHandler() {}
+
+  var _proto2 = DefaultErrorHandler.prototype;
+
+  _proto2.handle = function handle(error) {
+    /*
+    if (error) {
+        console.error(error);
+    }
+    */
+    return rxjs.of(error);
+  };
+
+  return DefaultErrorHandler;
+}();
+var ErrorInterceptors = [];
+var nextError$ = new rxjs.ReplaySubject(1);
+var errors$ = nextError$.pipe(
+/*
+switchMap(error => {
+    const chain = ErrorInterceptors.reduceRight((next: ErrorHandler, interceptor: IErrorInterceptor) => {
+        return new ErrorInterceptorHandler(next, interceptor);
+    }, new NoopErrorInterceptor());
+    return chain.handle(error);
+}),
+*/
+// switchMap(error => merge(ErrorInterceptors.map(x => x.intercept(error, next)))),
+operators.switchMap(function (error) {
+  var chain = ErrorInterceptors.reduceRight(function (next, interceptor) {
+    return new ErrorInterceptorHandler(next, interceptor);
+  }, new DefaultErrorHandler());
+  return chain.handle(error);
+}), operators.tap(function (error) {
+  if (error) {
+    console.error(error);
+  }
+}));var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
 var EventDirective = /*#__PURE__*/function (_Directive) {
   _inheritsLoose(EventDirective, _Directive);
@@ -474,11 +613,11 @@ var Context = /*#__PURE__*/function (_Component) {
 
   _proto.getExpressionToken = function getExpressionToken(expression) {
     if (expression === null) {
-      throw 'invalid for';
+      throw new Error('invalid for');
     }
 
     if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
-      throw 'invalid for';
+      throw new Error('invalid for');
     }
 
     var expressions = expression.split(';').map(function (x) {
@@ -703,28 +842,31 @@ var Platform = /*#__PURE__*/function () {
    */
   Platform.bootstrap = function bootstrap(moduleFactory) {
     if (!moduleFactory) {
-      throw 'missing moduleFactory';
+      throw new ModuleError('missing moduleFactory');
     }
 
     if (!moduleFactory.meta) {
-      throw 'missing moduleFactory meta';
+      throw new ModuleError('missing moduleFactory meta');
     }
 
     if (!moduleFactory.meta.bootstrap) {
-      throw 'missing bootstrap';
+      throw new ModuleError('missing bootstrap');
     }
 
     if (!moduleFactory.meta.bootstrap.meta) {
-      throw 'missing bootstrap meta';
+      throw new ModuleError('missing bootstrap meta');
     }
 
     if (!moduleFactory.meta.bootstrap.meta.selector) {
-      throw 'missing bootstrap meta selector';
+      throw new ModuleError('missing bootstrap meta selector');
     }
 
     var meta = this.resolveMeta(moduleFactory);
     var module = new moduleFactory();
-    module.meta = meta; // const instances = module.compile(meta.node, window);
+    module.meta = meta;
+    meta.imports.forEach(function (moduleFactory) {
+      moduleFactory.prototype.constructor.call(module);
+    }); // const instances = module.compile(meta.node, window);
     // module.instances = instances;
     // const root = instances[0];
     // root.pushChanges();
@@ -742,7 +884,7 @@ var Platform = /*#__PURE__*/function () {
     var node = this.querySelector(bootstrap.meta.selector);
 
     if (!node) {
-      throw "missing node " + bootstrap.meta.selector;
+      throw new ModuleError("missing node " + bootstrap.meta.selector);
     }
 
     var nodeInnerHTML = node.innerHTML;
@@ -757,7 +899,8 @@ var Platform = /*#__PURE__*/function () {
       selectors: selectors,
       bootstrap: bootstrap,
       node: node,
-      nodeInnerHTML: nodeInnerHTML
+      nodeInnerHTML: nodeInnerHTML,
+      imports: moduleFactory.meta.imports || []
     };
   };
 
@@ -913,7 +1056,9 @@ var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;
 var isPlatformWorker = PLATFORM_WEB_WORKER;var ID = 0;
 
 var Module = /*#__PURE__*/function () {
-  function Module() {}
+  function Module() {
+    this.unsubscribe$ = new rxjs.Subject();
+  }
 
   var _proto = Module.prototype;
 
@@ -1014,7 +1159,7 @@ var Module = /*#__PURE__*/function () {
       expression = Module.parseExpression(expression); // console.log(expression);
 
       var args = params.join(',');
-      var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}"); // console.log(this, $$module, $$pipes, "${expression}");
+      var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}"); // console.log(this, $$module, $$pipes, "${expression}");
       // console.log(expression_func);
 
       return expression_func;
@@ -1023,6 +1168,11 @@ var Module = /*#__PURE__*/function () {
         return null;
       };
     }
+  };
+
+  _proto.nextError = function nextError(error, instance, expression, params) {
+    var expressionError = new ExpressionError(error, this, instance, expression, params);
+    nextError$.next(expressionError);
   };
 
   _proto.resolve = function resolve(expression, parentInstance, payload) {
@@ -1065,6 +1215,8 @@ var Module = /*#__PURE__*/function () {
   };
 
   _proto.destroy = function destroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
     this.remove(this.meta.node);
     this.meta.node.innerHTML = this.meta.nodeInnerHTML;
   };
@@ -1700,7 +1852,12 @@ var CoreModule = /*#__PURE__*/function (_Module) {
   _inheritsLoose(CoreModule, _Module);
 
   function CoreModule() {
-    return _Module.apply(this, arguments) || this;
+    var _this;
+
+    _this = _Module.call(this) || this;
+    console.log('CoreModule');
+    errors$.pipe(operators.takeUntil(_this.unsubscribe$)).subscribe();
+    return _this;
   }
 
   return CoreModule;
@@ -1721,32 +1878,35 @@ CoreModule.meta = {
    */
   Browser.bootstrap = function bootstrap(moduleFactory) {
     if (!isPlatformBrowser) {
-      throw 'missing platform browser, window not found';
+      throw new ModuleError('missing platform browser, window not found');
     }
 
     if (!moduleFactory) {
-      throw 'missing moduleFactory';
+      throw new ModuleError('missing moduleFactory');
     }
 
     if (!moduleFactory.meta) {
-      throw 'missing moduleFactory meta';
+      throw new ModuleError('missing moduleFactory meta');
     }
 
     if (!moduleFactory.meta.bootstrap) {
-      throw 'missing bootstrap';
+      throw new ModuleError('missing bootstrap');
     }
 
     if (!moduleFactory.meta.bootstrap.meta) {
-      throw 'missing bootstrap meta';
+      throw new ModuleError('missing bootstrap meta');
     }
 
     if (!moduleFactory.meta.bootstrap.meta.selector) {
-      throw 'missing bootstrap meta selector';
+      throw new ModuleError('missing bootstrap meta selector');
     }
 
     var meta = this.resolveMeta(moduleFactory);
     var module = new moduleFactory();
     module.meta = meta;
+    meta.imports.forEach(function (moduleFactory) {
+      moduleFactory.prototype.constructor.call(module);
+    });
 
     if (window.rxcomp_hydrate_) {
       var _meta$node$parentNode;
@@ -1773,4 +1933,4 @@ CoreModule.meta = {
   };
 
   return Browser;
-}(Platform);exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.Directive=Directive;exports.EventDirective=EventDirective;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;Object.defineProperty(exports,'__esModule',{value:true});})));
+}(Platform);exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;Object.defineProperty(exports,'__esModule',{value:true});})));

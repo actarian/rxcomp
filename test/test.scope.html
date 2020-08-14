@@ -2,6 +2,7 @@
 <!-- @@block = main-->
 <main root-component>
 	<!-- @@include ./templates/shared/header.html -->
+	{{pippo | json}}
 	<div host [input]="items" [style]="{ 'color': 'red' }">
 		<ul class="list">
 			<li class="list__item" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items">

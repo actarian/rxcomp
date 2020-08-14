@@ -1,12 +1,14 @@
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import Factory from '../core/factory';
 import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, IModuleParsedMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
 export default class Module {
     meta?: IModuleParsedMeta;
     instances?: Factory[];
+    unsubscribe$: Subject<void>;
     compile(node: IElement, parentInstance?: Factory | Window): Factory[];
     makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[]): Factory | undefined;
     makeFunction(expression: string, params?: string[]): ExpressionFunction;
+    nextError(error: Error, instance: Factory, expression: string, params: any[]): void;
     resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any;
     parse(node: IElement, instance: Factory): void;
     remove(node: Node, keepInstance?: Factory): Node;

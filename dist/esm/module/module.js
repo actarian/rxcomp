@@ -4,9 +4,13 @@ import Component from '../core/component';
 import Context from '../core/context';
 import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
 import Structure from '../core/structure';
+import { ExpressionError, nextError$ } from '../error/error';
 import { isPlatformBrowser } from '../platform/platform';
 let ID = 0;
 export default class Module {
+    constructor() {
+        this.unsubscribe$ = new Subject();
+    }
     compile(node, parentInstance) {
         let componentNode;
         const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map((match) => {
@@ -85,8 +89,12 @@ export default class Module {
             const args = params.join(',');
             const expression_func = new Function(`with(this) {
 				return (function (${args}, $$module) {
-					const $$pipes = $$module.meta.pipes;
-					return ${expression};
+					try {
+						const $$pipes = $$module.meta.pipes;
+						return ${expression};
+					} catch(error) {
+						$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
+					}
 				}.bind(this)).apply(this, arguments);
 			}`);
             // console.log(this, $$module, $$pipes, "${expression}");
@@ -96,6 +104,10 @@ export default class Module {
         else {
             return () => { return null; };
         }
+    }
+    nextError(error, instance, expression, params) {
+        const expressionError = new ExpressionError(error, this, instance, expression, params);
+        nextError$.next(expressionError);
     }
     resolve(expression, parentInstance, payload) {
         // console.log(expression, parentInstance, payload);
@@ -131,6 +143,8 @@ export default class Module {
         return node;
     }
     destroy() {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
         this.remove(this.meta.node);
         this.meta.node.innerHTML = this.meta.nodeInnerHTML;
     }

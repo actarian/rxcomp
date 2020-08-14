@@ -84,10 +84,10 @@ export default class ForStructure extends Structure {
 
 	getExpressionToken(expression: string): IExpressionToken {
 		if (expression === null) {
-			throw ('invalid for');
+			throw new Error('invalid for');
 		}
 		if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
-			throw ('invalid for');
+			throw new Error('invalid for');
 		}
 		const expressions: string[] = expression.split(';').map(x => x.trim()).filter(x => x !== '');
 		const forExpressions: string[] = expressions[0].split(' of ').map(x => x.trim());

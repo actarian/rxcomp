@@ -84,10 +84,10 @@ var ForStructure = /** @class */ (function (_super) {
     };
     ForStructure.prototype.getExpressionToken = function (expression) {
         if (expression === null) {
-            throw ('invalid for');
+            throw new Error('invalid for');
         }
         if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
-            throw ('invalid for');
+            throw new Error('invalid for');
         }
         var expressions = expression.split(';').map(function (x) { return x.trim(); }).filter(function (x) { return x !== ''; });
         var forExpressions = expressions[0].split(' of ').map(function (x) { return x.trim(); });

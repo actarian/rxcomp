@@ -26,6 +26,13 @@ function _inheritsLoose(subClass, superClass) {
   subClass.__proto__ = superClass;
 }
 
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
 function _setPrototypeOf(o, p) {
   _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
     o.__proto__ = p;
@@ -63,6 +70,44 @@ function _construct(Parent, args, Class) {
   }
 
   return _construct.apply(null, arguments);
+}
+
+function _isNativeFunction(fn) {
+  return Function.toString.call(fn).indexOf("[native code]") !== -1;
+}
+
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+
+  _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !_isNativeFunction(Class)) return Class;
+
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+
+      _cache.set(Class, Wrapper);
+    }
+
+    function Wrapper() {
+      return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+    }
+
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return _setPrototypeOf(Wrapper, Class);
+  };
+
+  return _wrapNativeSuper(Class);
 }
 
 function _assertThisInitialized(self) {
@@ -642,7 +687,66 @@ JsonComponent.meta = {
 }(Pipe);
 JsonPipe.meta = {
   name: 'json'
-};var ORDER = [Structure, Component, Directive];
+};var ExpressionError = function (_Error) {
+  _inheritsLoose(ExpressionError, _Error);
+
+  function ExpressionError(error, module, instance, expression, params) {
+    var _this;
+
+    var message = "ExpressionError in " + instance.constructor.name + " \"" + expression + "\"\n\t\t" + error.message;
+    _this = _Error.call(this, message) || this;
+    _this.name = error.name;
+    _this.module = module;
+    _this.instance = instance;
+    _this.expression = expression;
+    _this.params = params;
+
+    var _getContext = getContext(instance),
+        node = _getContext.node;
+
+    _this.template = node.outerHTML;
+    return _this;
+  }
+
+  return ExpressionError;
+}(_wrapNativeSuper(Error));
+var ErrorInterceptorHandler = function () {
+  function ErrorInterceptorHandler(next, interceptor) {
+    this.next = next;
+    this.interceptor = interceptor;
+  }
+
+  var _proto = ErrorInterceptorHandler.prototype;
+
+  _proto.handle = function handle(error) {
+    return this.interceptor.intercept(error, this.next);
+  };
+
+  return ErrorInterceptorHandler;
+}();
+var DefaultErrorHandler = function () {
+  function DefaultErrorHandler() {}
+
+  var _proto2 = DefaultErrorHandler.prototype;
+
+  _proto2.handle = function handle(error) {
+    return rxjs.of(error);
+  };
+
+  return DefaultErrorHandler;
+}();
+var ErrorInterceptors = [];
+var nextError$ = new rxjs.ReplaySubject(1);
+var errors$ = nextError$.pipe(operators.switchMap(function (error) {
+  var chain = ErrorInterceptors.reduceRight(function (next, interceptor) {
+    return new ErrorInterceptorHandler(next, interceptor);
+  }, new DefaultErrorHandler());
+  return chain.handle(error);
+}), operators.tap(function (error) {
+  if (error) {
+    console.error(error);
+  }
+}));var ORDER = [Structure, Component, Directive];
 
 var Platform = function () {
   function Platform() {}
@@ -671,15 +775,7 @@ var Platform = function () {
     var meta = this.resolveMeta(moduleFactory);
     var module = new moduleFactory();
     module.meta = meta;
-    var instances = module.compile(meta.node, window);
-    module.instances = instances;
-    var root = instances[0];
-    root.pushChanges();
     return module;
-  };
-
-  Platform.isBrowser = function isBrowser() {
-    return Boolean(window);
   };
 
   Platform.querySelector = function querySelector(selector) {
@@ -707,7 +803,8 @@ var Platform = function () {
       selectors: selectors,
       bootstrap: bootstrap,
       node: node,
-      nodeInnerHTML: nodeInnerHTML
+      nodeInnerHTML: nodeInnerHTML,
+      imports: moduleFactory.meta.imports || []
     };
   };
 
@@ -853,7 +950,9 @@ var PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null &
 var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var ID = 0;
 
 var Module = function () {
-  function Module() {}
+  function Module() {
+    this.unsubscribe$ = new rxjs.Subject();
+  }
 
   var _proto = Module.prototype;
 
@@ -931,13 +1030,18 @@ var Module = function () {
     if (expression) {
       expression = Module.parseExpression(expression);
       var args = params.join(',');
-      var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\treturn " + expression + ";\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+      var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
       return expression_func;
     } else {
       return function () {
         return null;
       };
     }
+  };
+
+  _proto.nextError = function nextError(error, instance, expression, params) {
+    var expressionError = new ExpressionError(error, this, instance, expression, params);
+    nextError$.next(expressionError);
   };
 
   _proto.resolve = function resolve(expression, parentInstance, payload) {
@@ -979,6 +1083,8 @@ var Module = function () {
   };
 
   _proto.destroy = function destroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
     this.remove(this.meta.node);
     this.meta.node.innerHTML = this.meta.nodeInnerHTML;
   };
@@ -1600,7 +1706,11 @@ var CoreModule = function (_Module) {
   _inheritsLoose(CoreModule, _Module);
 
   function CoreModule() {
-    return _Module.apply(this, arguments) || this;
+    var _this;
+
+    _this = _Module.call(this) || this;
+    console.log('CoreModule', _assertThisInitialized(_this));
+    return _this;
   }
 
   return CoreModule;
@@ -1615,8 +1725,80 @@ CoreModule.meta = {
     return _Platform.apply(this, arguments) || this;
   }
 
+  Browser.bootstrap = function bootstrap(moduleFactory) {
+    if (!isPlatformBrowser) {
+      throw 'missing platform browser, window not found';
+    }
+
+    if (!moduleFactory) {
+      throw 'missing moduleFactory';
+    }
+
+    if (!moduleFactory.meta) {
+      throw 'missing moduleFactory meta';
+    }
+
+    if (!moduleFactory.meta.bootstrap) {
+      throw 'missing bootstrap';
+    }
+
+    if (!moduleFactory.meta.bootstrap.meta) {
+      throw 'missing bootstrap meta';
+    }
+
+    if (!moduleFactory.meta.bootstrap.meta.selector) {
+      throw 'missing bootstrap meta selector';
+    }
+
+    var meta = this.resolveMeta(moduleFactory);
+    var module = new moduleFactory();
+    module.meta = meta;
+    meta.imports.forEach(function (moduleFactory) {
+      moduleFactory.prototype.constructor.call(module);
+    });
+
+    if (window.rxcomp_hydrate_) {
+      var _meta$node$parentNode;
+
+      var clonedNode = meta.node.cloneNode();
+      clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;
+      var instances = module.compile(clonedNode, window);
+      module.instances = instances;
+      var root = instances[0];
+      root.pushChanges();
+      (_meta$node$parentNode = meta.node.parentNode) == null ? void 0 : _meta$node$parentNode.replaceChild(clonedNode, meta.node);
+    } else {
+      var _instances = module.compile(meta.node, window);
+
+      module.instances = _instances;
+      var _root = _instances[0];
+
+      _root.pushChanges();
+    }
+
+    errors$.pipe(operators.takeUntil(module.unsubscribe$)).subscribe(function () {});
+    return module;
+  };
+
   return Browser;
-}(Platform);var RootComponent = function (_Component) {
+}(Platform);var CustomErrorInterceptor = function () {
+  function CustomErrorInterceptor() {}
+
+  var _proto = CustomErrorInterceptor.prototype;
+
+  _proto.intercept = function intercept(error, next) {
+    return next.handle(error).pipe(operators.map(function (error) {
+      console.warn(error);
+      return;
+    }));
+  };
+
+  return CustomErrorInterceptor;
+}();
+
+ErrorInterceptors.push(new CustomErrorInterceptor());
+
+var RootComponent = function (_Component) {
   _inheritsLoose(RootComponent, _Component);
 
   function RootComponent() {
@@ -1630,13 +1812,13 @@ CoreModule.meta = {
     return _this;
   }
 
-  var _proto = RootComponent.prototype;
+  var _proto2 = RootComponent.prototype;
 
-  _proto.onItem = function onItem(item) {
+  _proto2.onItem = function onItem(item) {
     console.log('RootComponent.onItem.item', item);
   };
 
-  _proto.onHandled = function onHandled(event) {
+  _proto2.onHandled = function onHandled(event) {
     console.log('RootComponent.onHandled', event);
   };
 
@@ -1658,17 +1840,17 @@ var SubComponent = function (_Component2) {
     return _this2;
   }
 
-  var _proto2 = SubComponent.prototype;
+  var _proto3 = SubComponent.prototype;
 
-  _proto2.onInit = function onInit() {
+  _proto3.onInit = function onInit() {
     console.log('SubComponent.onInit.item', this.item);
   };
 
-  _proto2.onChanges = function onChanges(changes) {
+  _proto3.onChanges = function onChanges(changes) {
     console.log('SubComponent.onChanges.item', this.item);
   };
 
-  _proto2.onToggle = function onToggle() {
+  _proto3.onToggle = function onToggle() {
     this.toggle.next(this.item);
   };
 
@@ -1689,14 +1871,14 @@ var HostDirective = function (_Directive) {
     return _Directive.apply(this, arguments) || this;
   }
 
-  var _proto3 = HostDirective.prototype;
+  var _proto4 = HostDirective.prototype;
 
-  _proto3.onInit = function onInit() {
+  _proto4.onInit = function onInit() {
     console.log('HostDirective.onInit.style', this.style);
     console.log('HostDirective.onInit.input', this.input);
   };
 
-  _proto3.onChanges = function onChanges(changes) {
+  _proto4.onChanges = function onChanges(changes) {
     console.log('HostDirective.onChanges.input', this.input);
   };
 
@@ -1718,9 +1900,9 @@ var HostedDirective = function (_Directive2) {
     return _Directive2.apply(this, arguments) || this;
   }
 
-  var _proto4 = HostedDirective.prototype;
+  var _proto5 = HostedDirective.prototype;
 
-  _proto4.onInit = function onInit() {
+  _proto5.onInit = function onInit() {
     var _this3 = this;
 
     console.log('host', this.host);
@@ -1736,7 +1918,7 @@ var HostedDirective = function (_Directive2) {
     console.log('HostedDirective.onInit.host.input', this.host.input);
   };
 
-  _proto4.onChanges = function onChanges(changes) {
+  _proto5.onChanges = function onChanges(changes) {
     console.log('HostedDirective.onChanges.host.input', this.host.input);
   };
 

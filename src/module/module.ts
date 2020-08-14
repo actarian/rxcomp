@@ -5,6 +5,7 @@ import Context from '../core/context';
 import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
 import Structure from '../core/structure';
 import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, IModuleParsedMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
+import { ExpressionError, nextError$ } from '../error/error';
 import { isPlatformBrowser } from '../platform/platform';
 
 let ID: number = 0;
@@ -13,6 +14,7 @@ export default class Module {
 
 	meta?: IModuleParsedMeta;
 	instances?: Factory[];
+	unsubscribe$: Subject<void> = new Subject();
 
 	public compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode: IElement;
@@ -94,8 +96,12 @@ export default class Module {
 			const args: string = params.join(',');
 			const expression_func: ExpressionFunction = new Function(`with(this) {
 				return (function (${args}, $$module) {
-					const $$pipes = $$module.meta.pipes;
-					return ${expression};
+					try {
+						const $$pipes = $$module.meta.pipes;
+						return ${expression};
+					} catch(error) {
+						$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
+					}
 				}.bind(this)).apply(this, arguments);
 			}`) as ExpressionFunction;
 			// console.log(this, $$module, $$pipes, "${expression}");
@@ -104,6 +110,11 @@ export default class Module {
 		} else {
 			return () => { return null; };
 		}
+	}
+
+	public nextError(error: Error, instance: Factory, expression: string, params: any[]): void {
+		const expressionError: ExpressionError = new ExpressionError(error, this, instance, expression, params);
+		nextError$.next(expressionError);
 	}
 
 	public resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any {
@@ -142,6 +153,8 @@ export default class Module {
 	}
 
 	public destroy(): void {
+		this.unsubscribe$.next();
+		this.unsubscribe$.complete();
 		this.remove(this.meta!.node);
 		this.meta!.node.innerHTML = this.meta!.nodeInnerHTML;
 	}
@@ -522,7 +535,6 @@ export default class Module {
 	}
 
 	static meta: IModuleMeta;
-
 }
 
 export function getParsableContextByNode(node: Node): IContext | undefined {

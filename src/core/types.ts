@@ -55,6 +55,7 @@ export interface IModuleParsedImportedMeta {
 }
 
 export interface IModuleParsedMeta {
+	imports: typeof Module[];
 	factories: typeof Factory[];
 	pipes: { [key: string]: typeof Pipe };
 	selectors: SelectorFunction[];

@@ -7,6 +7,7 @@ var directive_1 = tslib_1.__importDefault(require("../core/directive"));
 var factory_1 = tslib_1.__importDefault(require("../core/factory"));
 var pipe_1 = tslib_1.__importDefault(require("../core/pipe"));
 var structure_1 = tslib_1.__importDefault(require("../core/structure"));
+var error_1 = require("../error/error");
 var ORDER = [structure_1.default, component_1.default, directive_1.default];
 var Platform = /** @class */ (function () {
     function Platform() {
@@ -17,23 +18,26 @@ var Platform = /** @class */ (function () {
      */
     Platform.bootstrap = function (moduleFactory) {
         if (!moduleFactory) {
-            throw ('missing moduleFactory');
+            throw new error_1.ModuleError('missing moduleFactory');
         }
         if (!moduleFactory.meta) {
-            throw ('missing moduleFactory meta');
+            throw new error_1.ModuleError('missing moduleFactory meta');
         }
         if (!moduleFactory.meta.bootstrap) {
-            throw ('missing bootstrap');
+            throw new error_1.ModuleError('missing bootstrap');
         }
         if (!moduleFactory.meta.bootstrap.meta) {
-            throw ('missing bootstrap meta');
+            throw new error_1.ModuleError('missing bootstrap meta');
         }
         if (!moduleFactory.meta.bootstrap.meta.selector) {
-            throw ('missing bootstrap meta selector');
+            throw new error_1.ModuleError('missing bootstrap meta selector');
         }
         var meta = this.resolveMeta(moduleFactory);
         var module = new moduleFactory();
         module.meta = meta;
+        meta.imports.forEach(function (moduleFactory) {
+            moduleFactory.prototype.constructor.call(module);
+        });
         // const instances = module.compile(meta.node, window);
         // module.instances = instances;
         // const root = instances[0];
@@ -48,7 +52,7 @@ var Platform = /** @class */ (function () {
         var bootstrap = moduleFactory.meta.bootstrap;
         var node = this.querySelector(bootstrap.meta.selector);
         if (!node) {
-            throw ("missing node " + bootstrap.meta.selector);
+            throw new error_1.ModuleError("missing node " + bootstrap.meta.selector);
         }
         var nodeInnerHTML = node.innerHTML;
         var pipes = this.resolvePipes(meta);
@@ -56,7 +60,7 @@ var Platform = /** @class */ (function () {
         this.sortFactories(factories);
         factories.unshift(bootstrap);
         var selectors = this.unwrapSelectors(factories);
-        return { factories: factories, pipes: pipes, selectors: selectors, bootstrap: bootstrap, node: node, nodeInnerHTML: nodeInnerHTML };
+        return { factories: factories, pipes: pipes, selectors: selectors, bootstrap: bootstrap, node: node, nodeInnerHTML: nodeInnerHTML, imports: moduleFactory.meta.imports || [] };
     };
     Platform.resolveImportedMeta = function (moduleFactory) {
         var _this = this;

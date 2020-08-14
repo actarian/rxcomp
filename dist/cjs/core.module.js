@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = require("tslib");
+var operators_1 = require("rxjs/operators");
 var class_directive_1 = tslib_1.__importDefault(require("./class/class.directive"));
+var error_1 = require("./error/error");
 var event_directive_1 = tslib_1.__importDefault(require("./event/event.directive"));
 var for_structure_1 = tslib_1.__importDefault(require("./for/for.structure"));
 var href_directive_1 = tslib_1.__importDefault(require("./href/href.directive"));
@@ -29,7 +31,10 @@ var pipes = [
 var CoreModule = /** @class */ (function (_super) {
     tslib_1.__extends(CoreModule, _super);
     function CoreModule() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super.call(this) || this;
+        console.log('CoreModule');
+        error_1.errors$.pipe(operators_1.takeUntil(_this.unsubscribe$)).subscribe();
+        return _this;
     }
     CoreModule.meta = {
         declarations: tslib_1.__spreadArrays(factories, pipes),

@@ -1,4 +1,6 @@
+import { takeUntil } from 'rxjs/operators';
 import ClassDirective from './class/class.directive';
+import { errors$ } from './error/error';
 import EventDirective from './event/event.directive';
 import ForStructure from './for/for.structure';
 import HrefDirective from './href/href.directive';
@@ -24,6 +26,11 @@ const pipes = [
     JsonPipe,
 ];
 export default class CoreModule extends Module {
+    constructor() {
+        super();
+        console.log('CoreModule');
+        errors$.pipe(takeUntil(this.unsubscribe$)).subscribe();
+    }
 }
 CoreModule.meta = {
     declarations: [
