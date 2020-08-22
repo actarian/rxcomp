@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>IModuleParsedImportedMeta | RxCompForm</title>
+	<title>IErrorInterceptor | RxCompForm</title>
 	<meta name="description" content="Documentation for RxCompForm">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -54,10 +54,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="imoduleparsedimportedmeta.html">IModuleParsedImportedMeta</a>
+					<a href="ierrorinterceptor.html">IErrorInterceptor</a>
 				</li>
 			</ul>
-			<h1>Interface IModuleParsedImportedMeta</h1>
+			<h1>Interface IErrorInterceptor</h1>
 		</div>
 	</div>
 </header>
@@ -68,7 +68,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">IModuleParsedImportedMeta</span>
+						<span class="target">IErrorInterceptor</span>
 					</li>
 				</ul>
 			</section>
@@ -77,66 +77,41 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Properties</h3>
+							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="imoduleparsedimportedmeta.html#declarations" class="tsd-kind-icon">declarations</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="imoduleparsedimportedmeta.html#exports" class="tsd-kind-icon">exports</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="imoduleparsedimportedmeta.html#imports" class="tsd-kind-icon">imports</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="imoduleparsedimportedmeta.html#pipes" class="tsd-kind-icon">pipes</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="ierrorinterceptor.html#intercept" class="tsd-kind-icon">intercept</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="declarations" class="tsd-anchor"></a>
-					<h3>declarations</h3>
-					<div class="tsd-signature tsd-kind-icon">declarations<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><a href="../classes/factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><a href="../classes/pipe.html" class="tsd-signature-type">Pipe</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/core/types.ts#L52">src/core/types.ts:52</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="exports" class="tsd-anchor"></a>
-					<h3>exports</h3>
-					<div class="tsd-signature tsd-kind-icon">exports<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><a href="../classes/factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol"> | </span><a href="../classes/pipe.html" class="tsd-signature-type">Pipe</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/core/types.ts#L54">src/core/types.ts:54</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="imports" class="tsd-anchor"></a>
-					<h3>imports</h3>
-					<div class="tsd-signature tsd-kind-icon">imports<span class="tsd-signature-symbol">:</span> <a href="imoduleparsedimportedmeta.html" class="tsd-signature-type">IModuleParsedImportedMeta</a><span class="tsd-signature-symbol">[]</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/core/types.ts#L51">src/core/types.ts:51</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="pipes" class="tsd-anchor"></a>
-					<h3>pipes</h3>
-					<div class="tsd-signature tsd-kind-icon">pipes<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/core/types.ts#L53">src/core/types.ts:53</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-index-signature">
-								<h5><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type">Pipe</span></h5>
-							</li>
-						</ul>
-					</div>
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="intercept" class="tsd-anchor"></a>
+					<h3>intercept</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">intercept<span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><a href="../classes/moduleerror.html#error" class="tsd-signature-type">Error</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span>, next<span class="tsd-signature-symbol">: </span><a href="ierrorhandler.html" class="tsd-signature-type">IErrorHandler</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Observable</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/moduleerror.html#error" class="tsd-signature-type">Error</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/error/error.ts#L35">src/error/error.ts:35</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>error: <a href="../classes/moduleerror.html#error" class="tsd-signature-type">Error</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></h5>
+								</li>
+								<li>
+									<h5>next: <a href="ierrorhandler.html" class="tsd-signature-type">IErrorHandler</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Observable</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/moduleerror.html#error" class="tsd-signature-type">Error</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -153,19 +128,10 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface">
-						<a href="imoduleparsedimportedmeta.html" class="tsd-kind-icon">IModule<wbr>Parsed<wbr>Imported<wbr>Meta</a>
+						<a href="ierrorinterceptor.html" class="tsd-kind-icon">IError<wbr>Interceptor</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="imoduleparsedimportedmeta.html#declarations" class="tsd-kind-icon">declarations</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="imoduleparsedimportedmeta.html#exports" class="tsd-kind-icon">exports</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="imoduleparsedimportedmeta.html#imports" class="tsd-kind-icon">imports</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="imoduleparsedimportedmeta.html#pipes" class="tsd-kind-icon">pipes</a>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="ierrorinterceptor.html#intercept" class="tsd-kind-icon">intercept</a>
 							</li>
 						</ul>
 					</li>

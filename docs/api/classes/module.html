@@ -86,6 +86,8 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="module.html#instances" class="tsd-kind-icon">instances</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="module.html#meta" class="tsd-kind-icon">meta</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="module.html#unsubscribe_" class="tsd-kind-icon">unsubscribe$</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="module.html#forroot" class="tsd-kind-icon">for<wbr>Root</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="module.html#meta-1" class="tsd-kind-icon">meta</a></li>
 							</ul>
 						</section>
@@ -104,6 +106,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="module.html#makeinstance" class="tsd-kind-icon">make<wbr>Instance</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="module.html#makeoutput" class="tsd-kind-icon">make<wbr>Output</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="module.html#makeoutputs" class="tsd-kind-icon">make<wbr>Outputs</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="module.html#nexterror" class="tsd-kind-icon">next<wbr>Error</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="module.html#parse" class="tsd-kind-icon">parse</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="module.html#parsetextnode" class="tsd-kind-icon">parse<wbr>Text<wbr>Node</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="module.html#parsetextnodeexpression" class="tsd-kind-icon">parse<wbr>Text<wbr>Node<wbr>Expression</a></li>
@@ -136,7 +139,7 @@
 					<div class="tsd-signature tsd-kind-icon">instances<span class="tsd-signature-symbol">:</span> <a href="factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L15">src/module/module.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L16">src/module/module.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -146,7 +149,27 @@
 					<div class="tsd-signature tsd-kind-icon">meta<span class="tsd-signature-symbol">:</span> <a href="../interfaces/imoduleparsedmeta.html" class="tsd-signature-type">IModuleParsedMeta</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L14">src/module/module.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L15">src/module/module.ts:15</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="unsubscribe_" class="tsd-anchor"></a>
+					<h3>unsubscribe$</h3>
+					<div class="tsd-signature tsd-kind-icon">unsubscribe$<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Subject</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Subject()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L17">src/module/module.ts:17</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+					<a name="forroot" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagOptional">Optional</span> for<wbr>Root</h3>
+					<div class="tsd-signature tsd-kind-icon">for<wbr>Root<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-symbol">typeof </span><a href="module.html" class="tsd-signature-type">Module</a><span class="tsd-signature-symbol">)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L18">src/module/module.ts:18</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -156,7 +179,7 @@
 					<div class="tsd-signature tsd-kind-icon">meta<span class="tsd-signature-symbol">:</span> <a href="../interfaces/imodulemeta.html" class="tsd-signature-type">IModuleMeta</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L524">src/module/module.ts:524</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L538">src/module/module.ts:538</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -173,7 +196,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L17">src/module/module.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L20">src/module/module.ts:20</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -199,7 +222,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L144">src/module/module.ts:144</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L156">src/module/module.ts:156</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -216,7 +239,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L155">src/module/module.ts:155</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L169">src/module/module.ts:169</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -239,7 +262,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L167">src/module/module.ts:167</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L181">src/module/module.ts:181</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -262,7 +285,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L149">src/module/module.ts:149</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L163">src/module/module.ts:163</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -294,7 +317,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L90">src/module/module.ts:90</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L93">src/module/module.ts:93</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -320,7 +343,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L233">src/module/module.ts:233</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L247">src/module/module.ts:247</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -349,7 +372,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L242">src/module/module.ts:242</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L256">src/module/module.ts:256</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -375,7 +398,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L270">src/module/module.ts:270</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L284">src/module/module.ts:284</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -406,7 +429,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L34">src/module/module.ts:34</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L37">src/module/module.ts:37</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -441,7 +464,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L283">src/module/module.ts:283</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L297">src/module/module.ts:297</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -467,7 +490,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L304">src/module/module.ts:304</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L318">src/module/module.ts:318</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -489,6 +512,38 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="nexterror" class="tsd-anchor"></a>
+					<h3>next<wbr>Error</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">next<wbr>Error<span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><a href="moduleerror.html#error" class="tsd-signature-type">Error</a>, instance<span class="tsd-signature-symbol">: </span><a href="factory.html" class="tsd-signature-type">Factory</a>, expression<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, params<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L116">src/module/module.ts:116</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>error: <a href="moduleerror.html#error" class="tsd-signature-type">Error</a></h5>
+								</li>
+								<li>
+									<h5>instance: <a href="factory.html" class="tsd-signature-type">Factory</a></h5>
+								</li>
+								<li>
+									<h5>expression: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>params: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="parse" class="tsd-anchor"></a>
 					<h3>parse</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -498,7 +553,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L114">src/module/module.ts:114</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L126">src/module/module.ts:126</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -524,7 +579,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L175">src/module/module.ts:175</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L189">src/module/module.ts:189</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -550,7 +605,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L208">src/module/module.ts:208</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L222">src/module/module.ts:222</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -573,7 +628,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L203">src/module/module.ts:203</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L217">src/module/module.ts:217</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -605,7 +660,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L130">src/module/module.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L142">src/module/module.ts:142</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -631,7 +686,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L109">src/module/module.ts:109</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L121">src/module/module.ts:121</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -660,7 +715,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L317">src/module/module.ts:317</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L331">src/module/module.ts:331</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -686,7 +741,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L414">src/module/module.ts:414</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L428">src/module/module.ts:428</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -712,7 +767,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L404">src/module/module.ts:404</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L418">src/module/module.ts:418</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -750,7 +805,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L438">src/module/module.ts:438</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L452">src/module/module.ts:452</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -779,7 +834,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L328">src/module/module.ts:328</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L342">src/module/module.ts:342</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -802,7 +857,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L389">src/module/module.ts:389</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L403">src/module/module.ts:403</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -825,7 +880,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L359">src/module/module.ts:359</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L373">src/module/module.ts:373</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -848,7 +903,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L344">src/module/module.ts:344</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L358">src/module/module.ts:358</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -871,7 +926,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L456">src/module/module.ts:456</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L470">src/module/module.ts:470</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -900,7 +955,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L483">src/module/module.ts:483</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L497">src/module/module.ts:497</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -950,7 +1005,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L513">src/module/module.ts:513</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L527">src/module/module.ts:527</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1000,7 +1055,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L502">src/module/module.ts:502</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L516">src/module/module.ts:516</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1050,7 +1105,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/module/module.ts#L472">src/module/module.ts:472</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/module/module.ts#L486">src/module/module.ts:486</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1113,6 +1168,12 @@
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="module.html#meta" class="tsd-kind-icon">meta</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="module.html#unsubscribe_" class="tsd-kind-icon">unsubscribe$</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
+								<a href="module.html#forroot" class="tsd-kind-icon">for<wbr>Root</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
 								<a href="module.html#meta-1" class="tsd-kind-icon">meta</a>
 							</li>
@@ -1151,6 +1212,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
 								<a href="module.html#makeoutputs" class="tsd-kind-icon">make<wbr>Outputs</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="module.html#nexterror" class="tsd-kind-icon">next<wbr>Error</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="module.html#parse" class="tsd-kind-icon">parse</a>
@@ -1229,13 +1293,14 @@
 				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
 			</ul>
 			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
 				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>

@@ -81,12 +81,11 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-inherited">
+						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="browser.html#bootstrap" class="tsd-kind-icon">bootstrap</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-static"><a href="browser.html#bootstrap" class="tsd-kind-icon">bootstrap</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static"><a href="browser.html#getexpressions" class="tsd-kind-icon">get<wbr>Expressions</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="browser.html#isbrowser" class="tsd-kind-icon">is<wbr>Browser</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static"><a href="browser.html#queryselector" class="tsd-kind-icon">query<wbr>Selector</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static"><a href="browser.html#resolvefactories" class="tsd-kind-icon">resolve<wbr>Factories</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static"><a href="browser.html#resolveimportedmeta" class="tsd-kind-icon">resolve<wbr>Imported<wbr>Meta</a></li>
@@ -99,22 +98,29 @@
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-static">
 					<a name="bootstrap" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> bootstrap</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-static">
 						<li class="tsd-signature tsd-kind-icon">bootstrap<span class="tsd-signature-symbol">(</span>moduleFactory<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type">Module</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="module.html" class="tsd-signature-type">Module</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#bootstrap">bootstrap</a></p>
+								<p>Overrides <a href="platform.html">Platform</a>.<a href="platform.html#bootstrap">bootstrap</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L13">src/platform/platform.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/browser.ts#L12">src/platform/browser.ts:12</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<dl class="tsd-comment-tags">
+									<dt>description</dt>
+									<dd><p>This method returns a Browser compiled module</p>
+									</dd>
+								</dl>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -136,7 +142,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#getexpressions">getExpressions</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L105">src/platform/platform.ts:105</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L105">src/platform/platform.ts:105</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -146,24 +152,6 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="../globals.html#matchfunction" class="tsd-signature-type">MatchFunction</a><span class="tsd-signature-symbol">[]</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="isbrowser" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> is<wbr>Browser</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Browser<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#isbrowser">isBrowser</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L41">src/platform/platform.ts:41</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -178,7 +166,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#queryselector">querySelector</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L47">src/platform/platform.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L47">src/platform/platform.ts:47</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -202,7 +190,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#resolvefactories">resolveFactories</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L86">src/platform/platform.ts:86</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L86">src/platform/platform.ts:86</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -229,7 +217,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#resolveimportedmeta">resolveImportedMeta</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L67">src/platform/platform.ts:67</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L67">src/platform/platform.ts:67</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -253,7 +241,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#resolvemeta">resolveMeta</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L51">src/platform/platform.ts:51</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L51">src/platform/platform.ts:51</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -277,7 +265,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#resolvepipes">resolvePipes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L78">src/platform/platform.ts:78</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L78">src/platform/platform.ts:78</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -304,7 +292,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#sortfactories">sortFactories</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L92">src/platform/platform.ts:92</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L92">src/platform/platform.ts:92</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -328,7 +316,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="platform.html">Platform</a>.<a href="platform.html#unwrapselectors">unwrapSelectors</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/a4243c5/src/platform/platform.ts#L134">src/platform/platform.ts:134</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/e1b4144/src/platform/platform.ts#L134">src/platform/platform.ts:134</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -358,14 +346,11 @@
 					<li class="current tsd-kind-class">
 						<a href="browser.html" class="tsd-kind-icon">Browser</a>
 						<ul>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-static">
 								<a href="browser.html#bootstrap" class="tsd-kind-icon">bootstrap</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static">
 								<a href="browser.html#getexpressions" class="tsd-kind-icon">get<wbr>Expressions</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="browser.html#isbrowser" class="tsd-kind-icon">is<wbr>Browser</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected tsd-is-static">
 								<a href="browser.html#queryselector" class="tsd-kind-icon">query<wbr>Selector</a>
@@ -408,13 +393,14 @@
 				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
 			</ul>
 			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
 				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
-			</ul>
-			<ul class="tsd-legend">
-				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>

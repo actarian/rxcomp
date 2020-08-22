@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.12
+ * @license rxcomp v1.0.0-beta.13
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1854,8 +1854,8 @@ var CoreModule = /*#__PURE__*/function (_Module) {
   function CoreModule() {
     var _this;
 
-    _this = _Module.call(this) || this;
-    console.log('CoreModule');
+    _this = _Module.call(this) || this; // console.log('CoreModule');
+
     errors$.pipe(operators.takeUntil(_this.unsubscribe$)).subscribe();
     return _this;
   }

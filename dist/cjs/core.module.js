@@ -32,7 +32,7 @@ var CoreModule = /** @class */ (function (_super) {
     tslib_1.__extends(CoreModule, _super);
     function CoreModule() {
         var _this = _super.call(this) || this;
-        console.log('CoreModule');
+        // console.log('CoreModule');
         error_1.errors$.pipe(operators_1.takeUntil(_this.unsubscribe$)).subscribe();
         return _this;
     }

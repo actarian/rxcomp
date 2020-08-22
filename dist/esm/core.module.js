@@ -28,7 +28,7 @@ const pipes = [
 export default class CoreModule extends Module {
     constructor() {
         super();
-        console.log('CoreModule');
+        // console.log('CoreModule');
         errors$.pipe(takeUntil(this.unsubscribe$)).subscribe();
     }
 }
