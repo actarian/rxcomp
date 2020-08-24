@@ -1933,4 +1933,114 @@ CoreModule.meta = {
   };
 
   return Browser;
-}(Platform);exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;Object.defineProperty(exports,'__esModule',{value:true});})));
+}(Platform);var TransferService = /*#__PURE__*/function () {
+  function TransferService() {}
+
+  TransferService.makeKey = function makeKey(url, params) {
+    url = params ? flatMap_(url, params) : url;
+    url = url.replace(/(\W)/gm, '_');
+    var key = "rxcomp_hydrate_" + url; // console.log('TransferService.makeKey', key, url);
+
+    return key;
+  };
+
+  TransferService.has = function has(key) {
+    var script = document.querySelector("#" + key);
+    return script !== null;
+  };
+
+  TransferService.get = function get(key) {
+    var node = document.querySelector("#" + key);
+
+    if (node && node.firstChild) {
+      var json = node.firstChild.nodeValue;
+      return json ? this.decode(json) : undefined;
+    } else {
+      return undefined;
+    }
+  };
+
+  TransferService.set = function set(key, value) {
+    var json = this.encode(value);
+
+    if (!json) {
+      return;
+    }
+
+    var text = document.createTextNode(json);
+    var node = document.querySelector("#" + key);
+
+    if (!node) {
+      node = document.createElement('script');
+      node.setAttribute('id', key);
+      node.setAttribute('type', 'text/template');
+      node.append(text);
+      document.head.append(node);
+    } else {
+      node.replaceChild(text, node.firstChild);
+    }
+  };
+
+  TransferService.remove = function remove(key) {
+    var node = document.querySelector("#" + key);
+
+    if (node && node.parentNode) {
+      node.parentNode.removeChild(node);
+    }
+  };
+
+  TransferService.encode = function encode(value) {
+    var encodedJson = null;
+
+    try {
+      var cache = new Map();
+      var json = JSON.stringify(value, function (key, value) {
+        if (typeof value === 'object' && value != null) {
+          if (cache.has(value)) {
+            // console.warn(`TransferService circular reference found, discard key "${key}"`);
+            return;
+          }
+
+          cache.set(value, true);
+        }
+
+        return value;
+      });
+      encodedJson = btoa(encodeURIComponent(json));
+    } catch (error) {// console.warn('TransferService.encode.error', value, error);
+    }
+
+    return encodedJson;
+  };
+
+  TransferService.decode = function decode(encodedJson) {
+    var value;
+
+    if (encodedJson) {
+      try {
+        value = JSON.parse(decodeURIComponent(atob(encodedJson)));
+      } catch (error) {
+        // console.warn('TransferService.decode.error', encodedJson);
+        value = encodedJson;
+      }
+    }
+
+    return value;
+  };
+
+  return TransferService;
+}();
+
+function flatMap_(s, x) {
+  if (typeof x === 'number') {
+    s += x.toString();
+  } else if (typeof x === 'string') {
+    s += x.substr(0, 10);
+  } else if (x && typeof x === 'object') {
+    s += '_' + Object.keys(x).map(function (k) {
+      return k + '_' + flatMap_('', x[k]);
+    }).join('_');
+  }
+
+  return s;
+}exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;Object.defineProperty(exports,'__esModule',{value:true});})));

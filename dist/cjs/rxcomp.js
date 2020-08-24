@@ -61,3 +61,5 @@ var src_directive_1 = require("./src/src.directive");
 Object.defineProperty(exports, "SrcDirective", { enumerable: true, get: function () { return src_directive_1.default; } });
 var style_directive_1 = require("./style/style.directive");
 Object.defineProperty(exports, "StyleDirective", { enumerable: true, get: function () { return style_directive_1.default; } });
+var transfer_service_1 = require("./transfer/transfer.service");
+Object.defineProperty(exports, "TransferService", { enumerable: true, get: function () { return transfer_service_1.default; } });

@@ -21,4 +21,5 @@ export { default as Browser } from './platform/browser';
 export { default as Platform, isPlatformBrowser, isPlatformServer, isPlatformWorker, PLATFORM_BROWSER, PLATFORM_JS_DOM, PLATFORM_NODE, PLATFORM_WEB_WORKER } from './platform/platform';
 export { default as SrcDirective } from './src/src.directive';
 export { default as StyleDirective } from './style/style.directive';
+export { default as TransferService } from './transfer/transfer.service';
 
