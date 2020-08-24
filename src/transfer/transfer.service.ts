@@ -4,7 +4,7 @@ export default class TransferService {
 		url = params ? flatMap_(url, params) : url;
 		url = url.replace(/(\W)/gm, '_');
 		const key: string = `rxcomp_hydrate_${url}`;
-		// console.log('TransferService.makeKey', key, url);
+		console.log('TransferService.makeKey', key, url);
 		return key;
 	}
 
@@ -25,6 +25,7 @@ export default class TransferService {
 	}
 
 	static set(key: string, value: { [key: string]: any }): void {
+		console.log('TransferService.set', key, value);
 		const json: string | null = this.encode(value);
 		if (!json) {
 			return;
