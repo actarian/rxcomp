@@ -1,17 +1,18 @@
 {
 	"compilerOptions": {
-    "lib": ["dom", "es2015", "es2016", "es2017"],
+		"lib": ["dom", "es2015", "es2016", "es2017", "es2020.string"],
 		"target": "ESNext",
 		"module": "ESNext",
 		"moduleResolution": "node",
 		"typeRoots": ["node_modules/@types"],
 		"emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": true
+		"experimentalDecorators": true,
+		"strict": true,
+		"strictNullChecks": true,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitReturns": true,
+		"noImplicitAny": true,
+		"noUnusedLocals": true,
+		"downlevelIteration": true
 	}
 }

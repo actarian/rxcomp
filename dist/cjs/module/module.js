@@ -32,7 +32,7 @@ var Module = /** @class */ (function () {
         // console.log('compile', instances, node, parentInstance);
         return instances;
     };
-    Module.prototype.makeInstance = function (node, factory, selector, parentInstance, args) {
+    Module.prototype.makeInstance = function (node, factory, selector, parentInstance, args, inject) {
         var _this = this;
         if (parentInstance || node.parentNode) {
             var meta_1 = factory.meta;
@@ -42,7 +42,18 @@ var Module = /** @class */ (function () {
                 return undefined;
             }
             // creating factory instance
-            var instance_1 = new (factory.bind.apply(factory, tslib_1.__spreadArrays([void 0], (args || []))))();
+            var instance_1 = new (factory.bind.apply(factory, tslib_1.__spread([void 0], (args || []))))();
+            // injecting custom properties
+            if (inject) {
+                Object.keys(inject).forEach(function (key) {
+                    Object.defineProperty(instance_1, key, {
+                        value: inject[key],
+                        enumerable: true,
+                        configurable: false,
+                        writable: false,
+                    });
+                });
+            }
             // creating instance context
             var context = Module.makeContext(this, instance_1, parentInstance, node, factory, selector);
             // creating component input and outputs
@@ -352,7 +363,7 @@ var Module = /** @class */ (function () {
                 var value = args[0].trim();
                 var params = Module.parsePipeParams(args[1]);
                 var func = params.shift().trim();
-                return "$$pipes." + func + ".transform" + l + tslib_1.__spreadArrays([value], params) + r;
+                return "$$pipes." + func + ".transform" + l + tslib_1.__spread([value], params) + r;
             });
         }
         return expression;

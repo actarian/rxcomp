@@ -27,7 +27,7 @@ export default class Module {
         // console.log('compile', instances, node, parentInstance);
         return instances;
     }
-    makeInstance(node, factory, selector, parentInstance, args) {
+    makeInstance(node, factory, selector, parentInstance, args, inject) {
         if (parentInstance || node.parentNode) {
             const meta = factory.meta;
             // collect parentInstance scope
@@ -37,6 +37,17 @@ export default class Module {
             }
             // creating factory instance
             const instance = new factory(...(args || []));
+            // injecting custom properties
+            if (inject) {
+                Object.keys(inject).forEach(key => {
+                    Object.defineProperty(instance, key, {
+                        value: inject[key],
+                        enumerable: true,
+                        configurable: false,
+                        writable: false,
+                    });
+                });
+            }
             // creating instance context
             const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
             // creating component input and outputs

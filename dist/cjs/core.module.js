@@ -37,8 +37,8 @@ var CoreModule = /** @class */ (function (_super) {
         return _this;
     }
     CoreModule.meta = {
-        declarations: tslib_1.__spreadArrays(factories, pipes),
-        exports: tslib_1.__spreadArrays(factories, pipes)
+        declarations: tslib_1.__spread(factories, pipes),
+        exports: tslib_1.__spread(factories, pipes)
     };
     return CoreModule;
 }(module_1.default));

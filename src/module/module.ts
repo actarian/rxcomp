@@ -15,7 +15,7 @@ export default class Module {
 	meta?: IModuleParsedMeta;
 	instances?: Factory[];
 	unsubscribe$: Subject<void> = new Subject();
-	static forRoot?: () => typeof Module;
+	static forRoot?: (...args: any[]) => typeof Module;
 
 	public compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode: IElement;
@@ -34,7 +34,7 @@ export default class Module {
 		return instances;
 	}
 
-	public makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[]): Factory | undefined {
+	public makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[], inject?: { [key: string]: any }): Factory | undefined {
 		if (parentInstance || node.parentNode) {
 			const meta: IFactoryMeta = factory.meta;
 			// collect parentInstance scope
@@ -44,6 +44,17 @@ export default class Module {
 			}
 			// creating factory instance
 			const instance = new factory(...(args || []));
+			// injecting custom properties
+			if (inject) {
+				Object.keys(inject).forEach(key => {
+					Object.defineProperty(instance, key, {
+						value: inject[key],
+						enumerable: true,
+						configurable: false,
+						writable: false,
+					});
+				});
+			}
 			// creating instance context
 			const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 			// creating component input and outputs

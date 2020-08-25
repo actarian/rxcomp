@@ -79,14 +79,14 @@ var Platform = /** @class */ (function () {
         var pipes = {};
         var pipeList = (exported ? meta.exports : meta.declarations).filter(function (x) { return x.prototype instanceof pipe_1.default; });
         pipeList.forEach(function (pipeFactory) { return pipes[pipeFactory.meta.name] = pipeFactory; });
-        return Object.assign.apply(Object, tslib_1.__spreadArrays([{}], importedPipes, [pipes]));
+        return Object.assign.apply(Object, tslib_1.__spread([{}], importedPipes, [pipes]));
     };
     Platform.resolveFactories = function (meta, exported) {
         var _a;
         var _this = this;
         var importedFactories = meta.imports.map(function (importMeta) { return _this.resolveFactories(importMeta, true); });
         var factoryList = (exported ? meta.exports : meta.declarations).filter(function (x) { return x.prototype instanceof factory_1.default; });
-        return (_a = Array.prototype.concat).call.apply(_a, tslib_1.__spreadArrays([factoryList], importedFactories));
+        return (_a = Array.prototype.concat).call.apply(_a, tslib_1.__spread([factoryList], importedFactories));
     };
     Platform.sortFactories = function (factories) {
         factories.sort(function (a, b) {
