@@ -12,6 +12,8 @@ export default class TransferService {
     static remove(key: string): void;
     static encode(value: {
         [key: string]: any;
-    }): string | null;
-    static decode<T>(encodedJson: string): T;
+    }): string | undefined;
+    static decode<T>(encoded: string): T | undefined;
+    static toBase64(s: string): string;
+    static fromBase64(s: string): string;
 }

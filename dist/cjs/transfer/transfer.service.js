@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var platform_1 = require("../platform/platform");
 var TransferService = /** @class */ (function () {
     function TransferService() {
     }
@@ -25,6 +26,7 @@ var TransferService = /** @class */ (function () {
         }
     };
     TransferService.set = function (key, value) {
+        // console.log('TransferService.set', key, value);
         var json = this.encode(value);
         if (!json) {
             return;
@@ -35,6 +37,7 @@ var TransferService = /** @class */ (function () {
             node = document.createElement('script');
             node.setAttribute('id', key);
             node.setAttribute('type', 'text/template');
+            // console.log('node', node!!, 'document', document!!, 'head', document.head!!);
             node.append(text);
             document.head.append(node);
         }
@@ -49,38 +52,55 @@ var TransferService = /** @class */ (function () {
         }
     };
     TransferService.encode = function (value) {
-        var encodedJson = null;
+        var encoded;
         try {
-            var cache_1 = new Map();
+            var pool_1 = new Map();
             var json = JSON.stringify(value, function (key, value) {
                 if (typeof value === 'object' && value != null) {
-                    if (cache_1.has(value)) {
+                    if (pool_1.has(value)) {
                         // console.warn(`TransferService circular reference found, discard key "${key}"`);
                         return;
                     }
-                    cache_1.set(value, true);
+                    pool_1.set(value, true);
                 }
                 return value;
             });
-            encodedJson = btoa(encodeURIComponent(json));
+            // encoded = this.toBase64(encodeURIComponent(json));
+            encoded = json;
         }
         catch (error) {
             // console.warn('TransferService.encode.error', value, error);
         }
-        return encodedJson;
+        return encoded;
     };
-    TransferService.decode = function (encodedJson) {
-        var value;
-        if (encodedJson) {
+    TransferService.decode = function (encoded) {
+        var decoded;
+        if (encoded) {
             try {
-                value = JSON.parse(decodeURIComponent(atob(encodedJson)));
+                // decoded = JSON.parse(decodeURIComponent(this.fromBase64(encoded))) as T;
+                decoded = JSON.parse(encoded);
             }
             catch (error) {
-                // console.warn('TransferService.decode.error', encodedJson);
-                value = encodedJson;
+                // console.warn('TransferService.decode.error', encoded);
             }
         }
-        return value;
+        return decoded;
+    };
+    TransferService.toBase64 = function (s) {
+        if (platform_1.isPlatformBrowser) {
+            return atob(s);
+        }
+        else {
+            return Buffer.from(s).toString('base64');
+        }
+    };
+    TransferService.fromBase64 = function (s) {
+        if (platform_1.isPlatformBrowser) {
+            return btoa(s);
+        }
+        else {
+            return Buffer.from(s, 'base64').toString();
+        }
     };
     return TransferService;
 }());

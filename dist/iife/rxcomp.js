@@ -1851,39 +1851,53 @@ CoreModule.meta = {
   };
 
   TransferService.encode = function encode(value) {
-    var encodedJson = null;
+    var encoded;
 
     try {
-      var cache = new Map();
+      var pool = new Map();
       var json = JSON.stringify(value, function (key, value) {
         if (typeof value === 'object' && value != null) {
-          if (cache.has(value)) {
+          if (pool.has(value)) {
             return;
           }
 
-          cache.set(value, true);
+          pool.set(value, true);
         }
 
         return value;
       });
-      encodedJson = btoa(encodeURIComponent(json));
+      encoded = json;
     } catch (error) {}
 
-    return encodedJson;
+    return encoded;
   };
 
-  TransferService.decode = function decode(encodedJson) {
-    var value;
+  TransferService.decode = function decode(encoded) {
+    var decoded;
 
-    if (encodedJson) {
+    if (encoded) {
       try {
-        value = JSON.parse(decodeURIComponent(atob(encodedJson)));
-      } catch (error) {
-        value = encodedJson;
-      }
+        decoded = JSON.parse(encoded);
+      } catch (error) {}
     }
 
-    return value;
+    return decoded;
+  };
+
+  TransferService.toBase64 = function toBase64(s) {
+    if (isPlatformBrowser) {
+      return atob(s);
+    } else {
+      return Buffer.from(s).toString('base64');
+    }
+  };
+
+  TransferService.fromBase64 = function fromBase64(s) {
+    if (isPlatformBrowser) {
+      return btoa(s);
+    } else {
+      return Buffer.from(s, 'base64').toString();
+    }
   };
 
   return TransferService;

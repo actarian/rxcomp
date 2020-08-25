@@ -1,10 +1,12 @@
+import { isPlatformBrowser } from "../platform/platform";
+
 export default class TransferService {
 
 	static makeKey(url: string, params?: { [key: string]: any }): string {
 		url = params ? flatMap_(url, params) : url;
 		url = url.replace(/(\W)/gm, '_');
 		const key: string = `rxcomp_hydrate_${url}`;
-		console.log('TransferService.makeKey', key, url);
+		// console.log('TransferService.makeKey', key, url);
 		return key;
 	}
 
@@ -25,8 +27,8 @@ export default class TransferService {
 	}
 
 	static set(key: string, value: { [key: string]: any }): void {
-		console.log('TransferService.set', key, value);
-		const json: string | null = this.encode(value);
+		// console.log('TransferService.set', key, value);
+		const json: string | undefined = this.encode(value);
 		if (!json) {
 			return;
 		}
@@ -36,6 +38,7 @@ export default class TransferService {
 			node = document.createElement('script');
 			node.setAttribute('id', key);
 			node.setAttribute('type', 'text/template');
+			// console.log('node', node!!, 'document', document!!, 'head', document.head!!);
 			node.append(text);
 			document.head!.append(node);
 		} else {
@@ -50,38 +53,55 @@ export default class TransferService {
 		}
 	}
 
-	static encode(value: { [key: string]: any }): string | null {
-		let encodedJson: string | null = null;
+	static encode(value: { [key: string]: any }): string | undefined {
+		let encoded: string | undefined;
 		try {
-			const cache: Map<any, boolean> = new Map();
+			const pool: Map<any, boolean> = new Map();
 			const json: string = JSON.stringify(value, function (key, value) {
 				if (typeof value === 'object' && value != null) {
-					if (cache.has(value)) {
+					if (pool.has(value)) {
 						// console.warn(`TransferService circular reference found, discard key "${key}"`);
 						return;
 					}
-					cache.set(value, true);
+					pool.set(value, true);
 				}
 				return value;
 			});
-			encodedJson = btoa(encodeURIComponent(json));
+			// encoded = this.toBase64(encodeURIComponent(json));
+			encoded = json;
 		} catch (error) {
 			// console.warn('TransferService.encode.error', value, error);
 		}
-		return encodedJson;
+		return encoded;
 	}
 
-	static decode<T>(encodedJson: string): T {
-		let value: any;
-		if (encodedJson) {
+	static decode<T>(encoded: string): T | undefined {
+		let decoded: T | undefined;
+		if (encoded) {
 			try {
-				value = JSON.parse(decodeURIComponent(atob(encodedJson)));
+				// decoded = JSON.parse(decodeURIComponent(this.fromBase64(encoded))) as T;
+				decoded = JSON.parse(encoded) as T;
 			} catch (error) {
-				// console.warn('TransferService.decode.error', encodedJson);
-				value = encodedJson;
+				// console.warn('TransferService.decode.error', encoded);
 			}
 		}
-		return value;
+		return decoded;
+	}
+
+	static toBase64(s: string): string {
+		if (isPlatformBrowser) {
+			return atob(s);
+		} else {
+			return Buffer.from(s).toString('base64');
+		}
+	}
+
+	static fromBase64(s: string): string {
+		if (isPlatformBrowser) {
+			return btoa(s);
+		} else {
+			return Buffer.from(s, 'base64').toString();
+		}
 	}
 
 }
