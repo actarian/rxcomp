@@ -96,6 +96,7 @@
 								<li class="tsd-kind-class"><a href="classes/moduleerror.html" class="tsd-kind-icon">Module<wbr>Error</a></li>
 								<li class="tsd-kind-class"><a href="classes/pipe.html" class="tsd-kind-icon">Pipe</a></li>
 								<li class="tsd-kind-class"><a href="classes/platform.html" class="tsd-kind-icon">Platform</a></li>
+								<li class="tsd-kind-class"><a href="classes/serializer.html" class="tsd-kind-icon">Serializer</a></li>
 								<li class="tsd-kind-class"><a href="classes/srcdirective.html" class="tsd-kind-icon">Src<wbr>Directive</a></li>
 								<li class="tsd-kind-class"><a href="classes/structure.html" class="tsd-kind-icon">Structure</a></li>
 								<li class="tsd-kind-class"><a href="classes/styledirective.html" class="tsd-kind-icon">Style<wbr>Directive</a></li>
@@ -112,6 +113,7 @@
 								<li class="tsd-kind-interface"><a href="interfaces/ierrorinterceptor.html" class="tsd-kind-icon">IError<wbr>Interceptor</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/iexpressiontoken.html" class="tsd-kind-icon">IExpression<wbr>Token</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/ifactorymeta.html" class="tsd-kind-icon">IFactory<wbr>Meta</a></li>
+								<li class="tsd-kind-interface"><a href="interfaces/ilocationinit.html" class="tsd-kind-icon">ILocation<wbr>Init</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/imodulemeta.html" class="tsd-kind-icon">IModule<wbr>Meta</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/imoduleparsedimportedmeta.html" class="tsd-kind-icon">IModule<wbr>Parsed<wbr>Imported<wbr>Meta</a></li>
 								<li class="tsd-kind-interface"><a href="interfaces/imoduleparsedmeta.html" class="tsd-kind-icon">IModule<wbr>Parsed<wbr>Meta</a></li>
@@ -158,11 +160,16 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function"><a href="globals.html#flatmap_" class="tsd-kind-icon">flat<wbr>Map_</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#decodebase64" class="tsd-kind-icon">decode<wbr>Base64</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#decodejson" class="tsd-kind-icon">decode<wbr>Json</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#encodebase64" class="tsd-kind-icon">encode<wbr>Base64</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#encodejson" class="tsd-kind-icon">encode<wbr>Json</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#getcontext" class="tsd-kind-icon">get<wbr>Context</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#getcontextbynode" class="tsd-kind-icon">get<wbr>Context<wbr>ByNode</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#gethost" class="tsd-kind-icon">get<wbr>Host</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#getlocationcomponents" class="tsd-kind-icon">get<wbr>Location<wbr>Components</a></li>
 								<li class="tsd-kind-function"><a href="globals.html#getparsablecontextbynode" class="tsd-kind-icon">get<wbr>Parsable<wbr>Context<wbr>ByNode</a></li>
+								<li class="tsd-kind-function"><a href="globals.html#optionstokey" class="tsd-kind-icon">options<wbr>ToKey</a></li>
 							</ul>
 						</section>
 					</div>
@@ -176,7 +183,7 @@
 					<div class="tsd-signature tsd-kind-icon">Expression<wbr>Function<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>payload<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, module<span class="tsd-signature-symbol">: </span><a href="classes/module.html" class="tsd-signature-type">Module</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/types.ts#L22">src/core/types.ts:22</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/types.ts#L22">src/core/types.ts:22</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -210,7 +217,7 @@
 					<div class="tsd-signature tsd-kind-icon">Factory<wbr>List<span class="tsd-signature-symbol">:</span> <a href="classes/factory.html" class="tsd-signature-type">Factory</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/types.ts#L16">src/core/types.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/types.ts#L16">src/core/types.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -220,7 +227,7 @@
 					<div class="tsd-signature tsd-kind-icon">Match<wbr>Function<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="interfaces/ielement.html#htmlelement" class="tsd-signature-type">HTMLElement</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/types.ts#L18">src/core/types.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/types.ts#L18">src/core/types.ts:18</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -251,7 +258,7 @@
 					<div class="tsd-signature tsd-kind-icon">Pipe<wbr>List<span class="tsd-signature-symbol">:</span> <a href="classes/pipe.html" class="tsd-signature-type">Pipe</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/types.ts#L14">src/core/types.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/types.ts#L14">src/core/types.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -261,7 +268,7 @@
 					<div class="tsd-signature tsd-kind-icon">Pipe<wbr>Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/types.ts#L12">src/core/types.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/types.ts#L12">src/core/types.ts:12</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -279,7 +286,7 @@
 					<div class="tsd-signature tsd-kind-icon">Selector<wbr>Function<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>node<span class="tsd-signature-symbol">: </span><a href="interfaces/ielement.html#htmlelement" class="tsd-signature-type">HTMLElement</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><a href="interfaces/iselectorresult.html" class="tsd-signature-type">ISelectorResult</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/types.ts#L20">src/core/types.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/types.ts#L20">src/core/types.ts:20</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -313,7 +320,7 @@
 					<div class="tsd-signature tsd-kind-icon">CONTEXTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/factory.ts#L4">src/core/factory.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/factory.ts#L4">src/core/factory.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -331,7 +338,7 @@
 					<div class="tsd-signature tsd-kind-icon">EVENTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = [&#x27;mousedown&#x27;, &#x27;mouseup&#x27;, &#x27;mousemove&#x27;, &#x27;click&#x27;, &#x27;dblclick&#x27;, &#x27;mouseover&#x27;, &#x27;mouseout&#x27;, &#x27;mouseenter&#x27;, &#x27;mouseleave&#x27;, &#x27;contextmenu&#x27;, &#x27;touchstart&#x27;, &#x27;touchmove&#x27;, &#x27;touchend&#x27;, &#x27;keydown&#x27;, &#x27;keyup&#x27;, &#x27;input&#x27;, &#x27;change&#x27;, &#x27;loaded&#x27;]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/event/event.directive.ts#L6">src/event/event.directive.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/event/event.directive.ts#L6">src/event/event.directive.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -341,7 +348,7 @@
 					<div class="tsd-signature tsd-kind-icon">Error<wbr>Interceptors<span class="tsd-signature-symbol">:</span> <a href="interfaces/ierrorinterceptor.html" class="tsd-signature-type">IErrorInterceptor</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/error/error.ts#L69">src/error/error.ts:69</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/error/error.ts#L69">src/error/error.ts:69</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -351,7 +358,7 @@
 					<div class="tsd-signature tsd-kind-icon">ID<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/module/module.ts#L11">src/module/module.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/module/module.ts#L11">src/module/module.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -361,7 +368,7 @@
 					<div class="tsd-signature tsd-kind-icon">NODES<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/factory.ts#L5">src/core/factory.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/factory.ts#L5">src/core/factory.ts:5</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -379,7 +386,7 @@
 					<div class="tsd-signature tsd-kind-icon">ORDER<span class="tsd-signature-symbol">:</span> <a href="globals.html#factorylist" class="tsd-signature-type">FactoryList</a><span class="tsd-signature-symbol"> = [Structure, Component, Directive]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L10">src/platform/platform.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L10">src/platform/platform.ts:10</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -389,7 +396,7 @@
 					<div class="tsd-signature tsd-kind-icon">PLATFORM_<wbr>BROWSER<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = typeof window !&#x3D;&#x3D; &#x27;undefined&#x27; &amp;&amp; typeof window.document !&#x3D;&#x3D; &#x27;undefined&#x27;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L168">src/platform/platform.ts:168</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L168">src/platform/platform.ts:168</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -399,7 +406,7 @@
 					<div class="tsd-signature tsd-kind-icon">PLATFORM_<wbr>JS_<wbr>DOM<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = (typeof window !&#x3D;&#x3D; &#x27;undefined&#x27; &amp;&amp; window.name &#x3D;&#x3D;&#x3D; &#x27;nodejs&#x27;) || (typeof navigator !&#x3D;&#x3D; &#x27;undefined&#x27; &amp;&amp; navigator.userAgent.includes(&#x27;Node.js&#x27;)) || (typeof navigator !&#x3D;&#x3D; &#x27;undefined&#x27; &amp;&amp; navigator.userAgent.includes(&#x27;jsdom&#x27;))</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L171">src/platform/platform.ts:171</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L171">src/platform/platform.ts:171</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -409,7 +416,7 @@
 					<div class="tsd-signature tsd-kind-icon">PLATFORM_<wbr>NODE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = typeof process !&#x3D;&#x3D; &#x27;undefined&#x27; &amp;&amp; process.versions !&#x3D; null &amp;&amp; process.versions.node !&#x3D; null</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L174">src/platform/platform.ts:174</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L174">src/platform/platform.ts:174</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -419,7 +426,7 @@
 					<div class="tsd-signature tsd-kind-icon">PLATFORM_<wbr>WEB_<wbr>WORKER<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = typeof self &#x3D;&#x3D;&#x3D; &#x27;object&#x27; &amp;&amp; self.constructor &amp;&amp; self.constructor.name &#x3D;&#x3D;&#x3D; &#x27;DedicatedWorkerGlobalScope&#x27;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L177">src/platform/platform.ts:177</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L177">src/platform/platform.ts:177</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -429,7 +436,7 @@
 					<div class="tsd-signature tsd-kind-icon">RESERVED_<wbr>PROPERTIES<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = [&#x27;constructor&#x27;, &#x27;rxcompId&#x27;, &#x27;onInit&#x27;, &#x27;onChanges&#x27;, &#x27;onDestroy&#x27;, &#x27;pushChanges&#x27;, &#x27;changes$&#x27;, &#x27;unsubscribe$&#x27;]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/context.ts#L5">src/core/context.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/context.ts#L5">src/core/context.ts:5</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -439,7 +446,7 @@
 					<div class="tsd-signature tsd-kind-icon">errors$<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Observable</span><span class="tsd-signature-symbol">&lt;</span><a href="classes/moduleerror.html#error" class="tsd-signature-type">Error</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = nextError$.pipe(/*switchMap(error &#x3D;&gt; {const chain &#x3D; ErrorInterceptors.reduceRight((next: ErrorHandler, interceptor: IErrorInterceptor) &#x3D;&gt; {return new ErrorInterceptorHandler(next, interceptor);}, new NoopErrorInterceptor());return chain.handle(error);}),*/// switchMap(error &#x3D;&gt; merge(ErrorInterceptors.map(x &#x3D;&gt; x.intercept(error, next)))),switchMap((error: Error) &#x3D;&gt; {const chain: IErrorHandler &#x3D; ErrorInterceptors.reduceRight((next: IErrorHandler, interceptor: IErrorInterceptor) &#x3D;&gt; {return new ErrorInterceptorHandler(next, interceptor);}, new DefaultErrorHandler());return chain.handle(error);}),tap((error: Error | void) &#x3D;&gt; {if (error) {console.error(error);}}),)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/error/error.ts#L72">src/error/error.ts:72</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/error/error.ts#L72">src/error/error.ts:72</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -449,7 +456,7 @@
 					<div class="tsd-signature tsd-kind-icon">factories<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type">Factory</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = [ClassDirective,EventDirective,ForStructure,HrefDirective,IfStructure,InnerHtmlDirective,JsonComponent,SrcDirective,StyleDirective,]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core.module.ts#L18">src/core.module.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core.module.ts#L18">src/core.module.ts:18</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -459,7 +466,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Platform<wbr>Browser<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = !PLATFORM_NODE &amp;&amp; PLATFORM_BROWSER</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L180">src/platform/platform.ts:180</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L180">src/platform/platform.ts:180</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -469,7 +476,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Platform<wbr>Server<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = PLATFORM_NODE</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L179">src/platform/platform.ts:179</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L179">src/platform/platform.ts:179</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -479,7 +486,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Platform<wbr>Worker<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = PLATFORM_WEB_WORKER</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/platform/platform.ts#L181">src/platform/platform.ts:181</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/platform.ts#L181">src/platform/platform.ts:181</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -489,7 +496,7 @@
 					<div class="tsd-signature tsd-kind-icon">next<wbr>Error$<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReplaySubject</span><span class="tsd-signature-symbol">&lt;</span><a href="classes/moduleerror.html#error" class="tsd-signature-type">Error</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new ReplaySubject&lt;Error&gt;(1)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/error/error.ts#L71">src/error/error.ts:71</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/error/error.ts#L71">src/error/error.ts:71</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -499,7 +506,7 @@
 					<div class="tsd-signature tsd-kind-icon">pipes<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type">Pipe</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = [JsonPipe,]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core.module.ts#L30">src/core.module.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core.module.ts#L30">src/core.module.ts:30</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -507,25 +514,91 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function">
-					<a name="flatmap_" class="tsd-anchor"></a>
-					<h3>flat<wbr>Map_</h3>
+					<a name="decodebase64" class="tsd-anchor"></a>
+					<h3>decode<wbr>Base64</h3>
 					<ul class="tsd-signatures tsd-kind-function">
-						<li class="tsd-signature tsd-kind-icon">flat<wbr>Map_<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, x<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">decode<wbr>Base64<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in src/transfer/transfer.service.ts:88</li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/common/serializer/serializer.ts#L54">src/platform/common/serializer/serializer.ts:54</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>s: <span class="tsd-signature-type">string</span></h5>
+									<h5>value: <span class="tsd-signature-type">string</span></h5>
 								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="decodejson" class="tsd-anchor"></a>
+					<h3>decode<wbr>Json</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">decode<wbr>Json<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/common/serializer/serializer.ts#L38">src/platform/common/serializer/serializer.ts:38</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
 								<li>
-									<h5>x: <span class="tsd-signature-type">any</span></h5>
+									<h5>value: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="encodebase64" class="tsd-anchor"></a>
+					<h3>encode<wbr>Base64</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">encode<wbr>Base64<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/common/serializer/serializer.ts#L50">src/platform/common/serializer/serializer.ts:50</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>value: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="encodejson" class="tsd-anchor"></a>
+					<h3>encode<wbr>Json</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">encode<wbr>Json<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/common/serializer/serializer.ts#L17">src/platform/common/serializer/serializer.ts:17</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>value: <span class="tsd-signature-type">any</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -542,7 +615,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/core/factory.ts#L33">src/core/factory.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/core/factory.ts#L33">src/core/factory.ts:33</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -565,7 +638,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/module/module.ts#L566">src/module/module.ts:566</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/module/module.ts#L577">src/module/module.ts:577</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -588,7 +661,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/module/module.ts#L574">src/module/module.ts:574</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/module/module.ts#L585">src/module/module.ts:585</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -608,6 +681,29 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="getlocationcomponents" class="tsd-anchor"></a>
+					<h3>get<wbr>Location<wbr>Components</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Location<wbr>Components<span class="tsd-signature-symbol">(</span>href<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="interfaces/ilocationinit.html" class="tsd-signature-type">ILocationInit</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/common/location/location.ts#L12">src/platform/common/location/location.ts:12</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>href: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="interfaces/ilocationinit.html" class="tsd-signature-type">ILocationInit</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="getparsablecontextbynode" class="tsd-anchor"></a>
 					<h3>get<wbr>Parsable<wbr>Context<wbr>ByNode</h3>
 					<ul class="tsd-signatures tsd-kind-function">
@@ -617,7 +713,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/7105c17/src/module/module.ts#L541">src/module/module.ts:541</a></li>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/module/module.ts#L552">src/module/module.ts:552</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -627,6 +723,32 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="interfaces/icontext.html" class="tsd-signature-type">IContext</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="optionstokey" class="tsd-anchor"></a>
+					<h3>options<wbr>ToKey</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">options<wbr>ToKey<span class="tsd-signature-symbol">(</span>v<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, s<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/actarian/rxcomp/blob/8601580/src/platform/common/transfer/transfer.service.ts#L58">src/platform/common/transfer/transfer.service.ts:58</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>v: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> s: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 						</li>
 					</ul>
 				</section>

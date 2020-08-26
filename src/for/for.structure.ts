@@ -107,7 +107,6 @@ export default class ForStructure extends Structure {
 		}
 		return { key, value, iterable };
 	}
-
 }
 
 ForStructure.meta = {

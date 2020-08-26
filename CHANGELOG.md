@@ -3,9 +3,9 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
-## [1.0.0-beta.13] - 2020-08-23
+## [1.0.0-beta.13] - 2020-08-26
 ### Added
-- Platform browser
+- Platform browser, serializer, transfer service
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.12
+ * @license rxcomp v1.0.0-beta.13
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -209,7 +209,75 @@ function getContext(instance) {
 ClassDirective.meta = {
   selector: "[[class]]",
   inputs: ['class']
-};var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
+};var ModuleError = function (_Error) {
+  _inheritsLoose(ModuleError, _Error);
+
+  function ModuleError() {
+    return _Error.apply(this, arguments) || this;
+  }
+
+  return ModuleError;
+}(_wrapNativeSuper(Error));
+var ExpressionError = function (_Error2) {
+  _inheritsLoose(ExpressionError, _Error2);
+
+  function ExpressionError(error, module, instance, expression, params) {
+    var _this;
+
+    var message = "ExpressionError in " + instance.constructor.name + " \"" + expression + "\"\n\t\t" + error.message;
+    _this = _Error2.call(this, message) || this;
+    _this.name = error.name;
+    _this.module = module;
+    _this.instance = instance;
+    _this.expression = expression;
+    _this.params = params;
+
+    var _getContext = getContext(instance),
+        node = _getContext.node;
+
+    _this.template = node.outerHTML;
+    return _this;
+  }
+
+  return ExpressionError;
+}(_wrapNativeSuper(Error));
+var ErrorInterceptorHandler = function () {
+  function ErrorInterceptorHandler(next, interceptor) {
+    this.next = next;
+    this.interceptor = interceptor;
+  }
+
+  var _proto = ErrorInterceptorHandler.prototype;
+
+  _proto.handle = function handle(error) {
+    return this.interceptor.intercept(error, this.next);
+  };
+
+  return ErrorInterceptorHandler;
+}();
+var DefaultErrorHandler = function () {
+  function DefaultErrorHandler() {}
+
+  var _proto2 = DefaultErrorHandler.prototype;
+
+  _proto2.handle = function handle(error) {
+    return rxjs.of(error);
+  };
+
+  return DefaultErrorHandler;
+}();
+var ErrorInterceptors = [];
+var nextError$ = new rxjs.ReplaySubject(1);
+var errors$ = nextError$.pipe(operators.switchMap(function (error) {
+  var chain = ErrorInterceptors.reduceRight(function (next, interceptor) {
+    return new ErrorInterceptorHandler(next, interceptor);
+  }, new DefaultErrorHandler());
+  return chain.handle(error);
+}), operators.tap(function (error) {
+  if (error) {
+    console.error(error);
+  }
+}));var EVENTS = ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave', 'contextmenu', 'touchstart', 'touchmove', 'touchend', 'keydown', 'keyup', 'input', 'change', 'loaded'];
 
 var EventDirective = function (_Directive) {
   _inheritsLoose(EventDirective, _Directive);
@@ -471,11 +539,11 @@ var Context = function (_Component) {
 
   _proto.getExpressionToken = function getExpressionToken(expression) {
     if (expression === null) {
-      throw 'invalid for';
+      throw new Error('invalid for');
     }
 
     if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {
-      throw 'invalid for';
+      throw new Error('invalid for');
     }
 
     var expressions = expression.split(';').map(function (x) {
@@ -687,94 +755,38 @@ JsonComponent.meta = {
 }(Pipe);
 JsonPipe.meta = {
   name: 'json'
-};var ExpressionError = function (_Error) {
-  _inheritsLoose(ExpressionError, _Error);
-
-  function ExpressionError(error, module, instance, expression, params) {
-    var _this;
-
-    var message = "ExpressionError in " + instance.constructor.name + " \"" + expression + "\"\n\t\t" + error.message;
-    _this = _Error.call(this, message) || this;
-    _this.name = error.name;
-    _this.module = module;
-    _this.instance = instance;
-    _this.expression = expression;
-    _this.params = params;
-
-    var _getContext = getContext(instance),
-        node = _getContext.node;
-
-    _this.template = node.outerHTML;
-    return _this;
-  }
-
-  return ExpressionError;
-}(_wrapNativeSuper(Error));
-var ErrorInterceptorHandler = function () {
-  function ErrorInterceptorHandler(next, interceptor) {
-    this.next = next;
-    this.interceptor = interceptor;
-  }
-
-  var _proto = ErrorInterceptorHandler.prototype;
-
-  _proto.handle = function handle(error) {
-    return this.interceptor.intercept(error, this.next);
-  };
-
-  return ErrorInterceptorHandler;
-}();
-var DefaultErrorHandler = function () {
-  function DefaultErrorHandler() {}
-
-  var _proto2 = DefaultErrorHandler.prototype;
-
-  _proto2.handle = function handle(error) {
-    return rxjs.of(error);
-  };
-
-  return DefaultErrorHandler;
-}();
-var ErrorInterceptors = [];
-var nextError$ = new rxjs.ReplaySubject(1);
-var errors$ = nextError$.pipe(operators.switchMap(function (error) {
-  var chain = ErrorInterceptors.reduceRight(function (next, interceptor) {
-    return new ErrorInterceptorHandler(next, interceptor);
-  }, new DefaultErrorHandler());
-  return chain.handle(error);
-}), operators.tap(function (error) {
-  if (error) {
-    console.error(error);
-  }
-}));var ORDER = [Structure, Component, Directive];
+};var ORDER = [Structure, Component, Directive];
 
 var Platform = function () {
   function Platform() {}
 
   Platform.bootstrap = function bootstrap(moduleFactory) {
     if (!moduleFactory) {
-      throw 'missing moduleFactory';
+      throw new ModuleError('missing moduleFactory');
     }
 
     if (!moduleFactory.meta) {
-      throw 'missing moduleFactory meta';
+      throw new ModuleError('missing moduleFactory meta');
     }
 
     if (!moduleFactory.meta.bootstrap) {
-      throw 'missing bootstrap';
+      throw new ModuleError('missing bootstrap');
     }
 
     if (!moduleFactory.meta.bootstrap.meta) {
-      throw 'missing bootstrap meta';
+      throw new ModuleError('missing bootstrap meta');
     }
 
     if (!moduleFactory.meta.bootstrap.meta.selector) {
-      throw 'missing bootstrap meta selector';
+      throw new ModuleError('missing bootstrap meta selector');
     }
 
     var meta = this.resolveMeta(moduleFactory);
     var module = new moduleFactory();
     module.meta = meta;
+    meta.imports.forEach(function (moduleFactory) {
+      moduleFactory.prototype.constructor.call(module);
+    });
     return module;
   };
 
@@ -788,7 +800,7 @@ var Platform = function () {
     var node = this.querySelector(bootstrap.meta.selector);
 
     if (!node) {
-      throw "missing node " + bootstrap.meta.selector;
+      throw new ModuleError("missing node " + bootstrap.meta.selector);
     }
 
     var nodeInnerHTML = node.innerHTML;
@@ -978,7 +990,7 @@ var Module = function () {
     return instances;
   };
 
-  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args) {
+  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args, inject) {
     var _this2 = this;
 
     if (parentInstance || node.parentNode) {
@@ -990,6 +1002,17 @@ var Module = function () {
       }
 
       var instance = _construct(factory, args || []);
+
+      if (inject) {
+        Object.keys(inject).forEach(function (key) {
+          Object.defineProperty(instance, key, {
+            value: inject[key],
+            enumerable: true,
+            configurable: false,
+            writable: false
+          });
+        });
+      }
 
       var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 
@@ -1709,7 +1732,7 @@ var CoreModule = function (_Module) {
     var _this;
 
     _this = _Module.call(this) || this;
-    console.log('CoreModule', _assertThisInitialized(_this));
+    errors$.pipe(operators.takeUntil(_this.unsubscribe$)).subscribe();
     return _this;
   }
 
@@ -1727,27 +1750,27 @@ CoreModule.meta = {
 
   Browser.bootstrap = function bootstrap(moduleFactory) {
     if (!isPlatformBrowser) {
-      throw 'missing platform browser, window not found';
+      throw new ModuleError('missing platform browser, window not found');
     }
 
     if (!moduleFactory) {
-      throw 'missing moduleFactory';
+      throw new ModuleError('missing moduleFactory');
     }
 
     if (!moduleFactory.meta) {
-      throw 'missing moduleFactory meta';
+      throw new ModuleError('missing moduleFactory meta');
     }
 
     if (!moduleFactory.meta.bootstrap) {
-      throw 'missing bootstrap';
+      throw new ModuleError('missing bootstrap');
     }
 
     if (!moduleFactory.meta.bootstrap.meta) {
-      throw 'missing bootstrap meta';
+      throw new ModuleError('missing bootstrap meta');
     }
 
     if (!moduleFactory.meta.bootstrap.meta.selector) {
-      throw 'missing bootstrap meta selector';
+      throw new ModuleError('missing bootstrap meta selector');
     }
 
     var meta = this.resolveMeta(moduleFactory);
@@ -1776,7 +1799,6 @@ CoreModule.meta = {
       _root.pushChanges();
     }
 
-    errors$.pipe(operators.takeUntil(module.unsubscribe$)).subscribe(function () {});
     return module;
   };
 
