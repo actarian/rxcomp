@@ -14,25 +14,32 @@ export default class Serializer {
 	}
 }
 
-export function encodeJson(value: any): string {
+export function encodeJson(value: any, space?: string | number, circularRef?: any): string {
 	let decoded: any;
 	try {
-		const pool: Map<any, boolean> = new Map();
+		// const pool: Map<any, boolean> = new Map();
+		const pool: any[] = [];
 		const json: string = JSON.stringify(value, function (key, value) {
 			if (typeof value === 'object' && value != null) {
-				if (pool.has(value)) {
+				// if (pool.has(value)) {
+				if (pool.indexOf(value) !== -1) {
 					// console.warn(`Serializer.encodeJson.error`, `circular reference found, discard key "${key}"`);
-					return;
+					return circularRef;
 				}
-				pool.set(value, true);
+				pool.push(value);
+				// pool.set(value, true);
 			}
 			return value;
-		});
+		}, space);
 		decoded = json;
 	} catch (error) {
 		// console.warn(`Serializer.encodeJson.error`, value, error);
 	}
 	return decoded;
+}
+
+export function encodeJsonWithOptions(space?: string | number, circularRef?: any): (value: any) => string {
+	return (value: any) => encodeJson(value, space, circularRef);
 }
 
 export function decodeJson(value: string): any {

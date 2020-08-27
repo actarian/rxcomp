@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.decodeBase64 = exports.encodeBase64 = exports.decodeJson = exports.encodeJson = void 0;
+exports.decodeBase64 = exports.encodeBase64 = exports.decodeJson = exports.encodeJsonWithOptions = exports.encodeJson = void 0;
 var platform_1 = require("../../platform");
 var Serializer = /** @class */ (function () {
     function Serializer() {
@@ -16,20 +16,23 @@ var Serializer = /** @class */ (function () {
     return Serializer;
 }());
 exports.default = Serializer;
-function encodeJson(value) {
+function encodeJson(value, space, circularRef) {
     var decoded;
     try {
-        var pool_1 = new Map();
+        // const pool: Map<any, boolean> = new Map();
+        var pool_1 = [];
         var json = JSON.stringify(value, function (key, value) {
             if (typeof value === 'object' && value != null) {
-                if (pool_1.has(value)) {
+                // if (pool.has(value)) {
+                if (pool_1.indexOf(value) !== -1) {
                     // console.warn(`Serializer.encodeJson.error`, `circular reference found, discard key "${key}"`);
-                    return;
+                    return circularRef;
                 }
-                pool_1.set(value, true);
+                pool_1.push(value);
+                // pool.set(value, true);
             }
             return value;
-        });
+        }, space);
         decoded = json;
     }
     catch (error) {
@@ -38,6 +41,10 @@ function encodeJson(value) {
     return decoded;
 }
 exports.encodeJson = encodeJson;
+function encodeJsonWithOptions(space, circularRef) {
+    return function (value) { return encodeJson(value, space, circularRef); };
+}
+exports.encodeJsonWithOptions = encodeJsonWithOptions;
 function decodeJson(value) {
     var decoded;
     if (value) {

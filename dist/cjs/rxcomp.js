@@ -56,6 +56,7 @@ Object.defineProperty(exports, "decodeJson", { enumerable: true, get: function (
 Object.defineProperty(exports, "Serializer", { enumerable: true, get: function () { return serializer_1.default; } });
 Object.defineProperty(exports, "encodeBase64", { enumerable: true, get: function () { return serializer_1.encodeBase64; } });
 Object.defineProperty(exports, "encodeJson", { enumerable: true, get: function () { return serializer_1.encodeJson; } });
+Object.defineProperty(exports, "encodeJsonWithOptions", { enumerable: true, get: function () { return serializer_1.encodeJsonWithOptions; } });
 var transfer_service_1 = require("./platform/common/transfer/transfer.service");
 Object.defineProperty(exports, "TransferService", { enumerable: true, get: function () { return transfer_service_1.default; } });
 Object.defineProperty(exports, "optionsToKey", { enumerable: true, get: function () { return transfer_service_1.optionsToKey; } });

@@ -7,26 +7,32 @@ export default class Serializer {
         return decoders.reduce((p, c) => c(p), value);
     }
 }
-export function encodeJson(value) {
+export function encodeJson(value, space, circularRef) {
     let decoded;
     try {
-        const pool = new Map();
+        // const pool: Map<any, boolean> = new Map();
+        const pool = [];
         const json = JSON.stringify(value, function (key, value) {
             if (typeof value === 'object' && value != null) {
-                if (pool.has(value)) {
+                // if (pool.has(value)) {
+                if (pool.indexOf(value) !== -1) {
                     // console.warn(`Serializer.encodeJson.error`, `circular reference found, discard key "${key}"`);
-                    return;
+                    return circularRef;
                 }
-                pool.set(value, true);
+                pool.push(value);
+                // pool.set(value, true);
             }
             return value;
-        });
+        }, space);
         decoded = json;
     }
     catch (error) {
         // console.warn(`Serializer.encodeJson.error`, value, error);
     }
     return decoded;
+}
+export function encodeJsonWithOptions(space, circularRef) {
+    return (value) => encodeJson(value, space, circularRef);
 }
 export function decodeJson(value) {
     let decoded;

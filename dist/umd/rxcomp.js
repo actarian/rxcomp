@@ -845,35 +845,7 @@ JsonComponent.meta = {
   };
 
   return Pipe;
-}();var JsonPipe = /*#__PURE__*/function (_Pipe) {
-  _inheritsLoose(JsonPipe, _Pipe);
-
-  function JsonPipe() {
-    return _Pipe.apply(this, arguments) || this;
-  }
-
-  JsonPipe.transform = function transform(value) {
-    var cache = new Map();
-    var json = JSON.stringify(value, function (key, value) {
-      if (typeof value === 'object' && value != null) {
-        if (cache.has(value)) {
-          // Circular reference found, discard key
-          return '#ref';
-        }
-
-        cache.set(value, true);
-      }
-
-      return value;
-    }, 2);
-    return json;
-  };
-
-  return JsonPipe;
-}(Pipe);
-JsonPipe.meta = {
-  name: 'json'
-};var ORDER = [Structure, Component, Directive];
+}();var ORDER = [Structure, Component, Directive];
 
 var Platform = /*#__PURE__*/function () {
   function Platform() {}
@@ -1095,7 +1067,94 @@ var PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null &
 var PLATFORM_WEB_WORKER = typeof self === 'object' && self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope';
 var isPlatformServer = PLATFORM_NODE;
 var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;
-var isPlatformWorker = PLATFORM_WEB_WORKER;var ID = 0;
+var isPlatformWorker = PLATFORM_WEB_WORKER;var Serializer = /*#__PURE__*/function () {
+  function Serializer() {}
+
+  Serializer.encode = function encode(value, encoders) {
+    if (encoders === void 0) {
+      encoders = [encodeJson];
+    }
+
+    return encoders.reduce(function (p, c) {
+      return c(p);
+    }, value);
+  };
+
+  Serializer.decode = function decode(value, decoders) {
+    if (decoders === void 0) {
+      decoders = [decodeJson];
+    }
+
+    return decoders.reduce(function (p, c) {
+      return c(p);
+    }, value);
+  };
+
+  return Serializer;
+}();
+function encodeJson(value, space, circularRef) {
+  var decoded;
+
+  try {
+    // const pool: Map<any, boolean> = new Map();
+    var pool = [];
+    var json = JSON.stringify(value, function (key, value) {
+      if (typeof value === 'object' && value != null) {
+        // if (pool.has(value)) {
+        if (pool.indexOf(value) !== -1) {
+          // console.warn(`Serializer.encodeJson.error`, `circular reference found, discard key "${key}"`);
+          return circularRef;
+        }
+
+        pool.push(value); // pool.set(value, true);
+      }
+
+      return value;
+    }, space);
+    decoded = json;
+  } catch (error) {// console.warn(`Serializer.encodeJson.error`, value, error);
+  }
+
+  return decoded;
+}
+function encodeJsonWithOptions(space, circularRef) {
+  return function (value) {
+    return encodeJson(value, space, circularRef);
+  };
+}
+function decodeJson(value) {
+  var decoded;
+
+  if (value) {
+    try {
+      decoded = JSON.parse(value);
+    } catch (error) {// console.warn(`Serializer.decodeJson.error`, value, error);
+    }
+  }
+
+  return decoded;
+}
+function encodeBase64(value) {
+  return isPlatformBrowser ? atob(value) : Buffer.from(value).toString('base64');
+}
+function decodeBase64(value) {
+  return isPlatformBrowser ? btoa(value) : Buffer.from(value, 'base64').toString();
+}var JsonPipe = /*#__PURE__*/function (_Pipe) {
+  _inheritsLoose(JsonPipe, _Pipe);
+
+  function JsonPipe() {
+    return _Pipe.apply(this, arguments) || this;
+  }
+
+  JsonPipe.transform = function transform(value) {
+    return Serializer.encode(value, [encodeJsonWithOptions(2, '#ref')]);
+  };
+
+  return JsonPipe;
+}(Pipe);
+JsonPipe.meta = {
+  name: 'json'
+};var ID = 0;
 
 var Module = /*#__PURE__*/function () {
   function Module() {
@@ -2018,71 +2077,6 @@ CoreModule.meta = {
     search: search,
     hash: hash
   };
-}var Serializer = /*#__PURE__*/function () {
-  function Serializer() {}
-
-  Serializer.encode = function encode(value, encoders) {
-    if (encoders === void 0) {
-      encoders = [encodeJson];
-    }
-
-    return encoders.reduce(function (p, c) {
-      return c(p);
-    }, value);
-  };
-
-  Serializer.decode = function decode(value, decoders) {
-    if (decoders === void 0) {
-      decoders = [decodeJson];
-    }
-
-    return decoders.reduce(function (p, c) {
-      return c(p);
-    }, value);
-  };
-
-  return Serializer;
-}();
-function encodeJson(value) {
-  var decoded;
-
-  try {
-    var pool = new Map();
-    var json = JSON.stringify(value, function (key, value) {
-      if (typeof value === 'object' && value != null) {
-        if (pool.has(value)) {
-          // console.warn(`Serializer.encodeJson.error`, `circular reference found, discard key "${key}"`);
-          return;
-        }
-
-        pool.set(value, true);
-      }
-
-      return value;
-    });
-    decoded = json;
-  } catch (error) {// console.warn(`Serializer.encodeJson.error`, value, error);
-  }
-
-  return decoded;
-}
-function decodeJson(value) {
-  var decoded;
-
-  if (value) {
-    try {
-      decoded = JSON.parse(value);
-    } catch (error) {// console.warn(`Serializer.decodeJson.error`, value, error);
-    }
-  }
-
-  return decoded;
-}
-function encodeBase64(value) {
-  return isPlatformBrowser ? atob(value) : Buffer.from(value).toString('base64');
-}
-function decodeBase64(value) {
-  return isPlatformBrowser ? btoa(value) : Buffer.from(value, 'base64').toString();
 }var TransferService = /*#__PURE__*/function () {
   function TransferService() {}
 
@@ -2165,4 +2159,4 @@ function optionsToKey(v, s) {
   }
 
   return s;
-}exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.decodeBase64=decodeBase64;exports.decodeJson=decodeJson;exports.encodeBase64=encodeBase64;exports.encodeJson=encodeJson;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;Object.defineProperty(exports,'__esModule',{value:true});})));
+}exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.decodeBase64=decodeBase64;exports.decodeJson=decodeJson;exports.encodeBase64=encodeBase64;exports.encodeJson=encodeJson;exports.encodeJsonWithOptions=encodeJsonWithOptions;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;Object.defineProperty(exports,'__esModule',{value:true});})));

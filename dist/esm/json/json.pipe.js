@@ -1,18 +1,8 @@
 import Pipe from '../core/pipe';
+import Serializer, { encodeJsonWithOptions } from '../platform/common/serializer/serializer';
 export default class JsonPipe extends Pipe {
     static transform(value) {
-        const cache = new Map();
-        const json = JSON.stringify(value, function (key, value) {
-            if (typeof value === 'object' && value != null) {
-                if (cache.has(value)) {
-                    // Circular reference found, discard key
-                    return '#ref';
-                }
-                cache.set(value, true);
-            }
-            return value;
-        }, 2);
-        return json;
+        return Serializer.encode(value, [encodeJsonWithOptions(2, '#ref')]);
     }
 }
 JsonPipe.meta = {
