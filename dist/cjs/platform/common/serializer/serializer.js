@@ -16,7 +16,7 @@ var Serializer = /** @class */ (function () {
     return Serializer;
 }());
 exports.default = Serializer;
-function encodeJson(value, space, circularRef) {
+function encodeJson(value, circularRef, space) {
     var decoded;
     try {
         // const pool: Map<any, boolean> = new Map();
@@ -41,8 +41,8 @@ function encodeJson(value, space, circularRef) {
     return decoded;
 }
 exports.encodeJson = encodeJson;
-function encodeJsonWithOptions(space, circularRef) {
-    return function (value) { return encodeJson(value, space, circularRef); };
+function encodeJsonWithOptions(circularRef, space) {
+    return function (value) { return encodeJson(value, circularRef, space); };
 }
 exports.encodeJsonWithOptions = encodeJsonWithOptions;
 function decodeJson(value) {

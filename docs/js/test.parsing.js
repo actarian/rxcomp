@@ -728,34 +728,7 @@ JsonComponent.meta = {
   };
 
   return Pipe;
-}();var JsonPipe = function (_Pipe) {
-  _inheritsLoose(JsonPipe, _Pipe);
-
-  function JsonPipe() {
-    return _Pipe.apply(this, arguments) || this;
-  }
-
-  JsonPipe.transform = function transform(value) {
-    var cache = new Map();
-    var json = JSON.stringify(value, function (key, value) {
-      if (typeof value === 'object' && value != null) {
-        if (cache.has(value)) {
-          return '#ref';
-        }
-
-        cache.set(value, true);
-      }
-
-      return value;
-    }, 2);
-    return json;
-  };
-
-  return JsonPipe;
-}(Pipe);
-JsonPipe.meta = {
-  name: 'json'
-};var ORDER = [Structure, Component, Directive];
+}();var ORDER = [Structure, Component, Directive];
 
 var Platform = function () {
   function Platform() {}
@@ -959,7 +932,83 @@ var Platform = function () {
 var PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 var PLATFORM_JS_DOM = typeof window !== 'undefined' && window.name === 'nodejs' || typeof navigator !== 'undefined' && navigator.userAgent.includes('Node.js') || typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom');
 var PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
-var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var ID = 0;
+var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var Serializer = function () {
+  function Serializer() {}
+
+  Serializer.encode = function encode(value, encoders) {
+    if (encoders === void 0) {
+      encoders = [encodeJson];
+    }
+
+    return encoders.reduce(function (p, c) {
+      return c(p);
+    }, value);
+  };
+
+  Serializer.decode = function decode(value, decoders) {
+    if (decoders === void 0) {
+      decoders = [decodeJson];
+    }
+
+    return decoders.reduce(function (p, c) {
+      return c(p);
+    }, value);
+  };
+
+  return Serializer;
+}();
+function encodeJson(value, circularRef, space) {
+  var decoded;
+
+  try {
+    var pool = [];
+    var json = JSON.stringify(value, function (key, value) {
+      if (typeof value === 'object' && value != null) {
+        if (pool.indexOf(value) !== -1) {
+          return circularRef;
+        }
+
+        pool.push(value);
+      }
+
+      return value;
+    }, space);
+    decoded = json;
+  } catch (error) {}
+
+  return decoded;
+}
+function encodeJsonWithOptions(circularRef, space) {
+  return function (value) {
+    return encodeJson(value, circularRef, space);
+  };
+}
+function decodeJson(value) {
+  var decoded;
+
+  if (value) {
+    try {
+      decoded = JSON.parse(value);
+    } catch (error) {}
+  }
+
+  return decoded;
+}var JsonPipe = function (_Pipe) {
+  _inheritsLoose(JsonPipe, _Pipe);
+
+  function JsonPipe() {
+    return _Pipe.apply(this, arguments) || this;
+  }
+
+  JsonPipe.transform = function transform(value) {
+    return Serializer.encode(value, [encodeJsonWithOptions('#ref', 2)]);
+  };
+
+  return JsonPipe;
+}(Pipe);
+JsonPipe.meta = {
+  name: 'json'
+};var ID = 0;
 
 var Module = function () {
   function Module() {

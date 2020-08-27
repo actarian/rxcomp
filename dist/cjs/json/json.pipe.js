@@ -9,7 +9,7 @@ var JsonPipe = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     JsonPipe.transform = function (value) {
-        return serializer_1.default.encode(value, [serializer_1.encodeJsonWithOptions(2, '#ref')]);
+        return serializer_1.default.encode(value, [serializer_1.encodeJsonWithOptions('#ref', 2)]);
     };
     return JsonPipe;
 }(pipe_1.default));

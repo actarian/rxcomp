@@ -1002,7 +1002,7 @@ var isPlatformWorker = PLATFORM_WEB_WORKER;var Serializer = function () {
 
   return Serializer;
 }();
-function encodeJson(value, space, circularRef) {
+function encodeJson(value, circularRef, space) {
   var decoded;
 
   try {
@@ -1023,9 +1023,9 @@ function encodeJson(value, space, circularRef) {
 
   return decoded;
 }
-function encodeJsonWithOptions(space, circularRef) {
+function encodeJsonWithOptions(circularRef, space) {
   return function (value) {
-    return encodeJson(value, space, circularRef);
+    return encodeJson(value, circularRef, space);
   };
 }
 function decodeJson(value) {
@@ -1052,7 +1052,7 @@ function decodeBase64(value) {
   }
 
   JsonPipe.transform = function transform(value) {
-    return Serializer.encode(value, [encodeJsonWithOptions(2, '#ref')]);
+    return Serializer.encode(value, [encodeJsonWithOptions('#ref', 2)]);
   };
 
   return JsonPipe;

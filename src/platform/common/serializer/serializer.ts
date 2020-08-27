@@ -14,7 +14,7 @@ export default class Serializer {
 	}
 }
 
-export function encodeJson(value: any, space?: string | number, circularRef?: any): string {
+export function encodeJson(value: any, circularRef?: any, space?: string | number): string {
 	let decoded: any;
 	try {
 		// const pool: Map<any, boolean> = new Map();
@@ -38,8 +38,8 @@ export function encodeJson(value: any, space?: string | number, circularRef?: an
 	return decoded;
 }
 
-export function encodeJsonWithOptions(space?: string | number, circularRef?: any): (value: any) => string {
-	return (value: any) => encodeJson(value, space, circularRef);
+export function encodeJsonWithOptions(circularRef?: any, space?: string | number): (value: any) => string {
+	return (value: any) => encodeJson(value, circularRef, space);
 }
 
 export function decodeJson(value: string): any {
