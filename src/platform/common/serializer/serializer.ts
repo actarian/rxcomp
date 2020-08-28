@@ -12,6 +12,26 @@ export default class Serializer {
 	static decode(value: any, decoders: ((from: any) => any)[] = [decodeJson]): any {
 		return decoders.reduce((p, c) => c(p), value);
 	}
+
+	static encodeJson<T>(value: any): T | undefined;
+	static encodeJson(value: any): any {
+		return this.encode(value, [encodeJson]);
+	}
+
+	static decodeJson<T>(value: any): T | undefined;
+	static decodeJson(value: any): any {
+		return this.decode(value, [decodeJson]);
+	}
+
+	static encodeBase64<T>(value: any): T | undefined;
+	static encodeBase64(value: any): any {
+		return this.encode(value, [encodeJson, encodeBase64]);
+	}
+
+	static decodeBase64<T>(value: any): T | undefined;
+	static decodeBase64(value: any): any {
+		return this.decode(value, [decodeBase64, decodeJson]);
+	}
 }
 
 export function encodeJson(value: any, circularRef?: any, space?: string | number): string {
