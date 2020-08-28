@@ -1,11 +1,53 @@
 {
-	"indent_with_tabs": true,
-	"max_preserve_newlines": 2,
-	"preserve_newlines": true,
-	"keep_array_indentation": true,
-	"break_chained_methods": false,
-	"wrap_line_length": 0,
-	"end_with_newline": true,
-	"brace_style": "collapse,preserve-inline",
-	"unformatted": ["svg"]
+  "brace_style": "collapse,preserve-inline",
+  "break_chained_methods": false,
+  "end_with_newline": true,
+  "eol": "\n",
+  "eval_code": false,
+  "indent_char": "\t",
+  "indent_size": 4,
+  "indent_with_tabs": true,
+  "keep_array_indentation": false,
+  "keep_function_indentation": false,
+  "max_preserve_newlines": 2,
+  "preserve_newlines": true,
+  "html": {
+    "allowed_file_extensions": ["htm", "html", "xhtml", "shtml", "xml", "svg", "dust"],
+    "indent_scripts": "keep",
+    "max_preserve_newlines": 10,
+    "unformatted": ["svg"],
+    "wrap_line_length": 0
+  },
+  "css": {
+    "allowed_file_extensions": ["css", "scss", "sass", "less"],
+    "newline_between_rules": true,
+    "selector_separator": " ",
+    "selector_separator_newline": true,
+    "max_preserve_newlines": 10
+  },
+  "js": {
+    "allowed_file_extensions": ["ts", "js", "json", "jshintrc", "jsbeautifyrc"],
+    "break_chained_methods": false,
+    "comma_first": false,
+    "e4x": false,
+    "indent_empty_lines": true,
+    "jslint_happy": false,
+    "max_preserve_newlines": 0,
+    "operator_position": "before-newline",
+    "space_after_anon_function": false,
+    "space_after_named_function": false,
+    "space_before_conditional": true,
+    "space_in_empty_paren": false,
+    "space_in_paren": false,
+    "templating": ["auto"],
+    "unescape_strings": false,
+    "unindent_chained_methods": false,
+    "wrap_line_length": 0,
+    "js": {
+      "allowed_file_extensions": ["json", "jshintrc", "jsbeautifyrc"],
+      "indent_char": " ",
+      "indent_size": 2,
+      "indent_with_tabs": false
+    }
+  }
 }
