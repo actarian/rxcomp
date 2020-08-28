@@ -13,6 +13,18 @@ var Serializer = /** @class */ (function () {
         if (decoders === void 0) { decoders = [decodeJson]; }
         return decoders.reduce(function (p, c) { return c(p); }, value);
     };
+    Serializer.encodeJson = function (value) {
+        return this.encode(value, [encodeJson]);
+    };
+    Serializer.decodeJson = function (value) {
+        return this.decode(value, [decodeJson]);
+    };
+    Serializer.encodeBase64 = function (value) {
+        return this.encode(value, [encodeJson, encodeBase64]);
+    };
+    Serializer.decodeBase64 = function (value) {
+        return this.decode(value, [decodeBase64, decodeJson]);
+    };
     return Serializer;
 }());
 exports.default = Serializer;
@@ -59,10 +71,24 @@ function decodeJson(value) {
 }
 exports.decodeJson = decodeJson;
 function encodeBase64(value) {
-    return platform_1.isPlatformBrowser ? atob(value) : Buffer.from(value).toString('base64');
+    var encoded;
+    try {
+        encoded = platform_1.isPlatformBrowser ? btoa(value) : Buffer.from(value).toString('base64');
+    }
+    catch (error) {
+        encoded = value;
+    }
+    return encoded;
 }
 exports.encodeBase64 = encodeBase64;
 function decodeBase64(value) {
-    return platform_1.isPlatformBrowser ? btoa(value) : Buffer.from(value, 'base64').toString();
+    var decoded;
+    try {
+        decoded = platform_1.isPlatformBrowser ? atob(value) : Buffer.from(value, 'base64').toString();
+    }
+    catch (error) {
+        decoded = value;
+    }
+    return decoded;
 }
 exports.decodeBase64 = decodeBase64;

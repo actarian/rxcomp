@@ -6,6 +6,18 @@ export default class Serializer {
     static decode(value, decoders = [decodeJson]) {
         return decoders.reduce((p, c) => c(p), value);
     }
+    static encodeJson(value) {
+        return this.encode(value, [encodeJson]);
+    }
+    static decodeJson(value) {
+        return this.decode(value, [decodeJson]);
+    }
+    static encodeBase64(value) {
+        return this.encode(value, [encodeJson, encodeBase64]);
+    }
+    static decodeBase64(value) {
+        return this.decode(value, [decodeBase64, decodeJson]);
+    }
 }
 export function encodeJson(value, circularRef, space) {
     let decoded;
@@ -47,8 +59,22 @@ export function decodeJson(value) {
     return decoded;
 }
 export function encodeBase64(value) {
-    return isPlatformBrowser ? atob(value) : Buffer.from(value).toString('base64');
+    let encoded;
+    try {
+        encoded = isPlatformBrowser ? btoa(value) : Buffer.from(value).toString('base64');
+    }
+    catch (error) {
+        encoded = value;
+    }
+    return encoded;
 }
 export function decodeBase64(value) {
-    return isPlatformBrowser ? btoa(value) : Buffer.from(value, 'base64').toString();
+    let decoded;
+    try {
+        decoded = isPlatformBrowser ? atob(value) : Buffer.from(value, 'base64').toString();
+    }
+    catch (error) {
+        decoded = value;
+    }
+    return decoded;
 }

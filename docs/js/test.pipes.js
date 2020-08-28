@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.13
+ * @license rxcomp v1.0.0-beta.14
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -937,7 +937,7 @@ var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var Serializer = func
 
   Serializer.encode = function encode(value, encoders) {
     if (encoders === void 0) {
-      encoders = [encodeJson];
+      encoders = [_encodeJson];
     }
 
     return encoders.reduce(function (p, c) {
@@ -947,7 +947,7 @@ var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var Serializer = func
 
   Serializer.decode = function decode(value, decoders) {
     if (decoders === void 0) {
-      decoders = [decodeJson];
+      decoders = [_decodeJson];
     }
 
     return decoders.reduce(function (p, c) {
@@ -955,9 +955,26 @@ var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var Serializer = func
     }, value);
   };
 
+  Serializer.encodeJson = function encodeJson(value) {
+    return this.encode(value, [_encodeJson]);
+  };
+
+  Serializer.decodeJson = function decodeJson(value) {
+    return this.decode(value, [_decodeJson]);
+  };
+
+  Serializer.encodeBase64 = function encodeBase64(value) {
+    return this.encode(value, [_encodeJson, _encodeBase]);
+  };
+
+  Serializer.decodeBase64 = function decodeBase64(value) {
+    return this.decode(value, [_decodeBase, _decodeJson]);
+  };
+
   return Serializer;
 }();
-function encodeJson(value, circularRef, space) {
+
+function _encodeJson(value, circularRef, space) {
   var decoded;
 
   try {
@@ -980,16 +997,41 @@ function encodeJson(value, circularRef, space) {
 }
 function encodeJsonWithOptions(circularRef, space) {
   return function (value) {
-    return encodeJson(value, circularRef, space);
+    return _encodeJson(value, circularRef, space);
   };
 }
-function decodeJson(value) {
+
+function _decodeJson(value) {
   var decoded;
 
   if (value) {
     try {
       decoded = JSON.parse(value);
     } catch (error) {}
+  }
+
+  return decoded;
+}
+
+function _encodeBase(value) {
+  var encoded;
+
+  try {
+    encoded = isPlatformBrowser ? btoa(value) : Buffer.from(value).toString('base64');
+  } catch (error) {
+    encoded = value;
+  }
+
+  return encoded;
+}
+
+function _decodeBase(value) {
+  var decoded;
+
+  try {
+    decoded = isPlatformBrowser ? atob(value) : Buffer.from(value, 'base64').toString();
+  } catch (error) {
+    decoded = value;
   }
 
   return decoded;

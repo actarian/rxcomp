@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.13
+ * @license rxcomp v1.0.0-beta.14
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -982,7 +982,7 @@ var isPlatformWorker = PLATFORM_WEB_WORKER;var Serializer = function () {
 
   Serializer.encode = function encode(value, encoders) {
     if (encoders === void 0) {
-      encoders = [encodeJson];
+      encoders = [_encodeJson];
     }
 
     return encoders.reduce(function (p, c) {
@@ -992,7 +992,7 @@ var isPlatformWorker = PLATFORM_WEB_WORKER;var Serializer = function () {
 
   Serializer.decode = function decode(value, decoders) {
     if (decoders === void 0) {
-      decoders = [decodeJson];
+      decoders = [_decodeJson];
     }
 
     return decoders.reduce(function (p, c) {
@@ -1000,9 +1000,26 @@ var isPlatformWorker = PLATFORM_WEB_WORKER;var Serializer = function () {
     }, value);
   };
 
+  Serializer.encodeJson = function encodeJson(value) {
+    return this.encode(value, [_encodeJson]);
+  };
+
+  Serializer.decodeJson = function decodeJson(value) {
+    return this.decode(value, [_decodeJson]);
+  };
+
+  Serializer.encodeBase64 = function encodeBase64(value) {
+    return this.encode(value, [_encodeJson, _encodeBase]);
+  };
+
+  Serializer.decodeBase64 = function decodeBase64(value) {
+    return this.decode(value, [_decodeBase, _decodeJson]);
+  };
+
   return Serializer;
 }();
-function encodeJson(value, circularRef, space) {
+
+function _encodeJson(value, circularRef, space) {
   var decoded;
 
   try {
@@ -1025,10 +1042,11 @@ function encodeJson(value, circularRef, space) {
 }
 function encodeJsonWithOptions(circularRef, space) {
   return function (value) {
-    return encodeJson(value, circularRef, space);
+    return _encodeJson(value, circularRef, space);
   };
 }
-function decodeJson(value) {
+
+function _decodeJson(value) {
   var decoded;
 
   if (value) {
@@ -1039,11 +1057,29 @@ function decodeJson(value) {
 
   return decoded;
 }
-function encodeBase64(value) {
-  return isPlatformBrowser ? atob(value) : Buffer.from(value).toString('base64');
+
+function _encodeBase(value) {
+  var encoded;
+
+  try {
+    encoded = isPlatformBrowser ? btoa(value) : Buffer.from(value).toString('base64');
+  } catch (error) {
+    encoded = value;
+  }
+
+  return encoded;
 }
-function decodeBase64(value) {
-  return isPlatformBrowser ? btoa(value) : Buffer.from(value, 'base64').toString();
+
+function _decodeBase(value) {
+  var decoded;
+
+  try {
+    decoded = isPlatformBrowser ? atob(value) : Buffer.from(value, 'base64').toString();
+  } catch (error) {
+    decoded = value;
+  }
+
+  return decoded;
 }var JsonPipe = function (_Pipe) {
   _inheritsLoose(JsonPipe, _Pipe);
 
@@ -1956,14 +1992,14 @@ CoreModule.meta = {
 
     if (node && node.firstChild) {
       var json = node.firstChild.nodeValue;
-      return json ? Serializer.decode(json, [decodeJson]) : undefined;
+      return json ? Serializer.decode(json, [_decodeJson]) : undefined;
     } else {
       return undefined;
     }
   };
 
   TransferService.set = function set(key, value) {
-    var json = Serializer.encode(value, [encodeJson]);
+    var json = Serializer.encode(value, [_encodeJson]);
 
     if (!json) {
       return;
@@ -2013,4 +2049,4 @@ function optionsToKey(v, s) {
   }
 
   return s;
-}exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.decodeBase64=decodeBase64;exports.decodeJson=decodeJson;exports.encodeBase64=encodeBase64;exports.encodeJson=encodeJson;exports.encodeJsonWithOptions=encodeJsonWithOptions;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;return exports;}({},rxjs,rxjs.operators));
+}exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.decodeBase64=_decodeBase;exports.decodeJson=_decodeJson;exports.encodeBase64=_encodeBase;exports.encodeJson=_encodeJson;exports.encodeJsonWithOptions=encodeJsonWithOptions;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;return exports;}({},rxjs,rxjs.operators));

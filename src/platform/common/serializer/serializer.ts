@@ -74,12 +74,12 @@ export function decodeJson(value: string): any {
 	return decoded;
 }
 
-export function encodeBase64(value: any): string | undefined {
+export function encodeBase64(value: string): string | undefined {
 	let encoded: string | undefined;
 	try {
 		encoded = isPlatformBrowser ? btoa(value) : Buffer.from(value).toString('base64');
 	} catch (error) {
-		encoded = typeof value === 'string' ? value : undefined;
+		encoded = value;
 	}
 	return encoded;
 }
@@ -89,7 +89,7 @@ export function decodeBase64(value: string): any {
 	try {
 		decoded = isPlatformBrowser ? atob(value) : Buffer.from(value, 'base64').toString();
 	} catch (error) {
-		decoded = typeof value === 'string' ? value : undefined;
+		decoded = value;
 	}
 	return decoded;
 }
