@@ -21,6 +21,7 @@ export { default as Browser } from './platform/browser';
 export { getLocationComponents, ILocationInit } from './platform/common/location/location';
 export { decodeBase64, decodeJson, default as Serializer, encodeBase64, encodeJson, encodeJsonWithOptions } from './platform/common/serializer/serializer';
 export { default as TransferService, optionsToKey } from './platform/common/transfer/transfer.service';
+export { WINDOW } from './platform/common/window/window';
 export { default as Platform, isPlatformBrowser, isPlatformServer, isPlatformWorker, PLATFORM_BROWSER, PLATFORM_JS_DOM, PLATFORM_NODE, PLATFORM_WEB_WORKER } from './platform/platform';
 export { default as SrcDirective } from './src/src.directive';
 export { default as StyleDirective } from './style/style.directive';

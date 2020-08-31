@@ -1,4 +1,8 @@
 import { isPlatformBrowser } from "../../platform";
+/**
+ * @example Serializer.encode(value, [encodeJson, encodeUriComponent, encodeBase64]);
+ * @example Serializer.decode(value, [decodeBase64, decodeUriComponent, decodeJson]);
+ */
 export default class Serializer {
     static encode(value, encoders = [encodeJson]) {
         return encoders.reduce((p, c) => c(p), value);

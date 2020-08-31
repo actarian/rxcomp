@@ -2,6 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeBase64 = exports.encodeBase64 = exports.decodeJson = exports.encodeJsonWithOptions = exports.encodeJson = void 0;
 var platform_1 = require("../../platform");
+/**
+ * @example Serializer.encode(value, [encodeJson, encodeUriComponent, encodeBase64]);
+ * @example Serializer.decode(value, [decodeBase64, decodeUriComponent, decodeJson]);
+ */
 var Serializer = /** @class */ (function () {
     function Serializer() {
     }

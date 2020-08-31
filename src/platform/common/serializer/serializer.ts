@@ -1,34 +1,36 @@
 import { isPlatformBrowser } from "../../platform";
 
+/**
+ * @example Serializer.encode(value, [encodeJson, encodeUriComponent, encodeBase64]);
+ * @example Serializer.decode(value, [decodeBase64, decodeUriComponent, decodeJson]);
+ */
 export default class Serializer {
-	// static encode(value: any, encoders: ((from: any) => any)[] = [encodeJson, encodeBase64, encodeUriComponent]): any {
-	static encode<T>(value: any, encoders: ((from: any) => any)[]): T | undefined;
+	static encode<T>(value: any, encoders: ((from: any) => any)[]): T;
 	static encode(value: any, encoders: ((from: any) => any)[] = [encodeJson]): any {
 		return encoders.reduce((p, c) => c(p), value);
 	}
 
-	// static decode(value: any, decoders: ((from: any) => any)[] = [decodeUriComponent, decodeBase64, decodeJson]): any {
-	static decode<T>(value: any, decoders: ((from: any) => any)[]): T | undefined;
+	static decode<T>(value: any, decoders: ((from: any) => any)[]): T;
 	static decode(value: any, decoders: ((from: any) => any)[] = [decodeJson]): any {
 		return decoders.reduce((p, c) => c(p), value);
 	}
 
-	static encodeJson<T>(value: any): T | undefined;
+	static encodeJson<T>(value: any): T;
 	static encodeJson(value: any): any {
 		return this.encode(value, [encodeJson]);
 	}
 
-	static decodeJson<T>(value: any): T | undefined;
+	static decodeJson<T>(value: any): T;
 	static decodeJson(value: any): any {
 		return this.decode(value, [decodeJson]);
 	}
 
-	static encodeBase64<T>(value: any): T | undefined;
+	static encodeBase64<T>(value: any): T;
 	static encodeBase64(value: any): any {
 		return this.encode(value, [encodeJson, encodeBase64]);
 	}
 
-	static decodeBase64<T>(value: any): T | undefined;
+	static decodeBase64<T>(value: any): T;
 	static decodeBase64(value: any): any {
 		return this.decode(value, [decodeBase64, decodeJson]);
 	}
@@ -74,8 +76,8 @@ export function decodeJson(value: string): any {
 	return decoded;
 }
 
-export function encodeBase64(value: string): string | undefined {
-	let encoded: string | undefined;
+export function encodeBase64(value: string): string {
+	let encoded: string;
 	try {
 		encoded = isPlatformBrowser ? btoa(value) : Buffer.from(value).toString('base64');
 	} catch (error) {
@@ -84,8 +86,8 @@ export function encodeBase64(value: string): string | undefined {
 	return encoded;
 }
 
-export function decodeBase64(value: string): any {
-	let decoded: any;
+export function decodeBase64(value: string): string {
+	let decoded: string;
 	try {
 		decoded = isPlatformBrowser ? atob(value) : Buffer.from(value, 'base64').toString();
 	} catch (error) {

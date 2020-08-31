@@ -46,11 +46,12 @@ var Module = /** @class */ (function () {
             // injecting custom properties
             if (inject) {
                 Object.keys(inject).forEach(function (key) {
+                    // console.log('Module.makeInstance', key, inject[key]);
                     Object.defineProperty(instance_1, key, {
                         value: inject[key],
-                        enumerable: true,
                         configurable: false,
-                        writable: false,
+                        enumerable: false,
+                        writable: true,
                     });
                 });
             }

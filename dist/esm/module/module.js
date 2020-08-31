@@ -40,11 +40,12 @@ export default class Module {
             // injecting custom properties
             if (inject) {
                 Object.keys(inject).forEach(key => {
+                    // console.log('Module.makeInstance', key, inject[key]);
                     Object.defineProperty(instance, key, {
                         value: inject[key],
-                        enumerable: true,
                         configurable: false,
-                        writable: false,
+                        enumerable: false,
+                        writable: true,
                     });
                 });
             }

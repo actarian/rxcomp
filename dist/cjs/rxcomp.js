@@ -60,6 +60,8 @@ Object.defineProperty(exports, "encodeJsonWithOptions", { enumerable: true, get:
 var transfer_service_1 = require("./platform/common/transfer/transfer.service");
 Object.defineProperty(exports, "TransferService", { enumerable: true, get: function () { return transfer_service_1.default; } });
 Object.defineProperty(exports, "optionsToKey", { enumerable: true, get: function () { return transfer_service_1.optionsToKey; } });
+var window_1 = require("./platform/common/window/window");
+Object.defineProperty(exports, "WINDOW", { enumerable: true, get: function () { return window_1.WINDOW; } });
 var platform_1 = require("./platform/platform");
 Object.defineProperty(exports, "Platform", { enumerable: true, get: function () { return platform_1.default; } });
 Object.defineProperty(exports, "isPlatformBrowser", { enumerable: true, get: function () { return platform_1.isPlatformBrowser; } });
