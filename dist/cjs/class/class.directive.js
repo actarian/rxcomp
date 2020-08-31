@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = require("tslib");
-// import Factory, { ExpressionFunction } from '../core/factory';
 var directive_1 = tslib_1.__importDefault(require("../core/directive"));
 var factory_1 = require("../core/factory");
 var ClassDirective = /** @class */ (function (_super) {
@@ -38,10 +37,10 @@ var ClassDirective = /** @class */ (function (_super) {
         node.setAttribute('class', keys.join(' '));
         // console.log('ClassDirective.onChanges', keys);
     };
+    ClassDirective.meta = {
+        selector: "[[class]]",
+        inputs: ['class']
+    };
     return ClassDirective;
 }(directive_1.default));
 exports.default = ClassDirective;
-ClassDirective.meta = {
-    selector: "[[class]]",
-    inputs: ['class']
-};

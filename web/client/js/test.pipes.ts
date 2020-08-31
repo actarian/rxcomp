@@ -1,4 +1,4 @@
-import { Browser, Component, CoreModule, Module, Pipe } from '../../src/rxcomp';
+import { Browser, Component, CoreModule, Module, Pipe } from '../../../src/rxcomp';
 
 class RootComponent extends Component {
 	time: Date = new Date();

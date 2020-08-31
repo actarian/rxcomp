@@ -1,4 +1,4 @@
-import { Component, Factory } from '../../../src/rxcomp';
+import { Component, Factory } from '../../../../src/rxcomp';
 import { accent, background, foreground } from '../colors/colors';
 
 export default class TodoItemComponent extends Component {

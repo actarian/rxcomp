@@ -1,4 +1,5 @@
 import Directive from '../core/directive';
+import { IFactoryMeta } from '../core/types';
 export default class ClassDirective extends Directive {
     class: {
         [key: string]: string;
@@ -6,4 +7,5 @@ export default class ClassDirective extends Directive {
     keys: string[];
     onInit(): void;
     onChanges(): void;
+    static meta: IFactoryMeta;
 }

@@ -2,18 +2,15 @@ import Component from '../core/component';
 import { IFactoryMeta } from '../core/types';
 
 export default class JsonComponent extends Component {
-
 	active: boolean = false;
-
 	onToggle() {
 		this.active = !this.active;
 		this.pushChanges();
 	}
-
 	static meta: IFactoryMeta = {
 		selector: 'json-component',
 		inputs: ['item'],
-		template: `
+		template: /* html */`
 		<div class="rxc-block">
 			<div class="rxc-head">
 				<span class="rxc-head__title" (click)="onToggle()">

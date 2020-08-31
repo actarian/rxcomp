@@ -181,7 +181,6 @@ var Module = /** @class */ (function () {
             return _this.getInstance(node);
         });
     };
-    // reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T): T;
     Module.prototype.parseTextNode = function (node, instance) {
         var _this = this;
         var expressions = node.nodeExpressions;

@@ -1,16 +1,14 @@
 import Factory, { getContext } from '../core/factory';
 import Structure from '../core/structure';
-import { ExpressionFunction, IComment, IContext, IElement, IExpressionToken } from '../core/types';
+import { ExpressionFunction, IComment, IContext, IElement, IExpressionToken, IFactoryMeta } from '../core/types';
 import Module from '../module/module';
 import ForItem from './for.item';
 
 export default class ForStructure extends Structure {
-
 	instances: Factory[] = [];
 	forend?: IComment;
 	token?: IExpressionToken;
 	forFunction?: ExpressionFunction;
-
 	onInit() {
 		const { module, node } = getContext(this);
 		const forbegin: IComment = document.createComment(`*for begin`);
@@ -23,7 +21,6 @@ export default class ForStructure extends Structure {
 		const token = this.token = this.getExpressionToken(expression);
 		this.forFunction = module.makeFunction(token.iterable);
 	}
-
 	onChanges(changes: Factory | Window) {
 		const context: IContext = getContext(this);
 		const module: Module = context.module;
@@ -81,7 +78,6 @@ export default class ForStructure extends Structure {
 		this.instances.length = array.length;
 		// console.log('ForStructure', this.instances, token);
 	}
-
 	getExpressionToken(expression: string): IExpressionToken {
 		if (expression === null) {
 			throw new Error('invalid for');
@@ -107,8 +103,7 @@ export default class ForStructure extends Structure {
 		}
 		return { key, value, iterable };
 	}
+	static meta: IFactoryMeta = {
+		selector: '[*for]',
+	};
 }
-
-ForStructure.meta = {
-	selector: '[*for]',
-};

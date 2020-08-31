@@ -1,14 +1,13 @@
 ﻿{
   "targets": {
     "browser": {
-      "compile": [
-        {
-          "input": "test/*.html",
+      "compile": [{
+          "input": "web/client/*.html",
           "output": "docs/",
           "minify": true
         },
         {
-          "input": "test/css/main.scss",
+          "input": "web/client/css/main.scss",
           "output": "docs/css/main.css",
           "minify": true
         },
@@ -23,7 +22,7 @@
           "minify": true
         },
         {
-          "input": "test/js/main.ts",
+          "input": "web/client/js/main.ts",
           "output": {
             "file": "docs/js/main.js",
             "format": "iife"
@@ -35,7 +34,7 @@
           "minify": true
         },
         {
-          "input": "test/js/test.for.ts",
+          "input": "web/client/js/test.for.ts",
           "output": {
             "file": "docs/js/test.for.js",
             "format": "iife"
@@ -47,7 +46,7 @@
           "minify": true
         },
         {
-          "input": "test/js/test.parsing.ts",
+          "input": "web/client/js/test.parsing.ts",
           "output": {
             "file": "docs/js/test.parsing.js",
             "format": "iife"
@@ -59,7 +58,7 @@
           "minify": true
         },
         {
-          "input": "test/js/test.pipes.ts",
+          "input": "web/client/js/test.pipes.ts",
           "output": {
             "file": "docs/js/test.pipes.js",
             "format": "iife"
@@ -71,7 +70,7 @@
           "minify": true
         },
         {
-          "input": "test/js/test.scope.ts",
+          "input": "web/client/js/test.scope.ts",
           "output": {
             "file": "docs/js/test.scope.js",
             "format": "iife"
@@ -86,11 +85,9 @@
       "bundle": []
     },
     "dist": {
-      "compile": [
-        {
+      "compile": [{
           "input": "src/rxcomp.ts",
-          "output": [
-            {
+          "output": [{
               "file": "dist/cjs/",
               "format": "cjs"
             },

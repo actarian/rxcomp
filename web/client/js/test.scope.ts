@@ -1,6 +1,6 @@
 import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { Browser, Component, CoreModule, Directive, ErrorInterceptors, Factory, getContext, IErrorHandler, IErrorInterceptor, Module, StyleDirective } from '../../src/rxcomp';
+import { Browser, Component, CoreModule, Directive, ErrorInterceptors, Factory, getContext, IErrorHandler, IErrorInterceptor, Module, StyleDirective } from '../../../src/rxcomp';
 
 class CustomErrorInterceptor implements IErrorInterceptor {
 	intercept(error: Error, next: IErrorHandler): Observable<Error | void> {

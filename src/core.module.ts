@@ -32,7 +32,6 @@ const pipes: typeof Pipe[] = [
 ];
 
 export default class CoreModule extends Module {
-
 	constructor() {
 		super();
 		// console.log('CoreModule');
@@ -40,7 +39,6 @@ export default class CoreModule extends Module {
 			takeUntil(this.unsubscribe$),
 		).subscribe();
 	}
-
 	static meta = {
 		declarations: [
 			...factories,
@@ -51,5 +49,4 @@ export default class CoreModule extends Module {
 			...pipes,
 		]
 	};
-
 }

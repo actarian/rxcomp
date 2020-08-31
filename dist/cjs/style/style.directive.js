@@ -35,10 +35,10 @@ var StyleDirective = /** @class */ (function (_super) {
         this.previousStyle = style;
         // console.log('StyleDirective.onChanges', style);
     };
+    StyleDirective.meta = {
+        selector: "[[style]]",
+        inputs: ['style']
+    };
     return StyleDirective;
 }(directive_1.default));
 exports.default = StyleDirective;
-StyleDirective.meta = {
-    selector: "[[style]]",
-    inputs: ['style']
-};

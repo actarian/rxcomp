@@ -1,4 +1,4 @@
-import { CoreModule, Module } from '../../src/rxcomp';
+import { CoreModule, Module } from '../../../src/rxcomp';
 import AppComponent from './app.component';
 import DatePipe from './date/date.pipe';
 import TodoItemComponent from './todo-item/todo-item.component';

@@ -1,8 +1,8 @@
 import Directive from '../core/directive';
 import { getContext } from '../core/factory';
+import { IFactoryMeta } from '../core/types';
 
 export default class HrefDirective extends Directive {
-
 	set href(href: string) {
 		if (this.href_ !== href) {
 			this.href_ = href;
@@ -10,21 +10,12 @@ export default class HrefDirective extends Directive {
 			href ? node.setAttribute('href', href) : node.removeAttribute('href');
 		}
 	}
-
 	get href(): string {
 		return this.href_;
 	}
-
-	/*
-	onChanges() {
-		const { node } = getContext(this);
-		node.setAttribute('href', this.href || '');
-	}
-	*/
-
+	static meta: IFactoryMeta = {
+		selector: '[[href]]',
+		inputs: ['href'],
+	};
 }
 
-HrefDirective.meta = {
-	selector: '[[href]]',
-	inputs: ['href'],
-};

@@ -107,9 +107,9 @@ var ForStructure = /** @class */ (function (_super) {
         }
         return { key: key, value: value, iterable: iterable };
     };
+    ForStructure.meta = {
+        selector: '[*for]',
+    };
     return ForStructure;
 }(structure_1.default));
 exports.default = ForStructure;
-ForStructure.meta = {
-    selector: '[*for]',
-};

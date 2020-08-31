@@ -1,14 +1,12 @@
 import Factory, { getContext } from '../core/factory';
 import Structure from '../core/structure';
-import { ExpressionFunction, IComment, IElement } from '../core/types';
+import { ExpressionFunction, IComment, IElement, IFactoryMeta } from '../core/types';
 
 export default class IfStructure extends Structure {
-
 	ifend?: IComment;
 	ifFunction?: ExpressionFunction;
 	clonedNode?: IElement;
 	element?: IElement;
-
 	onInit() {
 		const { module, node } = getContext(this);
 		const ifbegin: IComment = this.ifbegin = document.createComment(`*if begin`);
@@ -24,7 +22,6 @@ export default class IfStructure extends Structure {
 		this.element = clonedNode.cloneNode(true) as IElement;
 		// console.log('IfStructure.expression', expression);
 	}
-
 	onChanges(changes: Factory | Window) {
 		const { module } = getContext(this);
 		// console.log('IfStructure.onChanges', changes);
@@ -44,9 +41,7 @@ export default class IfStructure extends Structure {
 			}
 		}
 	}
-
-	static meta = {
+	static meta: IFactoryMeta = {
 		selector: '[*if]',
 	};
-
 }

@@ -1,6 +1,6 @@
 import { interval } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
-import { Browser, Component, CoreModule, Module, Pipe } from '../../src/rxcomp';
+import { Browser, Component, CoreModule, Module, Pipe } from '../../../src/rxcomp';
 
 // component
 class RootComponent extends Component {

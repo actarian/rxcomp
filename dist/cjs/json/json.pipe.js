@@ -11,9 +11,9 @@ var JsonPipe = /** @class */ (function (_super) {
     JsonPipe.transform = function (value) {
         return serializer_1.default.encode(value, [serializer_1.encodeJsonWithOptions('#ref', 2)]);
     };
+    JsonPipe.meta = {
+        name: 'json',
+    };
     return JsonPipe;
 }(pipe_1.default));
 exports.default = JsonPipe;
-JsonPipe.meta = {
-    name: 'json',
-};

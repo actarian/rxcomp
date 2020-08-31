@@ -1,8 +1,8 @@
 import Directive from '../core/directive';
 import { getContext } from '../core/factory';
+import { IFactoryMeta } from '../core/types';
 
 export default class SrcDirective extends Directive {
-
 	set src(src: string) {
 		if (this.src_ !== src) {
 			this.src_ = src;
@@ -10,27 +10,11 @@ export default class SrcDirective extends Directive {
 			src ? node.setAttribute('src', src) : node.removeAttribute('src');
 		}
 	}
-
 	get src(): string {
 		return this.src_;
 	}
-
-	/*
-	onChanges() {
-		const { node } = getContext(this);
-		if (this.src) {
-			if (node.getAttribute('src') !== this.src) {
-				node.setAttribute('src', this.src);
-			}
-		} else {
-			node.removeAttribute('src');
-		}
-	}
-	*/
-
+	static meta: IFactoryMeta = {
+		selector: '[[src]]',
+		inputs: ['src'],
+	};
 }
-
-SrcDirective.meta = {
-	selector: '[[src]]',
-	inputs: ['src'],
-};

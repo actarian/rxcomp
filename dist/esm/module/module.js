@@ -182,7 +182,6 @@ export default class Module {
             return this.getInstance(node);
         });
     }
-    // reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T): T;
     parseTextNode(node, instance) {
         let expressions = node.nodeExpressions;
         if (!expressions) {

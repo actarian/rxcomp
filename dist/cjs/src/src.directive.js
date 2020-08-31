@@ -22,10 +22,10 @@ var SrcDirective = /** @class */ (function (_super) {
         enumerable: false,
         configurable: true
     });
+    SrcDirective.meta = {
+        selector: '[[src]]',
+        inputs: ['src'],
+    };
     return SrcDirective;
 }(directive_1.default));
 exports.default = SrcDirective;
-SrcDirective.meta = {
-    selector: '[[src]]',
-    inputs: ['src'],
-};

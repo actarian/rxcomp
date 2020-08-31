@@ -1,5 +1,6 @@
 import Directive from '../core/directive';
 import { getContext } from '../core/factory';
+import { IFactoryMeta } from '../core/types';
 
 export default class StyleDirective extends Directive {
 
@@ -33,10 +34,8 @@ export default class StyleDirective extends Directive {
 		this.previousStyle = style;
 		// console.log('StyleDirective.onChanges', style);
 	}
-
+	static meta: IFactoryMeta = {
+		selector: `[[style]]`,
+		inputs: ['style']
+	};
 }
-
-StyleDirective.meta = {
-	selector: `[[style]]`,
-	inputs: ['style']
-};

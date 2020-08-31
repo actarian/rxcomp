@@ -22,10 +22,10 @@ var HrefDirective = /** @class */ (function (_super) {
         enumerable: false,
         configurable: true
     });
+    HrefDirective.meta = {
+        selector: '[[href]]',
+        inputs: ['href'],
+    };
     return HrefDirective;
 }(directive_1.default));
 exports.default = HrefDirective;
-HrefDirective.meta = {
-    selector: '[[href]]',
-    inputs: ['href'],
-};

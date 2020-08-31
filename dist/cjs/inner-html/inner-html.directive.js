@@ -22,10 +22,10 @@ var InnerHtmlDirective = /** @class */ (function (_super) {
         enumerable: false,
         configurable: true
     });
+    InnerHtmlDirective.meta = {
+        selector: "[innerHTML]",
+        inputs: ['innerHTML'],
+    };
     return InnerHtmlDirective;
 }(directive_1.default));
 exports.default = InnerHtmlDirective;
-InnerHtmlDirective.meta = {
-    selector: "[innerHTML]",
-    inputs: ['innerHTML'],
-};

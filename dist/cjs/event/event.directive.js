@@ -30,9 +30,9 @@ var EventDirective = /** @class */ (function (_super) {
         }
         // console.log('EventDirective.onInit', 'selector', selector, 'event', event);
     };
+    EventDirective.meta = {
+        selector: "[(" + EVENTS.join(')],[(') + ")]",
+    };
     return EventDirective;
 }(directive_1.default));
 exports.default = EventDirective;
-EventDirective.meta = {
-    selector: "[(" + EVENTS.join(')],[(') + ")]",
-};

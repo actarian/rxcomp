@@ -1,19 +1,16 @@
-// import Factory, { ExpressionFunction } from '../core/factory';
 import Directive from '../core/directive';
 import { getContext } from '../core/factory';
+import { IFactoryMeta } from '../core/types';
 
 export default class ClassDirective extends Directive {
-
 	class: { [key: string]: string } | string | null = '';
 	keys: string[] = [];
-
 	onInit() {
 		const { node } = getContext(this);
 		node.classList.forEach((value: string) => {
 			this.keys.push(value);
 		});
 	}
-
 	onChanges() {
 		const { node } = getContext(this);
 		let keys: string[] = [];
@@ -32,10 +29,8 @@ export default class ClassDirective extends Directive {
 		node.setAttribute('class', keys.join(' '));
 		// console.log('ClassDirective.onChanges', keys);
 	}
-
+	static meta: IFactoryMeta = {
+		selector: `[[class]]`,
+		inputs: ['class']
+	};
 }
-
-ClassDirective.meta = {
-	selector: `[[class]]`,
-	inputs: ['class']
-};

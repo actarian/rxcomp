@@ -12,7 +12,7 @@ export default class JsonComponent extends Component {
 JsonComponent.meta = {
     selector: 'json-component',
     inputs: ['item'],
-    template: `
+    template: /* html */ `
 		<div class="rxc-block">
 			<div class="rxc-head">
 				<span class="rxc-head__title" (click)="onToggle()">

@@ -5,18 +5,14 @@ export const CONTEXTS: { [key: number]: IContext } = {};
 export const NODES: { [key: number]: IContext[] } = {};
 
 export default class Factory {
-
 	static meta: IFactoryMeta;
-
 	rxcompId: number = -1;
 	unsubscribe$: Subject<void> = new Subject();
 	changes$: ReplaySubject<Factory> = new ReplaySubject(1);
-
 	onInit(): void { }
 	onChanges(changes: Factory | Window): void { }
 	onView(): void { }
 	onDestroy(): void { }
-
 	pushChanges(): void {
 		const { module } = getContext(this);
 		if (module.instances) {
@@ -24,9 +20,7 @@ export default class Factory {
 			this.onView();
 		}
 	}
-
 	[key: string]: any; // extensible object
-
 	constructor(...args: any[]) { }
 }
 

@@ -11,12 +11,10 @@ import { isPlatformBrowser } from '../platform/platform';
 let ID: number = 0;
 
 export default class Module {
-
 	meta?: IModuleParsedMeta;
 	instances?: Factory[];
 	unsubscribe$: Subject<void> = new Subject();
 	static forRoot?: (...args: any[]) => typeof Module;
-
 	public compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode: IElement;
 		const instances: Factory[] = Module.querySelectorsAll(node, this.meta!.selectors, []).map((match: ISelectorResult) => {
@@ -33,7 +31,6 @@ export default class Module {
 		// console.log('compile', instances, node, parentInstance);
 		return instances;
 	}
-
 	public makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[], inject?: { [key: string]: any }): Factory | undefined {
 		if (parentInstance || node.parentNode) {
 			const meta: IFactoryMeta = factory.meta;
@@ -101,7 +98,6 @@ export default class Module {
 			return undefined;
 		}
 	}
-
 	public makeFunction(expression: string, params: string[] = ['$instance']): ExpressionFunction {
 		if (expression) {
 			expression = Module.parseExpression(expression);
@@ -124,17 +120,14 @@ export default class Module {
 			return () => { return null; };
 		}
 	}
-
 	public nextError(error: Error, instance: Factory, expression: string, params: any[]): void {
 		const expressionError: ExpressionError = new ExpressionError(error, this, instance, expression, params);
 		nextError$.next(expressionError);
 	}
-
 	public resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any {
 		// console.log(expression, parentInstance, payload);
 		return expression.apply(parentInstance, [payload, this]);
 	}
-
 	public parse(node: IElement, instance: Factory): void {
 		for (let i: number = 0; i < node.childNodes.length; i++) {
 			const child: ChildNode = node.childNodes[i];
@@ -150,7 +143,6 @@ export default class Module {
 			}
 		}
 	}
-
 	public remove(node: Node, keepInstance?: Factory): Node {
 		const keepContext: IContext | undefined = keepInstance ? getContext(keepInstance) : undefined;
 		Module.traverseDown(node, (node: Node) => {
@@ -164,20 +156,17 @@ export default class Module {
 		});
 		return node;
 	}
-
 	public destroy(): void {
 		this.unsubscribe$.next();
 		this.unsubscribe$.complete();
 		this.remove(this.meta!.node);
 		this.meta!.node.innerHTML = this.meta!.nodeInnerHTML;
 	}
-
 	protected makeContext(instance: Factory, parentInstance: Factory | Window, node: IElement, selector: string): IContext {
 		const context: IContext = Module.makeContext(this, instance, parentInstance, node, instance.constructor as typeof Factory, selector);
 		// console.log('Module.makeContext', context, context.instance, context.node);
 		return context;
 	}
-
 	protected getInstance(node: HTMLElement | Document): Factory | Window | undefined {
 		if (node === document) {
 			return (isPlatformBrowser ? window : global) as Window;
@@ -189,15 +178,11 @@ export default class Module {
 			return undefined;
 		}
 	}
-
 	protected getParentInstance(node: Node | null): Factory | Window {
 		return Module.traverseUp(node, (node: Node) => {
 			return this.getInstance(node as HTMLElement);
 		});
 	}
-
-	// reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T): T;
-
 	protected parseTextNode(node: IText, instance: Factory): void {
 		let expressions: (ExpressionFunction | string)[] | undefined = node.nodeExpressions;
 		if (!expressions) {
@@ -225,12 +210,10 @@ export default class Module {
 			node.nodeExpressions = expressions;
 		}
 	}
-
 	protected pushFragment(nodeValue: string, from: number, to: number, expressions: (ExpressionFunction | string)[]): void {
 		const fragment: string = nodeValue.substring(from, to);
 		expressions.push(fragment);
 	}
-
 	protected parseTextNodeExpression(nodeValue: string): (ExpressionFunction | string)[] {
 		const expressions: (ExpressionFunction | string)[] = [];
 		const regex: RegExp = /\{{2}((([^{}])|(\{([^{}]|(\{.*?\}))+?\}))*?)\}{2}/g;
@@ -255,7 +238,6 @@ export default class Module {
 			return [];
 		}
 	}
-
 	protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void {
 		if (meta.hosts) {
 			Object.keys(meta.hosts).forEach((key: string) => {
@@ -264,7 +246,6 @@ export default class Module {
 			});
 		}
 	}
-
 	protected makeInput(instance: Factory, key: string): ExpressionFunction | null {
 		const { node } = getContext(instance);
 		let input: ExpressionFunction | null = null,
@@ -292,7 +273,6 @@ export default class Module {
 		}
 		return input;
 	}
-
 	protected makeInputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
 		const inputs: { [key: string]: ExpressionFunction } = {};
 		if (meta.inputs) {
@@ -305,7 +285,6 @@ export default class Module {
 		}
 		return inputs;
 	}
-
 	protected makeOutput(instance: Factory, key: string): Observable<any> {
 		const context: IContext = getContext(instance);
 		const node: IElement = context.node;
@@ -326,7 +305,6 @@ export default class Module {
 		instance[key] = output$;
 		return output$;
 	}
-
 	protected makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: Observable<any> } {
 		const outputs: { [key: string]: Observable<any> } = {};
 		if (meta.outputs) {
@@ -339,7 +317,6 @@ export default class Module {
 		}
 		return outputs;
 	}
-
 	protected resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
 		const context: IContext = getContext(instance);
 		const parentInstance: Factory | Window = context.parentInstance;
@@ -350,7 +327,6 @@ export default class Module {
 			instance[key] = value;
 		}
 	}
-
 	protected static parseExpression(expression: string): string {
 		const l: string = '┌';
 		const r: string = '┘';
@@ -366,7 +342,6 @@ export default class Module {
 		});
 		return Module.parseOptionalChaining(expression);
 	}
-
 	protected static parsePipes(expression: string): string {
 		const l: string = '┌';
 		const r: string = '┘';
@@ -381,7 +356,6 @@ export default class Module {
 		}
 		return expression;
 	}
-
 	protected static parsePipeParams(expression: string): string[] {
 		const segments: string[] = [];
 		let i: number = 0,
@@ -411,7 +385,6 @@ export default class Module {
 		}
 		return segments;
 	}
-
 	protected static parseOptionalChaining(expression: string): string {
 		const regex: RegExp = /(\w+(\?\.))+([\.|\w]+)/g;
 		let previous: string;
@@ -426,7 +399,6 @@ export default class Module {
 		});
 		return expression;
 	}
-
 	protected static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: IElement, factory: typeof Factory, selector: string): IContext {
 		instance.rxcompId = ++ID;
 		const context: IContext = { module, instance, parentInstance, node, factory, selector };
@@ -436,7 +408,6 @@ export default class Module {
 		CONTEXTS[instance.rxcompId] = context;
 		return context;
 	}
-
 	protected static deleteContext(id: number, keepContext: IContext | undefined): IContext[] {
 		const keepContexts: IContext[] = [];
 		const nodeContexts: IContext[] = NODES[id];
@@ -460,7 +431,6 @@ export default class Module {
 		}
 		return keepContexts;
 	}
-
 	protected static matchSelectors(node: HTMLElement, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
 		for (let i: number = 0; i < selectors.length; i++) {
 			const selectorResult: ISelectorResult | false = selectors[i](node);
@@ -478,7 +448,6 @@ export default class Module {
 		}
 		return results;
 	}
-
 	protected static querySelectorsAll(node: Node, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
 		if (node.nodeType === 1) {
 			const selectorResults: ISelectorResult[] = this.matchSelectors(node as HTMLElement, selectors, []);
@@ -494,7 +463,6 @@ export default class Module {
 		}
 		return results;
 	}
-
 	protected static traverseUp(node: Node | null, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
@@ -505,7 +473,6 @@ export default class Module {
 		}
 		return this.traverseUp(node.parentNode, callback, i + 1);
 	}
-
 	protected static traverseDown(node: Node | null, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
@@ -524,7 +491,6 @@ export default class Module {
 		}
 		return result;
 	}
-
 	protected static traversePrevious(node: Node | null, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
@@ -535,7 +501,6 @@ export default class Module {
 		}
 		return this.traversePrevious(node.previousSibling, callback, i + 1);
 	}
-
 	protected static traverseNext(node: Node | null, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {
 			return;
@@ -546,7 +511,6 @@ export default class Module {
 		}
 		return this.traverseNext(node.nextSibling, callback, i + 1);
 	}
-
 	static meta: IModuleMeta;
 }
 
@@ -574,7 +538,6 @@ export function getParsableContextByNode(node: Node): IContext | undefined {
 	}
 	return context;
 }
-
 export function getContextByNode(node: Node): IContext | undefined {
 	let context: IContext | undefined = getParsableContextByNode(node);
 	if (context && context.factory.prototype instanceof Structure) {
@@ -582,7 +545,6 @@ export function getContextByNode(node: Node): IContext | undefined {
 	}
 	return context;
 }
-
 export function getHost(instance: Factory, factory: typeof Factory, node: IElement): Factory | undefined {
 	if (!node) {
 		node = getContext(instance).node;

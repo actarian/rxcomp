@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Component, getContext } from '../../src/rxcomp';
+import { Component, getContext } from '../../../src/rxcomp';
 import StoreService from './store/store.service';
 import ITodoItem from './todo-item/todo-item';
 

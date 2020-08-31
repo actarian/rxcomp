@@ -1,6 +1,6 @@
 import { interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Browser, Component, CoreModule, Module } from '../../src/rxcomp';
+import { Browser, Component, CoreModule, Module } from '../../../src/rxcomp';
 import DatePipe from './date/date.pipe';
 
 // !!! todo: check {{ item | json }} vs [innerHTML]="item | json"

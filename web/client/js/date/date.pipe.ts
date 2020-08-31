@@ -1,4 +1,4 @@
-import { Pipe } from "../../../src/rxcomp";
+import { Pipe } from "../../../../src/rxcomp";
 
 export default class DatePipe extends Pipe {
 

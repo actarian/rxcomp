@@ -178,8 +178,8 @@ function getContext(instance) {
     var _getContext = getContext(this),
         node = _getContext.node;
 
-    Array.prototype.slice.call(node.classList).forEach(function (x) {
-      return _this2.keys.push(x);
+    node.classList.forEach(function (value) {
+      _this2.keys.push(value);
     });
   };
 
@@ -1098,9 +1098,9 @@ var Module = function () {
         Object.keys(inject).forEach(function (key) {
           Object.defineProperty(instance, key, {
             value: inject[key],
-            enumerable: true,
             configurable: false,
-            writable: false
+            enumerable: false,
+            writable: true
           });
         });
       }
