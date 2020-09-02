@@ -60,12 +60,18 @@ var ForStructure = /** @class */ (function (_super) {
                     this.forend.parentNode.insertBefore(clonedNode, this.forend);
                     // !!! todo: check context.parentInstance
                     var args = [token.key, key, token.value, value, i, total, context.parentInstance];
-                    var instance = module.makeInstance(clonedNode, for_item_1.default, context.selector, context.parentInstance, args);
+                    // console.log('ForStructure.makeInstance.ForItem');
+                    var skipSubscription = true;
+                    var instance = module.makeInstance(clonedNode, for_item_1.default, context.selector, context.parentInstance, args, undefined, skipSubscription);
+                    // console.log('ForStructure.instance.created', instance);
                     if (instance) {
                         // const forItemContext = getContext(instance);
                         // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
                         // module.compile(clonedNode, forItemContext.instance);
+                        // const instances: Factory[];
                         module.compile(clonedNode, instance);
+                        module.makeInstanceSubscription(instance, context.parentInstance);
+                        // console.log('ForStructure.instance.compiled', instances);
                         // nextSibling = clonedNode.nextSibling;
                         this.instances.push(instance);
                     }

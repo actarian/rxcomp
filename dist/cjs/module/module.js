@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHost = exports.getContextByNode = exports.getParsableContextByNode = void 0;
+exports.getHost = exports.getContextByNode = exports.getParsableContextByElement = void 0;
 var tslib_1 = require("tslib");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
@@ -32,10 +32,10 @@ var Module = /** @class */ (function () {
         // console.log('compile', instances, node, parentInstance);
         return instances;
     };
-    Module.prototype.makeInstance = function (node, factory, selector, parentInstance, args, inject) {
-        var _this = this;
+    Module.prototype.makeInstance = function (node, factory, selector, parentInstance, args, inject, skipSubscription) {
+        if (skipSubscription === void 0) { skipSubscription = false; }
         if (parentInstance || node.parentNode) {
-            var meta_1 = factory.meta;
+            var meta = factory.meta;
             // collect parentInstance scope
             parentInstance = parentInstance || this.getParentInstance(node.parentNode);
             if (!parentInstance) {
@@ -58,10 +58,10 @@ var Module = /** @class */ (function () {
             // creating instance context
             var context = Module.makeContext(this, instance_1, parentInstance, node, factory, selector);
             // creating component input and outputs
-            if (meta_1) {
-                this.makeHosts(meta_1, instance_1, node);
-                context.inputs = this.makeInputs(meta_1, instance_1);
-                context.outputs = this.makeOutputs(meta_1, instance_1);
+            if (!(instance_1 instanceof context_1.default)) {
+                this.makeHosts(meta, instance_1, node);
+                context.inputs = this.makeInputs(meta, instance_1);
+                context.outputs = this.makeOutputs(meta, instance_1);
                 if (parentInstance instanceof factory_1.default) {
                     this.resolveInputsOutputs(instance_1, parentInstance);
                 }
@@ -69,30 +69,8 @@ var Module = /** @class */ (function () {
             // calling onInit event
             instance_1.onInit();
             // subscribe to parent changes
-            if (parentInstance instanceof factory_1.default) {
-                parentInstance.changes$.pipe(
-                // filter(() => node.parentNode),
-                // debounceTime(1),
-                /*
-                distinctUntilChanged(function(prev, curr) {
-                    // console.log(isComponent, context.inputs);
-                    if (isComponent && meta && Object.keys(context.inputs).length === 0) {
-                        return true; // same
-                    } else {
-                        return false;
-                    }
-                }),
-                */
-                operators_1.takeUntil(instance_1.unsubscribe$)).subscribe(function (changes) {
-                    // resolve component input outputs
-                    if (meta_1) {
-                        _this.resolveInputsOutputs(instance_1, changes);
-                    }
-                    // calling onChanges event with changes
-                    instance_1.onChanges(changes);
-                    // push instance changes for subscribers
-                    instance_1.pushChanges();
-                });
+            if (!skipSubscription) {
+                this.makeInstanceSubscription(instance_1, parentInstance);
             }
             return instance_1;
         }
@@ -100,13 +78,44 @@ var Module = /** @class */ (function () {
             return undefined;
         }
     };
+    Module.prototype.makeInstanceSubscription = function (instance, parentInstance) {
+        var _this = this;
+        // subscribe to parent changes
+        if (parentInstance instanceof factory_1.default) {
+            parentInstance.changes$.pipe(
+            // filter(() => node.parentNode),
+            // debounceTime(1),
+            /*
+            distinctUntilChanged(function(prev, curr) {
+                // console.log(isComponent, context.inputs);
+                if (isComponent && meta && Object.keys(context.inputs).length === 0) {
+                    return true; // same
+                } else {
+                    return false;
+                }
+            }),
+            */
+            operators_1.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+                // console.log('Module.makeInstanceSubscription.changes', instance);
+                // resolve component input outputs
+                if (!(instance instanceof context_1.default)) {
+                    _this.resolveInputsOutputs(instance, changes);
+                }
+                // calling onChanges event with changes
+                instance.onChanges(changes);
+                // push instance changes for subscribers
+                instance.pushChanges();
+            });
+        }
+    };
     Module.prototype.makeFunction = function (expression, params) {
         if (params === void 0) { params = ['$instance']; }
         if (expression) {
             expression = Module.parseExpression(expression);
-            // console.log(expression);
             var args = params.join(',');
-            var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+            var expressionFunction = "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}";
+            // console.log('Module.makeFunction.expressionFunction', expressionFunction);
+            var expression_func = new Function(expressionFunction);
             // console.log(this, $$module, $$pipes, "${expression}");
             // console.log(expression_func);
             return expression_func;
@@ -120,7 +129,7 @@ var Module = /** @class */ (function () {
         error_1.nextError$.next(expressionError);
     };
     Module.prototype.resolve = function (expression, parentInstance, payload) {
-        // console.log(expression, parentInstance, payload);
+        // console.log('Module.resolve', expression, parentInstance, payload, getContext);
         return expression.apply(parentInstance, [payload, this]);
     };
     Module.prototype.parse = function (node, instance) {
@@ -128,13 +137,19 @@ var Module = /** @class */ (function () {
             var child = node.childNodes[i];
             if (child.nodeType === 1) {
                 var element = child;
-                var context = getParsableContextByNode(element);
+                var context = getParsableContextByElement(element);
                 if (!context) {
                     this.parse(element, instance);
                 }
+                // else { console.log('Module.parse', element, context.instance); }
             }
             else if (child.nodeType === 3) {
                 var text = child;
+                /*
+                if (text.nodeValue!.trim() !== '') {
+                    // console.log('Module.parse', text.nodeValue, instance);
+                }
+                */
                 this.parseTextNode(text, instance);
             }
         }
@@ -191,6 +206,7 @@ var Module = /** @class */ (function () {
             var replacedText = expressions.reduce(function (p, c) {
                 var text;
                 if (typeof c === 'function') { // instanceOf ExpressionFunction ?;
+                    // console.log('Module.parseTextNode', c, instance);
                     text = _this.resolve(c, instance, instance);
                     if (text == undefined) { // !!! keep == loose equality
                         text = '';
@@ -228,6 +244,7 @@ var Module = /** @class */ (function () {
             var expression = this.makeFunction(matches[1]);
             expressions.push(expression);
         }
+        // console.log('Module.parseTextNodeExpression', regex.source, expressions, nodeValue);
         var length = nodeValue.length;
         if (length > lastIndex) {
             this.pushFragment(nodeValue, lastIndex, length, expressions);
@@ -252,6 +269,7 @@ var Module = /** @class */ (function () {
         var input = null, expression = null;
         if (node.hasAttribute("[" + key + "]")) {
             expression = node.getAttribute("[" + key + "]");
+            // console.log('Module.makeInput.expression.1', expression);
         }
         else if (node.hasAttribute(key)) {
             // const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
@@ -268,10 +286,23 @@ var Module = /** @class */ (function () {
                 return '';
             });
             expression = "\"" + attribute + "\"";
+            // console.log('Module.makeInput.expression.2', expression);
         }
         if (expression) {
             input = this.makeFunction(expression);
         }
+        /*
+        const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(instance, key) as PropertyDescriptor;
+        if (!descriptor) {
+            Object.defineProperty(instance, key, {
+                value: null,
+                enumerable: true,
+                writable: true,
+                configurable: false,
+            });
+        }
+        */
+        // console.log('Module.makeInput', key, instance, descriptor);
         return input;
     };
     Module.prototype.makeInputs = function (meta, instance) {
@@ -323,6 +354,7 @@ var Module = /** @class */ (function () {
         var inputs = context.inputs;
         for (var key in inputs) {
             var inputFunction = inputs[key];
+            // console.log('Module.inputFunction', inputFunction);
             var value = this.resolve(inputFunction, parentInstance, instance);
             instance[key] = value;
         }
@@ -534,37 +566,33 @@ var Module = /** @class */ (function () {
     return Module;
 }());
 exports.default = Module;
-function getParsableContextByNode(node) {
+function getParsableContextByElement(element) {
     var context;
-    var rxcompId = node.rxcompId;
+    var rxcompId = element.rxcompId;
     if (rxcompId) {
-        var nodeContexts = factory_1.NODES[rxcompId];
-        if (nodeContexts) {
-            context = nodeContexts.reduce(function (previous, current) {
-                if (current.factory.prototype instanceof component_1.default) {
-                    return current;
-                }
-                else if (current.factory.prototype instanceof context_1.default) {
+        var contexts = factory_1.NODES[rxcompId];
+        if (contexts) {
+            context = contexts.reduce(function (previous, current) {
+                if (current.instance instanceof context_1.default) {
                     return previous ? previous : current;
-                    /*
-                    } else if (current.factory.prototype instanceof Structure) {
-                        return previous ? previous : current;
-                    */
+                }
+                else if (current.instance instanceof component_1.default) {
+                    return current;
                 }
                 else {
                     return previous;
                 }
             }, undefined);
-            // console.log(node.rxcompId, context);
         }
+        // context = contexts ? contexts.find(x => x.instance instanceof Component) : undefined;
     }
     return context;
 }
-exports.getParsableContextByNode = getParsableContextByNode;
-function getContextByNode(node) {
-    var context = getParsableContextByNode(node);
+exports.getParsableContextByElement = getParsableContextByElement;
+function getContextByNode(element) {
+    var context = getParsableContextByElement(element);
     if (context && context.factory.prototype instanceof structure_1.default) {
-        context = undefined;
+        return undefined;
     }
     return context;
 }

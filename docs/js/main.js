@@ -341,12 +341,6 @@ EventDirective.meta = {
 
     if (module.instances) {
       this.changes$.next(this);
-
-      if (this instanceof Context) {
-        var instances = module.getChildInstances(node);
-        console.log(node, instances);
-      }
-
       module.parse(node, this);
       this.onView();
     }
@@ -520,14 +514,13 @@ var Context = function (_Component) {
           delete clonedNode.rxcompId;
           this.forend.parentNode.insertBefore(clonedNode, this.forend);
           var args = [token.key, key, token.value, value, i, total, context.parentInstance];
+          var skipSubscription = true;
 
-          var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
-
-          console.log('ForStructure.instance.created', _instance);
+          var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
 
           if (_instance) {
-            var instances = module.compile(clonedNode, _instance);
-            console.log('ForStructure.instance.compiled', instances);
+            module.compile(clonedNode, _instance);
+            module.makeInstanceSubscription(_instance, context.parentInstance);
             this.instances.push(_instance);
           }
         }
@@ -1090,8 +1083,10 @@ var Module = function () {
     return instances;
   };
 
-  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args, inject) {
-    var _this2 = this;
+  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args, inject, skipSubscription) {
+    if (skipSubscription === void 0) {
+      skipSubscription = false;
+    }
 
     if (parentInstance || node.parentNode) {
       var meta = factory.meta;
@@ -1116,7 +1111,7 @@ var Module = function () {
 
       var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 
-      if (meta && !(instance instanceof Context)) {
+      if (!(instance instanceof Context)) {
         this.makeHosts(meta, instance, node);
         context.inputs = this.makeInputs(meta, instance);
         context.outputs = this.makeOutputs(meta, instance);
@@ -1128,20 +1123,28 @@ var Module = function () {
 
       instance.onInit();
 
-      if (parentInstance instanceof Factory) {
-        parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
-          if (meta && !(instance instanceof Context)) {
-            _this2.resolveInputsOutputs(instance, changes);
-          }
-
-          instance.onChanges(changes);
-          instance.pushChanges();
-        });
+      if (!skipSubscription) {
+        this.makeInstanceSubscription(instance, parentInstance);
       }
 
       return instance;
     } else {
       return undefined;
+    }
+  };
+
+  _proto.makeInstanceSubscription = function makeInstanceSubscription(instance, parentInstance) {
+    var _this2 = this;
+
+    if (parentInstance instanceof Factory) {
+      parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+        if (!(instance instanceof Context)) {
+          _this2.resolveInputsOutputs(instance, changes);
+        }
+
+        instance.onChanges(changes);
+        instance.pushChanges();
+      });
     }
   };
 
@@ -1178,7 +1181,7 @@ var Module = function () {
 
       if (child.nodeType === 1) {
         var element = child;
-        var context = getParsableContextByNode(element);
+        var context = getParsableContextByElement(element);
 
         if (!context) {
           this.parse(element, instance);
@@ -1188,46 +1191,6 @@ var Module = function () {
         this.parseTextNode(text, instance);
       }
     }
-  };
-
-  _proto.parse__ = function parse__(node, instance) {
-    for (var i = 0; i < node.childNodes.length; i++) {
-      var child = node.childNodes[i];
-
-      if (child.nodeType === 1) {
-        var element = child;
-        var rxcompId = element.rxcompId;
-
-        if (rxcompId) {
-          var contexts = NODES[rxcompId];
-
-          if (contexts) {
-            console.log(contexts);
-          }
-        }
-      } else if (child.nodeType === 3) {
-        var text = child;
-        this.parseTextNode(text, instance);
-      }
-    }
-  };
-
-  _proto.getChildInstances = function getChildInstances(node) {
-    var instances = [];
-    Module.traverseDown(node, function (node) {
-      var rxcompId = node.rxcompId;
-
-      if (rxcompId) {
-        var nodeContexts = NODES[rxcompId];
-
-        if (nodeContexts) {
-          instances.push.apply(instances, nodeContexts.map(function (c) {
-            return c.instance;
-          }));
-        }
-      }
-    });
-    return instances;
   };
 
   _proto.remove = function remove(node, keepInstance) {
@@ -1730,21 +1693,19 @@ var Module = function () {
 
   return Module;
 }();
-function getParsableContextByNode(node) {
+function getParsableContextByElement(element) {
   var context;
-  var rxcompId = node.rxcompId;
+  var rxcompId = element.rxcompId;
 
   if (rxcompId) {
     var contexts = NODES[rxcompId];
 
     if (contexts) {
       context = contexts.reduce(function (previous, current) {
-        console.log('Module.getParsableContextByNode', context);
-
-        if (current.instance instanceof Component) {
-          return current;
-        } else if (current.instance instanceof Context) {
+        if (current.instance instanceof Context) {
           return previous ? previous : current;
+        } else if (current.instance instanceof Component) {
+          return current;
         } else {
           return previous;
         }
@@ -1754,11 +1715,11 @@ function getParsableContextByNode(node) {
 
   return context;
 }
-function getContextByNode(node) {
-  var context = getParsableContextByNode(node);
+function getContextByNode(element) {
+  var context = getParsableContextByElement(element);
 
   if (context && context.factory.prototype instanceof Structure) {
-    context = undefined;
+    return undefined;
   }
 
   return context;

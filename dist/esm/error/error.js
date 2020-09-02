@@ -27,38 +27,14 @@ export class ErrorInterceptorHandler {
         return this.interceptor.intercept(error, this.next);
     }
 }
-/*
-export class NoopErrorInterceptor implements IErrorInterceptor {
-    intercept(error: Error, next: ErrorHandler): Observable<Error> {
-        return of(error);
-    }
-}
-
-const noopInterceptor = new NoopErrorInterceptor();
-*/
 export class DefaultErrorHandler {
     handle(error) {
-        /*
-        if (error) {
-            console.error(error);
-        }
-        */
         return of(error);
     }
 }
 export const ErrorInterceptors = [];
 export const nextError$ = new ReplaySubject(1);
-export const errors$ = nextError$.pipe(
-/*
-switchMap(error => {
-    const chain = ErrorInterceptors.reduceRight((next: ErrorHandler, interceptor: IErrorInterceptor) => {
-        return new ErrorInterceptorHandler(next, interceptor);
-    }, new NoopErrorInterceptor());
-    return chain.handle(error);
-}),
-*/
-// switchMap(error => merge(ErrorInterceptors.map(x => x.intercept(error, next)))),
-switchMap((error) => {
+export const errors$ = nextError$.pipe(switchMap((error) => {
     const chain = ErrorInterceptors.reduceRight((next, interceptor) => {
         return new ErrorInterceptorHandler(next, interceptor);
     }, new DefaultErrorHandler());

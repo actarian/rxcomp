@@ -17,6 +17,7 @@ export default class Context extends Component {
         }
         if (context.module.instances) {
             context.keys.forEach(key => {
+                // console.log('Context', key, context.parentInstance);
                 this[key] = context.parentInstance[key];
             });
         }

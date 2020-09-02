@@ -55,12 +55,18 @@ export default class ForStructure extends Structure {
                     this.forend.parentNode.insertBefore(clonedNode, this.forend);
                     // !!! todo: check context.parentInstance
                     const args = [token.key, key, token.value, value, i, total, context.parentInstance];
-                    const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
+                    // console.log('ForStructure.makeInstance.ForItem');
+                    const skipSubscription = true;
+                    const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
+                    // console.log('ForStructure.instance.created', instance);
                     if (instance) {
                         // const forItemContext = getContext(instance);
                         // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
                         // module.compile(clonedNode, forItemContext.instance);
+                        // const instances: Factory[];
                         module.compile(clonedNode, instance);
+                        module.makeInstanceSubscription(instance, context.parentInstance);
+                        // console.log('ForStructure.instance.compiled', instances);
                         // nextSibling = clonedNode.nextSibling;
                         this.instances.push(instance);
                     }

@@ -43,24 +43,10 @@ var ErrorInterceptorHandler = /** @class */ (function () {
     return ErrorInterceptorHandler;
 }());
 exports.ErrorInterceptorHandler = ErrorInterceptorHandler;
-/*
-export class NoopErrorInterceptor implements IErrorInterceptor {
-    intercept(error: Error, next: ErrorHandler): Observable<Error> {
-        return of(error);
-    }
-}
-
-const noopInterceptor = new NoopErrorInterceptor();
-*/
 var DefaultErrorHandler = /** @class */ (function () {
     function DefaultErrorHandler() {
     }
     DefaultErrorHandler.prototype.handle = function (error) {
-        /*
-        if (error) {
-            console.error(error);
-        }
-        */
         return rxjs_1.of(error);
     };
     return DefaultErrorHandler;
@@ -68,17 +54,7 @@ var DefaultErrorHandler = /** @class */ (function () {
 exports.DefaultErrorHandler = DefaultErrorHandler;
 exports.ErrorInterceptors = [];
 exports.nextError$ = new rxjs_1.ReplaySubject(1);
-exports.errors$ = exports.nextError$.pipe(
-/*
-switchMap(error => {
-    const chain = ErrorInterceptors.reduceRight((next: ErrorHandler, interceptor: IErrorInterceptor) => {
-        return new ErrorInterceptorHandler(next, interceptor);
-    }, new NoopErrorInterceptor());
-    return chain.handle(error);
-}),
-*/
-// switchMap(error => merge(ErrorInterceptors.map(x => x.intercept(error, next)))),
-operators_1.switchMap(function (error) {
+exports.errors$ = exports.nextError$.pipe(operators_1.switchMap(function (error) {
     var chain = exports.ErrorInterceptors.reduceRight(function (next, interceptor) {
         return new ErrorInterceptorHandler(next, interceptor);
     }, new DefaultErrorHandler());

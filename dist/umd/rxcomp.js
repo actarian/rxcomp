@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.14
+ * @license rxcomp v1.0.0-beta.15
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -299,27 +299,12 @@ var ErrorInterceptorHandler = /*#__PURE__*/function () {
 
   return ErrorInterceptorHandler;
 }();
-/*
-export class NoopErrorInterceptor implements IErrorInterceptor {
-    intercept(error: Error, next: ErrorHandler): Observable<Error> {
-        return of(error);
-    }
-}
-
-const noopInterceptor = new NoopErrorInterceptor();
-*/
-
 var DefaultErrorHandler = /*#__PURE__*/function () {
   function DefaultErrorHandler() {}
 
   var _proto2 = DefaultErrorHandler.prototype;
 
   _proto2.handle = function handle(error) {
-    /*
-    if (error) {
-        console.error(error);
-    }
-    */
     return rxjs.of(error);
   };
 
@@ -327,17 +312,7 @@ var DefaultErrorHandler = /*#__PURE__*/function () {
 }();
 var ErrorInterceptors = [];
 var nextError$ = new rxjs.ReplaySubject(1);
-var errors$ = nextError$.pipe(
-/*
-switchMap(error => {
-    const chain = ErrorInterceptors.reduceRight((next: ErrorHandler, interceptor: IErrorInterceptor) => {
-        return new ErrorInterceptorHandler(next, interceptor);
-    }, new NoopErrorInterceptor());
-    return chain.handle(error);
-}),
-*/
-// switchMap(error => merge(ErrorInterceptors.map(x => x.intercept(error, next)))),
-operators.switchMap(function (error) {
+var errors$ = nextError$.pipe(operators.switchMap(function (error) {
   var chain = ErrorInterceptors.reduceRight(function (next, interceptor) {
     return new ErrorInterceptorHandler(next, interceptor);
   }, new DefaultErrorHandler());
@@ -415,6 +390,13 @@ EventDirective.meta = {
       this.changes$.next(this); // console.log('Module.parse', instance.constructor.name);
       // parse component text nodes
 
+      /*
+      if (this instanceof Context) {
+          const instances: Factory[] = module.getChildInstances(node);
+          console.log(node, instances);
+      }
+      */
+
       module.parse(node, this); // calling onView event
 
       this.onView();
@@ -456,6 +438,7 @@ var Context = /*#__PURE__*/function (_Component) {
 
     if (context.module.instances) {
       context.keys.forEach(function (key) {
+        // console.log('Context', key, context.parentInstance);
         _this2[key] = context.parentInstance[key];
       });
     }
@@ -624,15 +607,21 @@ var Context = /*#__PURE__*/function (_Component) {
           delete clonedNode.rxcompId;
           this.forend.parentNode.insertBefore(clonedNode, this.forend); // !!! todo: check context.parentInstance
 
-          var args = [token.key, key, token.value, value, i, total, context.parentInstance];
+          var args = [token.key, key, token.value, value, i, total, context.parentInstance]; // console.log('ForStructure.makeInstance.ForItem');
 
-          var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
+          var skipSubscription = true;
+
+          var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription); // console.log('ForStructure.instance.created', instance);
+
 
           if (_instance) {
             // const forItemContext = getContext(instance);
             // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
             // module.compile(clonedNode, forItemContext.instance);
-            module.compile(clonedNode, _instance); // nextSibling = clonedNode.nextSibling;
+            // const instances: Factory[];
+            module.compile(clonedNode, _instance);
+            module.makeInstanceSubscription(_instance, context.parentInstance); // console.log('ForStructure.instance.compiled', instances);
+            // nextSibling = clonedNode.nextSibling;
 
             this.instances.push(_instance);
           }
@@ -1230,8 +1219,10 @@ var Module = /*#__PURE__*/function () {
     return instances;
   };
 
-  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args, inject) {
-    var _this2 = this;
+  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args, inject, skipSubscription) {
+    if (skipSubscription === void 0) {
+      skipSubscription = false;
+    }
 
     if (parentInstance || node.parentNode) {
       var meta = factory.meta; // collect parentInstance scope
@@ -1261,7 +1252,7 @@ var Module = /*#__PURE__*/function () {
 
       var context = Module.makeContext(this, instance, parentInstance, node, factory, selector); // creating component input and outputs
 
-      if (meta) {
+      if (!(instance instanceof Context)) {
         this.makeHosts(meta, instance, node);
         context.inputs = this.makeInputs(meta, instance);
         context.outputs = this.makeOutputs(meta, instance);
@@ -1274,36 +1265,46 @@ var Module = /*#__PURE__*/function () {
 
       instance.onInit(); // subscribe to parent changes
 
-      if (parentInstance instanceof Factory) {
-        parentInstance.changes$.pipe( // filter(() => node.parentNode),
-        // debounceTime(1),
-
-        /*
-        distinctUntilChanged(function(prev, curr) {
-            // console.log(isComponent, context.inputs);
-            if (isComponent && meta && Object.keys(context.inputs).length === 0) {
-                return true; // same
-            } else {
-                return false;
-            }
-        }),
-        */
-        operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
-          // resolve component input outputs
-          if (meta) {
-            _this2.resolveInputsOutputs(instance, changes);
-          } // calling onChanges event with changes
-
-
-          instance.onChanges(changes); // push instance changes for subscribers
-
-          instance.pushChanges();
-        });
+      if (!skipSubscription) {
+        this.makeInstanceSubscription(instance, parentInstance);
       }
 
       return instance;
     } else {
       return undefined;
+    }
+  };
+
+  _proto.makeInstanceSubscription = function makeInstanceSubscription(instance, parentInstance) {
+    var _this2 = this;
+
+    // subscribe to parent changes
+    if (parentInstance instanceof Factory) {
+      parentInstance.changes$.pipe( // filter(() => node.parentNode),
+      // debounceTime(1),
+
+      /*
+      distinctUntilChanged(function(prev, curr) {
+          // console.log(isComponent, context.inputs);
+          if (isComponent && meta && Object.keys(context.inputs).length === 0) {
+              return true; // same
+          } else {
+              return false;
+          }
+      }),
+      */
+      operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+        // console.log('Module.makeInstanceSubscription.changes', instance);
+        // resolve component input outputs
+        if (!(instance instanceof Context)) {
+          _this2.resolveInputsOutputs(instance, changes);
+        } // calling onChanges event with changes
+
+
+        instance.onChanges(changes); // push instance changes for subscribers
+
+        instance.pushChanges();
+      });
     }
   };
 
@@ -1313,10 +1314,11 @@ var Module = /*#__PURE__*/function () {
     }
 
     if (expression) {
-      expression = Module.parseExpression(expression); // console.log(expression);
-
+      expression = Module.parseExpression(expression);
       var args = params.join(',');
-      var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}"); // console.log(this, $$module, $$pipes, "${expression}");
+      var expressionFunction = "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}"; // console.log('Module.makeFunction.expressionFunction', expressionFunction);
+
+      var expression_func = new Function(expressionFunction); // console.log(this, $$module, $$pipes, "${expression}");
       // console.log(expression_func);
 
       return expression_func;
@@ -1333,7 +1335,7 @@ var Module = /*#__PURE__*/function () {
   };
 
   _proto.resolve = function resolve(expression, parentInstance, payload) {
-    // console.log(expression, parentInstance, payload);
+    // console.log('Module.resolve', expression, parentInstance, payload, getContext);
     return expression.apply(parentInstance, [payload, this]);
   };
 
@@ -1343,13 +1345,20 @@ var Module = /*#__PURE__*/function () {
 
       if (child.nodeType === 1) {
         var element = child;
-        var context = getParsableContextByNode(element);
+        var context = getParsableContextByElement(element);
 
         if (!context) {
           this.parse(element, instance);
-        }
+        } // else { console.log('Module.parse', element, context.instance); }
+
       } else if (child.nodeType === 3) {
         var text = child;
+        /*
+        if (text.nodeValue!.trim() !== '') {
+            // console.log('Module.parse', text.nodeValue, instance);
+        }
+        */
+
         this.parseTextNode(text, instance);
       }
     }
@@ -1421,6 +1430,7 @@ var Module = /*#__PURE__*/function () {
 
         if (typeof c === 'function') {
           // instanceOf ExpressionFunction ?;
+          // console.log('Module.parseTextNode', c, instance);
           text = _this4.resolve(c, instance, instance);
 
           if (text == undefined) {
@@ -1465,7 +1475,8 @@ var Module = /*#__PURE__*/function () {
       lastIndex = regex.lastIndex;
       var expression = this.makeFunction(matches[1]);
       expressions.push(expression);
-    }
+    } // console.log('Module.parseTextNodeExpression', regex.source, expressions, nodeValue);
+
 
     var length = nodeValue.length;
 
@@ -1499,7 +1510,7 @@ var Module = /*#__PURE__*/function () {
         expression = null;
 
     if (node.hasAttribute("[" + key + "]")) {
-      expression = node.getAttribute("[" + key + "]");
+      expression = node.getAttribute("[" + key + "]"); // console.log('Module.makeInput.expression.1', expression);
     } else if (node.hasAttribute(key)) {
       // const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
       var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
@@ -1517,12 +1528,25 @@ var Module = /*#__PURE__*/function () {
 
         return '';
       });
-      expression = "\"" + attribute + "\"";
+      expression = "\"" + attribute + "\""; // console.log('Module.makeInput.expression.2', expression);
     }
 
     if (expression) {
       input = this.makeFunction(expression);
     }
+    /*
+    const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(instance, key) as PropertyDescriptor;
+    if (!descriptor) {
+        Object.defineProperty(instance, key, {
+            value: null,
+            enumerable: true,
+            writable: true,
+            configurable: false,
+        });
+    }
+    */
+    // console.log('Module.makeInput', key, instance, descriptor);
+
 
     return input;
   };
@@ -1588,7 +1612,8 @@ var Module = /*#__PURE__*/function () {
     var inputs = context.inputs;
 
     for (var key in inputs) {
-      var inputFunction = inputs[key];
+      var inputFunction = inputs[key]; // console.log('Module.inputFunction', inputFunction);
+
       var value = this.resolve(inputFunction, parentInstance, instance);
       instance[key] = value;
     }
@@ -1861,37 +1886,34 @@ var Module = /*#__PURE__*/function () {
 
   return Module;
 }();
-function getParsableContextByNode(node) {
+function getParsableContextByElement(element) {
   var context;
-  var rxcompId = node.rxcompId;
+  var rxcompId = element.rxcompId;
 
   if (rxcompId) {
-    var nodeContexts = NODES[rxcompId];
+    var contexts = NODES[rxcompId];
 
-    if (nodeContexts) {
-      context = nodeContexts.reduce(function (previous, current) {
-        if (current.factory.prototype instanceof Component) {
-          return current;
-        } else if (current.factory.prototype instanceof Context) {
+    if (contexts) {
+      context = contexts.reduce(function (previous, current) {
+        if (current.instance instanceof Context) {
           return previous ? previous : current;
-          /*
-          } else if (current.factory.prototype instanceof Structure) {
-              return previous ? previous : current;
-          */
+        } else if (current.instance instanceof Component) {
+          return current;
         } else {
           return previous;
         }
-      }, undefined); // console.log(node.rxcompId, context);
-    }
+      }, undefined);
+    } // context = contexts ? contexts.find(x => x.instance instanceof Component) : undefined;
+
   }
 
   return context;
 }
-function getContextByNode(node) {
-  var context = getParsableContextByNode(node);
+function getContextByNode(element) {
+  var context = getParsableContextByElement(element);
 
   if (context && context.factory.prototype instanceof Structure) {
-    context = undefined;
+    return undefined;
   }
 
   return context;
@@ -2202,4 +2224,4 @@ function optionsToKey(v, s) {
   }
 
   return s;
-}var WINDOW = typeof self === 'object' && self.self === self && self || typeof global === 'object' && global.global === global && global || undefined;exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.WINDOW=WINDOW;exports.decodeBase64=_decodeBase;exports.decodeJson=_decodeJson;exports.encodeBase64=_encodeBase;exports.encodeJson=_encodeJson;exports.encodeJsonWithOptions=encodeJsonWithOptions;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByNode=getParsableContextByNode;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;Object.defineProperty(exports,'__esModule',{value:true});})));
+}var WINDOW = typeof self === 'object' && self.self === self && self || typeof global === 'object' && global.global === global && global || undefined;exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.WINDOW=WINDOW;exports.decodeBase64=_decodeBase;exports.decodeJson=_decodeJson;exports.encodeBase64=_encodeBase;exports.encodeJson=_encodeJson;exports.encodeJsonWithOptions=encodeJsonWithOptions;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByElement=getParsableContextByElement;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;Object.defineProperty(exports,'__esModule',{value:true});})));

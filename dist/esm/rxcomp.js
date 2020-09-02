@@ -15,7 +15,7 @@ export { default as IfStructure } from './if/if.structure';
 export { default as InnerHtmlDirective } from './inner-html/inner-html.directive';
 export { default as JsonComponent } from './json/json.component';
 export { default as JsonPipe } from './json/json.pipe';
-export { default as Module, getContextByNode, getHost, getParsableContextByNode } from './module/module';
+export { default as Module, getContextByNode, getHost, getParsableContextByElement } from './module/module';
 export { default as Browser } from './platform/browser';
 export { getLocationComponents } from './platform/common/location/location';
 export { decodeBase64, decodeJson, default as Serializer, encodeBase64, encodeJson, encodeJsonWithOptions } from './platform/common/serializer/serializer';

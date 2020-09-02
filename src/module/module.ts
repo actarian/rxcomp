@@ -31,7 +31,7 @@ export default class Module {
 		// console.log('compile', instances, node, parentInstance);
 		return instances;
 	}
-	public makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[], inject?: { [key: string]: any }): Factory | undefined {
+	public makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[], inject?: { [key: string]: any }, skipSubscription: boolean = false): Factory | undefined {
 		if (parentInstance || node.parentNode) {
 			const meta: IFactoryMeta = factory.meta;
 			// collect parentInstance scope
@@ -56,7 +56,7 @@ export default class Module {
 			// creating instance context
 			const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 			// creating component input and outputs
-			if (meta && !(instance instanceof Context)) {
+			if (!(instance instanceof Context)) {
 				this.makeHosts(meta, instance, node);
 				context.inputs = this.makeInputs(meta, instance);
 				context.outputs = this.makeOutputs(meta, instance);
@@ -67,35 +67,42 @@ export default class Module {
 			// calling onInit event
 			instance.onInit();
 			// subscribe to parent changes
-			if (parentInstance instanceof Factory) {
-				parentInstance.changes$.pipe(
-					// filter(() => node.parentNode),
-					// debounceTime(1),
-					/*
-					distinctUntilChanged(function(prev, curr) {
-						// console.log(isComponent, context.inputs);
-						if (isComponent && meta && Object.keys(context.inputs).length === 0) {
-							return true; // same
-						} else {
-							return false;
-						}
-					}),
-					*/
-					takeUntil(instance.unsubscribe$)
-				).subscribe((changes: Factory | Window) => {
-					// resolve component input outputs
-					if (meta && !(instance instanceof Context)) {
-						this.resolveInputsOutputs(instance, changes);
-					}
-					// calling onChanges event with changes
-					instance.onChanges(changes);
-					// push instance changes for subscribers
-					instance.pushChanges();
-				});
+			if (!skipSubscription) {
+				this.makeInstanceSubscription(instance, parentInstance);
 			}
 			return instance;
 		} else {
 			return undefined;
+		}
+	}
+	public makeInstanceSubscription(instance: Factory, parentInstance?: Factory | Window): void {
+		// subscribe to parent changes
+		if (parentInstance instanceof Factory) {
+			parentInstance.changes$.pipe(
+				// filter(() => node.parentNode),
+				// debounceTime(1),
+				/*
+				distinctUntilChanged(function(prev, curr) {
+					// console.log(isComponent, context.inputs);
+					if (isComponent && meta && Object.keys(context.inputs).length === 0) {
+						return true; // same
+					} else {
+						return false;
+					}
+				}),
+				*/
+				takeUntil(instance.unsubscribe$)
+			).subscribe((changes: Factory | Window) => {
+				// console.log('Module.makeInstanceSubscription.changes', instance);
+				// resolve component input outputs
+				if (!(instance instanceof Context)) {
+					this.resolveInputsOutputs(instance, changes);
+				}
+				// calling onChanges event with changes
+				instance.onChanges(changes);
+				// push instance changes for subscribers
+				instance.pushChanges();
+			});
 		}
 	}
 	public makeFunction(expression: string, params: string[] = ['$instance']): ExpressionFunction {
@@ -129,58 +136,26 @@ export default class Module {
 		// console.log('Module.resolve', expression, parentInstance, payload, getContext);
 		return expression.apply(parentInstance, [payload, this]);
 	}
-	public parse(node: IElement, instance: Factory): void {
+	public parse(node: HTMLElement, instance: Factory): void {
 		for (let i: number = 0; i < node.childNodes.length; i++) {
 			const child: ChildNode = node.childNodes[i];
 			if (child.nodeType === 1) {
 				const element: HTMLElement = child as HTMLElement;
-				const context: IContext | void = getParsableContextByNode(element);
+				const context: IContext | undefined = getParsableContextByElement(element);
 				if (!context) {
 					this.parse(element, instance);
 				}
+				// else { console.log('Module.parse', element, context.instance); }
 			} else if (child.nodeType === 3) {
 				const text: IText = child as IText;
-				this.parseTextNode(text, instance);
-			}
-		}
-	}
-	public parse__(node: IElement, instance: Factory): void {
-		for (let i: number = 0; i < node.childNodes.length; i++) {
-			const child: ChildNode = node.childNodes[i];
-			if (child.nodeType === 1) {
-				const element: HTMLElement = child as HTMLElement;
-				const rxcompId: number | undefined = (element as IElement).rxcompId;
-				if (rxcompId) {
-					const contexts: IContext[] = NODES[rxcompId];
-					if (contexts) {
-						console.log(contexts);
-					}
-				}
 				/*
-				const context: IContext | void = getParsableContextByNode(element);
-				console.log('Module.parse', node, instance, context);
-				if (!context) {
-					this.parse(element, instance);
+				if (text.nodeValue!.trim() !== '') {
+					// console.log('Module.parse', text.nodeValue, instance);
 				}
 				*/
-			} else if (child.nodeType === 3) {
-				const text: IText = child as IText;
 				this.parseTextNode(text, instance);
 			}
 		}
-	}
-	public getChildInstances(node: Node): Factory[] {
-		const instances: Factory[] = [];
-		Module.traverseDown(node, (node: Node) => {
-			const rxcompId: number | undefined = (node as IElement).rxcompId;
-			if (rxcompId) {
-				const nodeContexts: IContext[] = NODES[rxcompId];
-				if (nodeContexts) {
-					instances.push(...nodeContexts.map(c => c.instance));
-				}
-			}
-		});
-		return instances;
 	}
 	public remove(node: Node, keepInstance?: Factory): Node {
 		const keepContext: IContext | undefined = keepInstance ? getContext(keepInstance) : undefined;
@@ -210,7 +185,7 @@ export default class Module {
 		if (node === document) {
 			return (isPlatformBrowser ? window : global) as Window;
 		}
-		const context: IContext | undefined = getContextByNode(node);
+		const context: IContext | undefined = getContextByNode(node as HTMLElement);
 		if (context) {
 			return context.instance;
 		} else {
@@ -569,38 +544,33 @@ export default class Module {
 	}
 	static meta: IModuleMeta;
 }
-
-export function getParsableContextByNode(node: Node): IContext | undefined {
+export function getParsableContextByElement(element: HTMLElement): IContext | undefined {
 	let context: IContext | undefined;
-	const rxcompId: number | undefined = (node as IElement).rxcompId;
+	const rxcompId: number | undefined = (element as IElement).rxcompId;
 	if (rxcompId) {
-		const contexts: IContext[] = NODES[rxcompId];
+		const contexts: IContext[] | undefined = NODES[rxcompId];
 		if (contexts) {
-			context = contexts.reduce((previous: IContext | undefined, current: IContext) => {
-				console.log('Module.getParsableContextByNode', context);
-				if (current.instance instanceof Component) {
-					// if (current.factory.prototype instanceof Component) {
-					return current;
-					// } else if (current.factory.prototype instanceof Context) {
-				} else if (current.instance instanceof Context) {
-					return previous ? previous : current;
-					/*
-					} else if (current.factory.prototype instanceof Structure) {
+			context = contexts.reduce(
+				(previous: IContext | undefined, current: IContext) => {
+					if (current.instance instanceof Context) {
 						return previous ? previous : current;
-					*/
-				} else {
-					return previous;
-				}
-			}, undefined);
-			// console.log(node.rxcompId, context);
+					} else if (current.instance instanceof Component) {
+						return current;
+					} else {
+						return previous;
+					}
+				},
+				undefined
+			);
 		}
+		// context = contexts ? contexts.find(x => x.instance instanceof Component) : undefined;
 	}
 	return context;
 }
-export function getContextByNode(node: Node): IContext | undefined {
-	let context: IContext | undefined = getParsableContextByNode(node);
+export function getContextByNode(element: HTMLElement): IContext | undefined {
+	let context: IContext | undefined = getParsableContextByElement(element);
 	if (context && context.factory.prototype instanceof Structure) {
-		context = undefined;
+		return undefined;
 	}
 	return context;
 }

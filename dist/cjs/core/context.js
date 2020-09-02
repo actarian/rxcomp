@@ -24,6 +24,7 @@ var Context = /** @class */ (function (_super) {
         }
         if (context.module.instances) {
             context.keys.forEach(function (key) {
+                // console.log('Context', key, context.parentInstance);
                 _this[key] = context.parentInstance[key];
             });
         }

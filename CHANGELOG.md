@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.15] - 2020-09-03
+### Fixing
+- TextNode Parser
+
+---
+
 ## [1.0.0-beta.14] - 2020-08-29
 ### Added
 - Platform Browser, getLocationComponents, Serializer, TransferService

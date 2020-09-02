@@ -9,11 +9,12 @@ export default class Module {
     compile(node: IElement, parentInstance?: Factory | Window): Factory[];
     makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[], inject?: {
         [key: string]: any;
-    }): Factory | undefined;
+    }, skipSubscription?: boolean): Factory | undefined;
+    makeInstanceSubscription(instance: Factory, parentInstance?: Factory | Window): void;
     makeFunction(expression: string, params?: string[]): ExpressionFunction;
     nextError(error: Error, instance: Factory, expression: string, params: any[]): void;
     resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any;
-    parse(node: IElement, instance: Factory): void;
+    parse(node: HTMLElement, instance: Factory): void;
     remove(node: Node, keepInstance?: Factory): Node;
     destroy(): void;
     protected makeContext(instance: Factory, parentInstance: Factory | Window, node: IElement, selector: string): IContext;
@@ -46,6 +47,6 @@ export default class Module {
     protected static traverseNext(node: Node | null, callback: (node: Node, i: number) => any, i?: number): any;
     static meta: IModuleMeta;
 }
-export declare function getParsableContextByNode(node: Node): IContext | undefined;
-export declare function getContextByNode(node: Node): IContext | undefined;
+export declare function getParsableContextByElement(element: HTMLElement): IContext | undefined;
+export declare function getContextByNode(element: HTMLElement): IContext | undefined;
 export declare function getHost(instance: Factory, factory: typeof Factory, node: IElement): Factory | undefined;

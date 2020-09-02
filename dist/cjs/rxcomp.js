@@ -45,7 +45,7 @@ var module_1 = require("./module/module");
 Object.defineProperty(exports, "Module", { enumerable: true, get: function () { return module_1.default; } });
 Object.defineProperty(exports, "getContextByNode", { enumerable: true, get: function () { return module_1.getContextByNode; } });
 Object.defineProperty(exports, "getHost", { enumerable: true, get: function () { return module_1.getHost; } });
-Object.defineProperty(exports, "getParsableContextByNode", { enumerable: true, get: function () { return module_1.getParsableContextByNode; } });
+Object.defineProperty(exports, "getParsableContextByElement", { enumerable: true, get: function () { return module_1.getParsableContextByElement; } });
 var browser_1 = require("./platform/browser");
 Object.defineProperty(exports, "Browser", { enumerable: true, get: function () { return browser_1.default; } });
 var location_1 = require("./platform/common/location/location");

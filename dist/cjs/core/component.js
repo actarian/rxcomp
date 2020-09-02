@@ -14,6 +14,12 @@ var Component = /** @class */ (function (_super) {
             this.changes$.next(this);
             // console.log('Module.parse', instance.constructor.name);
             // parse component text nodes
+            /*
+            if (this instanceof Context) {
+                const instances: Factory[] = module.getChildInstances(node);
+                console.log(node, instances);
+            }
+            */
             module.parse(node, this);
             // calling onView event
             this.onView();
