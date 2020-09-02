@@ -1,4 +1,5 @@
 
+import Context from './context';
 import Factory, { getContext } from './factory';
 
 export default class Component extends Factory {
@@ -10,6 +11,10 @@ export default class Component extends Factory {
 			this.changes$.next(this);
 			// console.log('Module.parse', instance.constructor.name);
 			// parse component text nodes
+			if (this instanceof Context) {
+				const instances: Factory[] = module.getChildInstances(node);
+				console.log(node, instances);
+			}
 			module.parse(node, this);
 			// calling onView event
 			this.onView();

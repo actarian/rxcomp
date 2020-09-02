@@ -341,6 +341,12 @@ EventDirective.meta = {
 
     if (module.instances) {
       this.changes$.next(this);
+
+      if (this instanceof Context) {
+        var instances = module.getChildInstances(node);
+        console.log(node, instances);
+      }
+
       module.parse(node, this);
       this.onView();
     }
@@ -517,8 +523,11 @@ var Context = function (_Component) {
 
           var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 
+          console.log('ForStructure.instance.created', _instance);
+
           if (_instance) {
-            module.compile(clonedNode, _instance);
+            var instances = module.compile(clonedNode, _instance);
+            console.log('ForStructure.instance.compiled', instances);
             this.instances.push(_instance);
           }
         }
@@ -1107,7 +1116,7 @@ var Module = function () {
 
       var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 
-      if (meta) {
+      if (meta && !(instance instanceof Context)) {
         this.makeHosts(meta, instance, node);
         context.inputs = this.makeInputs(meta, instance);
         context.outputs = this.makeOutputs(meta, instance);
@@ -1121,7 +1130,7 @@ var Module = function () {
 
       if (parentInstance instanceof Factory) {
         parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
-          if (meta) {
+          if (meta && !(instance instanceof Context)) {
             _this2.resolveInputsOutputs(instance, changes);
           }
 
@@ -1144,7 +1153,8 @@ var Module = function () {
     if (expression) {
       expression = Module.parseExpression(expression);
       var args = params.join(',');
-      var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+      var expressionFunction = "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}";
+      var expression_func = new Function(expressionFunction);
       return expression_func;
     } else {
       return function () {
@@ -1178,6 +1188,46 @@ var Module = function () {
         this.parseTextNode(text, instance);
       }
     }
+  };
+
+  _proto.parse__ = function parse__(node, instance) {
+    for (var i = 0; i < node.childNodes.length; i++) {
+      var child = node.childNodes[i];
+
+      if (child.nodeType === 1) {
+        var element = child;
+        var rxcompId = element.rxcompId;
+
+        if (rxcompId) {
+          var contexts = NODES[rxcompId];
+
+          if (contexts) {
+            console.log(contexts);
+          }
+        }
+      } else if (child.nodeType === 3) {
+        var text = child;
+        this.parseTextNode(text, instance);
+      }
+    }
+  };
+
+  _proto.getChildInstances = function getChildInstances(node) {
+    var instances = [];
+    Module.traverseDown(node, function (node) {
+      var rxcompId = node.rxcompId;
+
+      if (rxcompId) {
+        var nodeContexts = NODES[rxcompId];
+
+        if (nodeContexts) {
+          instances.push.apply(instances, nodeContexts.map(function (c) {
+            return c.instance;
+          }));
+        }
+      }
+    });
+    return instances;
   };
 
   _proto.remove = function remove(node, keepInstance) {
@@ -1685,13 +1735,15 @@ function getParsableContextByNode(node) {
   var rxcompId = node.rxcompId;
 
   if (rxcompId) {
-    var nodeContexts = NODES[rxcompId];
+    var contexts = NODES[rxcompId];
 
-    if (nodeContexts) {
-      context = nodeContexts.reduce(function (previous, current) {
-        if (current.factory.prototype instanceof Component) {
+    if (contexts) {
+      context = contexts.reduce(function (previous, current) {
+        console.log('Module.getParsableContextByNode', context);
+
+        if (current.instance instanceof Component) {
           return current;
-        } else if (current.factory.prototype instanceof Context) {
+        } else if (current.instance instanceof Context) {
           return previous ? previous : current;
         } else {
           return previous;

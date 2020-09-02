@@ -80,7 +80,8 @@
 		max-width: 100%;
 	}
 
-	[sub-component] {
+	[sub-component],
+	[\[label\]] {
 		padding: 4px;
 		cursor: pointer;
 	}

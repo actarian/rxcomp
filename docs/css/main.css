@@ -437,7 +437,8 @@ button,
       color: #fff; }
   .page--test img {
     max-width: 100%; }
-  .page--test [sub-component] {
+  .page--test [sub-component],
+  .page--test [\[label\]] {
     padding: 4px;
     cursor: pointer; }
   @media (min-width: 768px) {

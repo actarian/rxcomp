@@ -8,7 +8,11 @@
 			<li class="list__item" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items">
 				<div sub-component [item]="item"></div>
 			</li>
-			<li class="list__item" hosted (handled)="onHandled($event)" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" sub-component [item]="item"></li>
+			<li class="list__item" hosted (handled)="onHandled($event)" [style]="{ 'background-color': background }" (click)="onItem(item)" *for="let item of items" [item]="item">
+				<div [style]="{ 'background-color': background }">
+					<div [label]="item">{{currentLabel}}</div>
+				</div>
+			</li>
 		</ul>
 	</div>
 	<div [style]="{ 'background-color': background }" (click)="onItem(4)" sub-component [item]="4"></div>

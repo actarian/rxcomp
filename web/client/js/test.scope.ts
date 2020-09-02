@@ -1,6 +1,6 @@
 import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { Browser, Component, CoreModule, Directive, ErrorInterceptors, Factory, getContext, IErrorHandler, IErrorInterceptor, Module, StyleDirective } from '../../../src/rxcomp';
+import { Browser, Component, CoreModule, Directive, ErrorInterceptors, getContext, IErrorHandler, IErrorInterceptor, Module, StyleDirective } from '../../../src/rxcomp';
 
 class CustomErrorInterceptor implements IErrorInterceptor {
 	intercept(error: Error, next: IErrorHandler): Observable<Error | void> {
@@ -21,6 +21,13 @@ class RootComponent extends Component {
 	href = 'https://github.com/actarian/rxcomp';
 	src = 'https://source.unsplash.com/random/400x300';
 
+	onInit() {
+		setTimeout(() => {
+			this.items = [1, 2];
+			this.pushChanges();
+		}, 2000);
+	}
+
 	onItem(item: number) {
 		console.log('RootComponent.onItem.item', item);
 	}
@@ -38,6 +45,7 @@ class SubComponent extends Component {
 	toggle?: BehaviorSubject<any>;
 	item?: number;
 
+	/*
 	onInit() {
 		console.log('SubComponent.onInit.item', this.item);
 	}
@@ -45,6 +53,7 @@ class SubComponent extends Component {
 	onChanges(changes: Factory) {
 		console.log('SubComponent.onChanges.item', this.item);
 	}
+	*/
 
 	onToggle() {
 		// console.log(this.item);
@@ -55,12 +64,13 @@ SubComponent.meta = {
 	selector: '[sub-component]:not(.red)',
 	inputs: ['item'],
 	outputs: ['toggle'],
-	template: `<div [style]="{ 'background-color': background }" (click)="onToggle()" [innerHTML]="item"></div>`
+	template: `<div [style]="{ 'background-color': background }" (click)="onToggle()">{{item}}</div>`
 };
 
 class HostDirective extends Directive {
 	style: any;
 
+	/*
 	onInit() {
 		console.log('HostDirective.onInit.style', this.style);
 		console.log('HostDirective.onInit.input', this.input);
@@ -69,6 +79,7 @@ class HostDirective extends Directive {
 	onChanges(changes: Factory) {
 		console.log('HostDirective.onChanges.input', this.input);
 	}
+	*/
 }
 HostDirective.meta = {
 	selector: '[host]',
@@ -80,7 +91,7 @@ class HostedDirective extends Directive {
 	host?: HostDirective;
 
 	onInit() {
-		console.log('host', this.host);
+		// console.log('HostedDirective.host', this.host);
 		const { node } = getContext(this);
 		fromEvent(node, 'click').pipe(
 			takeUntil(this.unsubscribe$)
@@ -88,17 +99,36 @@ class HostedDirective extends Directive {
 			this.handled.next(event);
 			this.unhandled.next(event);
 		});
-		console.log('HostedDirective.onInit.host.input', this.host!.input);
+		// console.log('HostedDirective.onInit.host.input', this.host!.input);
 	}
 
+	/*
 	onChanges(changes: Factory) {
 		console.log('HostedDirective.onChanges.host.input', this.host!.input);
 	}
+	*/
 }
 HostedDirective.meta = {
 	selector: '[hosted]',
 	outputs: ['handled', 'unhandled'],
 	hosts: { host: HostDirective }
+};
+
+class LabelComponent extends Component {
+	label: number = 0;
+
+	get currentLabel() {
+		// console.log('LabelComponent.currentLabel', getContext);
+		if (this.label !== undefined) {
+			return this.label.toString();
+		} else {
+			return '---';
+		}
+	}
+}
+LabelComponent.meta = {
+	selector: '[label]',
+	inputs: ['label'],
 };
 
 class AppModule extends Module { }
@@ -109,7 +139,8 @@ AppModule.meta = {
 	declarations: [
 		HostedDirective,
 		HostDirective,
-		SubComponent
+		SubComponent,
+		LabelComponent,
 	],
 	bootstrap: RootComponent,
 };

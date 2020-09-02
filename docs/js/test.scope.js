@@ -341,6 +341,12 @@ EventDirective.meta = {
 
     if (module.instances) {
       this.changes$.next(this);
+
+      if (this instanceof Context) {
+        var instances = module.getChildInstances(node);
+        console.log(node, instances);
+      }
+
       module.parse(node, this);
       this.onView();
     }
@@ -517,8 +523,11 @@ var Context = function (_Component) {
 
           var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args);
 
+          console.log('ForStructure.instance.created', _instance);
+
           if (_instance) {
-            module.compile(clonedNode, _instance);
+            var instances = module.compile(clonedNode, _instance);
+            console.log('ForStructure.instance.compiled', instances);
             this.instances.push(_instance);
           }
         }
@@ -1107,7 +1116,7 @@ var Module = function () {
 
       var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
 
-      if (meta) {
+      if (meta && !(instance instanceof Context)) {
         this.makeHosts(meta, instance, node);
         context.inputs = this.makeInputs(meta, instance);
         context.outputs = this.makeOutputs(meta, instance);
@@ -1121,7 +1130,7 @@ var Module = function () {
 
       if (parentInstance instanceof Factory) {
         parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
-          if (meta) {
+          if (meta && !(instance instanceof Context)) {
             _this2.resolveInputsOutputs(instance, changes);
           }
 
@@ -1144,7 +1153,8 @@ var Module = function () {
     if (expression) {
       expression = Module.parseExpression(expression);
       var args = params.join(',');
-      var expression_func = new Function("with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}");
+      var expressionFunction = "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}";
+      var expression_func = new Function(expressionFunction);
       return expression_func;
     } else {
       return function () {
@@ -1178,6 +1188,46 @@ var Module = function () {
         this.parseTextNode(text, instance);
       }
     }
+  };
+
+  _proto.parse__ = function parse__(node, instance) {
+    for (var i = 0; i < node.childNodes.length; i++) {
+      var child = node.childNodes[i];
+
+      if (child.nodeType === 1) {
+        var element = child;
+        var rxcompId = element.rxcompId;
+
+        if (rxcompId) {
+          var contexts = NODES[rxcompId];
+
+          if (contexts) {
+            console.log(contexts);
+          }
+        }
+      } else if (child.nodeType === 3) {
+        var text = child;
+        this.parseTextNode(text, instance);
+      }
+    }
+  };
+
+  _proto.getChildInstances = function getChildInstances(node) {
+    var instances = [];
+    Module.traverseDown(node, function (node) {
+      var rxcompId = node.rxcompId;
+
+      if (rxcompId) {
+        var nodeContexts = NODES[rxcompId];
+
+        if (nodeContexts) {
+          instances.push.apply(instances, nodeContexts.map(function (c) {
+            return c.instance;
+          }));
+        }
+      }
+    });
+    return instances;
   };
 
   _proto.remove = function remove(node, keepInstance) {
@@ -1685,13 +1735,15 @@ function getParsableContextByNode(node) {
   var rxcompId = node.rxcompId;
 
   if (rxcompId) {
-    var nodeContexts = NODES[rxcompId];
+    var contexts = NODES[rxcompId];
 
-    if (nodeContexts) {
-      context = nodeContexts.reduce(function (previous, current) {
-        if (current.factory.prototype instanceof Component) {
+    if (contexts) {
+      context = contexts.reduce(function (previous, current) {
+        console.log('Module.getParsableContextByNode', context);
+
+        if (current.instance instanceof Component) {
           return current;
-        } else if (current.factory.prototype instanceof Context) {
+        } else if (current.instance instanceof Context) {
           return previous ? previous : current;
         } else {
           return previous;
@@ -1927,6 +1979,16 @@ var RootComponent = function (_Component) {
 
   var _proto2 = RootComponent.prototype;
 
+  _proto2.onInit = function onInit() {
+    var _this2 = this;
+
+    setTimeout(function () {
+      _this2.items = [1, 2];
+
+      _this2.pushChanges();
+    }, 2000);
+  };
+
   _proto2.onItem = function onItem(item) {
     console.log('RootComponent.onItem.item', item);
   };
@@ -1946,22 +2008,14 @@ var SubComponent = function (_Component2) {
   _inheritsLoose(SubComponent, _Component2);
 
   function SubComponent() {
-    var _this2;
+    var _this3;
 
-    _this2 = _Component2.apply(this, arguments) || this;
-    _this2.background = '#ffb9b9';
-    return _this2;
+    _this3 = _Component2.apply(this, arguments) || this;
+    _this3.background = '#ffb9b9';
+    return _this3;
   }
 
   var _proto3 = SubComponent.prototype;
-
-  _proto3.onInit = function onInit() {
-    console.log('SubComponent.onInit.item', this.item);
-  };
-
-  _proto3.onChanges = function onChanges(changes) {
-    console.log('SubComponent.onChanges.item', this.item);
-  };
 
   _proto3.onToggle = function onToggle() {
     this.toggle.next(this.item);
@@ -1974,7 +2028,7 @@ SubComponent.meta = {
   selector: '[sub-component]:not(.red)',
   inputs: ['item'],
   outputs: ['toggle'],
-  template: "<div [style]=\"{ 'background-color': background }\" (click)=\"onToggle()\" [innerHTML]=\"item\"></div>"
+  template: "<div [style]=\"{ 'background-color': background }\" (click)=\"onToggle()\">{{item}}</div>"
 };
 
 var HostDirective = function (_Directive) {
@@ -1983,17 +2037,6 @@ var HostDirective = function (_Directive) {
   function HostDirective() {
     return _Directive.apply(this, arguments) || this;
   }
-
-  var _proto4 = HostDirective.prototype;
-
-  _proto4.onInit = function onInit() {
-    console.log('HostDirective.onInit.style', this.style);
-    console.log('HostDirective.onInit.input', this.input);
-  };
-
-  _proto4.onChanges = function onChanges(changes) {
-    console.log('HostDirective.onChanges.input', this.input);
-  };
 
   return HostDirective;
 }(Directive);
@@ -2013,26 +2056,19 @@ var HostedDirective = function (_Directive2) {
     return _Directive2.apply(this, arguments) || this;
   }
 
-  var _proto5 = HostedDirective.prototype;
+  var _proto4 = HostedDirective.prototype;
 
-  _proto5.onInit = function onInit() {
-    var _this3 = this;
-
-    console.log('host', this.host);
+  _proto4.onInit = function onInit() {
+    var _this4 = this;
 
     var _getContext = getContext(this),
         node = _getContext.node;
 
     rxjs.fromEvent(node, 'click').pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (event) {
-      _this3.handled.next(event);
+      _this4.handled.next(event);
 
-      _this3.unhandled.next(event);
+      _this4.unhandled.next(event);
     });
-    console.log('HostedDirective.onInit.host.input', this.host.input);
-  };
-
-  _proto5.onChanges = function onChanges(changes) {
-    console.log('HostedDirective.onChanges.host.input', this.host.input);
   };
 
   return HostedDirective;
@@ -2044,6 +2080,36 @@ HostedDirective.meta = {
   hosts: {
     host: HostDirective
   }
+};
+
+var LabelComponent = function (_Component3) {
+  _inheritsLoose(LabelComponent, _Component3);
+
+  function LabelComponent() {
+    var _this5;
+
+    _this5 = _Component3.apply(this, arguments) || this;
+    _this5.label = 0;
+    return _this5;
+  }
+
+  _createClass(LabelComponent, [{
+    key: "currentLabel",
+    get: function get() {
+      if (this.label !== undefined) {
+        return this.label.toString();
+      } else {
+        return '---';
+      }
+    }
+  }]);
+
+  return LabelComponent;
+}(Component);
+
+LabelComponent.meta = {
+  selector: '[label]',
+  inputs: ['label']
 };
 
 var AppModule = function (_Module) {
@@ -2058,7 +2124,7 @@ var AppModule = function (_Module) {
 
 AppModule.meta = {
   imports: [CoreModule],
-  declarations: [HostedDirective, HostDirective, SubComponent],
+  declarations: [HostedDirective, HostDirective, SubComponent, LabelComponent],
   bootstrap: RootComponent
 };
 Browser.bootstrap(AppModule);}(rxjs,rxjs.operators));
