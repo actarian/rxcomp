@@ -22,6 +22,9 @@ export default class Factory {
 	}
 	[key: string]: any; // extensible object
 	constructor(...args: any[]) { }
+	static getInputsTokens(instance: Factory): string[] {
+		return this.meta.inputs || [];
+	}
 }
 
 export function getContext(instance: Factory): IContext {

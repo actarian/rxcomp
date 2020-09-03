@@ -13,7 +13,7 @@ export default class Component extends Factory {
 			/*
 			if (this instanceof Context) {
 				const instances: Factory[] = module.getChildInstances(node);
-				console.log(node, instances);
+				// console.log(node, instances);
 			}
 			*/
 			module.parse(node, this);

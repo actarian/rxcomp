@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.14
+ * @license rxcomp v1.0.0-beta.15
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -144,6 +144,10 @@ var Factory = function () {
       this.changes$.next(this);
       this.onView();
     }
+  };
+
+  Factory.getInputsTokens = function getInputsTokens(instance) {
+    return this.meta.inputs || [];
   };
 
   return Factory;
@@ -475,7 +479,6 @@ var Context = function (_Component) {
 
   _proto.onInit = function onInit() {
     var _getContext = getContext(this),
-        module = _getContext.module,
         node = _getContext.node;
 
     var forbegin = document.createComment("*for begin");
@@ -483,18 +486,16 @@ var Context = function (_Component) {
     node.parentNode.replaceChild(forbegin, node);
     var forend = this.forend = document.createComment("*for end");
     forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
-    var expression = node.getAttribute('*for');
     node.removeAttribute('*for');
-    var token = this.token = this.getExpressionToken(expression);
-    this.forFunction = module.makeFunction(token.iterable);
   };
 
   _proto.onChanges = function onChanges(changes) {
     var context = getContext(this);
     var module = context.module;
     var node = context.node;
-    var token = this.token;
-    var result = module.resolve(this.forFunction, changes, this) || [];
+    var tokens = this.tokens;
+    var inputKey = tokens.iterable;
+    var result = this[inputKey];
     var isArray = Array.isArray(result);
     var array = isArray ? result : Object.keys(result);
     var total = array.length;
@@ -507,13 +508,13 @@ var Context = function (_Component) {
 
         if (i < previous) {
           var instance = this.instances[i];
-          instance[token.key] = key;
-          instance[token.value] = value;
+          instance[tokens.key] = key;
+          instance[tokens.value] = value;
         } else {
           var clonedNode = node.cloneNode(true);
           delete clonedNode.rxcompId;
           this.forend.parentNode.insertBefore(clonedNode, this.forend);
-          var args = [token.key, key, token.value, value, i, total, context.parentInstance];
+          var args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
           var skipSubscription = true;
 
           var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
@@ -539,7 +540,17 @@ var Context = function (_Component) {
     this.instances.length = array.length;
   };
 
-  _proto.getExpressionToken = function getExpressionToken(expression) {
+  ForStructure.getInputsTokens = function getInputsTokens(instance) {
+    var _getContext3 = getContext(instance),
+        node = _getContext3.node;
+
+    var expression = node.getAttribute('*for');
+    var tokens = ForStructure.getForExpressionTokens(expression);
+    instance.tokens = tokens;
+    return [tokens.iterable];
+  };
+
+  ForStructure.getForExpressionTokens = function getForExpressionTokens(expression) {
     if (expression === null) {
       throw new Error('invalid for');
     }
@@ -586,7 +597,8 @@ var Context = function (_Component) {
   return ForStructure;
 }(Structure);
 ForStructure.meta = {
-  selector: '[*for]'
+  selector: '[*for]',
+  inputs: ['for']
 };var HrefDirective = function (_Directive) {
   _inheritsLoose(HrefDirective, _Directive);
 
@@ -627,7 +639,6 @@ HrefDirective.meta = {
 
   _proto.onInit = function onInit() {
     var _getContext = getContext(this),
-        module = _getContext.module,
         node = _getContext.node;
 
     var ifbegin = this.ifbegin = document.createComment("*if begin");
@@ -635,8 +646,6 @@ HrefDirective.meta = {
     node.parentNode.replaceChild(ifbegin, node);
     var ifend = this.ifend = document.createComment("*if end");
     ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
-    var expression = node.getAttribute('*if');
-    this.ifFunction = module.makeFunction(expression);
     var clonedNode = node.cloneNode(true);
     clonedNode.removeAttribute('*if');
     this.clonedNode = clonedNode;
@@ -647,10 +656,9 @@ HrefDirective.meta = {
     var _getContext2 = getContext(this),
         module = _getContext2.module;
 
-    var value = module.resolve(this.ifFunction, changes, this);
     var element = this.element;
 
-    if (value) {
+    if (this.if != null) {
       if (!element.parentNode) {
         var ifend = this.ifend;
         ifend.parentNode.insertBefore(element, ifend);
@@ -668,7 +676,8 @@ HrefDirective.meta = {
   return IfStructure;
 }(Structure);
 IfStructure.meta = {
-  selector: '[*if]'
+  selector: '[*if]',
+  inputs: ['if']
 };var InnerHtmlDirective = function (_Directive) {
   _inheritsLoose(InnerHtmlDirective, _Directive);
 
@@ -1113,7 +1122,7 @@ var Module = function () {
 
       if (!(instance instanceof Context)) {
         this.makeHosts(meta, instance, node);
-        context.inputs = this.makeInputs(meta, instance);
+        context.inputs = this.makeInputs(meta, instance, factory);
         context.outputs = this.makeOutputs(meta, instance);
 
         if (parentInstance instanceof Factory) {
@@ -1123,7 +1132,7 @@ var Module = function () {
 
       instance.onInit();
 
-      if (!skipSubscription) {
+      if (!skipSubscription && context.inputs && Object.keys(context.inputs).length > 0) {
         this.makeInstanceSubscription(instance, parentInstance);
       }
 
@@ -1164,11 +1173,6 @@ var Module = function () {
         return null;
       };
     }
-  };
-
-  _proto.nextError = function nextError(error, instance, expression, params) {
-    var expressionError = new ExpressionError(error, this, instance, expression, params);
-    nextError$.next(expressionError);
   };
 
   _proto.resolve = function resolve(expression, parentInstance, payload) {
@@ -1216,9 +1220,116 @@ var Module = function () {
     this.meta.node.innerHTML = this.meta.nodeInnerHTML;
   };
 
+  _proto.nextError = function nextError(error, instance, expression, params) {
+    var expressionError = new ExpressionError(error, this, instance, expression, params);
+    nextError$.next(expressionError);
+  };
+
   _proto.makeContext = function makeContext(instance, parentInstance, node, selector) {
     var context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
     return context;
+  };
+
+  _proto.makeHosts = function makeHosts(meta, instance, node) {
+    if (meta.hosts) {
+      Object.keys(meta.hosts).forEach(function (key) {
+        var factory = meta.hosts[key];
+        instance[key] = getHost(instance, factory, node);
+      });
+    }
+  };
+
+  _proto.makeInput = function makeInput(instance, key) {
+    var _getContext = getContext(instance),
+        node = _getContext.node;
+
+    var input = null,
+        expression = null;
+
+    if (node.hasAttribute("[" + key + "]")) {
+      expression = node.getAttribute("[" + key + "]");
+    } else if (node.hasAttribute("*" + key)) {
+      expression = node.getAttribute("*" + key);
+    } else if (node.hasAttribute(key)) {
+      expression = node.getAttribute(key);
+
+      if (expression) {
+        var attribute = expression.replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
+          if (a) {
+            return '"+';
+          }
+
+          if (b) {
+            return '+"';
+          }
+
+          if (c) {
+            return '\"';
+          }
+
+          return '';
+        });
+        expression = "\"" + attribute + "\"";
+      }
+    }
+
+    expression = expression || key;
+
+    if (expression) {
+      input = this.makeFunction(expression);
+    }
+
+    return input;
+  };
+
+  _proto.makeInputs = function makeInputs(meta, instance, factory) {
+    var _this3 = this;
+
+    var inputs = {};
+    factory.getInputsTokens(instance).forEach(function (key) {
+      var input = _this3.makeInput(instance, key);
+
+      if (input) {
+        inputs[key] = input;
+      }
+    });
+    return inputs;
+  };
+
+  _proto.makeOutput = function makeOutput(instance, key) {
+    var _this4 = this;
+
+    var context = getContext(instance);
+    var node = context.node;
+    var parentInstance = context.parentInstance;
+    var expression = node.getAttribute("(" + key + ")");
+    var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
+    var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
+      if (outputFunction) {
+        _this4.resolve(outputFunction, parentInstance, event);
+      }
+    }));
+    output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
+    instance[key] = output$;
+    return output$;
+  };
+
+  _proto.makeOutputs = function makeOutputs(meta, instance) {
+    var _this5 = this;
+
+    var outputs = {};
+
+    if (meta.outputs) {
+      meta.outputs.forEach(function (key) {
+        var output = _this5.makeOutput(instance, key);
+
+        if (output) {
+          outputs[key] = output;
+        }
+      });
+    }
+
+    return outputs;
   };
 
   _proto.getInstance = function getInstance(node) {
@@ -1236,15 +1347,15 @@ var Module = function () {
   };
 
   _proto.getParentInstance = function getParentInstance(node) {
-    var _this3 = this;
+    var _this6 = this;
 
     return Module.traverseUp(node, function (node) {
-      return _this3.getInstance(node);
+      return _this6.getInstance(node);
     });
   };
 
   _proto.parseTextNode = function parseTextNode(node, instance) {
-    var _this4 = this;
+    var _this7 = this;
 
     var expressions = node.nodeExpressions;
 
@@ -1257,7 +1368,7 @@ var Module = function () {
         var text;
 
         if (typeof c === 'function') {
-          text = _this4.resolve(c, instance, instance);
+          text = _this7.resolve(c, instance, instance);
 
           if (text == undefined) {
             text = '';
@@ -1317,104 +1428,6 @@ var Module = function () {
     }
   };
 
-  _proto.makeHosts = function makeHosts(meta, instance, node) {
-    if (meta.hosts) {
-      Object.keys(meta.hosts).forEach(function (key) {
-        var factory = meta.hosts[key];
-        instance[key] = getHost(instance, factory, node);
-      });
-    }
-  };
-
-  _proto.makeInput = function makeInput(instance, key) {
-    var _getContext = getContext(instance),
-        node = _getContext.node;
-
-    var input = null,
-        expression = null;
-
-    if (node.hasAttribute("[" + key + "]")) {
-      expression = node.getAttribute("[" + key + "]");
-    } else if (node.hasAttribute(key)) {
-      var attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
-        if (a) {
-          return '"+';
-        }
-
-        if (b) {
-          return '+"';
-        }
-
-        if (c) {
-          return '\"';
-        }
-
-        return '';
-      });
-      expression = "\"" + attribute + "\"";
-    }
-
-    if (expression) {
-      input = this.makeFunction(expression);
-    }
-
-    return input;
-  };
-
-  _proto.makeInputs = function makeInputs(meta, instance) {
-    var _this5 = this;
-
-    var inputs = {};
-
-    if (meta.inputs) {
-      meta.inputs.forEach(function (key, i) {
-        var input = _this5.makeInput(instance, key);
-
-        if (input) {
-          inputs[key] = input;
-        }
-      });
-    }
-
-    return inputs;
-  };
-
-  _proto.makeOutput = function makeOutput(instance, key) {
-    var _this6 = this;
-
-    var context = getContext(instance);
-    var node = context.node;
-    var parentInstance = context.parentInstance;
-    var expression = node.getAttribute("(" + key + ")");
-    var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
-    var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
-      if (outputFunction) {
-        _this6.resolve(outputFunction, parentInstance, event);
-      }
-    }));
-    output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
-    instance[key] = output$;
-    return output$;
-  };
-
-  _proto.makeOutputs = function makeOutputs(meta, instance) {
-    var _this7 = this;
-
-    var outputs = {};
-
-    if (meta.outputs) {
-      meta.outputs.forEach(function (key) {
-        var output = _this7.makeOutput(instance, key);
-
-        if (output) {
-          outputs[key] = output;
-        }
-      });
-    }
-
-    return outputs;
-  };
-
   _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
     var context = getContext(instance);
     var parentInstance = context.parentInstance;
@@ -1425,6 +1438,23 @@ var Module = function () {
       var value = this.resolve(inputFunction, parentInstance, instance);
       instance[key] = value;
     }
+  };
+
+  Module.makeContext = function makeContext(module, instance, parentInstance, node, factory, selector) {
+    instance.rxcompId = ++ID;
+    var context = {
+      module: module,
+      instance: instance,
+      parentInstance: parentInstance,
+      node: node,
+      factory: factory,
+      selector: selector
+    };
+    var rxcompNodeId = node.rxcompId = node.rxcompId || instance.rxcompId;
+    var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+    nodeContexts.push(context);
+    CONTEXTS[instance.rxcompId] = context;
+    return context;
   };
 
   Module.parseExpression = function parseExpression(expression) {
@@ -1519,23 +1549,6 @@ var Module = function () {
       return previous || '';
     });
     return expression;
-  };
-
-  Module.makeContext = function makeContext(module, instance, parentInstance, node, factory, selector) {
-    instance.rxcompId = ++ID;
-    var context = {
-      module: module,
-      instance: instance,
-      parentInstance: parentInstance,
-      node: node,
-      factory: factory,
-      selector: selector
-    };
-    var rxcompNodeId = node.rxcompId = node.rxcompId || instance.rxcompId;
-    var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
-    nodeContexts.push(context);
-    CONTEXTS[instance.rxcompId] = context;
-    return context;
   };
 
   Module.deleteContext = function deleteContext(id, keepContext) {

@@ -58,7 +58,7 @@ export default class Module {
 			// creating component input and outputs
 			if (!(instance instanceof Context)) {
 				this.makeHosts(meta, instance, node);
-				context.inputs = this.makeInputs(meta, instance);
+				context.inputs = this.makeInputs(meta, instance, factory);
 				context.outputs = this.makeOutputs(meta, instance);
 				if (parentInstance instanceof Factory) {
 					this.resolveInputsOutputs(instance, parentInstance);
@@ -67,7 +67,7 @@ export default class Module {
 			// calling onInit event
 			instance.onInit();
 			// subscribe to parent changes
-			if (!skipSubscription) {
+			if (!skipSubscription && context.inputs && Object.keys(context.inputs).length > 0) {
 				this.makeInstanceSubscription(instance, parentInstance);
 			}
 			return instance;
@@ -128,10 +128,6 @@ export default class Module {
 			return () => { return null; };
 		}
 	}
-	public nextError(error: Error, instance: Factory, expression: string, params: any[]): void {
-		const expressionError: ExpressionError = new ExpressionError(error, this, instance, expression, params);
-		nextError$.next(expressionError);
-	}
 	public resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any {
 		// console.log('Module.resolve', expression, parentInstance, payload, getContext);
 		return expression.apply(parentInstance, [payload, this]);
@@ -176,10 +172,126 @@ export default class Module {
 		this.remove(this.meta!.node);
 		this.meta!.node.innerHTML = this.meta!.nodeInnerHTML;
 	}
+	public nextError(error: Error, instance: Factory, expression: string, params: any[]): void {
+		const expressionError: ExpressionError = new ExpressionError(error, this, instance, expression, params);
+		nextError$.next(expressionError);
+	}
 	protected makeContext(instance: Factory, parentInstance: Factory | Window, node: IElement, selector: string): IContext {
 		const context: IContext = Module.makeContext(this, instance, parentInstance, node, instance.constructor as typeof Factory, selector);
 		// console.log('Module.makeContext', context, context.instance, context.node);
 		return context;
+	}
+	protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void {
+		if (meta.hosts) {
+			Object.keys(meta.hosts).forEach((key: string) => {
+				const factory: typeof Factory = meta.hosts![key];
+				instance[key] = getHost(instance, factory, node);
+			});
+		}
+	}
+	protected makeInput(instance: Factory, key: string): ExpressionFunction | null {
+		// console.log('Module.makeInput', 'key', key, 'instance', instance);
+		const { node } = getContext(instance);
+		let input: ExpressionFunction | null = null,
+			expression: string | null = null;
+		if (node.hasAttribute(`[${key}]`)) {
+			expression = node.getAttribute(`[${key}]`);
+			// console.log('Module.makeInput.expression.1', expression);
+		} else if (node.hasAttribute(`*${key}`)) {
+			expression = node.getAttribute(`*${key}`);
+			// console.log('Module.makeInput.expression.2', expression);
+		} else if (node.hasAttribute(key)) {
+			expression = node.getAttribute(key);
+			if (expression) {
+				const attribute: string = expression.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
+					if (a) {
+						return '"+';
+					}
+					if (b) {
+						return '+"';
+					}
+					if (c) {
+						return '\"';
+					}
+					return '';
+				});
+				expression = `"${attribute}"`;
+				// console.log('Module.makeInput.expression.3', expression);
+			}
+		}
+		expression = expression || key;
+		if (expression) {
+			input = this.makeFunction(expression);
+		}
+		/*
+		const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(instance, key) as PropertyDescriptor;
+		if (!descriptor) {
+			Object.defineProperty(instance, key, {
+				value: null,
+				enumerable: true,
+				writable: true,
+				configurable: false,
+			});
+		}
+		*/
+		// console.log('Module.makeInput', key, instance, descriptor);
+		return input;
+	}
+	protected makeInputs(meta: IFactoryMeta, instance: Factory, factory: typeof Factory): { [key: string]: ExpressionFunction } {
+		const inputs: { [key: string]: ExpressionFunction } = {};
+		factory.getInputsTokens(instance).forEach((key: string) => {
+			const input = this.makeInput(instance, key);
+			if (input) {
+				inputs[key] = input;
+			}
+		});
+		return inputs;
+	}
+	/*
+	protected makeInputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
+		const inputs: { [key: string]: ExpressionFunction } = {};
+		if (meta.inputs) {
+			meta.inputs.forEach((key: string, i: number) => {
+				const input = this.makeInput(instance, key);
+				if (input) {
+					inputs[key] = input;
+				}
+			});
+		}
+		return inputs;
+	}
+	*/
+	protected makeOutput(instance: Factory, key: string): Observable<any> {
+		const context: IContext = getContext(instance);
+		const node: IElement = context.node;
+		const parentInstance: Factory | Window = context.parentInstance;
+		const expression: string | null = node.getAttribute(`(${key})`);
+		const outputFunction: ExpressionFunction | null = expression ? this.makeFunction(expression, ['$event']) : null;
+		const output$: Observable<any> = new Subject<any>().pipe(
+			tap((event) => {
+				if (outputFunction) {
+					// console.log(expression, parentInstance);
+					this.resolve(outputFunction, parentInstance, event);
+				}
+			})
+		);
+		output$.pipe(
+			takeUntil(instance.unsubscribe$)
+		).subscribe();
+		instance[key] = output$;
+		return output$;
+	}
+	protected makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: Observable<any> } {
+		const outputs: { [key: string]: Observable<any> } = {};
+		if (meta.outputs) {
+			meta.outputs.forEach((key: string) => {
+				const output = this.makeOutput(instance, key);
+				if (output) {
+					outputs[key] = output;
+				}
+			});
+		}
+		return outputs;
 	}
 	protected getInstance(node: HTMLElement | Document): Factory | Window | undefined {
 		if (node === document) {
@@ -254,99 +366,6 @@ export default class Module {
 			return [];
 		}
 	}
-	protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void {
-		if (meta.hosts) {
-			Object.keys(meta.hosts).forEach((key: string) => {
-				const factory: typeof Factory = meta.hosts![key];
-				instance[key] = getHost(instance, factory, node);
-			});
-		}
-	}
-	protected makeInput(instance: Factory, key: string): ExpressionFunction | null {
-		const { node } = getContext(instance);
-		let input: ExpressionFunction | null = null,
-			expression: string | null = null;
-		if (node.hasAttribute(`[${key}]`)) {
-			expression = node.getAttribute(`[${key}]`)!;
-			// console.log('Module.makeInput.expression.1', expression);
-		} else if (node.hasAttribute(key)) {
-			// const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
-			const attribute: string = node.getAttribute(key)!.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
-				if (a) {
-					return '"+';
-				}
-				if (b) {
-					return '+"';
-				}
-				if (c) {
-					return '\"';
-				}
-				return '';
-			});
-			expression = `"${attribute}"`;
-			// console.log('Module.makeInput.expression.2', expression);
-		}
-		if (expression) {
-			input = this.makeFunction(expression);
-		}
-		/*
-		const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(instance, key) as PropertyDescriptor;
-		if (!descriptor) {
-			Object.defineProperty(instance, key, {
-				value: null,
-				enumerable: true,
-				writable: true,
-				configurable: false,
-			});
-		}
-		*/
-		// console.log('Module.makeInput', key, instance, descriptor);
-		return input;
-	}
-	protected makeInputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
-		const inputs: { [key: string]: ExpressionFunction } = {};
-		if (meta.inputs) {
-			meta.inputs.forEach((key: string, i: number) => {
-				const input = this.makeInput(instance, key);
-				if (input) {
-					inputs[key] = input;
-				}
-			});
-		}
-		return inputs;
-	}
-	protected makeOutput(instance: Factory, key: string): Observable<any> {
-		const context: IContext = getContext(instance);
-		const node: IElement = context.node;
-		const parentInstance: Factory | Window = context.parentInstance;
-		const expression: string | null = node.getAttribute(`(${key})`);
-		const outputFunction: ExpressionFunction | null = expression ? this.makeFunction(expression, ['$event']) : null;
-		const output$: Observable<any> = new Subject<any>().pipe(
-			tap((event) => {
-				if (outputFunction) {
-					// console.log(expression, parentInstance);
-					this.resolve(outputFunction, parentInstance, event);
-				}
-			})
-		);
-		output$.pipe(
-			takeUntil(instance.unsubscribe$)
-		).subscribe();
-		instance[key] = output$;
-		return output$;
-	}
-	protected makeOutputs(meta: IFactoryMeta, instance: Factory): { [key: string]: Observable<any> } {
-		const outputs: { [key: string]: Observable<any> } = {};
-		if (meta.outputs) {
-			meta.outputs.forEach((key: string) => {
-				const output = this.makeOutput(instance, key);
-				if (output) {
-					outputs[key] = output;
-				}
-			});
-		}
-		return outputs;
-	}
 	protected resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
 		const context: IContext = getContext(instance);
 		const parentInstance: Factory | Window = context.parentInstance;
@@ -357,6 +376,15 @@ export default class Module {
 			const value: any = this.resolve(inputFunction, parentInstance, instance);
 			instance[key] = value;
 		}
+	}
+	protected static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: IElement, factory: typeof Factory, selector: string): IContext {
+		instance.rxcompId = ++ID;
+		const context: IContext = { module, instance, parentInstance, node, factory, selector };
+		const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
+		const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+		nodeContexts.push(context);
+		CONTEXTS[instance.rxcompId] = context;
+		return context;
 	}
 	protected static parseExpression(expression: string): string {
 		const l: string = '┌';
@@ -429,15 +457,6 @@ export default class Module {
 			return previous || '';
 		});
 		return expression;
-	}
-	protected static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: IElement, factory: typeof Factory, selector: string): IContext {
-		instance.rxcompId = ++ID;
-		const context: IContext = { module, instance, parentInstance, node, factory, selector };
-		const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
-		const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
-		nodeContexts.push(context);
-		CONTEXTS[instance.rxcompId] = context;
-		return context;
 	}
 	protected static deleteContext(id: number, keepContext: IContext | undefined): IContext[] {
 		const keepContexts: IContext[] = [];

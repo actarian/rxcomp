@@ -1,33 +1,38 @@
 import Factory, { getContext } from '../core/factory';
 import Structure from '../core/structure';
-import { ExpressionFunction, IComment, IContext, IElement, IExpressionToken, IFactoryMeta } from '../core/types';
+import { ExpressionFunction, IComment, IContext, IElement, IFactoryMeta, IForExpressionTokens } from '../core/types';
 import Module from '../module/module';
 import ForItem from './for.item';
 
 export default class ForStructure extends Structure {
 	instances: Factory[] = [];
 	forend?: IComment;
-	token?: IExpressionToken;
+	tokens!: IForExpressionTokens;
 	forFunction?: ExpressionFunction;
 	onInit() {
-		const { module, node } = getContext(this);
+		// const { module, node } = getContext(this);
+		const { node } = getContext(this);
 		const forbegin: IComment = document.createComment(`*for begin`);
 		forbegin.rxcompId = node.rxcompId;
 		node.parentNode!.replaceChild(forbegin, node);
 		const forend: IComment = this.forend = document.createComment(`*for end`);
 		forbegin.parentNode!.insertBefore(forend, forbegin.nextSibling);
-		const expression: string = node.getAttribute('*for')!;
+		// const expression: string = node.getAttribute('*for')!;
 		node.removeAttribute('*for');
-		const token = this.token = this.getExpressionToken(expression);
-		this.forFunction = module.makeFunction(token.iterable);
+		// const tokens = this.tokens = ForStructure.getForExpressionTokens(expression);
+		// this.forFunction = module.makeFunction(tokens.iterable);
+		// const inputKey = this.tokens.iterable;
+		// console.log('*for', inputKey, this[inputKey]);
 	}
 	onChanges(changes: Factory | Window) {
 		const context: IContext = getContext(this);
 		const module: Module = context.module;
 		const node: IElement = context.node;
 		// resolve
-		const token: IExpressionToken = this.token!;
-		let result = module.resolve(this.forFunction!, changes, this) || [];
+		const tokens: IForExpressionTokens = this.tokens!;
+		// let result = module.resolve(this.forFunction!, changes, this) || [];
+		const inputKey = tokens.iterable;
+		let result = this[inputKey];
 		const isArray = Array.isArray(result);
 		const array: any[] = isArray ? result : Object.keys(result);
 		const total: number = array.length;
@@ -39,8 +44,8 @@ export default class ForStructure extends Structure {
 				if (i < previous) {
 					// update
 					const instance: Factory = this.instances[i];
-					instance[token.key] = key;
-					instance[token.value] = value;
+					instance[tokens.key] = key;
+					instance[tokens.value] = value;
 					/*
 					if (!nextSibling) {
 						const context = getContext(instance);
@@ -56,7 +61,7 @@ export default class ForStructure extends Structure {
 					delete clonedNode.rxcompId;
 					this.forend!.parentNode!.insertBefore(clonedNode, this.forend!);
 					// !!! todo: check context.parentInstance
-					const args = [token.key, key, token.value, value, i, total, context.parentInstance];
+					const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
 					// console.log('ForStructure.makeInstance.ForItem');
 					const skipSubscription = true;
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
@@ -82,9 +87,17 @@ export default class ForStructure extends Structure {
 			}
 		}
 		this.instances.length = array.length;
-		// console.log('ForStructure', this.instances, token);
+		// console.log('ForStructure', this.instances, tokens);
 	}
-	getExpressionToken(expression: string): IExpressionToken {
+	static getInputsTokens(instance: ForStructure): string[] {
+		const { node } = getContext(instance);
+		const expression: string = node.getAttribute('*for')!;
+		const tokens = ForStructure.getForExpressionTokens(expression);
+		instance.tokens = tokens;
+		// console.log('ForStructure.getInputsTokens', [tokens.iterable]);
+		return [tokens.iterable];
+	}
+	static getForExpressionTokens(expression: string): IForExpressionTokens {
 		if (expression === null) {
 			throw new Error('invalid for');
 		}
@@ -111,5 +124,6 @@ export default class ForStructure extends Structure {
 	}
 	static meta: IFactoryMeta = {
 		selector: '[*for]',
+		inputs: ['for'],
 	};
 }

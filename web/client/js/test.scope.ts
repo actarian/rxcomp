@@ -1,6 +1,6 @@
 import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { Browser, Component, CoreModule, Directive, ErrorInterceptors, getContext, IErrorHandler, IErrorInterceptor, Module, StyleDirective } from '../../../src/rxcomp';
+import { Browser, Component, CoreModule, Directive, ErrorInterceptors, Factory, getContext, IErrorHandler, IErrorInterceptor, Module, StyleDirective } from '../../../src/rxcomp';
 
 class CustomErrorInterceptor implements IErrorInterceptor {
 	intercept(error: Error, next: IErrorHandler): Observable<Error | void> {
@@ -45,7 +45,6 @@ class SubComponent extends Component {
 	toggle?: BehaviorSubject<any>;
 	item?: number;
 
-	/*
 	onInit() {
 		console.log('SubComponent.onInit.item', this.item);
 	}
@@ -53,7 +52,6 @@ class SubComponent extends Component {
 	onChanges(changes: Factory) {
 		console.log('SubComponent.onChanges.item', this.item);
 	}
-	*/
 
 	onToggle() {
 		// console.log(this.item);
@@ -70,7 +68,6 @@ SubComponent.meta = {
 class HostDirective extends Directive {
 	style: any;
 
-	/*
 	onInit() {
 		console.log('HostDirective.onInit.style', this.style);
 		console.log('HostDirective.onInit.input', this.input);
@@ -79,7 +76,6 @@ class HostDirective extends Directive {
 	onChanges(changes: Factory) {
 		console.log('HostDirective.onChanges.input', this.input);
 	}
-	*/
 }
 HostDirective.meta = {
 	selector: '[host]',
@@ -104,7 +100,7 @@ class HostedDirective extends Directive {
 
 	/*
 	onChanges(changes: Factory) {
-		console.log('HostedDirective.onChanges.host.input', this.host!.input);
+		// console.log('HostedDirective.onChanges.host.input', this.host!.input);
 	}
 	*/
 }

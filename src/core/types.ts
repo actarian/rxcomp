@@ -94,7 +94,7 @@ export interface IText extends Text {
 	nodeExpressions?: (ExpressionFunction | string)[];
 }
 
-export interface IExpressionToken {
+export interface IForExpressionTokens {
 	key: string;
 	value: string;
 	iterable: string;
