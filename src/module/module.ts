@@ -199,7 +199,7 @@ export default class Module {
 		}
 		expression = expression || key;
 		if (expression) {
-			instance[key] = instance[key] || null; // !!! avoid throError undefined key
+			instance[key] = instance[key] === undefined ? null : instance[key]; // !!! avoid throError undefined key
 			input = this.makeFunction(expression);
 		}
 		// console.log('Module.makeInput', key, instance, descriptor);
