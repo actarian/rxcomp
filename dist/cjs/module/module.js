@@ -69,7 +69,7 @@ var Module = /** @class */ (function () {
             // calling onInit event
             instance_1.onInit();
             // subscribe to parent changes
-            if (!skipSubscription && context.inputs && Object.keys(context.inputs).length > 0) {
+            if (!skipSubscription) {
                 this.makeInstanceSubscription(instance_1, parentInstance);
             }
             return instance_1;

@@ -67,7 +67,7 @@ export default class Module {
 			// calling onInit event
 			instance.onInit();
 			// subscribe to parent changes
-			if (!skipSubscription && context.inputs && Object.keys(context.inputs).length > 0) {
+			if (!skipSubscription) {
 				this.makeInstanceSubscription(instance, parentInstance);
 			}
 			return instance;

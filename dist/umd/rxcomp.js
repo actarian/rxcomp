@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.15
+ * @license rxcomp v1.0.0-beta.16
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1269,7 +1269,7 @@ var Module = /*#__PURE__*/function () {
 
       instance.onInit(); // subscribe to parent changes
 
-      if (!skipSubscription && context.inputs && Object.keys(context.inputs).length > 0) {
+      if (!skipSubscription) {
         this.makeInstanceSubscription(instance, parentInstance);
       }
 
