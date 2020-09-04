@@ -1,38 +1,29 @@
 import Factory, { getContext } from '../core/factory';
 import Structure from '../core/structure';
-import { ExpressionFunction, IComment, IContext, IElement, IFactoryMeta, IForExpressionTokens } from '../core/types';
+import { IComment, IContext, IElement, IFactoryMeta, IForExpressionTokens } from '../core/types';
 import Module from '../module/module';
 import ForItem from './for.item';
 
 export default class ForStructure extends Structure {
 	instances: Factory[] = [];
-	forend?: IComment;
+	forbegin!: IComment;
+	forend!: IComment;
 	tokens!: IForExpressionTokens;
-	forFunction?: ExpressionFunction;
 	onInit() {
-		// const { module, node } = getContext(this);
 		const { node } = getContext(this);
-		const forbegin: IComment = document.createComment(`*for begin`);
+		const forbegin: IComment = this.forbegin = document.createComment(`*for begin`);
 		forbegin.rxcompId = node.rxcompId;
 		node.parentNode!.replaceChild(forbegin, node);
 		const forend: IComment = this.forend = document.createComment(`*for end`);
 		forbegin.parentNode!.insertBefore(forend, forbegin.nextSibling);
-		// const expression: string = node.getAttribute('*for')!;
 		node.removeAttribute('*for');
-		// const tokens = this.tokens = ForStructure.getForExpressionTokens(expression);
-		// this.forFunction = module.makeFunction(tokens.iterable);
-		// const inputKey = this.tokens.iterable;
-		// console.log('*for', inputKey, this[inputKey]);
 	}
-	onChanges(changes: Factory | Window) {
+	onChanges() {
 		const context: IContext = getContext(this);
 		const module: Module = context.module;
 		const node: IElement = context.node;
-		// resolve
 		const tokens: IForExpressionTokens = this.tokens!;
-		// let result = module.resolve(this.forFunction!, changes, this) || [];
-		const inputKey = tokens.iterable;
-		let result = this[inputKey];
+		let result = this[tokens.iterable];
 		const isArray = Array.isArray(result);
 		const array: any[] = isArray ? result : Object.keys(result);
 		const total: number = array.length;
@@ -46,35 +37,17 @@ export default class ForStructure extends Structure {
 					const instance: Factory = this.instances[i];
 					instance[tokens.key] = key;
 					instance[tokens.value] = value;
-					/*
-					if (!nextSibling) {
-						const context = getContext(instance);
-						const node = context.node;
-						this.forend.parentNode.insertBefore(node, this.forend);
-					} else {
-						nextSibling = nextSibling.nextSibling;
-					}
-					*/
 				} else {
 					// create
 					const clonedNode: IElement = node.cloneNode(true) as IElement;
 					delete clonedNode.rxcompId;
-					this.forend!.parentNode!.insertBefore(clonedNode, this.forend!);
-					// !!! todo: check context.parentInstance
+					this.forend.parentNode!.insertBefore(clonedNode, this.forend);
 					const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
-					// console.log('ForStructure.makeInstance.ForItem');
 					const skipSubscription = true;
 					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
-					// console.log('ForStructure.instance.created', instance);
 					if (instance) {
-						// const forItemContext = getContext(instance);
-						// console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
-						// module.compile(clonedNode, forItemContext.instance);
-						// const instances: Factory[];
 						module.compile(clonedNode, instance);
 						module.makeInstanceSubscription(instance, context.parentInstance);
-						// console.log('ForStructure.instance.compiled', instances);
-						// nextSibling = clonedNode.nextSibling;
 						this.instances.push(instance);
 					}
 				}
@@ -87,14 +60,11 @@ export default class ForStructure extends Structure {
 			}
 		}
 		this.instances.length = array.length;
-		// console.log('ForStructure', this.instances, tokens);
 	}
 	static getInputsTokens(instance: ForStructure): string[] {
 		const { node } = getContext(instance);
 		const expression: string = node.getAttribute('*for')!;
-		const tokens = ForStructure.getForExpressionTokens(expression);
-		instance.tokens = tokens;
-		// console.log('ForStructure.getInputsTokens', [tokens.iterable]);
+		const tokens = instance.tokens = ForStructure.getForExpressionTokens(expression);
 		return [tokens.iterable];
 	}
 	static getForExpressionTokens(expression: string): IForExpressionTokens {

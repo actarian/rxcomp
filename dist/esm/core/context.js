@@ -23,6 +23,10 @@ export default class Context extends Component {
         }
         super.pushChanges();
     }
+    onParentDidChange(changes) {
+        this.onChanges(changes);
+        this.pushChanges();
+    }
     static mergeDescriptors(source, instance, descriptors = {}) {
         const properties = Object.getOwnPropertyNames(source);
         while (properties.length) {

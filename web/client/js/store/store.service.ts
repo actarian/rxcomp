@@ -4,14 +4,11 @@ import LocalStorageService from '../local-storage/local-storage.service';
 import ITodoItem from '../todo-item/todo-item';
 
 export default class StoreService {
-
 	static store$: BehaviorSubject<any>;
-
 	static set(items: ITodoItem[]) {
 		LocalStorageService.set('items', items);
 		return this.get$().next(items);
 	}
-
 	static get$(): BehaviorSubject<ITodoItem[]> {
 		if (this.store$) {
 			return this.store$;
@@ -32,7 +29,6 @@ export default class StoreService {
 			delay(1) // simulate http
 		) as BehaviorSubject<ITodoItem[]>;
 	}
-
 	static add$(patch: ITodoItem): Observable<ITodoItem> {
 		const item = Object.assign({
 			id: Date.now(),
@@ -45,7 +41,6 @@ export default class StoreService {
 			delay(1) // simulate http
 		);
 	}
-
 	static patch$(patch: ITodoItem): Observable<ITodoItem> {
 		const items = this.store$.getValue();
 		const item = items.find((x: ITodoItem) => x.id === patch.id);
@@ -57,7 +52,6 @@ export default class StoreService {
 			delay(1) // simulate http
 		);
 	}
-
 	static delete$(item: ITodoItem): Observable<ITodoItem> {
 		const items = this.store$.getValue();
 		const index = items.indexOf(item);
@@ -69,5 +63,4 @@ export default class StoreService {
 			delay(1) // simulate http
 		);
 	}
-
 }

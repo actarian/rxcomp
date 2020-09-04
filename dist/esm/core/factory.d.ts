@@ -16,7 +16,9 @@ export default class Factory {
     onView(): void;
     onDestroy(): void;
     pushChanges(): void;
+    onParentDidChange(changes: Factory | Window): void;
     [key: string]: any;
     constructor(...args: any[]);
+    static getInputsTokens(instance: Factory): string[];
 }
 export declare function getContext(instance: Factory): IContext;

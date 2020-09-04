@@ -3,10 +3,8 @@ import { getContext } from '../core/factory';
 import { IFactoryMeta } from '../core/types';
 
 export default class StyleDirective extends Directive {
-
 	style?: { [key: string]: string } | null;
 	previousStyle?: { [key: string]: string } | null;
-
 	onChanges() {
 		const { node } = getContext(this);
 		const style = this.style;

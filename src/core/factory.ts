@@ -51,7 +51,6 @@ export default class Factory {
 		return this.meta.inputs || [];
 	}
 }
-
 export function getContext(instance: Factory): IContext {
 	return CONTEXTS[instance.rxcompId];
 }

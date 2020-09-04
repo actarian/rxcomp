@@ -1,4 +1,3 @@
 import Factory from './factory';
 
-export default class Directive extends Factory {
-}
+export default class Directive extends Factory { }

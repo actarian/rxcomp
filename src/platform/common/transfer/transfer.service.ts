@@ -1,7 +1,6 @@
 import Serializer, { decodeJson, encodeJson } from "../serializer/serializer";
 
 export default class TransferService {
-
 	static makeKey(base: string, params?: { [key: string]: any }): string {
 		const paramsKey: string = params ? optionsToKey(params) : '';
 		let key: string = `rxcomp-hydrate-${base}-${paramsKey}`;
@@ -9,12 +8,10 @@ export default class TransferService {
 		// console.log('TransferService.makeKey', key, base, paramsKey);
 		return key;
 	}
-
 	static has(key: string): boolean {
 		const script = document.querySelector(`#${key}`);
 		return script !== null;
 	}
-
 	static get<T>(key: string): T | undefined;
 	static get(key: string): { [key: string]: any } | undefined;
 	static get(key: string): any {
@@ -26,7 +23,6 @@ export default class TransferService {
 			return undefined;
 		}
 	}
-
 	static set(key: string, value: { [key: string]: any }): void {
 		// console.log('TransferService.set', key, value);
 		const json: string | undefined = Serializer.encode(value, [encodeJson]);
@@ -46,7 +42,6 @@ export default class TransferService {
 			node.replaceChild(text, node.firstChild!);
 		}
 	}
-
 	static remove(key: string): void {
 		let node = document.querySelector(`#${key}`);
 		if (node && node.parentNode) {
@@ -54,7 +49,6 @@ export default class TransferService {
 		}
 	}
 }
-
 export function optionsToKey(v: any, s: string = ''): string {
 	if (typeof v === 'number') {
 		s += '-' + v.toString();

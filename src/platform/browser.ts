@@ -1,17 +1,17 @@
 import { IElement, IModuleParsedMeta } from '../core/types';
 import { ModuleError } from '../error/error';
 import Module from '../module/module';
+import { WINDOW } from './common/window/window';
 import Platform, { isPlatformBrowser } from './platform';
 
 export default class Browser extends Platform {
-
 	/**
 	 * @param moduleFactory
 	 * @description This method returns a Browser compiled module
 	 */
 	static bootstrap(moduleFactory?: typeof Module): Module {
 		if (!isPlatformBrowser) {
-			throw new ModuleError('missing platform browser, window not found');
+			throw new ModuleError('missing platform browser, Window not found');
 		}
 		if (!moduleFactory) {
 			throw new ModuleError('missing moduleFactory');
@@ -34,25 +34,20 @@ export default class Browser extends Platform {
 		meta.imports.forEach((moduleFactory: typeof Module) => {
 			moduleFactory.prototype.constructor.call(module);
 		});
-		if (window.rxcomp_hydrate_) {
+		if (WINDOW.rxcomp_hydrate_) {
 			const clonedNode = meta.node.cloneNode() as IElement;
-			clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;
-			const instances = module.compile(clonedNode, window);
+			clonedNode.innerHTML = meta.nodeInnerHTML = WINDOW.rxcomp_hydrate_.innerHTML;
+			const instances = module.compile(clonedNode, WINDOW);
 			module.instances = instances;
 			const root = instances[0];
-			// if (root instanceof module.meta.bootstrap) {
 			root.pushChanges();
 			meta.node.parentNode?.replaceChild(clonedNode, meta.node);
-			// }
 		} else {
-			const instances = module.compile(meta.node, window);
+			const instances = module.compile(meta.node, WINDOW);
 			module.instances = instances;
 			const root = instances[0];
-			// if (root instanceof module.meta.bootstrap) {
 			root.pushChanges();
-			// }
 		}
 		return module;
 	}
-
 }

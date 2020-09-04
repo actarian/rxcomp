@@ -10,7 +10,6 @@ export default class EventDirective extends Directive {
     }
     onInit() {
         const { module, node, parentInstance, selector } = getContext(this);
-        // console.log('parentInstance', parentInstance);
         const event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
         const event$ = fromEvent(node, event).pipe(shareReplay(1));
         const expression = node.getAttribute(`(${event})`);

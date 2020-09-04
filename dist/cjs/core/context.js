@@ -30,6 +30,10 @@ var Context = /** @class */ (function (_super) {
         }
         _super.prototype.pushChanges.call(this);
     };
+    Context.prototype.onParentDidChange = function (changes) {
+        this.onChanges(changes);
+        this.pushChanges();
+    };
     Context.mergeDescriptors = function (source, instance, descriptors) {
         if (descriptors === void 0) { descriptors = {}; }
         var properties = Object.getOwnPropertyNames(source);

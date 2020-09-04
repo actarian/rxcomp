@@ -38,10 +38,6 @@ var Platform = /** @class */ (function () {
         meta.imports.forEach(function (moduleFactory) {
             moduleFactory.prototype.constructor.call(module);
         });
-        // const instances = module.compile(meta.node, window);
-        // module.instances = instances;
-        // const root = instances[0];
-        // root.pushChanges();
         return module;
     };
     Platform.querySelector = function (selector) {

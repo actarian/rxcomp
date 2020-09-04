@@ -15,7 +15,6 @@ var EventDirective = /** @class */ (function (_super) {
     }
     EventDirective.prototype.onInit = function () {
         var _a = factory_1.getContext(this), module = _a.module, node = _a.node, parentInstance = _a.parentInstance, selector = _a.selector;
-        // console.log('parentInstance', parentInstance);
         var event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
         var event$ = rxjs_1.fromEvent(node, event).pipe(operators_1.shareReplay(1));
         var expression = node.getAttribute("(" + event + ")");

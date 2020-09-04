@@ -7,24 +7,20 @@ export default class ForStructure extends Structure {
         this.instances = [];
     }
     onInit() {
-        const { module, node } = getContext(this);
-        const forbegin = document.createComment(`*for begin`);
+        const { node } = getContext(this);
+        const forbegin = this.forbegin = document.createComment(`*for begin`);
         forbegin.rxcompId = node.rxcompId;
         node.parentNode.replaceChild(forbegin, node);
         const forend = this.forend = document.createComment(`*for end`);
         forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
-        const expression = node.getAttribute('*for');
         node.removeAttribute('*for');
-        const token = this.token = this.getExpressionToken(expression);
-        this.forFunction = module.makeFunction(token.iterable);
     }
-    onChanges(changes) {
+    onChanges() {
         const context = getContext(this);
         const module = context.module;
         const node = context.node;
-        // resolve
-        const token = this.token;
-        let result = module.resolve(this.forFunction, changes, this) || [];
+        const tokens = this.tokens;
+        let result = this[tokens.iterable];
         const isArray = Array.isArray(result);
         const array = isArray ? result : Object.keys(result);
         const total = array.length;
@@ -36,38 +32,20 @@ export default class ForStructure extends Structure {
                 if (i < previous) {
                     // update
                     const instance = this.instances[i];
-                    instance[token.key] = key;
-                    instance[token.value] = value;
-                    /*
-                    if (!nextSibling) {
-                        const context = getContext(instance);
-                        const node = context.node;
-                        this.forend.parentNode.insertBefore(node, this.forend);
-                    } else {
-                        nextSibling = nextSibling.nextSibling;
-                    }
-                    */
+                    instance[tokens.key] = key;
+                    instance[tokens.value] = value;
                 }
                 else {
                     // create
                     const clonedNode = node.cloneNode(true);
                     delete clonedNode.rxcompId;
                     this.forend.parentNode.insertBefore(clonedNode, this.forend);
-                    // !!! todo: check context.parentInstance
-                    const args = [token.key, key, token.value, value, i, total, context.parentInstance];
-                    // console.log('ForStructure.makeInstance.ForItem');
+                    const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
                     const skipSubscription = true;
                     const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
-                    // console.log('ForStructure.instance.created', instance);
                     if (instance) {
-                        // const forItemContext = getContext(instance);
-                        // console.log('ForStructure', clonedNode, forItemContext.instance.constructor.name);
-                        // module.compile(clonedNode, forItemContext.instance);
-                        // const instances: Factory[];
                         module.compile(clonedNode, instance);
                         module.makeInstanceSubscription(instance, context.parentInstance);
-                        // console.log('ForStructure.instance.compiled', instances);
-                        // nextSibling = clonedNode.nextSibling;
                         this.instances.push(instance);
                     }
                 }
@@ -81,9 +59,14 @@ export default class ForStructure extends Structure {
             }
         }
         this.instances.length = array.length;
-        // console.log('ForStructure', this.instances, token);
     }
-    getExpressionToken(expression) {
+    static getInputsTokens(instance) {
+        const { node } = getContext(instance);
+        const expression = node.getAttribute('*for');
+        const tokens = instance.tokens = ForStructure.getForExpressionTokens(expression);
+        return [tokens.iterable];
+    }
+    static getForExpressionTokens(expression) {
         if (expression === null) {
             throw new Error('invalid for');
         }
@@ -111,4 +94,5 @@ export default class ForStructure extends Structure {
 }
 ForStructure.meta = {
     selector: '[*for]',
+    inputs: ['for'],
 };

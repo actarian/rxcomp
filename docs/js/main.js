@@ -495,7 +495,7 @@ var Context = function (_Component) {
     var _getContext = getContext(this),
         node = _getContext.node;
 
-    var forbegin = document.createComment("*for begin");
+    var forbegin = this.forbegin = document.createComment("*for begin");
     forbegin.rxcompId = node.rxcompId;
     node.parentNode.replaceChild(forbegin, node);
     var forend = this.forend = document.createComment("*for end");
@@ -503,13 +503,12 @@ var Context = function (_Component) {
     node.removeAttribute('*for');
   };
 
-  _proto.onChanges = function onChanges(changes) {
+  _proto.onChanges = function onChanges() {
     var context = getContext(this);
     var module = context.module;
     var node = context.node;
     var tokens = this.tokens;
-    var inputKey = tokens.iterable;
-    var result = this[inputKey];
+    var result = this[tokens.iterable];
     var isArray = Array.isArray(result);
     var array = isArray ? result : Object.keys(result);
     var total = array.length;
@@ -559,8 +558,7 @@ var Context = function (_Component) {
         node = _getContext3.node;
 
     var expression = node.getAttribute('*for');
-    var tokens = ForStructure.getForExpressionTokens(expression);
-    instance.tokens = tokens;
+    var tokens = instance.tokens = ForStructure.getForExpressionTokens(expression);
     return [tokens.iterable];
   };
 
@@ -666,7 +664,7 @@ HrefDirective.meta = {
     this.element = clonedNode.cloneNode(true);
   };
 
-  _proto.onChanges = function onChanges(changes) {
+  _proto.onChanges = function onChanges() {
     var _getContext2 = getContext(this),
         module = _getContext2.module;
 
@@ -1075,7 +1073,7 @@ function _decodeBase(value) {
 }(Pipe);
 JsonPipe.meta = {
   name: 'json'
-};var ID = 0;
+};var WINDOW = typeof self === 'object' && self.self === self && self || typeof global === 'object' && global.global === global && global || undefined;var ID = 0;
 
 var Module = function () {
   function Module() {
@@ -1169,17 +1167,9 @@ var Module = function () {
       params = ['$instance'];
     }
 
-    if (expression) {
-      expression = Module.parseExpression(expression);
-      var args = params.join(',');
-      var expressionFunction = "with(this) {\n\t\t\t\treturn (function (" + args + ", $$module) {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t} catch(error) {\n\t\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t\t}\n\t\t\t\t}.bind(this)).apply(this, arguments);\n\t\t\t}";
-      var expression_func = new Function(expressionFunction);
-      return expression_func;
-    } else {
-      return function () {
-        return null;
-      };
-    }
+    expression = Module.parseExpression(expression);
+    var expressionFunction = "with(this) {\n\treturn (function (" + params.join(',') + ", $$module) {\n\t\ttry {\n\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\treturn " + expression + ";\n\t\t} catch(error) {\n\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t}\n\t}.bind(this)).apply(this, arguments);\n}";
+    return new Function(expressionFunction);
   };
 
   _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
@@ -1295,6 +1285,7 @@ var Module = function () {
     expression = expression || key;
 
     if (expression) {
+      instance[key] = instance[key] || null;
       input = this.makeFunction(expression);
     }
 
@@ -1322,10 +1313,10 @@ var Module = function () {
     var node = context.node;
     var parentInstance = context.parentInstance;
     var expression = node.getAttribute("(" + key + ")");
-    var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
+    var outputExpression = expression ? this.makeFunction(expression, ['$event']) : null;
     var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
-      if (outputFunction) {
-        _this3.resolve(outputFunction, parentInstance, event);
+      if (outputExpression) {
+        _this3.resolve(outputExpression, parentInstance, event);
       }
     }));
     output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
@@ -1353,7 +1344,7 @@ var Module = function () {
 
   _proto.getInstance = function getInstance(node) {
     if (node === document) {
-      return isPlatformBrowser ? window : global;
+      return WINDOW;
     }
 
     var context = getContextByNode(node);
@@ -1428,8 +1419,11 @@ var Module = function () {
       }
 
       lastIndex = regex.lastIndex;
-      var expression = this.makeFunction(matches[1]);
-      expressions.push(expression);
+
+      if (matches[1]) {
+        var expression = this.makeFunction(matches[1]);
+        expressions.push(expression);
+      }
     }
 
     var length = nodeValue.length;
@@ -1874,7 +1868,7 @@ CoreModule.meta = {
 
   Browser.bootstrap = function bootstrap(moduleFactory) {
     if (!isPlatformBrowser) {
-      throw new ModuleError('missing platform browser, window not found');
+      throw new ModuleError('missing platform browser, Window not found');
     }
 
     if (!moduleFactory) {
@@ -1904,18 +1898,18 @@ CoreModule.meta = {
       moduleFactory.prototype.constructor.call(module);
     });
 
-    if (window.rxcomp_hydrate_) {
+    if (WINDOW.rxcomp_hydrate_) {
       var _meta$node$parentNode;
 
       var clonedNode = meta.node.cloneNode();
-      clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;
-      var instances = module.compile(clonedNode, window);
+      clonedNode.innerHTML = meta.nodeInnerHTML = WINDOW.rxcomp_hydrate_.innerHTML;
+      var instances = module.compile(clonedNode, WINDOW);
       module.instances = instances;
       var root = instances[0];
       root.pushChanges();
       (_meta$node$parentNode = meta.node.parentNode) == null ? void 0 : _meta$node$parentNode.replaceChild(clonedNode, meta.node);
     } else {
-      var _instances = module.compile(meta.node, window);
+      var _instances = module.compile(meta.node, WINDOW);
 
       module.instances = _instances;
       var _root = _instances[0];
@@ -1932,13 +1926,13 @@ CoreModule.meta = {
 
   LocalStorageService.delete = function _delete(name) {
     if (this.isLocalStorageSupported()) {
-      window.localStorage.removeItem(name);
+      WINDOW.localStorage.removeItem(name);
     }
   };
 
   LocalStorageService.exist = function exist(name) {
     if (this.isLocalStorageSupported()) {
-      return window.localStorage[name] !== undefined;
+      return WINDOW.localStorage[name] !== undefined;
     } else {
       return false;
     }
@@ -1947,9 +1941,9 @@ CoreModule.meta = {
   LocalStorageService.get = function get(name) {
     var value = null;
 
-    if (this.isLocalStorageSupported() && window.localStorage[name] !== undefined) {
+    if (this.isLocalStorageSupported() && WINDOW.localStorage[name] !== undefined) {
       try {
-        value = JSON.parse(window.localStorage[name]);
+        value = JSON.parse(WINDOW.localStorage[name]);
       } catch (e) {
         console.log('LocalStorageService.get.error parsing', name, e);
       }
@@ -1973,7 +1967,7 @@ CoreModule.meta = {
 
           return value;
         });
-        window.localStorage.setItem(name, json);
+        WINDOW.localStorage.setItem(name, json);
       } catch (e) {
         console.log('LocalStorageService.set.error serializing', name, value, e);
       }
@@ -1988,11 +1982,11 @@ CoreModule.meta = {
     var supported = false;
 
     try {
-      supported = 'localStorage' in window && window.localStorage !== null;
+      supported = 'localStorage' in WINDOW && WINDOW.localStorage !== null;
 
       if (supported) {
-        window.localStorage.setItem('test', '1');
-        window.localStorage.removeItem('test');
+        WINDOW.localStorage.setItem('test', '1');
+        WINDOW.localStorage.removeItem('test');
       } else {
         supported = false;
       }

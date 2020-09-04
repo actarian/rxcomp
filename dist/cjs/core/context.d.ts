@@ -5,6 +5,7 @@ export default class Context extends Component {
         [key: string]: PropertyDescriptor;
     });
     pushChanges(): void;
+    onParentDidChange(changes: Factory | Window): void;
     static mergeDescriptors(source: Object, instance: Factory, descriptors?: {
         [key: string]: PropertyDescriptor;
     }): {

@@ -11,7 +11,6 @@ export class ExpressionError extends Error {
 	expression: string;
 	params: any[];
 	template: string;
-
 	constructor(error: Error, module: Module, instance: Factory, expression: string, params: any[]) {
 		const message: string = `ExpressionError in ${instance.constructor.name} "${expression}"
 		${error.message}`;
@@ -26,15 +25,12 @@ export class ExpressionError extends Error {
 		this.template = node.outerHTML;
 	}
 }
-
 export interface IErrorHandler {
 	handle(error: Error): Observable<Error | void>
 }
-
 export interface IErrorInterceptor {
 	intercept(error: Error | void, next: IErrorHandler): Observable<Error | void>
 }
-
 export class ErrorInterceptorHandler implements IErrorHandler {
 	constructor(
 		private next: IErrorHandler,
@@ -44,15 +40,12 @@ export class ErrorInterceptorHandler implements IErrorHandler {
 		return this.interceptor.intercept(error, this.next);
 	}
 }
-
 export class DefaultErrorHandler implements IErrorHandler {
 	handle(error: Error | void): Observable<Error | void> {
 		return of(error);
 	}
 }
-
 export const ErrorInterceptors: IErrorInterceptor[] = [];
-
 export const nextError$: ReplaySubject<Error> = new ReplaySubject<Error>(1);
 export const errors$: Observable<Error | void> = nextError$.pipe(
 	switchMap((error: Error) => {

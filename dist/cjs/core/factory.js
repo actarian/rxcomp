@@ -13,6 +13,23 @@ var Factory = /** @class */ (function () {
         this.rxcompId = -1;
         this.unsubscribe$ = new rxjs_1.Subject();
         this.changes$ = new rxjs_1.ReplaySubject(1);
+        /*
+        // !!! PROXY
+        const store: { [key: string]: any } = {};
+        const handler: ProxyHandler<Factory> = {
+            get: function (target: Factory, prop: string, receiver: any) {
+                return target[prop];
+            },
+            set: function (target: Factory, prop: string | number | Symbol, value: any, receiver: any) {
+                store[prop as string] = value;
+                console.log('Factory updating store', prop, value, store);
+                target[prop as string] = value;
+                return true;
+            }
+        }
+        const proxy = new Proxy(this, handler);
+        console.log('proxy', proxy);
+        */
     }
     Factory.prototype.onInit = function () { };
     Factory.prototype.onChanges = function (changes) { };
@@ -24,6 +41,16 @@ var Factory = /** @class */ (function () {
             this.changes$.next(this);
             this.onView();
         }
+    };
+    Factory.prototype.onParentDidChange = function (changes) {
+        var module = getContext(this).module;
+        // console.log('Component.onParentDidChange', changes);
+        module.resolveInputsOutputs(this, changes);
+        this.onChanges(changes);
+        this.pushChanges();
+    };
+    Factory.getInputsTokens = function (instance) {
+        return this.meta.inputs || [];
     };
     return Factory;
 }());

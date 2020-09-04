@@ -35,7 +35,6 @@ export default class Serializer {
 		return this.decode(value, [decodeBase64, decodeJson]);
 	}
 }
-
 export function encodeJson(value: any, circularRef?: any, space?: string | number): string {
 	let decoded: any;
 	try {
@@ -59,11 +58,9 @@ export function encodeJson(value: any, circularRef?: any, space?: string | numbe
 	}
 	return decoded;
 }
-
 export function encodeJsonWithOptions(circularRef?: any, space?: string | number): (value: any) => string {
 	return (value: any) => encodeJson(value, circularRef, space);
 }
-
 export function decodeJson(value: string): any {
 	let decoded: any;
 	if (value) {
@@ -75,7 +72,6 @@ export function decodeJson(value: string): any {
 	}
 	return decoded;
 }
-
 export function encodeBase64(value: string): string {
 	let encoded: string;
 	try {
@@ -85,7 +81,6 @@ export function encodeBase64(value: string): string {
 	}
 	return encoded;
 }
-
 export function decodeBase64(value: string): string {
 	let decoded: string;
 	try {

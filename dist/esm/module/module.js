@@ -5,7 +5,7 @@ import Context from '../core/context';
 import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
 import Structure from '../core/structure';
 import { ExpressionError, nextError$ } from '../error/error';
-import { isPlatformBrowser } from '../platform/platform';
+import { WINDOW } from '../platform/common/window/window';
 let ID = 0;
 export default class Module {
     constructor() {
@@ -54,7 +54,7 @@ export default class Module {
             // creating component input and outputs
             if (!(instance instanceof Context)) {
                 this.makeHosts(meta, instance, node);
-                context.inputs = this.makeInputs(meta, instance);
+                context.inputs = this.makeInputs(meta, instance, factory);
                 context.outputs = this.makeOutputs(meta, instance);
                 if (parentInstance instanceof Factory) {
                     this.resolveInputsOutputs(instance, parentInstance);
@@ -63,7 +63,7 @@ export default class Module {
             // calling onInit event
             instance.onInit();
             // subscribe to parent changes
-            if (!skipSubscription) {
+            if (!skipSubscription && context.inputs && Object.keys(context.inputs).length > 0) {
                 this.makeInstanceSubscription(instance, parentInstance);
             }
             return instance;
@@ -73,61 +73,40 @@ export default class Module {
         }
     }
     makeInstanceSubscription(instance, parentInstance) {
-        // subscribe to parent changes
         if (parentInstance instanceof Factory) {
             parentInstance.changes$.pipe(
-            // filter(() => node.parentNode),
-            // debounceTime(1),
-            /*
-            distinctUntilChanged(function(prev, curr) {
-                // console.log(isComponent, context.inputs);
-                if (isComponent && meta && Object.keys(context.inputs).length === 0) {
-                    return true; // same
-                } else {
-                    return false;
-                }
-            }),
-            */
-            takeUntil(instance.unsubscribe$)).subscribe((changes) => {
-                // console.log('Module.makeInstanceSubscription.changes', instance);
-                // resolve component input outputs
-                if (!(instance instanceof Context)) {
-                    this.resolveInputsOutputs(instance, changes);
-                }
-                // calling onChanges event with changes
-                instance.onChanges(changes);
-                // push instance changes for subscribers
-                instance.pushChanges();
+            // distinctUntilChanged(deepEqual),
+            takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+                instance.onParentDidChange(changes);
             });
         }
     }
     makeFunction(expression, params = ['$instance']) {
-        if (expression) {
-            expression = Module.parseExpression(expression);
-            const args = params.join(',');
-            const expressionFunction = `with(this) {
-				return (function (${args}, $$module) {
-					try {
-						const $$pipes = $$module.meta.pipes;
-						return ${expression};
-					} catch(error) {
-						$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
-					}
-				}.bind(this)).apply(this, arguments);
-			}`;
-            // console.log('Module.makeFunction.expressionFunction', expressionFunction);
-            const expression_func = new Function(expressionFunction);
-            // console.log(this, $$module, $$pipes, "${expression}");
-            // console.log(expression_func);
-            return expression_func;
-        }
-        else {
-            return () => { return null; };
-        }
+        expression = Module.parseExpression(expression);
+        const expressionFunction = `with(this) {
+	return (function (${params.join(',')}, $$module) {
+		try {
+			const $$pipes = $$module.meta.pipes;
+			return ${expression};
+		} catch(error) {
+			$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
+		}
+	}.bind(this)).apply(this, arguments);
+}`;
+        // console.log('Module.makeFunction.expressionFunction', expressionFunction);
+        return new Function(expressionFunction);
+        // return () => { return null; };
     }
-    nextError(error, instance, expression, params) {
-        const expressionError = new ExpressionError(error, this, instance, expression, params);
-        nextError$.next(expressionError);
+    resolveInputsOutputs(instance, changes) {
+        const context = getContext(instance);
+        const parentInstance = context.parentInstance;
+        const inputs = context.inputs;
+        for (let key in inputs) {
+            const inputFunction = inputs[key];
+            // console.log('Module.inputFunction', inputFunction);
+            const value = this.resolve(inputFunction, parentInstance, instance);
+            instance[key] = value;
+        }
     }
     resolve(expression, parentInstance, payload) {
         // console.log('Module.resolve', expression, parentInstance, payload, getContext);
@@ -142,15 +121,9 @@ export default class Module {
                 if (!context) {
                     this.parse(element, instance);
                 }
-                // else { console.log('Module.parse', element, context.instance); }
             }
             else if (child.nodeType === 3) {
                 const text = child;
-                /*
-                if (text.nodeValue!.trim() !== '') {
-                    // console.log('Module.parse', text.nodeValue, instance);
-                }
-                */
                 this.parseTextNode(text, instance);
             }
         }
@@ -174,14 +147,103 @@ export default class Module {
         this.remove(this.meta.node);
         this.meta.node.innerHTML = this.meta.nodeInnerHTML;
     }
+    nextError(error, instance, expression, params) {
+        const expressionError = new ExpressionError(error, this, instance, expression, params);
+        nextError$.next(expressionError);
+    }
     makeContext(instance, parentInstance, node, selector) {
         const context = Module.makeContext(this, instance, parentInstance, node, instance.constructor, selector);
         // console.log('Module.makeContext', context, context.instance, context.node);
         return context;
     }
+    makeHosts(meta, instance, node) {
+        if (meta.hosts) {
+            Object.keys(meta.hosts).forEach((key) => {
+                const factory = meta.hosts[key];
+                instance[key] = getHost(instance, factory, node);
+            });
+        }
+    }
+    makeInput(instance, key) {
+        // console.log('Module.makeInput', 'key', key, 'instance', instance);
+        const { node } = getContext(instance);
+        let input = null, expression = null;
+        if (node.hasAttribute(`[${key}]`)) {
+            expression = node.getAttribute(`[${key}]`);
+            // console.log('Module.makeInput.expression.1', expression);
+        }
+        else if (node.hasAttribute(`*${key}`)) {
+            expression = node.getAttribute(`*${key}`);
+            // console.log('Module.makeInput.expression.2', expression);
+        }
+        else if (node.hasAttribute(key)) {
+            expression = node.getAttribute(key);
+            if (expression) {
+                const attribute = expression.replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
+                    if (a) {
+                        return '"+';
+                    }
+                    if (b) {
+                        return '+"';
+                    }
+                    if (c) {
+                        return '\"';
+                    }
+                    return '';
+                });
+                expression = `"${attribute}"`;
+                // console.log('Module.makeInput.expression.3', expression);
+            }
+        }
+        expression = expression || key;
+        if (expression) {
+            instance[key] = instance[key] || null; // !!! avoid throError undefined key
+            input = this.makeFunction(expression);
+        }
+        // console.log('Module.makeInput', key, instance, descriptor);
+        return input;
+    }
+    makeInputs(meta, instance, factory) {
+        const inputs = {};
+        factory.getInputsTokens(instance).forEach((key) => {
+            const input = this.makeInput(instance, key);
+            if (input) {
+                inputs[key] = input;
+            }
+        });
+        return inputs;
+    }
+    makeOutput(instance, key) {
+        const context = getContext(instance);
+        const node = context.node;
+        const parentInstance = context.parentInstance;
+        const expression = node.getAttribute(`(${key})`);
+        const outputExpression = expression ? this.makeFunction(expression, ['$event']) : null;
+        const output$ = new Subject().pipe(tap((event) => {
+            if (outputExpression) {
+                // console.log(expression, parentInstance);
+                this.resolve(outputExpression, parentInstance, event);
+            }
+        }));
+        output$.pipe(takeUntil(instance.unsubscribe$)).subscribe();
+        instance[key] = output$;
+        return output$;
+    }
+    makeOutputs(meta, instance) {
+        const outputs = {};
+        if (meta.outputs) {
+            meta.outputs.forEach((key) => {
+                const output = this.makeOutput(instance, key);
+                if (output) {
+                    outputs[key] = output;
+                }
+            });
+        }
+        return outputs;
+    }
     getInstance(node) {
         if (node === document) {
-            return (isPlatformBrowser ? window : global);
+            return WINDOW; // (isPlatformBrowser ? window : global) as Window;
         }
         const context = getContextByNode(node);
         if (context) {
@@ -240,8 +302,10 @@ export default class Module {
                 this.pushFragment(nodeValue, index, lastIndex, expressions);
             }
             lastIndex = regex.lastIndex;
-            const expression = this.makeFunction(matches[1]);
-            expressions.push(expression);
+            if (matches[1]) {
+                const expression = this.makeFunction(matches[1]);
+                expressions.push(expression);
+            }
         }
         // console.log('Module.parseTextNodeExpression', regex.source, expressions, nodeValue);
         const length = nodeValue.length;
@@ -255,105 +319,14 @@ export default class Module {
             return [];
         }
     }
-    makeHosts(meta, instance, node) {
-        if (meta.hosts) {
-            Object.keys(meta.hosts).forEach((key) => {
-                const factory = meta.hosts[key];
-                instance[key] = getHost(instance, factory, node);
-            });
-        }
-    }
-    makeInput(instance, key) {
-        const { node } = getContext(instance);
-        let input = null, expression = null;
-        if (node.hasAttribute(`[${key}]`)) {
-            expression = node.getAttribute(`[${key}]`);
-            // console.log('Module.makeInput.expression.1', expression);
-        }
-        else if (node.hasAttribute(key)) {
-            // const attribute = node.getAttribute(key).replace(/{{/g, '"+').replace(/}}/g, '+"');
-            const attribute = node.getAttribute(key).replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
-                if (a) {
-                    return '"+';
-                }
-                if (b) {
-                    return '+"';
-                }
-                if (c) {
-                    return '\"';
-                }
-                return '';
-            });
-            expression = `"${attribute}"`;
-            // console.log('Module.makeInput.expression.2', expression);
-        }
-        if (expression) {
-            input = this.makeFunction(expression);
-        }
-        /*
-        const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(instance, key) as PropertyDescriptor;
-        if (!descriptor) {
-            Object.defineProperty(instance, key, {
-                value: null,
-                enumerable: true,
-                writable: true,
-                configurable: false,
-            });
-        }
-        */
-        // console.log('Module.makeInput', key, instance, descriptor);
-        return input;
-    }
-    makeInputs(meta, instance) {
-        const inputs = {};
-        if (meta.inputs) {
-            meta.inputs.forEach((key, i) => {
-                const input = this.makeInput(instance, key);
-                if (input) {
-                    inputs[key] = input;
-                }
-            });
-        }
-        return inputs;
-    }
-    makeOutput(instance, key) {
-        const context = getContext(instance);
-        const node = context.node;
-        const parentInstance = context.parentInstance;
-        const expression = node.getAttribute(`(${key})`);
-        const outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
-        const output$ = new Subject().pipe(tap((event) => {
-            if (outputFunction) {
-                // console.log(expression, parentInstance);
-                this.resolve(outputFunction, parentInstance, event);
-            }
-        }));
-        output$.pipe(takeUntil(instance.unsubscribe$)).subscribe();
-        instance[key] = output$;
-        return output$;
-    }
-    makeOutputs(meta, instance) {
-        const outputs = {};
-        if (meta.outputs) {
-            meta.outputs.forEach((key) => {
-                const output = this.makeOutput(instance, key);
-                if (output) {
-                    outputs[key] = output;
-                }
-            });
-        }
-        return outputs;
-    }
-    resolveInputsOutputs(instance, changes) {
-        const context = getContext(instance);
-        const parentInstance = context.parentInstance;
-        const inputs = context.inputs;
-        for (let key in inputs) {
-            const inputFunction = inputs[key];
-            // console.log('Module.inputFunction', inputFunction);
-            const value = this.resolve(inputFunction, parentInstance, instance);
-            instance[key] = value;
-        }
+    static makeContext(module, instance, parentInstance, node, factory, selector) {
+        instance.rxcompId = ++ID;
+        const context = { module, instance, parentInstance, node, factory, selector };
+        const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
+        const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+        nodeContexts.push(context);
+        CONTEXTS[instance.rxcompId] = context;
+        return context;
     }
     static parseExpression(expression) {
         const l = '┌';
@@ -425,15 +398,6 @@ export default class Module {
             return previous || '';
         });
         return expression;
-    }
-    static makeContext(module, instance, parentInstance, node, factory, selector) {
-        instance.rxcompId = ++ID;
-        const context = { module, instance, parentInstance, node, factory, selector };
-        const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
-        const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
-        nodeContexts.push(context);
-        CONTEXTS[instance.rxcompId] = context;
-        return context;
     }
     static deleteContext(id, keepContext) {
         const keepContexts = [];
@@ -595,3 +559,40 @@ export function getHost(instance, factory, node) {
         return undefined;
     }
 }
+/*
+export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
+    let equal: boolean = typeof prev === typeof curr;
+    if (prev && pool.indexOf(prev) === -1 && pool.indexOf(curr) === -1) {
+        pool.push(prev, curr);
+        const type = Array.isArray(curr) ? 'array' : typeof curr;
+        switch (type) {
+            case 'array':
+                equal = prev.length === curr.length;
+                equal = equal && prev.reduce((p: boolean, a: any[], i: number) => p && deepEqual(a, curr[i], pool), true);
+                break;
+            case 'object':
+                if ('Symbol' in WINDOW && Symbol.iterator in prev) {
+                    // || prev instanceof Map
+                    equal = prev.size === curr.size;
+                    const ea = prev.entries();
+                    const eb = curr.entries();
+                    for (let item = ea.next(); item.done !== true; item = ea.next()) {
+                        const ia = item.value;
+                        const ib = eb.next().value;
+                        equal = equal && deepEqual(ia, ib, pool);
+                    }
+                } else {
+                    const prevKeys = Object.keys(prev);
+                    const currKeys = Object.keys(curr);
+                    equal = prevKeys.length === currKeys.length;
+                    equal = equal && prevKeys.reduce((p: boolean, k: string) => p && deepEqual(prev[k], curr[k], pool), true);
+                }
+                break;
+            default:
+                equal = prev === curr;
+        }
+    }
+    console.log(equal, prev, curr);
+    return equal;
+}
+*/

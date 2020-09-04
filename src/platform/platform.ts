@@ -10,7 +10,6 @@ import Module from '../module/module';
 const ORDER: FactoryList = [Structure, Component, Directive];
 
 export default class Platform {
-
 	/**
 	 * @param moduleFactory
 	 * @description This method returns an uncompiled module
@@ -37,17 +36,11 @@ export default class Platform {
 		meta.imports.forEach((moduleFactory: typeof Module) => {
 			moduleFactory.prototype.constructor.call(module);
 		});
-		// const instances = module.compile(meta.node, window);
-		// module.instances = instances;
-		// const root = instances[0];
-		// root.pushChanges();
 		return module;
 	}
-
 	protected static querySelector(selector: string): IElement | null {
 		return document.querySelector(selector);
 	}
-
 	protected static resolveMeta(moduleFactory: typeof Module): IModuleParsedMeta {
 		const meta: IModuleParsedImportedMeta = this.resolveImportedMeta(moduleFactory);
 		const bootstrap: typeof Factory = moduleFactory.meta.bootstrap!;
@@ -63,7 +56,6 @@ export default class Platform {
 		const selectors = this.unwrapSelectors(factories);
 		return { factories, pipes, selectors, bootstrap, node, nodeInnerHTML, imports: moduleFactory.meta.imports || [] };
 	}
-
 	protected static resolveImportedMeta(moduleFactory: typeof Module): IModuleParsedImportedMeta {
 		const meta: IModuleParsedImportedMeta = Object.assign({
 			imports: [],
@@ -74,7 +66,6 @@ export default class Platform {
 		meta.imports = (moduleFactory.meta.imports || []).map(moduleFactory => this.resolveImportedMeta(moduleFactory));
 		return meta;
 	}
-
 	protected static resolvePipes(meta: IModuleParsedImportedMeta, exported?: boolean): PipeMap {
 		const importedPipes: PipeMap[] = meta.imports.map((importMeta: IModuleParsedImportedMeta) => this.resolvePipes(importMeta, true));
 		const pipes: PipeMap = {};
@@ -82,13 +73,11 @@ export default class Platform {
 		pipeList.forEach(pipeFactory => pipes[pipeFactory.meta.name] = pipeFactory);
 		return Object.assign({}, ...importedPipes, pipes);
 	}
-
 	protected static resolveFactories(meta: IModuleParsedImportedMeta, exported?: boolean): FactoryList {
 		const importedFactories: FactoryList[] = meta.imports.map((importMeta: any) => this.resolveFactories(importMeta, true));
 		const factoryList: FactoryList = (exported ? meta.exports : meta.declarations).filter((x): x is typeof Factory => x.prototype instanceof Factory);
 		return Array.prototype.concat.call(factoryList, ...importedFactories);
 	}
-
 	protected static sortFactories(factories: FactoryList): void {
 		factories.sort((a, b) => {
 			const ai = ORDER.reduce((p, c, i) => a.prototype instanceof c ? i : p, -1);
@@ -101,7 +90,6 @@ export default class Platform {
 			return o;
 		});
 	}
-
 	protected static getExpressions(selector: string): MatchFunction[] {
 		let matchers: ((node: HTMLElement) => boolean)[] = [];
 		selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value: string, c1, a2, u3, v4, a5, e6) {
@@ -130,7 +118,6 @@ export default class Platform {
 		});
 		return matchers;
 	}
-
 	protected static unwrapSelectors(factories: FactoryList): SelectorFunction[] {
 		const selectors: SelectorFunction[] = [];
 		factories.forEach((factory: typeof Factory) => {
@@ -161,21 +148,15 @@ export default class Platform {
 		});
 		return selectors;
 	}
-
 }
-
 /* global window self */
 export const PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-
 /* eslint-disable no-undef */
 export const PLATFORM_JS_DOM = (typeof window !== 'undefined' && window.name === 'nodejs') || (typeof navigator !== 'undefined' && navigator.userAgent.includes('Node.js')) || (typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom'));
 /* eslint-enable no-undef */
-
 export const PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
-
 /* eslint-disable no-restricted-globals */
 export const PLATFORM_WEB_WORKER = typeof self === 'object' && self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope';
-
 export const isPlatformServer = PLATFORM_NODE;
 export const isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;
 export const isPlatformWorker = PLATFORM_WEB_WORKER;

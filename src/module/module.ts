@@ -6,7 +6,7 @@ import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
 import Structure from '../core/structure';
 import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, IModuleParsedMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
 import { ExpressionError, nextError$ } from '../error/error';
-import { isPlatformBrowser } from '../platform/platform';
+import { WINDOW } from '../platform/common/window/window';
 
 let ID: number = 0;
 
@@ -86,27 +86,20 @@ export default class Module {
 		}
 	}
 	public makeFunction(expression: string, params: string[] = ['$instance']): ExpressionFunction {
-		if (expression) {
-			expression = Module.parseExpression(expression);
-			const args: string = params.join(',');
-			const expressionFunction: string = `with(this) {
-				return (function (${args}, $$module) {
-					try {
-						const $$pipes = $$module.meta.pipes;
-						return ${expression};
-					} catch(error) {
-						$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
-					}
-				}.bind(this)).apply(this, arguments);
-			}`;
-			// console.log('Module.makeFunction.expressionFunction', expressionFunction);
-			const expression_func: ExpressionFunction = new Function(expressionFunction) as ExpressionFunction;
-			// console.log(this, $$module, $$pipes, "${expression}");
-			// console.log(expression_func);
-			return expression_func;
-		} else {
-			return () => { return null; };
+		expression = Module.parseExpression(expression);
+		const expressionFunction: string = `with(this) {
+	return (function (${params.join(',')}, $$module) {
+		try {
+			const $$pipes = $$module.meta.pipes;
+			return ${expression};
+		} catch(error) {
+			$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
 		}
+	}.bind(this)).apply(this, arguments);
+}`;
+		// console.log('Module.makeFunction.expressionFunction', expressionFunction);
+		return new Function(expressionFunction) as ExpressionFunction;
+		// return () => { return null; };
 	}
 	public resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
 		const context: IContext = getContext(instance);
@@ -132,14 +125,8 @@ export default class Module {
 				if (!context) {
 					this.parse(element, instance);
 				}
-				// else { console.log('Module.parse', element, context.instance); }
 			} else if (child.nodeType === 3) {
 				const text: IText = child as IText;
-				/*
-				if (text.nodeValue!.trim() !== '') {
-					// console.log('Module.parse', text.nodeValue, instance);
-				}
-				*/
 				this.parseTextNode(text, instance);
 			}
 		}
@@ -212,19 +199,9 @@ export default class Module {
 		}
 		expression = expression || key;
 		if (expression) {
+			instance[key] = instance[key] || null; // !!! avoid throError undefined key
 			input = this.makeFunction(expression);
 		}
-		/*
-		const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(instance, key) as PropertyDescriptor;
-		if (!descriptor) {
-			Object.defineProperty(instance, key, {
-				value: null,
-				enumerable: true,
-				writable: true,
-				configurable: false,
-			});
-		}
-		*/
 		// console.log('Module.makeInput', key, instance, descriptor);
 		return input;
 	}
@@ -238,31 +215,17 @@ export default class Module {
 		});
 		return inputs;
 	}
-	/*
-	protected makeInputs(meta: IFactoryMeta, instance: Factory): { [key: string]: ExpressionFunction } {
-		const inputs: { [key: string]: ExpressionFunction } = {};
-		if (meta.inputs) {
-			meta.inputs.forEach((key: string, i: number) => {
-				const input = this.makeInput(instance, key);
-				if (input) {
-					inputs[key] = input;
-				}
-			});
-		}
-		return inputs;
-	}
-	*/
 	protected makeOutput(instance: Factory, key: string): Observable<any> {
 		const context: IContext = getContext(instance);
 		const node: IElement = context.node;
 		const parentInstance: Factory | Window = context.parentInstance;
 		const expression: string | null = node.getAttribute(`(${key})`);
-		const outputFunction: ExpressionFunction | null = expression ? this.makeFunction(expression, ['$event']) : null;
+		const outputExpression: ExpressionFunction | null = expression ? this.makeFunction(expression, ['$event']) : null;
 		const output$: Observable<any> = new Subject<any>().pipe(
 			tap((event) => {
-				if (outputFunction) {
+				if (outputExpression) {
 					// console.log(expression, parentInstance);
-					this.resolve(outputFunction, parentInstance, event);
+					this.resolve(outputExpression, parentInstance, event);
 				}
 			})
 		);
@@ -286,7 +249,7 @@ export default class Module {
 	}
 	protected getInstance(node: HTMLElement | Document): Factory | Window | undefined {
 		if (node === document) {
-			return (isPlatformBrowser ? window : global) as Window;
+			return WINDOW; // (isPlatformBrowser ? window : global) as Window;
 		}
 		const context: IContext | undefined = getContextByNode(node as HTMLElement);
 		if (context) {
@@ -343,8 +306,10 @@ export default class Module {
 				this.pushFragment(nodeValue, index, lastIndex, expressions);
 			}
 			lastIndex = regex.lastIndex;
-			const expression: ExpressionFunction = this.makeFunction(matches[1]);
-			expressions.push(expression);
+			if (matches[1]) {
+				const expression: ExpressionFunction = this.makeFunction(matches[1]);
+				expressions.push(expression);
+			}
 		}
 		// console.log('Module.parseTextNodeExpression', regex.source, expressions, nodeValue);
 		const length: number = nodeValue.length;
@@ -598,6 +563,7 @@ export function getHost(instance: Factory, factory: typeof Factory, node: IEleme
 		return undefined;
 	}
 }
+/*
 export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
 	let equal: boolean = typeof prev === typeof curr;
 	if (prev && pool.indexOf(prev) === -1 && pool.indexOf(curr) === -1) {
@@ -609,7 +575,7 @@ export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
 				equal = equal && prev.reduce((p: boolean, a: any[], i: number) => p && deepEqual(a, curr[i], pool), true);
 				break;
 			case 'object':
-				if ('Symbol' in window && Symbol.iterator in prev) {
+				if ('Symbol' in WINDOW && Symbol.iterator in prev) {
 					// || prev instanceof Map
 					equal = prev.size === curr.size;
 					const ea = prev.entries();
@@ -633,3 +599,4 @@ export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
 	console.log(equal, prev, curr);
 	return equal;
 }
+*/

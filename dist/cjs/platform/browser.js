@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = require("tslib");
 var error_1 = require("../error/error");
+var window_1 = require("./common/window/window");
 var platform_1 = tslib_1.__importStar(require("./platform"));
 var Browser = /** @class */ (function (_super) {
     tslib_1.__extends(Browser, _super);
@@ -15,7 +16,7 @@ var Browser = /** @class */ (function (_super) {
     Browser.bootstrap = function (moduleFactory) {
         var _a;
         if (!platform_1.isPlatformBrowser) {
-            throw new error_1.ModuleError('missing platform browser, window not found');
+            throw new error_1.ModuleError('missing platform browser, Window not found');
         }
         if (!moduleFactory) {
             throw new error_1.ModuleError('missing moduleFactory');
@@ -38,24 +39,20 @@ var Browser = /** @class */ (function (_super) {
         meta.imports.forEach(function (moduleFactory) {
             moduleFactory.prototype.constructor.call(module);
         });
-        if (window.rxcomp_hydrate_) {
+        if (window_1.WINDOW.rxcomp_hydrate_) {
             var clonedNode = meta.node.cloneNode();
-            clonedNode.innerHTML = meta.nodeInnerHTML = window.rxcomp_hydrate_.innerHTML;
-            var instances = module.compile(clonedNode, window);
+            clonedNode.innerHTML = meta.nodeInnerHTML = window_1.WINDOW.rxcomp_hydrate_.innerHTML;
+            var instances = module.compile(clonedNode, window_1.WINDOW);
             module.instances = instances;
             var root = instances[0];
-            // if (root instanceof module.meta.bootstrap) {
             root.pushChanges();
             (_a = meta.node.parentNode) === null || _a === void 0 ? void 0 : _a.replaceChild(clonedNode, meta.node);
-            // }
         }
         else {
-            var instances = module.compile(meta.node, window);
+            var instances = module.compile(meta.node, window_1.WINDOW);
             module.instances = instances;
             var root = instances[0];
-            // if (root instanceof module.meta.bootstrap) {
             root.pushChanges();
-            // }
         }
         return module;
     };

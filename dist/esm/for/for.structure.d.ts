@@ -1,13 +1,14 @@
 import Factory from '../core/factory';
 import Structure from '../core/structure';
-import { ExpressionFunction, IComment, IExpressionToken, IFactoryMeta } from '../core/types';
+import { IComment, IFactoryMeta, IForExpressionTokens } from '../core/types';
 export default class ForStructure extends Structure {
     instances: Factory[];
-    forend?: IComment;
-    token?: IExpressionToken;
-    forFunction?: ExpressionFunction;
+    forbegin: IComment;
+    forend: IComment;
+    tokens: IForExpressionTokens;
     onInit(): void;
-    onChanges(changes: Factory | Window): void;
-    getExpressionToken(expression: string): IExpressionToken;
+    onChanges(): void;
+    static getInputsTokens(instance: ForStructure): string[];
+    static getForExpressionTokens(expression: string): IForExpressionTokens;
     static meta: IFactoryMeta;
 }

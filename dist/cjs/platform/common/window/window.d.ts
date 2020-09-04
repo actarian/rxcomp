@@ -1,1 +1,1 @@
-export declare const WINDOW: typeof globalThis;
+export declare const WINDOW: Window;
