@@ -5,14 +5,12 @@ import Factory, { getContext } from './factory';
 const RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
 export default class Context extends Component {
-
 	constructor(parentInstance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}) {
 		super();
 		descriptors = Context.mergeDescriptors(parentInstance, parentInstance, descriptors);
 		descriptors = Context.mergeDescriptors(Object.getPrototypeOf(parentInstance), parentInstance, descriptors);
 		Object.defineProperties(this, descriptors);
 	}
-
 	pushChanges(): void {
 		const context = getContext(this);
 		if (!context.keys) {
@@ -27,7 +25,10 @@ export default class Context extends Component {
 		}
 		super.pushChanges();
 	}
-
+	onParentDidChange(changes: Factory | Window): void {
+		this.onChanges(changes);
+		this.pushChanges();
+	}
 	static mergeDescriptors(source: Object, instance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}): { [key: string]: PropertyDescriptor } {
 		const properties: string[] = Object.getOwnPropertyNames(source);
 		while (properties.length) {
@@ -44,5 +45,4 @@ export default class Context extends Component {
 		}
 		return descriptors;
 	}
-
 }

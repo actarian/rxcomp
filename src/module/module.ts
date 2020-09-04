@@ -76,32 +76,12 @@ export default class Module {
 		}
 	}
 	public makeInstanceSubscription(instance: Factory, parentInstance?: Factory | Window): void {
-		// subscribe to parent changes
 		if (parentInstance instanceof Factory) {
 			parentInstance.changes$.pipe(
-				// filter(() => node.parentNode),
-				// debounceTime(1),
-				/*
-				distinctUntilChanged(function(prev, curr) {
-					// console.log(isComponent, context.inputs);
-					if (isComponent && meta && Object.keys(context.inputs).length === 0) {
-						return true; // same
-					} else {
-						return false;
-					}
-				}),
-				*/
+				// distinctUntilChanged(deepEqual),
 				takeUntil(instance.unsubscribe$)
-			).subscribe((changes: Factory | Window) => {
-				// console.log('Module.makeInstanceSubscription.changes', instance);
-				// resolve component input outputs
-				if (!(instance instanceof Context)) {
-					this.resolveInputsOutputs(instance, changes);
-				}
-				// calling onChanges event with changes
-				instance.onChanges(changes);
-				// push instance changes for subscribers
-				instance.pushChanges();
+			).subscribe(function (changes: Factory | Window) {
+				instance.onParentDidChange(changes);
 			});
 		}
 	}
@@ -126,6 +106,17 @@ export default class Module {
 			return expression_func;
 		} else {
 			return () => { return null; };
+		}
+	}
+	public resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
+		const context: IContext = getContext(instance);
+		const parentInstance: Factory | Window = context.parentInstance;
+		const inputs: { [key: string]: ExpressionFunction } = context.inputs!;
+		for (let key in inputs) {
+			const inputFunction: ExpressionFunction = inputs[key];
+			// console.log('Module.inputFunction', inputFunction);
+			const value: any = this.resolve(inputFunction, parentInstance, instance);
+			instance[key] = value;
 		}
 	}
 	public resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any {
@@ -364,17 +355,6 @@ export default class Module {
 			return expressions;
 		} else {
 			return [];
-		}
-	}
-	protected resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
-		const context: IContext = getContext(instance);
-		const parentInstance: Factory | Window = context.parentInstance;
-		const inputs: { [key: string]: ExpressionFunction } = context.inputs!;
-		for (let key in inputs) {
-			const inputFunction: ExpressionFunction = inputs[key];
-			// console.log('Module.inputFunction', inputFunction);
-			const value: any = this.resolve(inputFunction, parentInstance, instance);
-			instance[key] = value;
 		}
 	}
 	protected static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: IElement, factory: typeof Factory, selector: string): IContext {
@@ -617,4 +597,39 @@ export function getHost(instance: Factory, factory: typeof Factory, node: IEleme
 	} else {
 		return undefined;
 	}
+}
+export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
+	let equal: boolean = typeof prev === typeof curr;
+	if (prev && pool.indexOf(prev) === -1 && pool.indexOf(curr) === -1) {
+		pool.push(prev, curr);
+		const type = Array.isArray(curr) ? 'array' : typeof curr;
+		switch (type) {
+			case 'array':
+				equal = prev.length === curr.length;
+				equal = equal && prev.reduce((p: boolean, a: any[], i: number) => p && deepEqual(a, curr[i], pool), true);
+				break;
+			case 'object':
+				if ('Symbol' in window && Symbol.iterator in prev) {
+					// || prev instanceof Map
+					equal = prev.size === curr.size;
+					const ea = prev.entries();
+					const eb = curr.entries();
+					for (let item = ea.next(); item.done !== true; item = ea.next()) {
+						const ia = item.value;
+						const ib = eb.next().value;
+						equal = equal && deepEqual(ia, ib, pool);
+					}
+				} else {
+					const prevKeys = Object.keys(prev);
+					const currKeys = Object.keys(curr);
+					equal = prevKeys.length === currKeys.length;
+					equal = equal && prevKeys.reduce((p: boolean, k: string) => p && deepEqual(prev[k], curr[k], pool), true);
+				}
+				break;
+			default:
+				equal = prev === curr;
+		}
+	}
+	console.log(equal, prev, curr);
+	return equal;
 }

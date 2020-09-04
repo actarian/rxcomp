@@ -20,8 +20,33 @@ export default class Factory {
 			this.onView();
 		}
 	}
+	onParentDidChange(changes: Factory | Window): void {
+		const { module } = getContext(this);
+		// console.log('Component.onParentDidChange', changes);
+		module.resolveInputsOutputs(this, changes);
+		this.onChanges(changes);
+		this.pushChanges();
+	}
 	[key: string]: any; // extensible object
-	constructor(...args: any[]) { }
+	constructor(...args: any[]) {
+		/*
+		// !!! PROXY
+		const store: { [key: string]: any } = {};
+		const handler: ProxyHandler<Factory> = {
+			get: function (target: Factory, prop: string, receiver: any) {
+				return target[prop];
+			},
+			set: function (target: Factory, prop: string | number | Symbol, value: any, receiver: any) {
+				store[prop as string] = value;
+				console.log('Factory updating store', prop, value, store);
+				target[prop as string] = value;
+				return true;
+			}
+		}
+		const proxy = new Proxy(this, handler);
+		console.log('proxy', proxy);
+		*/
+	}
 	static getInputsTokens(instance: Factory): string[] {
 		return this.meta.inputs || [];
 	}

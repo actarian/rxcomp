@@ -146,6 +146,15 @@ var Factory = function () {
     }
   };
 
+  _proto.onParentDidChange = function onParentDidChange(changes) {
+    var _getContext2 = getContext(this),
+        module = _getContext2.module;
+
+    module.resolveInputsOutputs(this, changes);
+    this.onChanges(changes);
+    this.pushChanges();
+  };
+
   Factory.getInputsTokens = function getInputsTokens(instance) {
     return this.meta.inputs || [];
   };
@@ -390,6 +399,11 @@ var Context = function (_Component) {
     }
 
     _Component.prototype.pushChanges.call(this);
+  };
+
+  _proto.onParentDidChange = function onParentDidChange(changes) {
+    this.onChanges(changes);
+    this.pushChanges();
   };
 
   Context.mergeDescriptors = function mergeDescriptors(source, instance, descriptors) {
@@ -1143,16 +1157,9 @@ var Module = function () {
   };
 
   _proto.makeInstanceSubscription = function makeInstanceSubscription(instance, parentInstance) {
-    var _this2 = this;
-
     if (parentInstance instanceof Factory) {
       parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
-        if (!(instance instanceof Context)) {
-          _this2.resolveInputsOutputs(instance, changes);
-        }
-
-        instance.onChanges(changes);
-        instance.pushChanges();
+        instance.onParentDidChange(changes);
       });
     }
   };
@@ -1172,6 +1179,18 @@ var Module = function () {
       return function () {
         return null;
       };
+    }
+  };
+
+  _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
+    var context = getContext(instance);
+    var parentInstance = context.parentInstance;
+    var inputs = context.inputs;
+
+    for (var key in inputs) {
+      var inputFunction = inputs[key];
+      var value = this.resolve(inputFunction, parentInstance, instance);
+      instance[key] = value;
     }
   };
 
@@ -1283,11 +1302,11 @@ var Module = function () {
   };
 
   _proto.makeInputs = function makeInputs(meta, instance, factory) {
-    var _this3 = this;
+    var _this2 = this;
 
     var inputs = {};
     factory.getInputsTokens(instance).forEach(function (key) {
-      var input = _this3.makeInput(instance, key);
+      var input = _this2.makeInput(instance, key);
 
       if (input) {
         inputs[key] = input;
@@ -1297,7 +1316,7 @@ var Module = function () {
   };
 
   _proto.makeOutput = function makeOutput(instance, key) {
-    var _this4 = this;
+    var _this3 = this;
 
     var context = getContext(instance);
     var node = context.node;
@@ -1306,7 +1325,7 @@ var Module = function () {
     var outputFunction = expression ? this.makeFunction(expression, ['$event']) : null;
     var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
       if (outputFunction) {
-        _this4.resolve(outputFunction, parentInstance, event);
+        _this3.resolve(outputFunction, parentInstance, event);
       }
     }));
     output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
@@ -1315,13 +1334,13 @@ var Module = function () {
   };
 
   _proto.makeOutputs = function makeOutputs(meta, instance) {
-    var _this5 = this;
+    var _this4 = this;
 
     var outputs = {};
 
     if (meta.outputs) {
       meta.outputs.forEach(function (key) {
-        var output = _this5.makeOutput(instance, key);
+        var output = _this4.makeOutput(instance, key);
 
         if (output) {
           outputs[key] = output;
@@ -1347,15 +1366,15 @@ var Module = function () {
   };
 
   _proto.getParentInstance = function getParentInstance(node) {
-    var _this6 = this;
+    var _this5 = this;
 
     return Module.traverseUp(node, function (node) {
-      return _this6.getInstance(node);
+      return _this5.getInstance(node);
     });
   };
 
   _proto.parseTextNode = function parseTextNode(node, instance) {
-    var _this7 = this;
+    var _this6 = this;
 
     var expressions = node.nodeExpressions;
 
@@ -1368,7 +1387,7 @@ var Module = function () {
         var text;
 
         if (typeof c === 'function') {
-          text = _this7.resolve(c, instance, instance);
+          text = _this6.resolve(c, instance, instance);
 
           if (text == undefined) {
             text = '';
@@ -1425,18 +1444,6 @@ var Module = function () {
       return expressions;
     } else {
       return [];
-    }
-  };
-
-  _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
-    var context = getContext(instance);
-    var parentInstance = context.parentInstance;
-    var inputs = context.inputs;
-
-    for (var key in inputs) {
-      var inputFunction = inputs[key];
-      var value = this.resolve(inputFunction, parentInstance, instance);
-      instance[key] = value;
     }
   };
 
