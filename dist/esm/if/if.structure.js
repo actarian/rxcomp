@@ -16,11 +16,13 @@ export default class IfStructure extends Structure {
     onChanges() {
         const { module } = getContext(this);
         const element = this.element;
-        if (this.if != null) { // !!! keep == loose equality
+        // console.log('IfStructure.onChanges.if', this.if);
+        if (Boolean(this.if)) { // !!! keep == loose equality
             if (!element.parentNode) {
                 const ifend = this.ifend;
                 ifend.parentNode.insertBefore(element, ifend);
                 module.compile(element);
+                // console.log('IfStructure.onChanges.add', element);
             }
         }
         else {
@@ -28,6 +30,7 @@ export default class IfStructure extends Structure {
                 module.remove(element, this);
                 element.parentNode.removeChild(element);
                 this.element = this.clonedNode.cloneNode(true);
+                // console.log('IfStructure.onChanges.remove', element);
             }
         }
     }

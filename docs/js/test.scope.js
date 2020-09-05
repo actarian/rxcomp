@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.16
+ * @license rxcomp v1.0.0-beta.17
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -670,7 +670,7 @@ HrefDirective.meta = {
 
     var element = this.element;
 
-    if (this.if != null) {
+    if (Boolean(this.if)) {
       if (!element.parentNode) {
         var ifend = this.ifend;
         ifend.parentNode.insertBefore(element, ifend);
@@ -1283,12 +1283,8 @@ var Module = function () {
     }
 
     expression = expression || key;
-
-    if (expression) {
-      instance[key] = instance[key] || null;
-      input = this.makeFunction(expression);
-    }
-
+    instance[key] = instance[key] === undefined ? null : instance[key];
+    input = this.makeFunction(expression);
     return input;
   };
 

@@ -23,11 +23,13 @@ var IfStructure = /** @class */ (function (_super) {
     IfStructure.prototype.onChanges = function () {
         var module = factory_1.getContext(this).module;
         var element = this.element;
-        if (this.if != null) { // !!! keep == loose equality
+        // console.log('IfStructure.onChanges.if', this.if);
+        if (Boolean(this.if)) { // !!! keep == loose equality
             if (!element.parentNode) {
                 var ifend = this.ifend;
                 ifend.parentNode.insertBefore(element, ifend);
                 module.compile(element);
+                // console.log('IfStructure.onChanges.add', element);
             }
         }
         else {
@@ -35,6 +37,7 @@ var IfStructure = /** @class */ (function (_super) {
                 module.remove(element, this);
                 element.parentNode.removeChild(element);
                 this.element = this.clonedNode.cloneNode(true);
+                // console.log('IfStructure.onChanges.remove', element);
             }
         }
     };

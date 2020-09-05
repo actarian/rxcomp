@@ -103,8 +103,8 @@ export default class Module {
         const inputs = context.inputs;
         for (let key in inputs) {
             const inputFunction = inputs[key];
-            // console.log('Module.inputFunction', inputFunction);
             const value = this.resolve(inputFunction, parentInstance, instance);
+            // console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'parentInstance', parentInstance, 'instance', instance);
             instance[key] = value;
         }
     }
@@ -196,11 +196,11 @@ export default class Module {
             }
         }
         expression = expression || key;
-        if (expression) {
-            instance[key] = instance[key] || null; // !!! avoid throError undefined key
-            input = this.makeFunction(expression);
-        }
-        // console.log('Module.makeInput', key, instance, descriptor);
+        // if (expression) {
+        instance[key] = instance[key] === undefined ? null : instance[key]; // !!! avoid throError undefined key
+        input = this.makeFunction(expression);
+        // }
+        // console.log('Module.makeInput', key, expression);
         return input;
     }
     makeInputs(meta, instance, factory) {
@@ -592,7 +592,7 @@ export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
                 equal = prev === curr;
         }
     }
-    console.log(equal, prev, curr);
+    // console.log(equal, prev, curr);
     return equal;
 }
 */

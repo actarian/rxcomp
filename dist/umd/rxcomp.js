@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.16
+ * @license rxcomp v1.0.0-beta.17
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -758,20 +758,20 @@ HrefDirective.meta = {
     var _getContext2 = getContext(this),
         module = _getContext2.module;
 
-    var element = this.element;
+    var element = this.element; // console.log('IfStructure.onChanges.if', this.if);
 
-    if (this.if != null) {
+    if (Boolean(this.if)) {
       // !!! keep == loose equality
       if (!element.parentNode) {
         var ifend = this.ifend;
         ifend.parentNode.insertBefore(element, ifend);
-        module.compile(element);
+        module.compile(element); // console.log('IfStructure.onChanges.add', element);
       }
     } else {
       if (element.parentNode) {
         module.remove(element, this);
         element.parentNode.removeChild(element);
-        this.element = this.clonedNode.cloneNode(true);
+        this.element = this.clonedNode.cloneNode(true); // console.log('IfStructure.onChanges.remove', element);
       }
     }
   };
@@ -1305,9 +1305,9 @@ var Module = /*#__PURE__*/function () {
     var inputs = context.inputs;
 
     for (var key in inputs) {
-      var inputFunction = inputs[key]; // console.log('Module.inputFunction', inputFunction);
+      var inputFunction = inputs[key];
+      var value = this.resolve(inputFunction, parentInstance, instance); // console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'parentInstance', parentInstance, 'instance', instance);
 
-      var value = this.resolve(inputFunction, parentInstance, instance);
       instance[key] = value;
     }
   };
@@ -1413,14 +1413,12 @@ var Module = /*#__PURE__*/function () {
       }
     }
 
-    expression = expression || key;
+    expression = expression || key; // if (expression) {
 
-    if (expression) {
-      instance[key] = instance[key] || null; // !!! avoid throError undefined key
+    instance[key] = instance[key] === undefined ? null : instance[key]; // !!! avoid throError undefined key
 
-      input = this.makeFunction(expression);
-    } // console.log('Module.makeInput', key, instance, descriptor);
-
+    input = this.makeFunction(expression); // }
+    // console.log('Module.makeInput', key, expression);
 
     return input;
   };
@@ -1940,7 +1938,7 @@ export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
                 equal = prev === curr;
         }
     }
-    console.log(equal, prev, curr);
+    // console.log(equal, prev, curr);
     return equal;
 }
 */var SrcDirective = /*#__PURE__*/function (_Directive) {
