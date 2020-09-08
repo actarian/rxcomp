@@ -11,6 +11,7 @@ export { DefaultErrorHandler, ErrorInterceptorHandler, ErrorInterceptors, errors
 export { default as EventDirective } from './event/event.directive';
 export { default as ForItem } from './for/for.item';
 export { default as ForStructure } from './for/for.structure';
+export { default as HrefTargetDirective } from './href/href-target.directive';
 export { default as HrefDirective } from './href/href.directive';
 export { default as IfStructure } from './if/if.structure';
 export { default as InnerHtmlDirective } from './inner-html/inner-html.directive';
@@ -25,3 +26,4 @@ export { WINDOW } from './platform/common/window/window';
 export { default as Platform, isPlatformBrowser, isPlatformServer, isPlatformWorker, PLATFORM_BROWSER, PLATFORM_JS_DOM, PLATFORM_NODE, PLATFORM_WEB_WORKER } from './platform/platform';
 export { default as SrcDirective } from './src/src.directive';
 export { default as StyleDirective } from './style/style.directive';
+

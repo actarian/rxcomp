@@ -6,6 +6,7 @@ import Pipe from './core/pipe';
 import { errors$ } from './error/error';
 import EventDirective from './event/event.directive';
 import ForStructure from './for/for.structure';
+import HrefTargetDirective from './href/href-target.directive';
 import HrefDirective from './href/href.directive';
 import IfStructure from './if/if.structure';
 import InnerHtmlDirective from './inner-html/inner-html.directive';
@@ -20,17 +21,16 @@ const factories: typeof Factory[] = [
 	EventDirective,
 	ForStructure,
 	HrefDirective,
+	HrefTargetDirective,
 	IfStructure,
 	InnerHtmlDirective,
 	JsonComponent,
 	SrcDirective,
 	StyleDirective,
 ];
-
 const pipes: typeof Pipe[] = [
 	JsonPipe,
 ];
-
 export default class CoreModule extends Module {
 	constructor() {
 		super();

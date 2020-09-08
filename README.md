@@ -40,17 +40,17 @@ ___
 * Automatic Subscription / Unsubscription
 * Optional Chaining
 * Component Template
+* Http client with [RxComp HttpModule](https://github.com/actarian/rxcomp-http)
+* Spa Router with [RxComp RouterModule](https://github.com/actarian/rxcomp-router)
 * Reactive Forms with [RxComp FormModule](https://github.com/actarian/rxcomp-form)
 * Form Validation with [RxComp FormModule](https://github.com/actarian/rxcomp-form)
+* Server Side Rendering with [RxComp ServerModule](https://github.com/actarian/rxcomp-server)
 
 ___
 
 ### What is NOT included
 * ~~Two-Way Data Binding~~
 * ~~Dependency Injection~~
-* ~~HttpClient~~
-* ~~Routing~~
-* ~~Server Side Rendering~~
 
 ___
 

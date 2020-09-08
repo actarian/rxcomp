@@ -11,6 +11,7 @@ export { DefaultErrorHandler, ErrorInterceptorHandler, ErrorInterceptors, errors
 export { default as EventDirective } from './event/event.directive';
 export { default as ForItem } from './for/for.item';
 export { default as ForStructure } from './for/for.structure';
+export { default as HrefTargetDirective } from './href/href-target.directive';
 export { default as HrefDirective } from './href/href.directive';
 export { default as IfStructure } from './if/if.structure';
 export { default as InnerHtmlDirective } from './inner-html/inner-html.directive';

@@ -31,6 +31,8 @@ var for_item_1 = require("./for/for.item");
 Object.defineProperty(exports, "ForItem", { enumerable: true, get: function () { return for_item_1.default; } });
 var for_structure_1 = require("./for/for.structure");
 Object.defineProperty(exports, "ForStructure", { enumerable: true, get: function () { return for_structure_1.default; } });
+var href_target_directive_1 = require("./href/href-target.directive");
+Object.defineProperty(exports, "HrefTargetDirective", { enumerable: true, get: function () { return href_target_directive_1.default; } });
 var href_directive_1 = require("./href/href.directive");
 Object.defineProperty(exports, "HrefDirective", { enumerable: true, get: function () { return href_directive_1.default; } });
 var if_structure_1 = require("./if/if.structure");

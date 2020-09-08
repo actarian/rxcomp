@@ -625,6 +625,35 @@ var Context = function (_Component) {
 ForStructure.meta = {
   selector: '[*for]',
   inputs: ['for']
+};var HrefTargetDirective = function (_Directive) {
+  _inheritsLoose(HrefTargetDirective, _Directive);
+
+  function HrefTargetDirective() {
+    return _Directive.apply(this, arguments) || this;
+  }
+
+  _createClass(HrefTargetDirective, [{
+    key: "target",
+    set: function set(target) {
+      if (this.target_ !== target) {
+        this.target_ = target;
+
+        var _getContext = getContext(this),
+            node = _getContext.node;
+
+        target ? node.setAttribute('target', target) : node.removeAttribute('target');
+      }
+    },
+    get: function get() {
+      return this.target_;
+    }
+  }]);
+
+  return HrefTargetDirective;
+}(Directive);
+HrefTargetDirective.meta = {
+  selector: '[[target]]',
+  inputs: ['target']
 };var HrefDirective = function (_Directive) {
   _inheritsLoose(HrefDirective, _Directive);
 
@@ -1843,7 +1872,7 @@ SrcDirective.meta = {
 StyleDirective.meta = {
   selector: "[[style]]",
   inputs: ['style']
-};var factories = [ClassDirective, EventDirective, ForStructure, HrefDirective, IfStructure, InnerHtmlDirective, JsonComponent, SrcDirective, StyleDirective];
+};var factories = [ClassDirective, EventDirective, ForStructure, HrefDirective, HrefTargetDirective, IfStructure, InnerHtmlDirective, JsonComponent, SrcDirective, StyleDirective];
 var pipes = [JsonPipe];
 
 var CoreModule = function (_Module) {

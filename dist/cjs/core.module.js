@@ -6,6 +6,7 @@ var class_directive_1 = tslib_1.__importDefault(require("./class/class.directive
 var error_1 = require("./error/error");
 var event_directive_1 = tslib_1.__importDefault(require("./event/event.directive"));
 var for_structure_1 = tslib_1.__importDefault(require("./for/for.structure"));
+var href_target_directive_1 = tslib_1.__importDefault(require("./href/href-target.directive"));
 var href_directive_1 = tslib_1.__importDefault(require("./href/href.directive"));
 var if_structure_1 = tslib_1.__importDefault(require("./if/if.structure"));
 var inner_html_directive_1 = tslib_1.__importDefault(require("./inner-html/inner-html.directive"));
@@ -19,6 +20,7 @@ var factories = [
     event_directive_1.default,
     for_structure_1.default,
     href_directive_1.default,
+    href_target_directive_1.default,
     if_structure_1.default,
     inner_html_directive_1.default,
     json_component_1.default,

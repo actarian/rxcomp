@@ -3,6 +3,7 @@ import ClassDirective from './class/class.directive';
 import { errors$ } from './error/error';
 import EventDirective from './event/event.directive';
 import ForStructure from './for/for.structure';
+import HrefTargetDirective from './href/href-target.directive';
 import HrefDirective from './href/href.directive';
 import IfStructure from './if/if.structure';
 import InnerHtmlDirective from './inner-html/inner-html.directive';
@@ -16,6 +17,7 @@ const factories = [
     EventDirective,
     ForStructure,
     HrefDirective,
+    HrefTargetDirective,
     IfStructure,
     InnerHtmlDirective,
     JsonComponent,
