@@ -160,7 +160,7 @@ var Factory = function () {
 
     var inputs = {};
     (_this$meta$inputs = this.meta.inputs) == null ? void 0 : _this$meta$inputs.forEach(function (key) {
-      var expression = module.getExpression(key, node);
+      var expression = module.resolveAttribute(key, node);
 
       if (expression) {
         inputs[key] = expression;
@@ -1200,6 +1200,39 @@ var Module = function () {
     }
   };
 
+  _proto.resolveAttribute = function resolveAttribute(key, node) {
+    var expression = null;
+
+    if (node.hasAttribute("[" + key + "]")) {
+      expression = node.getAttribute("[" + key + "]");
+    } else if (node.hasAttribute("*" + key)) {
+      expression = node.getAttribute("*" + key);
+    } else if (node.hasAttribute(key)) {
+      expression = node.getAttribute(key);
+
+      if (expression) {
+        var attribute = expression.replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
+          if (a) {
+            return '"+';
+          }
+
+          if (b) {
+            return '+"';
+          }
+
+          if (c) {
+            return '\"';
+          }
+
+          return '';
+        });
+        expression = "\"" + attribute + "\"";
+      }
+    }
+
+    return expression;
+  };
+
   _proto.resolve = function resolve(expression, parentInstance, payload) {
     return expression.apply(parentInstance, [payload, this]);
   };
@@ -1262,39 +1295,6 @@ var Module = function () {
         instance[key] = getHost(instance, factory, node);
       });
     }
-  };
-
-  _proto.getExpression = function getExpression(key, node) {
-    var expression = null;
-
-    if (node.hasAttribute("[" + key + "]")) {
-      expression = node.getAttribute("[" + key + "]");
-    } else if (node.hasAttribute("*" + key)) {
-      expression = node.getAttribute("*" + key);
-    } else if (node.hasAttribute(key)) {
-      expression = node.getAttribute(key);
-
-      if (expression) {
-        var attribute = expression.replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
-          if (a) {
-            return '"+';
-          }
-
-          if (b) {
-            return '+"';
-          }
-
-          if (c) {
-            return '\"';
-          }
-
-          return '';
-        });
-        expression = "\"" + attribute + "\"";
-      }
-    }
-
-    return expression;
   };
 
   _proto.makeInputs = function makeInputs(meta, instance, node, factory) {

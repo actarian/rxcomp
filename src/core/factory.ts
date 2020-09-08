@@ -51,7 +51,7 @@ export default class Factory {
 	static getInputsTokens(instance: Factory, node: IElement, module: Module): { [key: string]: string } {
 		const inputs: { [key: string]: string } = {};
 		this.meta.inputs?.forEach(key => {
-			const expression: string | null = module.getExpression(key, node);
+			const expression: string | null = module.resolveAttribute(key, node);
 			/*
 			let expression: string | null = null;
 			if (node.hasAttribute(`[${key}]`)) {

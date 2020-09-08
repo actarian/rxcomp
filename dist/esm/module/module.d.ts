@@ -13,6 +13,7 @@ export default class Module {
     makeInstanceSubscription(instance: Factory, parentInstance?: Factory | Window): void;
     makeFunction(expression: string, params?: string[]): ExpressionFunction;
     resolveInputsOutputs(instance: Factory, changes: Factory | Window): void;
+    resolveAttribute(key: string, node: IElement): string | null;
     resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any;
     parse(node: HTMLElement, instance: Factory): void;
     remove(node: Node, keepInstance?: Factory): Node;
@@ -20,7 +21,6 @@ export default class Module {
     nextError(error: Error, instance: Factory, expression: string, params: any[]): void;
     protected makeContext(instance: Factory, parentInstance: Factory | Window, node: IElement, selector: string): IContext;
     protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void;
-    getExpression(key: string, node: IElement): string | null;
     protected makeInputs(meta: IFactoryMeta, instance: Factory, node: IElement, factory: typeof Factory): {
         [key: string]: ExpressionFunction;
     };

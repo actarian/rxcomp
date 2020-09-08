@@ -53,7 +53,7 @@ var Factory = /** @class */ (function () {
         var _a;
         var inputs = {};
         (_a = this.meta.inputs) === null || _a === void 0 ? void 0 : _a.forEach(function (key) {
-            var expression = module.getExpression(key, node);
+            var expression = module.resolveAttribute(key, node);
             /*
             let expression: string | null = null;
             if (node.hasAttribute(`[${key}]`)) {

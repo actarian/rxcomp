@@ -46,7 +46,7 @@ export default class Factory {
         var _a;
         const inputs = {};
         (_a = this.meta.inputs) === null || _a === void 0 ? void 0 : _a.forEach(key => {
-            const expression = module.getExpression(key, node);
+            const expression = module.resolveAttribute(key, node);
             /*
             let expression: string | null = null;
             if (node.hasAttribute(`[${key}]`)) {

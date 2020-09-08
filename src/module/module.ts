@@ -114,6 +114,36 @@ export default class Module {
 			instance[key] = value;
 		}
 	}
+	public resolveAttribute(key: string, node: IElement): string | null {
+		let expression: string | null = null;
+		if (node.hasAttribute(`[${key}]`)) {
+			expression = node.getAttribute(`[${key}]`);
+			// console.log('Module.resolveAttribute.expression.1', expression);
+		} else if (node.hasAttribute(`*${key}`)) {
+			expression = node.getAttribute(`*${key}`);
+			// console.log('Module.resolveAttribute.expression.2', expression);
+		} else if (node.hasAttribute(key)) {
+			expression = node.getAttribute(key);
+			if (expression) {
+				const attribute: string = expression.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
+					if (a) {
+						return '"+';
+					}
+					if (b) {
+						return '+"';
+					}
+					if (c) {
+						return '\"';
+					}
+					return '';
+				});
+				expression = `"${attribute}"`;
+				// console.log('Module.resolveAttribute.expression.3', expression);
+			}
+		}
+		// console.log('Module.resolveAttribute.expression', expression);
+		return expression;
+	}
 	public resolve(expression: ExpressionFunction, parentInstance: Factory | Window, payload: any): any {
 		// console.log('Module.resolve', expression, parentInstance, payload, getContext);
 		return expression.apply(parentInstance, [payload, this]);
@@ -174,7 +204,7 @@ export default class Module {
 		// console.log('Module.makeInput', 'key', key, 'instance', instance);
 		const { node } = getContext(instance);
 		let input: ExpressionFunction | null = null;
-		const expression: string | null = this.getExpression(key, node);
+		const expression: string | null = this.resolveAttribute(key, node);
 		if (expression) {
 			instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
 			input = this.makeFunction(expression);
@@ -183,36 +213,6 @@ export default class Module {
 		return input;
 	}
 	*/
-	getExpression(key: string, node: IElement): string | null {
-		let expression: string | null = null;
-		if (node.hasAttribute(`[${key}]`)) {
-			expression = node.getAttribute(`[${key}]`);
-			// console.log('Module.getExpression.expression.1', expression);
-		} else if (node.hasAttribute(`*${key}`)) {
-			expression = node.getAttribute(`*${key}`);
-			// console.log('Module.getExpression.expression.2', expression);
-		} else if (node.hasAttribute(key)) {
-			expression = node.getAttribute(key);
-			if (expression) {
-				const attribute: string = expression.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
-					if (a) {
-						return '"+';
-					}
-					if (b) {
-						return '+"';
-					}
-					if (c) {
-						return '\"';
-					}
-					return '';
-				});
-				expression = `"${attribute}"`;
-				// console.log('Module.getExpression.expression.3', expression);
-			}
-		}
-		// console.log('Module.getExpression.expression', expression);
-		return expression;
-	}
 	protected makeInputs(meta: IFactoryMeta, instance: Factory, node: IElement, factory: typeof Factory): { [key: string]: ExpressionFunction } {
 		const inputs: { [key: string]: ExpressionFunction } = {};
 		const inputsTokens = factory.getInputsTokens(instance, node, this);

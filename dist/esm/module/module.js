@@ -110,6 +110,38 @@ export default class Module {
             instance[key] = value;
         }
     }
+    resolveAttribute(key, node) {
+        let expression = null;
+        if (node.hasAttribute(`[${key}]`)) {
+            expression = node.getAttribute(`[${key}]`);
+            // console.log('Module.resolveAttribute.expression.1', expression);
+        }
+        else if (node.hasAttribute(`*${key}`)) {
+            expression = node.getAttribute(`*${key}`);
+            // console.log('Module.resolveAttribute.expression.2', expression);
+        }
+        else if (node.hasAttribute(key)) {
+            expression = node.getAttribute(key);
+            if (expression) {
+                const attribute = expression.replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
+                    if (a) {
+                        return '"+';
+                    }
+                    if (b) {
+                        return '+"';
+                    }
+                    if (c) {
+                        return '\"';
+                    }
+                    return '';
+                });
+                expression = `"${attribute}"`;
+                // console.log('Module.resolveAttribute.expression.3', expression);
+            }
+        }
+        // console.log('Module.resolveAttribute.expression', expression);
+        return expression;
+    }
     resolve(expression, parentInstance, payload) {
         // console.log('Module.resolve', expression, parentInstance, payload, getContext);
         return expression.apply(parentInstance, [payload, this]);
@@ -171,7 +203,7 @@ export default class Module {
         // console.log('Module.makeInput', 'key', key, 'instance', instance);
         const { node } = getContext(instance);
         let input: ExpressionFunction | null = null;
-        const expression: string | null = this.getExpression(key, node);
+        const expression: string | null = this.resolveAttribute(key, node);
         if (expression) {
             instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
             input = this.makeFunction(expression);
@@ -180,38 +212,6 @@ export default class Module {
         return input;
     }
     */
-    getExpression(key, node) {
-        let expression = null;
-        if (node.hasAttribute(`[${key}]`)) {
-            expression = node.getAttribute(`[${key}]`);
-            // console.log('Module.getExpression.expression.1', expression);
-        }
-        else if (node.hasAttribute(`*${key}`)) {
-            expression = node.getAttribute(`*${key}`);
-            // console.log('Module.getExpression.expression.2', expression);
-        }
-        else if (node.hasAttribute(key)) {
-            expression = node.getAttribute(key);
-            if (expression) {
-                const attribute = expression.replace(/({{)|(}})|(")/g, function (substring, a, b, c) {
-                    if (a) {
-                        return '"+';
-                    }
-                    if (b) {
-                        return '+"';
-                    }
-                    if (c) {
-                        return '\"';
-                    }
-                    return '';
-                });
-                expression = `"${attribute}"`;
-                // console.log('Module.getExpression.expression.3', expression);
-            }
-        }
-        // console.log('Module.getExpression.expression', expression);
-        return expression;
-    }
     makeInputs(meta, instance, node, factory) {
         const inputs = {};
         const inputsTokens = factory.getInputsTokens(instance, node, this);
