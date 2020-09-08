@@ -60,7 +60,7 @@ var Module = /** @class */ (function () {
             // creating component input and outputs
             if (!(instance_1 instanceof context_1.default)) {
                 this.makeHosts(meta, instance_1, node);
-                context.inputs = this.makeInputs(meta, instance_1, factory);
+                context.inputs = this.makeInputs(meta, instance_1, node, factory);
                 context.outputs = this.makeOutputs(meta, instance_1);
                 if (parentInstance instanceof factory_1.default) {
                     this.resolveInputsOutputs(instance_1, parentInstance);
@@ -92,8 +92,10 @@ var Module = /** @class */ (function () {
         expression = Module.parseExpression(expression);
         var expressionFunction = "with(this) {\n\treturn (function (" + params.join(',') + ", $$module) {\n\t\ttry {\n\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\treturn " + expression + ";\n\t\t} catch(error) {\n\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t}\n\t}.bind(this)).apply(this, arguments);\n}";
         // console.log('Module.makeFunction.expressionFunction', expressionFunction);
-        return new Function(expressionFunction);
+        var callback = new Function(expressionFunction);
         // return () => { return null; };
+        callback.expression = expression;
+        return callback;
     };
     Module.prototype.resolveInputsOutputs = function (instance, changes) {
         var context = factory_1.getContext(instance);
@@ -102,7 +104,7 @@ var Module = /** @class */ (function () {
         for (var key in inputs) {
             var inputFunction = inputs[key];
             var value = this.resolve(inputFunction, parentInstance, instance);
-            // console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'parentInstance', parentInstance, 'instance', instance);
+            // console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'value', value, 'parentInstance', parentInstance, 'instance', instance);
             instance[key] = value;
         }
     };
@@ -162,17 +164,29 @@ var Module = /** @class */ (function () {
             });
         }
     };
-    Module.prototype.makeInput = function (instance, key) {
+    /*
+    protected makeInput(instance: Factory, key: string): ExpressionFunction | null {
         // console.log('Module.makeInput', 'key', key, 'instance', instance);
-        var node = factory_1.getContext(instance).node;
-        var input = null, expression = null;
+        const { node } = getContext(instance);
+        let input: ExpressionFunction | null = null;
+        const expression: string | null = this.getExpression(key, node);
+        if (expression) {
+            instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
+            input = this.makeFunction(expression);
+        }
+        // console.log('Module.makeInput', key, expression);
+        return input;
+    }
+    */
+    Module.prototype.getExpression = function (key, node) {
+        var expression = null;
         if (node.hasAttribute("[" + key + "]")) {
             expression = node.getAttribute("[" + key + "]");
-            // console.log('Module.makeInput.expression.1', expression);
+            // console.log('Module.getExpression.expression.1', expression);
         }
         else if (node.hasAttribute("*" + key)) {
             expression = node.getAttribute("*" + key);
-            // console.log('Module.makeInput.expression.2', expression);
+            // console.log('Module.getExpression.expression.2', expression);
         }
         else if (node.hasAttribute(key)) {
             expression = node.getAttribute(key);
@@ -190,26 +204,28 @@ var Module = /** @class */ (function () {
                     return '';
                 });
                 expression = "\"" + attribute + "\"";
-                // console.log('Module.makeInput.expression.3', expression);
+                // console.log('Module.getExpression.expression.3', expression);
             }
         }
-        expression = expression || key;
-        // if (expression) {
-        instance[key] = instance[key] === undefined ? null : instance[key]; // !!! avoid throError undefined key
-        input = this.makeFunction(expression);
-        // }
-        // console.log('Module.makeInput', key, expression);
-        return input;
+        // console.log('Module.getExpression.expression', expression);
+        return expression;
     };
-    Module.prototype.makeInputs = function (meta, instance, factory) {
+    Module.prototype.makeInputs = function (meta, instance, node, factory) {
         var _this = this;
         var inputs = {};
-        factory.getInputsTokens(instance).forEach(function (key) {
-            var input = _this.makeInput(instance, key);
+        var inputsTokens = factory.getInputsTokens(instance, node, this);
+        Object.keys(inputsTokens).forEach(function (key) {
+            instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
+            inputs[key] = _this.makeFunction(inputsTokens[key]);
+        });
+        /*
+        factory.getInputsTokens(instance, node).forEach((key: string) => {
+            const input = this.makeInput(instance, key);
             if (input) {
                 inputs[key] = input;
             }
         });
+        */
         return inputs;
     };
     Module.prototype.makeOutput = function (instance, key) {

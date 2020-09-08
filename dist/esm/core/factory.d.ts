@@ -1,5 +1,6 @@
 import { ReplaySubject, Subject } from 'rxjs';
-import { IContext, IFactoryMeta } from './types';
+import Module from '../module/module';
+import { IContext, IElement, IFactoryMeta } from './types';
 export declare const CONTEXTS: {
     [key: number]: IContext;
 };
@@ -19,6 +20,8 @@ export default class Factory {
     onParentDidChange(changes: Factory | Window): void;
     [key: string]: any;
     constructor(...args: any[]);
-    static getInputsTokens(instance: Factory): string[];
+    static getInputsTokens(instance: Factory, node: IElement, module: Module): {
+        [key: string]: string;
+    };
 }
 export declare function getContext(instance: Factory): IContext;

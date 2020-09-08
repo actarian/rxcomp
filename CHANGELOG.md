@@ -3,7 +3,7 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
-## [1.0.0-beta.17] - 2020-09-05
+## [1.0.0-beta.18] - 2020-09-08
 ### Fixing
 - TextNode Parser
 

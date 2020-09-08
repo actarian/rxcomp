@@ -54,7 +54,7 @@ export default class Module {
             // creating component input and outputs
             if (!(instance instanceof Context)) {
                 this.makeHosts(meta, instance, node);
-                context.inputs = this.makeInputs(meta, instance, factory);
+                context.inputs = this.makeInputs(meta, instance, node, factory);
                 context.outputs = this.makeOutputs(meta, instance);
                 if (parentInstance instanceof Factory) {
                     this.resolveInputsOutputs(instance, parentInstance);
@@ -94,8 +94,10 @@ export default class Module {
 	}.bind(this)).apply(this, arguments);
 }`;
         // console.log('Module.makeFunction.expressionFunction', expressionFunction);
-        return new Function(expressionFunction);
+        const callback = new Function(expressionFunction);
         // return () => { return null; };
+        callback.expression = expression;
+        return callback;
     }
     resolveInputsOutputs(instance, changes) {
         const context = getContext(instance);
@@ -104,7 +106,7 @@ export default class Module {
         for (let key in inputs) {
             const inputFunction = inputs[key];
             const value = this.resolve(inputFunction, parentInstance, instance);
-            // console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'parentInstance', parentInstance, 'instance', instance);
+            // console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'value', value, 'parentInstance', parentInstance, 'instance', instance);
             instance[key] = value;
         }
     }
@@ -164,17 +166,29 @@ export default class Module {
             });
         }
     }
-    makeInput(instance, key) {
+    /*
+    protected makeInput(instance: Factory, key: string): ExpressionFunction | null {
         // console.log('Module.makeInput', 'key', key, 'instance', instance);
         const { node } = getContext(instance);
-        let input = null, expression = null;
+        let input: ExpressionFunction | null = null;
+        const expression: string | null = this.getExpression(key, node);
+        if (expression) {
+            instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
+            input = this.makeFunction(expression);
+        }
+        // console.log('Module.makeInput', key, expression);
+        return input;
+    }
+    */
+    getExpression(key, node) {
+        let expression = null;
         if (node.hasAttribute(`[${key}]`)) {
             expression = node.getAttribute(`[${key}]`);
-            // console.log('Module.makeInput.expression.1', expression);
+            // console.log('Module.getExpression.expression.1', expression);
         }
         else if (node.hasAttribute(`*${key}`)) {
             expression = node.getAttribute(`*${key}`);
-            // console.log('Module.makeInput.expression.2', expression);
+            // console.log('Module.getExpression.expression.2', expression);
         }
         else if (node.hasAttribute(key)) {
             expression = node.getAttribute(key);
@@ -192,25 +206,27 @@ export default class Module {
                     return '';
                 });
                 expression = `"${attribute}"`;
-                // console.log('Module.makeInput.expression.3', expression);
+                // console.log('Module.getExpression.expression.3', expression);
             }
         }
-        expression = expression || key;
-        // if (expression) {
-        instance[key] = instance[key] === undefined ? null : instance[key]; // !!! avoid throError undefined key
-        input = this.makeFunction(expression);
-        // }
-        // console.log('Module.makeInput', key, expression);
-        return input;
+        // console.log('Module.getExpression.expression', expression);
+        return expression;
     }
-    makeInputs(meta, instance, factory) {
+    makeInputs(meta, instance, node, factory) {
         const inputs = {};
-        factory.getInputsTokens(instance).forEach((key) => {
+        const inputsTokens = factory.getInputsTokens(instance, node, this);
+        Object.keys(inputsTokens).forEach(key => {
+            instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
+            inputs[key] = this.makeFunction(inputsTokens[key]);
+        });
+        /*
+        factory.getInputsTokens(instance, node).forEach((key: string) => {
             const input = this.makeInput(instance, key);
             if (input) {
                 inputs[key] = input;
             }
         });
+        */
         return inputs;
     }
     makeOutput(instance, key) {

@@ -11,13 +11,13 @@ import { WINDOW } from '../platform/common/window/window';
 let ID: number = 0;
 
 export default class Module {
-	meta?: IModuleParsedMeta;
+	meta!: IModuleParsedMeta; // !!!
 	instances?: Factory[];
 	unsubscribe$: Subject<void> = new Subject();
 	static forRoot?: (...args: any[]) => typeof Module;
 	public compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode: IElement;
-		const instances: Factory[] = Module.querySelectorsAll(node, this.meta!.selectors, []).map((match: ISelectorResult) => {
+		const instances: Factory[] = Module.querySelectorsAll(node, this.meta.selectors, []).map((match: ISelectorResult) => {
 			if (componentNode && componentNode !== match.node) {
 				parentInstance = undefined;
 			}
@@ -58,7 +58,7 @@ export default class Module {
 			// creating component input and outputs
 			if (!(instance instanceof Context)) {
 				this.makeHosts(meta, instance, node);
-				context.inputs = this.makeInputs(meta, instance, factory);
+				context.inputs = this.makeInputs(meta, instance, node, factory);
 				context.outputs = this.makeOutputs(meta, instance);
 				if (parentInstance instanceof Factory) {
 					this.resolveInputsOutputs(instance, parentInstance);
@@ -98,8 +98,10 @@ export default class Module {
 	}.bind(this)).apply(this, arguments);
 }`;
 		// console.log('Module.makeFunction.expressionFunction', expressionFunction);
-		return new Function(expressionFunction) as ExpressionFunction;
+		const callback = new Function(expressionFunction) as ExpressionFunction;
 		// return () => { return null; };
+		(callback as any).expression = expression;
+		return callback;
 	}
 	public resolveInputsOutputs(instance: Factory, changes: Factory | Window): void {
 		const context: IContext = getContext(instance);
@@ -108,7 +110,7 @@ export default class Module {
 		for (let key in inputs) {
 			const inputFunction: ExpressionFunction = inputs[key];
 			const value: any = this.resolve(inputFunction, parentInstance, instance);
-			// console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'parentInstance', parentInstance, 'instance', instance);
+			// console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'value', value, 'parentInstance', parentInstance, 'instance', instance);
 			instance[key] = value;
 		}
 	}
@@ -147,8 +149,8 @@ export default class Module {
 	public destroy(): void {
 		this.unsubscribe$.next();
 		this.unsubscribe$.complete();
-		this.remove(this.meta!.node);
-		this.meta!.node.innerHTML = this.meta!.nodeInnerHTML;
+		this.remove(this.meta.node);
+		this.meta.node.innerHTML = this.meta.nodeInnerHTML;
 	}
 	public nextError(error: Error, instance: Factory, expression: string, params: any[]): void {
 		const expressionError: ExpressionError = new ExpressionError(error, this, instance, expression, params);
@@ -167,17 +169,28 @@ export default class Module {
 			});
 		}
 	}
+	/*
 	protected makeInput(instance: Factory, key: string): ExpressionFunction | null {
 		// console.log('Module.makeInput', 'key', key, 'instance', instance);
 		const { node } = getContext(instance);
-		let input: ExpressionFunction | null = null,
-			expression: string | null = null;
+		let input: ExpressionFunction | null = null;
+		const expression: string | null = this.getExpression(key, node);
+		if (expression) {
+			instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
+			input = this.makeFunction(expression);
+		}
+		// console.log('Module.makeInput', key, expression);
+		return input;
+	}
+	*/
+	getExpression(key: string, node: IElement): string | null {
+		let expression: string | null = null;
 		if (node.hasAttribute(`[${key}]`)) {
 			expression = node.getAttribute(`[${key}]`);
-			// console.log('Module.makeInput.expression.1', expression);
+			// console.log('Module.getExpression.expression.1', expression);
 		} else if (node.hasAttribute(`*${key}`)) {
 			expression = node.getAttribute(`*${key}`);
-			// console.log('Module.makeInput.expression.2', expression);
+			// console.log('Module.getExpression.expression.2', expression);
 		} else if (node.hasAttribute(key)) {
 			expression = node.getAttribute(key);
 			if (expression) {
@@ -194,25 +207,27 @@ export default class Module {
 					return '';
 				});
 				expression = `"${attribute}"`;
-				// console.log('Module.makeInput.expression.3', expression);
+				// console.log('Module.getExpression.expression.3', expression);
 			}
 		}
-		expression = expression || key;
-		// if (expression) {
-		instance[key] = instance[key] === undefined ? null : instance[key]; // !!! avoid throError undefined key
-		input = this.makeFunction(expression);
-		// }
-		// console.log('Module.makeInput', key, expression);
-		return input;
+		// console.log('Module.getExpression.expression', expression);
+		return expression;
 	}
-	protected makeInputs(meta: IFactoryMeta, instance: Factory, factory: typeof Factory): { [key: string]: ExpressionFunction } {
+	protected makeInputs(meta: IFactoryMeta, instance: Factory, node: IElement, factory: typeof Factory): { [key: string]: ExpressionFunction } {
 		const inputs: { [key: string]: ExpressionFunction } = {};
-		factory.getInputsTokens(instance).forEach((key: string) => {
+		const inputsTokens = factory.getInputsTokens(instance, node, this);
+		Object.keys(inputsTokens).forEach(key => {
+			instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
+			inputs[key] = this.makeFunction(inputsTokens[key]);
+		});
+		/*
+		factory.getInputsTokens(instance, node).forEach((key: string) => {
 			const input = this.makeInput(instance, key);
 			if (input) {
 				inputs[key] = input;
 			}
 		});
+		*/
 		return inputs;
 	}
 	protected makeOutput(instance: Factory, key: string): Observable<any> {

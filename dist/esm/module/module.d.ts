@@ -2,7 +2,7 @@ import { Observable, Subject } from 'rxjs';
 import Factory from '../core/factory';
 import { ExpressionFunction, IContext, IElement, IFactoryMeta, IModuleMeta, IModuleParsedMeta, ISelectorResult, IText, SelectorFunction } from '../core/types';
 export default class Module {
-    meta?: IModuleParsedMeta;
+    meta: IModuleParsedMeta;
     instances?: Factory[];
     unsubscribe$: Subject<void>;
     static forRoot?: (...args: any[]) => typeof Module;
@@ -20,8 +20,8 @@ export default class Module {
     nextError(error: Error, instance: Factory, expression: string, params: any[]): void;
     protected makeContext(instance: Factory, parentInstance: Factory | Window, node: IElement, selector: string): IContext;
     protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void;
-    protected makeInput(instance: Factory, key: string): ExpressionFunction | null;
-    protected makeInputs(meta: IFactoryMeta, instance: Factory, factory: typeof Factory): {
+    getExpression(key: string, node: IElement): string | null;
+    protected makeInputs(meta: IFactoryMeta, instance: Factory, node: IElement, factory: typeof Factory): {
         [key: string]: ExpressionFunction;
     };
     protected makeOutput(instance: Factory, key: string): Observable<any>;

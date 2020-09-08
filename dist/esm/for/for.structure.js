@@ -20,7 +20,7 @@ export default class ForStructure extends Structure {
         const module = context.module;
         const node = context.node;
         const tokens = this.tokens;
-        let result = this[tokens.iterable];
+        let result = this.for || [];
         const isArray = Array.isArray(result);
         const array = isArray ? result : Object.keys(result);
         const total = array.length;
@@ -60,11 +60,15 @@ export default class ForStructure extends Structure {
         }
         this.instances.length = array.length;
     }
-    static getInputsTokens(instance) {
-        const { node } = getContext(instance);
+    static getInputsTokens(instance, node, module) {
+        const inputs = {};
         const expression = node.getAttribute('*for');
-        const tokens = instance.tokens = ForStructure.getForExpressionTokens(expression);
-        return [tokens.iterable];
+        if (expression) {
+            const tokens = ForStructure.getForExpressionTokens(expression);
+            instance.tokens = tokens;
+            inputs.for = tokens.iterable;
+        }
+        return inputs;
     }
     static getForExpressionTokens(expression) {
         if (expression === null) {

@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.17
+ * @license rxcomp v1.0.0-beta.18
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -197,8 +197,18 @@ var Factory = function () {
     this.pushChanges();
   };
 
-  Factory.getInputsTokens = function getInputsTokens(instance) {
-    return this.meta.inputs || [];
+  Factory.getInputsTokens = function getInputsTokens(instance, node, module) {
+    var _this$meta$inputs;
+
+    var inputs = {};
+    (_this$meta$inputs = this.meta.inputs) == null ? void 0 : _this$meta$inputs.forEach(function (key) {
+      var expression = module.getExpression(key, node);
+
+      if (expression) {
+        inputs[key] = expression;
+      }
+    });
+    return inputs;
   };
 
   return Factory;
@@ -550,7 +560,7 @@ var Context = function (_Component) {
     var module = context.module;
     var node = context.node;
     var tokens = this.tokens;
-    var result = this[tokens.iterable];
+    var result = this.for || [];
     var isArray = Array.isArray(result);
     var array = isArray ? result : Object.keys(result);
     var total = array.length;
@@ -595,13 +605,17 @@ var Context = function (_Component) {
     this.instances.length = array.length;
   };
 
-  ForStructure.getInputsTokens = function getInputsTokens(instance) {
-    var _getContext3 = getContext(instance),
-        node = _getContext3.node;
-
+  ForStructure.getInputsTokens = function getInputsTokens(instance, node, module) {
+    var inputs = {};
     var expression = node.getAttribute('*for');
-    var tokens = instance.tokens = ForStructure.getForExpressionTokens(expression);
-    return [tokens.iterable];
+
+    if (expression) {
+      var tokens = ForStructure.getForExpressionTokens(expression);
+      instance.tokens = tokens;
+      inputs.for = tokens.iterable;
+    }
+
+    return inputs;
   };
 
   ForStructure.getForExpressionTokens = function getForExpressionTokens(expression) {
@@ -1179,7 +1193,7 @@ var Module = function () {
 
       if (!(instance instanceof Context)) {
         this.makeHosts(meta, instance, node);
-        context.inputs = this.makeInputs(meta, instance, factory);
+        context.inputs = this.makeInputs(meta, instance, node, factory);
         context.outputs = this.makeOutputs(meta, instance);
 
         if (parentInstance instanceof Factory) {
@@ -1214,7 +1228,9 @@ var Module = function () {
 
     expression = Module.parseExpression(expression);
     var expressionFunction = "with(this) {\n\treturn (function (" + params.join(',') + ", $$module) {\n\t\ttry {\n\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\treturn " + expression + ";\n\t\t} catch(error) {\n\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t}\n\t}.bind(this)).apply(this, arguments);\n}";
-    return new Function(expressionFunction);
+    var callback = new Function(expressionFunction);
+    callback.expression = expression;
+    return callback;
   };
 
   _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
@@ -1293,12 +1309,8 @@ var Module = function () {
     }
   };
 
-  _proto.makeInput = function makeInput(instance, key) {
-    var _getContext = getContext(instance),
-        node = _getContext.node;
-
-    var input = null,
-        expression = null;
+  _proto.getExpression = function getExpression(key, node) {
+    var expression = null;
 
     if (node.hasAttribute("[" + key + "]")) {
       expression = node.getAttribute("[" + key + "]");
@@ -1327,22 +1339,17 @@ var Module = function () {
       }
     }
 
-    expression = expression || key;
-    instance[key] = instance[key] === undefined ? null : instance[key];
-    input = this.makeFunction(expression);
-    return input;
+    return expression;
   };
 
-  _proto.makeInputs = function makeInputs(meta, instance, factory) {
+  _proto.makeInputs = function makeInputs(meta, instance, node, factory) {
     var _this2 = this;
 
     var inputs = {};
-    factory.getInputsTokens(instance).forEach(function (key) {
-      var input = _this2.makeInput(instance, key);
-
-      if (input) {
-        inputs[key] = input;
-      }
+    var inputsTokens = factory.getInputsTokens(instance, node, this);
+    Object.keys(inputsTokens).forEach(function (key) {
+      instance[key] = typeof instance[key] === 'undefined' ? null : instance[key];
+      inputs[key] = _this2.makeFunction(inputsTokens[key]);
     });
     return inputs;
   };

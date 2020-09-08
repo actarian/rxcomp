@@ -49,8 +49,45 @@ var Factory = /** @class */ (function () {
         this.onChanges(changes);
         this.pushChanges();
     };
-    Factory.getInputsTokens = function (instance) {
-        return this.meta.inputs || [];
+    Factory.getInputsTokens = function (instance, node, module) {
+        var _a;
+        var inputs = {};
+        (_a = this.meta.inputs) === null || _a === void 0 ? void 0 : _a.forEach(function (key) {
+            var expression = module.getExpression(key, node);
+            /*
+            let expression: string | null = null;
+            if (node.hasAttribute(`[${key}]`)) {
+                expression = node.getAttribute(`[${key}]`);
+                // console.log('Factory.getInputsTokens.expression.1', expression);
+            } else if (node.hasAttribute(`*${key}`)) {
+                expression = node.getAttribute(`*${key}`);
+                // console.log('Factory.getInputsTokens.expression.2', expression);
+            } else if (node.hasAttribute(key)) {
+                expression = node.getAttribute(key);
+                if (expression) {
+                    const attribute: string = expression.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
+                        if (a) {
+                            return '"+';
+                        }
+                        if (b) {
+                            return '+"';
+                        }
+                        if (c) {
+                            return '\"';
+                        }
+                        return '';
+                    });
+                    expression = `"${attribute}"`;
+                    // console.log('Factory.getInputsTokens.expression.3', expression);
+                }
+            }
+            */
+            if (expression) {
+                inputs[key] = expression;
+            }
+        });
+        return inputs;
+        // return this.meta.inputs || [];
     };
     return Factory;
 }());

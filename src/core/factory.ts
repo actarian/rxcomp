@@ -1,5 +1,6 @@
 import { ReplaySubject, Subject } from 'rxjs';
-import { IContext, IFactoryMeta } from './types';
+import Module from '../module/module';
+import { IContext, IElement, IFactoryMeta } from './types';
 
 export const CONTEXTS: { [key: number]: IContext } = {};
 export const NODES: { [key: number]: IContext[] } = {};
@@ -47,8 +48,44 @@ export default class Factory {
 		console.log('proxy', proxy);
 		*/
 	}
-	static getInputsTokens(instance: Factory): string[] {
-		return this.meta.inputs || [];
+	static getInputsTokens(instance: Factory, node: IElement, module: Module): { [key: string]: string } {
+		const inputs: { [key: string]: string } = {};
+		this.meta.inputs?.forEach(key => {
+			const expression: string | null = module.getExpression(key, node);
+			/*
+			let expression: string | null = null;
+			if (node.hasAttribute(`[${key}]`)) {
+				expression = node.getAttribute(`[${key}]`);
+				// console.log('Factory.getInputsTokens.expression.1', expression);
+			} else if (node.hasAttribute(`*${key}`)) {
+				expression = node.getAttribute(`*${key}`);
+				// console.log('Factory.getInputsTokens.expression.2', expression);
+			} else if (node.hasAttribute(key)) {
+				expression = node.getAttribute(key);
+				if (expression) {
+					const attribute: string = expression.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
+						if (a) {
+							return '"+';
+						}
+						if (b) {
+							return '+"';
+						}
+						if (c) {
+							return '\"';
+						}
+						return '';
+					});
+					expression = `"${attribute}"`;
+					// console.log('Factory.getInputsTokens.expression.3', expression);
+				}
+			}
+			*/
+			if (expression) {
+				inputs[key] = expression;
+			}
+		});
+		return inputs;
+		// return this.meta.inputs || [];
 	}
 }
 export function getContext(instance: Factory): IContext {

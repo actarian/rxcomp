@@ -25,7 +25,7 @@ var ForStructure = /** @class */ (function (_super) {
         var module = context.module;
         var node = context.node;
         var tokens = this.tokens;
-        var result = this[tokens.iterable];
+        var result = this.for || [];
         var isArray = Array.isArray(result);
         var array = isArray ? result : Object.keys(result);
         var total = array.length;
@@ -65,11 +65,15 @@ var ForStructure = /** @class */ (function (_super) {
         }
         this.instances.length = array.length;
     };
-    ForStructure.getInputsTokens = function (instance) {
-        var node = factory_1.getContext(instance).node;
+    ForStructure.getInputsTokens = function (instance, node, module) {
+        var inputs = {};
         var expression = node.getAttribute('*for');
-        var tokens = instance.tokens = ForStructure.getForExpressionTokens(expression);
-        return [tokens.iterable];
+        if (expression) {
+            var tokens = ForStructure.getForExpressionTokens(expression);
+            instance.tokens = tokens;
+            inputs.for = tokens.iterable;
+        }
+        return inputs;
     };
     ForStructure.getForExpressionTokens = function (expression) {
         if (expression === null) {
