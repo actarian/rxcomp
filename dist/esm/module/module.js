@@ -56,9 +56,9 @@ export default class Module {
                 this.makeHosts(meta, instance, node);
                 context.inputs = this.makeInputs(meta, instance, node, factory);
                 context.outputs = this.makeOutputs(meta, instance);
-                if (parentInstance instanceof Factory) {
-                    this.resolveInputsOutputs(instance, parentInstance);
-                }
+                // if (parentInstance instanceof Factory) {
+                this.resolveInputsOutputs(instance, parentInstance);
+                // }
             }
             // calling onInit event
             instance.onInit();
@@ -216,7 +216,8 @@ export default class Module {
         const inputs = {};
         const inputsTokens = factory.getInputsTokens(instance, node, this);
         Object.keys(inputsTokens).forEach(key => {
-            instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
+            // !!! removed cause it throws error on instance setters
+            // instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
             inputs[key] = this.makeFunction(inputsTokens[key]);
         });
         /*

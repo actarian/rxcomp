@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.19] - 2020-10-19
+### Fixing
+- Root Component Inputs
+
+---
+
 ## [1.0.0-beta.18] - 2020-09-08
 ### Fixing
 - TextNode Parser

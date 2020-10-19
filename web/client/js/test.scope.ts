@@ -35,6 +35,11 @@ class RootComponent extends Component {
 	onHandled(event: any) {
 		console.log('RootComponent.onHandled', event);
 	}
+
+	onClick(event: any) {
+		console.log(event);
+		event.preventDefault();
+	}
 }
 RootComponent.meta = {
 	selector: '[root-component]',

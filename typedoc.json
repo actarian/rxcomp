@@ -2,7 +2,7 @@
   "exclude": [
     "!src/**/*.ts"
   ],
-  "out": "docs/api",
+  "out": "docs/typedoc",
   "mode": "file",
   "stripInternal": true,
   "excludePrivate": true,

@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.18
+ * @license rxcomp v1.0.0-beta.19
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -1224,10 +1224,7 @@ var Module = function () {
         this.makeHosts(meta, instance, node);
         context.inputs = this.makeInputs(meta, instance, node, factory);
         context.outputs = this.makeOutputs(meta, instance);
-
-        if (parentInstance instanceof Factory) {
-          this.resolveInputsOutputs(instance, parentInstance);
-        }
+        this.resolveInputsOutputs(instance, parentInstance);
       }
 
       instance.onInit();
@@ -1377,7 +1374,6 @@ var Module = function () {
     var inputs = {};
     var inputsTokens = factory.getInputsTokens(instance, node, this);
     Object.keys(inputsTokens).forEach(function (key) {
-      instance[key] = typeof instance[key] === 'undefined' ? null : instance[key];
       inputs[key] = _this2.makeFunction(inputsTokens[key]);
     });
     return inputs;

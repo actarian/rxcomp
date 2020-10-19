@@ -8,8 +8,8 @@ If you like Angular declarative syntax but you just want go Vanilla, RxComp libr
 
  lib & dependancy | size
 :-----------------|:----------------------------------------------------------------------------------------------|
-rxcomp.min.js     | ![](https://img.badgesize.io/https://unpkg.com/rxcomp@1.0.0-beta.18/dist/umd/rxcomp.min.js.svg?compression=gzip)
-rxcomp.min.js     | ![](https://img.badgesize.io/https://unpkg.com/rxcomp@1.0.0-beta.18/dist/umd/rxcomp.min.js.svg)
+rxcomp.min.js     | ![](https://img.badgesize.io/https://unpkg.com/rxcomp@1.0.0-beta.19/dist/umd/rxcomp.min.js.svg?compression=gzip)
+rxcomp.min.js     | ![](https://img.badgesize.io/https://unpkg.com/rxcomp@1.0.0-beta.19/dist/umd/rxcomp.min.js.svg)
 rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/rxjs@6.6.2/bundles/rxjs.umd.min.js.svg?compression=gzip)
 rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/rxjs@6.6.2/bundles/rxjs.umd.min.js.svg)
  
@@ -17,7 +17,7 @@ rxjs.min.js       | ![](https://img.badgesize.io/https://unpkg.com/rxjs@6.6.2/bu
 > [TodoMvc Source](https://github.com/actarian/rxcomp-todomvc)  
 > [TodoMvc Codepen](https://codepen.io/actarian/pen/QWWRZON?editors=0010)  
 > [RxComp Codesandbox](https://codesandbox.io/s/rxcomp-template-2t3yu?fontsize=14&hidenavigation=1&theme=dark)  
-> [RxComp Docs](https://actarian.github.io/rxcomp/api/)   
+> [RxComp Docs](https://actarian.github.io/rxcomp/typedoc/)   
 ___
 
 ### Modules
@@ -71,7 +71,7 @@ For CDN, you can use unpkg
 
 ```html
 <script src="https://unpkg.com/rxjs@6.6.2/bundles/rxjs.umd.min.js"></script>  
-<script src="https://unpkg.com/rxcomp@1.0.0-beta.18/dist/umd/rxcomp.min.js"></script>  
+<script src="https://unpkg.com/rxcomp@1.0.0-beta.19/dist/umd/rxcomp.min.js"></script>  
 ```
 
 The global namespace for RxComp is `rxcomp`
