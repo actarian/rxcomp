@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.19
+ * @license rxcomp v1.0.0-beta.20
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -201,7 +201,7 @@ function getContext(instance) {
     var _getContext = getContext(this),
         node = _getContext.node;
 
-    node.classList.forEach(function (value) {
+    Array.prototype.slice.call(node.classList).forEach(function (value) {
       _this2.keys.push(value);
     });
   };
@@ -996,7 +996,7 @@ var Platform = function () {
   return Platform;
 }();
 var PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-var PLATFORM_JS_DOM = typeof window !== 'undefined' && window.name === 'nodejs' || typeof navigator !== 'undefined' && navigator.userAgent.includes('Node.js') || typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom');
+var PLATFORM_JS_DOM = typeof window !== 'undefined' && window.name === 'nodejs' || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Node.js') !== -1 || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('jsdom') !== -1;
 var PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var Serializer = function () {
   function Serializer() {}

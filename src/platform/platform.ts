@@ -152,7 +152,7 @@ export default class Platform {
 /* global window self */
 export const PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 /* eslint-disable no-undef */
-export const PLATFORM_JS_DOM = (typeof window !== 'undefined' && window.name === 'nodejs') || (typeof navigator !== 'undefined' && navigator.userAgent.includes('Node.js')) || (typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom'));
+export const PLATFORM_JS_DOM = (typeof window !== 'undefined' && window.name === 'nodejs') || (typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Node.js') !== -1) || (typeof navigator !== 'undefined' && navigator.userAgent.indexOf('jsdom') !== -1);
 /* eslint-enable no-undef */
 export const PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 /* eslint-disable no-restricted-globals */

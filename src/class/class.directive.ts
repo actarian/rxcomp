@@ -7,7 +7,7 @@ export default class ClassDirective extends Directive {
 	keys: string[] = [];
 	onInit() {
 		const { node } = getContext(this);
-		node.classList.forEach((value: string) => {
+		Array.prototype.slice.call(node.classList).forEach((value: string) => {
 			this.keys.push(value);
 		});
 	}

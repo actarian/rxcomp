@@ -12,16 +12,20 @@ function getLocationComponents(href) {
     var search = '';
     var hash = '';
     var regExp = /^((http\:|https\:)?\/\/)?((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])|locahost)?(\:([^\/]+))?(\.?\/[^\?]+)?(\?[^\#]+)?(\#.+)?$/g;
-    var matches = href.matchAll(regExp);
+    var matches = [];
+    var match;
+    while ((match = regExp.exec(href)) !== null) {
+        matches.push(match);
+    }
     try {
         for (var matches_1 = tslib_1.__values(matches), matches_1_1 = matches_1.next(); !matches_1_1.done; matches_1_1 = matches_1.next()) {
-            var match = matches_1_1.value;
-            protocol = match[2] || '';
-            host = hostname = match[3] || '';
-            port = match[11] || '';
-            pathname = match[12] || '';
-            search = match[13] || '';
-            hash = match[14] || '';
+            var match_1 = matches_1_1.value;
+            protocol = match_1[2] || '';
+            host = hostname = match_1[3] || '';
+            port = match_1[11] || '';
+            pathname = match_1[12] || '';
+            search = match_1[13] || '';
+            hash = match_1[14] || '';
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }

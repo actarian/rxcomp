@@ -1,5 +1,5 @@
 /**
- * @license rxcomp v1.0.0-beta.19
+ * @license rxcomp v1.0.0-beta.20
  * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
@@ -116,48 +116,6 @@ function _assertThisInitialized(self) {
   }
 
   return self;
-}
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-}
-
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-
-  return arr2;
-}
-
-function _createForOfIteratorHelperLoose(o, allowArrayLike) {
-  var it;
-
-  if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
-    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
-      if (it) o = it;
-      var i = 0;
-      return function () {
-        if (i >= o.length) return {
-          done: true
-        };
-        return {
-          done: false,
-          value: o[i++]
-        };
-      };
-    }
-
-    throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-
-  it = o[Symbol.iterator]();
-  return it.next.bind(it);
 }var CONTEXTS = {};
 var NODES = {};
 
@@ -289,7 +247,7 @@ function getContext(instance) {
     var _getContext = getContext(this),
         node = _getContext.node;
 
-    node.classList.forEach(function (value) {
+    Array.prototype.slice.call(node.classList).forEach(function (value) {
       _this2.keys.push(value);
     });
   };
@@ -1124,7 +1082,7 @@ var Platform = /*#__PURE__*/function () {
 var PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 /* eslint-disable no-undef */
 
-var PLATFORM_JS_DOM = typeof window !== 'undefined' && window.name === 'nodejs' || typeof navigator !== 'undefined' && navigator.userAgent.includes('Node.js') || typeof navigator !== 'undefined' && navigator.userAgent.includes('jsdom');
+var PLATFORM_JS_DOM = typeof window !== 'undefined' && window.name === 'nodejs' || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Node.js') !== -1 || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('jsdom') !== -1;
 /* eslint-enable no-undef */
 
 var PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
@@ -2197,16 +2155,21 @@ CoreModule.meta = {
   var search = '';
   var hash = '';
   var regExp = /^((http\:|https\:)?\/\/)?((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])|locahost)?(\:([^\/]+))?(\.?\/[^\?]+)?(\?[^\#]+)?(\#.+)?$/g;
-  var matches = href.matchAll(regExp);
+  var matches = [];
+  var match;
 
-  for (var _iterator = _createForOfIteratorHelperLoose(matches), _step; !(_step = _iterator()).done;) {
-    var match = _step.value;
-    protocol = match[2] || '';
-    host = hostname = match[3] || '';
-    port = match[11] || '';
-    pathname = match[12] || '';
-    search = match[13] || '';
-    hash = match[14] || '';
+  while ((match = regExp.exec(href)) !== null) {
+    matches.push(match);
+  }
+
+  for (var _i = 0, _matches = matches; _i < _matches.length; _i++) {
+    var _match = _matches[_i];
+    protocol = _match[2] || '';
+    host = hostname = _match[3] || '';
+    port = _match[11] || '';
+    pathname = _match[12] || '';
+    search = _match[13] || '';
+    hash = _match[14] || '';
   }
 
   return {

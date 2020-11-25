@@ -2,7 +2,7 @@
   "author": "Luca Zampetti <lzampetti@gmail.com>",
   "name": "rxcomp",
   "description": "Reactive component library for JavaScript",
-  "version": "1.0.0-beta.19",
+  "version": "1.0.0-beta.20",
   "browser": "dist/umd/rxcomp.js",
   "main": "dist/cjs/rxcomp.js",
   "types": "dist/cjs/rxcomp.d.ts",
