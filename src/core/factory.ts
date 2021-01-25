@@ -1,4 +1,4 @@
-import { ReplaySubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import Module from '../module/module';
 import { IContext, IElement, IFactoryMeta } from './types';
 
@@ -9,17 +9,18 @@ export default class Factory {
 	static meta: IFactoryMeta;
 	rxcompId: number = -1;
 	unsubscribe$: Subject<void> = new Subject();
-	changes$: ReplaySubject<Factory> = new ReplaySubject(1);
+	changes$: Subject<Factory> = new Subject();
+	// changes$: ReplaySubject<Factory> = new ReplaySubject(1);
 	onInit(): void { }
 	onChanges(changes: Factory | Window): void { }
 	onView(): void { }
 	onDestroy(): void { }
 	pushChanges(): void {
-		const { module } = getContext(this);
-		if (module.instances) {
+		// const { module } = getContext(this);
+		// if (module.instances) {
 			this.changes$.next(this);
 			this.onView();
-		}
+		// }
 	}
 	onParentDidChange(changes: Factory | Window): void {
 		const { module } = getContext(this);

@@ -94,6 +94,7 @@ export default class Platform {
 		let matchers: ((node: HTMLElement) => boolean)[] = [];
 		selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value: string, c1, a2, u3, v4, a5, e6) {
 			if (c1) {
+				// className
 				matchers.push(function (node) {
 					return node.classList.contains(c1);
 				});
@@ -105,11 +106,13 @@ export default class Platform {
 				});
 			}
 			if (a5) {
+				// attribute
 				matchers.push(function (node) {
 					return node.hasAttribute(a5) || node.hasAttribute(`[${a5}]`);
 				});
 			}
 			if (e6) {
+				// nodeName
 				matchers.push(function (node) {
 					return node.nodeName.toLowerCase() === e6.toLowerCase();
 				});
@@ -117,6 +120,7 @@ export default class Platform {
 			return '';
 		});
 		return matchers;
+
 	}
 	protected static unwrapSelectors(factories: FactoryList): SelectorFunction[] {
 		const selectors: SelectorFunction[] = [];
@@ -130,15 +134,19 @@ export default class Platform {
 						return '';
 					});
 					const includes: MatchFunction[] = this.getExpressions(matchSelector);
-					selectors.push((node) => {
-						const included = includes.reduce((p, match) => {
+					selectors.push(function(node) {
+						const included = includes.reduce(function(p, match) {
 							return p && match(node);
 						}, true);
-						const excluded = excludes.reduce((p, match) => {
-							return p || match(node);
-						}, false);
-						if (included && !excluded) {
-							return { node, factory, selector } as ISelectorResult;
+						if (included) {
+							const excluded = excludes.length && excludes.reduce(function(p, match) {
+								return p || match(node);
+							}, false);
+							if (!excluded) {
+								return { node, factory, selector } as ISelectorResult;
+							} else {
+								return false;
+							}
 						} else {
 							return false;
 						}

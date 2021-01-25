@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { startWith, takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
 import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
@@ -43,7 +43,7 @@ export default class Module {
 			const instance = new factory(...(args || []));
 			// injecting custom properties
 			if (inject) {
-				Object.keys(inject).forEach(key => {
+				Object.keys(inject).forEach((key:string) => {
 					// console.log('Module.makeInstance', key, inject[key]);
 					Object.defineProperty(instance, key, {
 						value: inject[key],
@@ -79,6 +79,7 @@ export default class Module {
 		if (parentInstance instanceof Factory) {
 			parentInstance.changes$.pipe(
 				// distinctUntilChanged(deepEqual),
+				startWith(parentInstance),
 				takeUntil(instance.unsubscribe$)
 			).subscribe(function (changes: Factory | Window) {
 				instance.onParentDidChange(changes);
@@ -216,7 +217,7 @@ export default class Module {
 	protected makeInputs(meta: IFactoryMeta, instance: Factory, node: IElement, factory: typeof Factory): { [key: string]: ExpressionFunction } {
 		const inputs: { [key: string]: ExpressionFunction } = {};
 		const inputsTokens = factory.getInputsTokens(instance, node, this);
-		Object.keys(inputsTokens).forEach(key => {
+		Object.keys(inputsTokens).forEach((key: string) => {
 			// !!! removed cause it throws error on instance setters
 			// instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
 			inputs[key] = this.makeFunction(inputsTokens[key]);
@@ -442,7 +443,8 @@ export default class Module {
 		}
 		return keepContexts;
 	}
-	protected static matchSelectors(node: HTMLElement, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
+	protected static matchSelectors(node: HTMLElement, selectors: SelectorFunction[], results: ISelectorResult[]): boolean {
+		/*
 		for (let i: number = 0; i < selectors.length; i++) {
 			const selectorResult: ISelectorResult | false = selectors[i](node);
 			if (selectorResult) {
@@ -458,8 +460,26 @@ export default class Module {
 			}
 		}
 		return results;
+		*/
+		let foundStructure = false;
+		for (let i: number = 0; i < selectors.length; i++) {
+			const selectorResult: ISelectorResult | false = selectors[i](node);
+			if (selectorResult) { // !== false
+				results.push(selectorResult as ISelectorResult);
+				const factory: typeof Factory = selectorResult.factory;
+				if (factory.prototype instanceof Component && factory.meta.template) {
+					node.innerHTML = factory.meta.template;
+				}
+				if (factory.prototype instanceof Structure) {
+					foundStructure = true;
+					break;
+				}
+			}
+		}
+		return foundStructure;
 	}
 	protected static querySelectorsAll(node: Node, selectors: SelectorFunction[], results: ISelectorResult[]): ISelectorResult[] {
+		/*
 		if (node.nodeType === 1) {
 			const selectorResults: ISelectorResult[] = this.matchSelectors(node as HTMLElement, selectors, []);
 			results = results.concat(selectorResults);
@@ -473,6 +493,18 @@ export default class Module {
 			}
 		}
 		return results;
+		*/
+		if (node.nodeType === 1) {
+			const foundStructure : boolean = this.matchSelectors(node as HTMLElement, selectors, results);
+			if (!foundStructure) {
+				const childNodes: NodeListOf<ChildNode> = node.childNodes;
+				for (let i: number = 0; i < childNodes.length; i++) {
+					results = this.querySelectorsAll(childNodes[i], selectors, results);
+				}
+			}
+		}
+		return results;
+
 	}
 	protected static traverseUp(node: Node | null, callback: (node: Node, i: number) => any, i: number = 0): any {
 		if (!node) {

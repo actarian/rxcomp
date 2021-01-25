@@ -32,6 +32,270 @@
             "rxjs/operators": "rxjs.operators"
           },
           "minify": true
+        }
+      ],
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        }
+      ]
+    },
+    "for": {
+      "compile": [{
+          "input": "web/client/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "web/client/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "docs/css/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "docs/css/rxcomp-dark.css",
+          "minify": true
+        },
+        {
+          "input": "web/client/js/test.for.ts",
+          "output": {
+            "file": "docs/js/test.for.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          },
+          "minify": true
+        }
+      ],
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        }
+      ]
+    },
+    "parsing": {
+      "compile": [{
+          "input": "web/client/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "web/client/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "docs/css/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "docs/css/rxcomp-dark.css",
+          "minify": true
+        },
+        {
+          "input": "web/client/js/test.parsing.ts",
+          "output": {
+            "file": "docs/js/test.parsing.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          },
+          "minify": true
+        }
+      ],
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        }
+      ]
+    },
+    "performance": {
+      "compile": [{
+          "input": "web/client/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "web/client/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "docs/css/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "docs/css/rxcomp-dark.css",
+          "minify": true
+        },
+        {
+          "input": "web/client/js/test.performance.ts",
+          "output": {
+            "file": "docs/js/test.performance.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          },
+          "minify": true
+        }
+      ],
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        }
+      ]
+    },
+    "pipes": {
+      "compile": [{
+          "input": "web/client/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "web/client/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "docs/css/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "docs/css/rxcomp-dark.css",
+          "minify": true
+        },
+        {
+          "input": "web/client/js/test.pipes.ts",
+          "output": {
+            "file": "docs/js/test.pipes.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          },
+          "minify": true
+        }
+      ],
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        }
+      ]
+    },
+    "scope": {
+      "compile": [{
+          "input": "web/client/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "web/client/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "docs/css/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "docs/css/rxcomp-dark.css",
+          "minify": true
+        },
+        {
+          "input": "web/client/js/test.scope.ts",
+          "output": {
+            "file": "docs/js/test.scope.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          },
+          "minify": true
+        }
+      ],
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        }
+      ]
+    },
+    "all": {
+      "compile": [{
+          "input": "web/client/*.html",
+          "output": "docs/",
+          "minify": true
+        },
+        {
+          "input": "web/client/css/main.scss",
+          "output": "docs/css/main.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-light.scss",
+          "output": "docs/css/rxcomp-light.css",
+          "minify": true
+        },
+        {
+          "input": "src/_scss/rxcomp-dark.scss",
+          "output": "docs/css/rxcomp-dark.css",
+          "minify": true
+        },
+        {
+          "input": "web/client/js/main.ts",
+          "output": {
+            "file": "docs/js/main.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          },
+          "minify": true
         },
         {
           "input": "web/client/js/test.for.ts",
@@ -49,6 +313,18 @@
           "input": "web/client/js/test.parsing.ts",
           "output": {
             "file": "docs/js/test.parsing.js",
+            "format": "iife"
+          },
+          "globals": {
+            "rxjs": "rxjs",
+            "rxjs/operators": "rxjs.operators"
+          },
+          "minify": true
+        },
+        {
+          "input": "web/client/js/test.performance.ts",
+          "output": {
+            "file": "docs/js/test.performance.js",
             "format": "iife"
           },
           "globals": {
@@ -82,7 +358,15 @@
           "minify": true
         }
       ],
-      "bundle": []
+      "bundle": [
+        {
+          "input": [
+            "node_modules/rxjs/bundles/rxjs.umd.js"
+          ],
+          "output": "docs/js/vendors.js",
+          "minify": true
+        }
+      ]
     },
     "dist": {
       "compile": [{
@@ -131,7 +415,8 @@
     "path": "/rxcomp/",
     "host": "localhost",
     "port": 40999,
-    "log": false
+    "log": false,
+    "livereload": false
   },
   "tfs": false
 }

@@ -1947,324 +1947,63 @@ CoreModule.meta = {
   };
 
   return Browser;
-}(Platform);var LocalStorageService = function () {
-  function LocalStorageService() {}
+}(Platform);var RootComponent = function (_Component) {
+  _inheritsLoose(RootComponent, _Component);
 
-  LocalStorageService.delete = function _delete(name) {
-    if (this.isLocalStorageSupported()) {
-      WINDOW.localStorage.removeItem(name);
-    }
-  };
-
-  LocalStorageService.exist = function exist(name) {
-    if (this.isLocalStorageSupported()) {
-      return WINDOW.localStorage[name] !== undefined;
-    } else {
-      return false;
-    }
-  };
-
-  LocalStorageService.get = function get(name) {
-    var value = null;
-
-    if (this.isLocalStorageSupported() && WINDOW.localStorage[name] !== undefined) {
-      try {
-        value = JSON.parse(WINDOW.localStorage[name]);
-      } catch (e) {
-        console.log('LocalStorageService.get.error parsing', name, e);
-      }
-    }
-
-    return value;
-  };
-
-  LocalStorageService.set = function set(name, value) {
-    if (this.isLocalStorageSupported()) {
-      try {
-        var cache = [];
-        var json = JSON.stringify(value, function (key, value) {
-          if (typeof value === 'object' && value !== null) {
-            if (cache.indexOf(value) !== -1) {
-              return;
-            }
-
-            cache.push(value);
-          }
-
-          return value;
-        });
-        WINDOW.localStorage.setItem(name, json);
-      } catch (e) {
-        console.log('LocalStorageService.set.error serializing', name, value, e);
-      }
-    }
-  };
-
-  LocalStorageService.isLocalStorageSupported = function isLocalStorageSupported() {
-    if (this.supported) {
-      return true;
-    }
-
-    var supported = false;
-
-    try {
-      supported = 'localStorage' in WINDOW && WINDOW.localStorage !== null;
-
-      if (supported) {
-        WINDOW.localStorage.setItem('test', '1');
-        WINDOW.localStorage.removeItem('test');
-      } else {
-        supported = false;
-      }
-    } catch (e) {
-      supported = false;
-    }
-
-    this.supported = supported;
-    return supported;
-  };
-
-  return LocalStorageService;
-}();
-LocalStorageService.supported = false;var StoreService = function () {
-  function StoreService() {}
-
-  StoreService.set = function set(items) {
-    LocalStorageService.set('items', items);
-    return this.get$().next(items);
-  };
-
-  StoreService.get$ = function get$() {
-    if (this.store$) {
-      return this.store$;
-    }
-
-    var items = LocalStorageService.get('items');
-
-    if (!items) {
-      items = [{
-        id: 5,
-        name: 'Cookies',
-        date: new Date(Date.now())
-      }, {
-        id: 4,
-        name: 'Pizza',
-        date: new Date(2019, 4, 4, 12)
-      }, {
-        id: 3,
-        name: 'Pasta',
-        date: new Date(2019, 3, 22, 12)
-      }, {
-        id: 2,
-        name: 'Bread',
-        date: new Date(2019, 0, 6, 12)
-      }, {
-        id: 1,
-        name: 'Ham',
-        date: new Date(2018, 11, 30, 12)
-      }];
-      LocalStorageService.set('items', items);
-    }
-
-    this.store$ = new rxjs.BehaviorSubject(items);
-    return this.store$.pipe(operators.delay(1));
-  };
-
-  StoreService.add$ = function add$(patch) {
-    var item = Object.assign({
-      id: Date.now(),
-      date: new Date(Date.now())
-    }, patch);
-    var items = this.store$.getValue();
-    items.unshift(item);
-    this.set(items);
-    return rxjs.of(item).pipe(operators.delay(1));
-  };
-
-  StoreService.patch$ = function patch$(patch) {
-    var items = this.store$.getValue();
-    var item = items.find(function (x) {
-      return x.id === patch.id;
-    });
-
-    if (item) {
-      Object.assign(item, patch);
-      this.set(items);
-    }
-
-    return rxjs.of(item).pipe(operators.delay(1));
-  };
-
-  StoreService.delete$ = function delete$(item) {
-    var items = this.store$.getValue();
-    var index = items.indexOf(item);
-
-    if (index !== -1) {
-      items.splice(index, 1);
-      this.set(items);
-    }
-
-    return rxjs.of(item).pipe(operators.delay(1));
-  };
-
-  return StoreService;
-}();var AppComponent = function (_Component) {
-  _inheritsLoose(AppComponent, _Component);
-
-  function AppComponent() {
+  function RootComponent() {
     return _Component.apply(this, arguments) || this;
   }
 
-  var _proto = AppComponent.prototype;
+  var _proto = RootComponent.prototype;
 
   _proto.onInit = function onInit() {
-    var _this = this;
-
-    var context = getContext(this);
-    this.input = context.node.querySelector('.control--text');
-    this.items = [];
-    this.store$ = StoreService.get$();
-    this.store$.pipe(operators.takeUntil(this.unsubscribe$)).subscribe(function (items) {
-      _this.items = items;
-
-      _this.pushChanges();
+    this.index = -1;
+    var params = new URLSearchParams(document.location.search.substring(1));
+    var paramCount = params.get('count');
+    var count = this.count = paramCount ? parseInt(paramCount) : this.count || 500;
+    this.items = new Array(count).fill(0).map(function (x, i) {
+      return i + 1;
     });
   };
 
-  _proto.onInput = function onInput($event) {
+  _proto.setIndex = function setIndex(index) {
+    this.index = index;
     this.pushChanges();
   };
 
-  _proto.onAddItem = function onAddItem($event) {
-    var _this2 = this;
-
-    if (this.input.value) {
-      StoreService.add$({
-        name: this.input.value
-      }).subscribe(function (item) {
-        _this2.input.value = '';
-      });
-    }
-  };
-
-  _proto.onToggleItem = function onToggleItem(item) {
-    StoreService.patch$({
-      id: item.id,
-      done: !item.done
-    }).subscribe(function (item) {});
-  };
-
-  _proto.onRemoveItem = function onRemoveItem(item) {
-    StoreService.delete$(item).subscribe(function (item) {});
-  };
-
-  return AppComponent;
+  return RootComponent;
 }(Component);
-AppComponent.meta = {
-  selector: '[app-component]'
-};var DatePipe = function (_Pipe) {
-  _inheritsLoose(DatePipe, _Pipe);
 
-  function DatePipe() {
-    return _Pipe.apply(this, arguments) || this;
+RootComponent.meta = {
+  selector: '[root-component]',
+  inputs: ['count']
+};
+
+var ItemComponent = function (_Component2) {
+  _inheritsLoose(ItemComponent, _Component2);
+
+  function ItemComponent() {
+    return _Component2.apply(this, arguments) || this;
   }
 
-  DatePipe.transform = function transform(value, locale, options) {
-    if (locale === void 0) {
-      locale = 'it-IT-u-ca-gregory';
-    }
+  var _proto2 = ItemComponent.prototype;
 
-    if (options === void 0) {
-      options = {
-        dateStyle: 'short',
-        timeStyle: 'short'
-      };
-    }
+  _proto2.onInit = function onInit() {
+    var _getContext = getContext(this),
+        node = _getContext.node;
 
-    var localeDateString = new Date(value).toLocaleDateString(locale, options);
-    return localeDateString;
+    node.innerText = this.item;
   };
 
-  return DatePipe;
-}(Pipe);
-DatePipe.meta = {
-  name: 'date'
-};var colors = [{
-  hex: '#ffffff',
-  background: '#ffffff',
-  foreground: '#003adc',
-  accent: '#212121'
-}, {
-  hex: '#212121',
-  background: '#212121',
-  foreground: '#ffffff',
-  accent: '#003adc'
-}, {
-  hex: '#ffffff',
-  background: '#ffffff',
-  foreground: '#212121',
-  accent: '#003adc'
-}, {
-  hex: '#003adc',
-  background: '#003adc',
-  foreground: '#ffffff',
-  accent: '#212121'
-}];
-function background(index, alpha) {
-  return hexToRgb(colors[index % colors.length].background, alpha);
-}
-function foreground(index, alpha) {
-  return hexToRgb(colors[index % colors.length].foreground, alpha);
-}
-function accent(index, alpha) {
-  return hexToRgb(colors[index % colors.length].accent, alpha);
-}
-function hexToRgb(hex, a) {
-  var r = parseInt(hex.slice(1, 3), 16);
-  var g = parseInt(hex.slice(3, 5), 16);
-  var b = parseInt(hex.slice(5, 7), 16);
-
-  if (a) {
-    return "rgba(" + r + "," + g + "," + b + "," + a + ")";
-  } else {
-    return "rgb(" + r + "," + g + "," + b + ")";
-  }
-}var TodoItemComponent = function (_Component) {
-  _inheritsLoose(TodoItemComponent, _Component);
-
-  function TodoItemComponent() {
-    var _this;
-
-    _this = _Component.apply(this, arguments) || this;
-    _this.background = null;
-    _this.foreground = null;
-    _this.accent = null;
-    return _this;
-  }
-
-  var _proto = TodoItemComponent.prototype;
-
-  _proto.onChanges = function onChanges(changes) {
-    this.background = background(this.item.id);
-    this.foreground = foreground(this.item.id);
-    this.accent = accent(this.item.id);
-  };
-
-  _proto.onToggle = function onToggle($event) {
-    this.toggle.next($event);
-  };
-
-  _proto.onRemove = function onRemove($event) {
-    this.remove.next($event);
-  };
-
-  return TodoItemComponent;
+  return ItemComponent;
 }(Component);
-TodoItemComponent.meta = {
-  selector: '[todo-item-component]',
-  inputs: ['item'],
-  outputs: ['toggle', 'remove']
-};var AppModule = function (_Module) {
+
+ItemComponent.meta = {
+  selector: '[item-component]',
+  inputs: ['item']
+};
+
+var AppModule = function (_Module) {
   _inheritsLoose(AppModule, _Module);
 
   function AppModule() {
@@ -2273,8 +2012,10 @@ TodoItemComponent.meta = {
 
   return AppModule;
 }(Module);
+
 AppModule.meta = {
   imports: [CoreModule],
-  declarations: [TodoItemComponent, DatePipe],
-  bootstrap: AppComponent
-};Browser.bootstrap(AppModule);}(rxjs,rxjs.operators));
+  declarations: [ItemComponent],
+  bootstrap: RootComponent
+};
+Browser.bootstrap(AppModule);}(rxjs,rxjs.operators));

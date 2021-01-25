@@ -1,6 +1,6 @@
 /**
- * @license rxcomp v1.0.0-beta.20
- * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
+ * @license rxcomp v1.0.0
+ * (c) 2021 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
 
@@ -123,7 +123,7 @@ var Factory = function () {
   function Factory() {
     this.rxcompId = -1;
     this.unsubscribe$ = new rxjs.Subject();
-    this.changes$ = new rxjs.ReplaySubject(1);
+    this.changes$ = new rxjs.Subject();
   }
 
   var _proto = Factory.prototype;
@@ -517,39 +517,41 @@ var Context = function (_Component) {
     var context = getContext(this);
     var module = context.module;
     var node = context.node;
+    var selector = context.selector;
+    var parentInstance = context.parentInstance;
+    var forend = this.forend;
     var tokens = this.tokens;
-    var result = this.for || [];
-    var isArray = Array.isArray(result);
-    var array = isArray ? result : Object.keys(result);
-    var total = array.length;
-    var previous = this.instances.length;
+    var data = this.for || [];
+    var isArray = Array.isArray(data);
+    var items = isArray ? data : Object.keys(data);
+    var total = items.length;
+    var instances = this.instances;
+    var previous = instances.length;
 
     for (var i = 0; i < Math.max(previous, total); i++) {
       if (i < total) {
-        var key = isArray ? i : array[i];
-        var value = isArray ? array[key] : result[key];
+        var key = isArray ? i : items[i];
+        var value = isArray ? items[key] : data[key];
 
         if (i < previous) {
-          var instance = this.instances[i];
+          var instance = instances[i];
           instance[tokens.key] = key;
           instance[tokens.value] = value;
         } else {
           var clonedNode = node.cloneNode(true);
-          delete clonedNode.rxcompId;
-          this.forend.parentNode.insertBefore(clonedNode, this.forend);
-          var args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
-          var skipSubscription = true;
+          forend.parentNode.insertBefore(clonedNode, forend);
+          var args = [tokens.key, key, tokens.value, value, i, total, parentInstance];
+          var skipSubscription = false;
 
-          var _instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
+          var _instance = module.makeInstance(clonedNode, ForItem, selector, parentInstance, args, undefined, skipSubscription);
 
           if (_instance) {
             module.compile(clonedNode, _instance);
-            module.makeInstanceSubscription(_instance, context.parentInstance);
-            this.instances.push(_instance);
+            instances.push(_instance);
           }
         }
       } else {
-        var _instance2 = this.instances[i];
+        var _instance2 = instances[i];
 
         var _getContext2 = getContext(_instance2),
             _node = _getContext2.node;
@@ -560,7 +562,7 @@ var Context = function (_Component) {
       }
     }
 
-    this.instances.length = array.length;
+    instances.length = total;
   };
 
   ForStructure.getInputsTokens = function getInputsTokens(instance, node, module) {
@@ -973,16 +975,21 @@ var Platform = function () {
             var included = includes.reduce(function (p, match) {
               return p && match(node);
             }, true);
-            var excluded = excludes.reduce(function (p, match) {
-              return p || match(node);
-            }, false);
 
-            if (included && !excluded) {
-              return {
-                node: node,
-                factory: factory,
-                selector: selector
-              };
+            if (included) {
+              var excluded = excludes.length && excludes.reduce(function (p, match) {
+                return p || match(node);
+              }, false);
+
+              if (!excluded) {
+                return {
+                  node: node,
+                  factory: factory,
+                  selector: selector
+                };
+              } else {
+                return false;
+              }
             } else {
               return false;
             }
@@ -1196,7 +1203,7 @@ var Module = function () {
 
   _proto.makeInstanceSubscription = function makeInstanceSubscription(instance, parentInstance) {
     if (parentInstance instanceof Factory) {
-      parentInstance.changes$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+      parentInstance.changes$.pipe(operators.startWith(parentInstance), operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
         instance.onParentDidChange(changes);
       });
     }
@@ -1608,43 +1615,39 @@ var Module = function () {
   };
 
   Module.matchSelectors = function matchSelectors(node, selectors, results) {
+    var foundStructure = false;
+
     for (var i = 0; i < selectors.length; i++) {
       var selectorResult = selectors[i](node);
 
       if (selectorResult) {
+        results.push(selectorResult);
         var factory = selectorResult.factory;
 
         if (factory.prototype instanceof Component && factory.meta.template) {
           node.innerHTML = factory.meta.template;
         }
 
-        results.push(selectorResult);
-
         if (factory.prototype instanceof Structure) {
+          foundStructure = true;
           break;
         }
       }
     }
 
-    return results;
+    return foundStructure;
   };
 
   Module.querySelectorsAll = function querySelectorsAll(node, selectors, results) {
     if (node.nodeType === 1) {
-      var selectorResults = this.matchSelectors(node, selectors, []);
-      results = results.concat(selectorResults);
-      var structure = selectorResults.find(function (x) {
-        return x.factory.prototype instanceof Structure;
-      });
+      var foundStructure = this.matchSelectors(node, selectors, results);
 
-      if (structure) {
-        return results;
-      }
+      if (!foundStructure) {
+        var childNodes = node.childNodes;
 
-      var childNodes = node.childNodes;
-
-      for (var i = 0; i < childNodes.length; i++) {
-        results = this.querySelectorsAll(childNodes[i], selectors, results);
+        for (var i = 0; i < childNodes.length; i++) {
+          results = this.querySelectorsAll(childNodes[i], selectors, results);
+        }
       }
     }
 

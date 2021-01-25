@@ -1,0 +1,37 @@
+<!-- @@master = ./templates/layout.html { "class": "page--test", "title": "RxComp" } -->
+<!-- @@block = main-->
+<style>
+	.item {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 1px;
+		width: 40px;
+		height: 40px;
+		border: 1px solid #eee;
+		cursor: pointer;
+	}
+	.item:hover,
+	.item.active {
+		background: red;
+		color: white;
+	}
+	.item.red {
+		color: red;
+	}
+</style>
+<main root-component [count]="10" style="overflow-x: hidden; overflow-y: auto;">
+	<strong>RxComp</strong>
+	<div>count <span [innerHTML]="count"></span></div>
+	<div>index <span [innerHTML]="index"></span></div>
+	<div class="item" item-component [item]="item" (click)="setIndex(item)" *for="let item of items"></div>
+	<!-- div.item[item-component][item=1]*100 -->
+	<!-- <div item-component (mouseover)="$event.target.style.background = 'red'" (mouseout)="$event.target.style.background = 'none'" [item]="item" *for="let item of items"></div> -->
+	<!--
+	<div item-component (mouseover)="$event.target.style.background = 'red'" (mouseout)="$event.target.style.background = 'none'" [item]="1"></div>
+	-->
+</main>
+<!-- @@close-->
+<!-- @@block = js-->
+<script src="/rxcomp/js/test.performance.js"></script>
+<!-- @@close-->

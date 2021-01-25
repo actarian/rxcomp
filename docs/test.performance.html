@@ -19,4 +19,23 @@
 
 </script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<-@@var=code->" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
---><!-- end analytics.html--><!-- start main --><main root-component><!-- start header.html--><div class="header"><a href="https://github.com/actarian/rxcomp" target="_blank" class="brand">RxComp</a> <a href="https://twitter.com/actarian" target="_blank" class="btn--twitter"><i class="icon--twitter"></i> </a><a href="https://github.com/actarian/rxcomp" target="_blank" class="btn--github"><i class="icon--github"></i></a></div><!-- end header.html--><ul class="list"><li class="list__item"><span class="item" [innerhtml]="time | time"></span></li><li class="list__item"><span class="item">{{time | time}}</span></li><li class="list__item"><span class="item" [innerhtml]="value | mult:6"></span></li><li class="list__item"><span class="item" [innerhtml]="(value | mult:value:value) + value | mult:2"></span></li></ul></main><!-- end main --><!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign%2Cfetch" crossorigin="anonymous" SameSite="none Secure"></script> --><!-- <script src="https://unpkg.com/rxjs@6.6.2/bundles/rxjs.umd.min.js" crossorigin="anonymous" SameSite="none Secure"></script> --><script src="/rxcomp/js/vendors.min.js"></script><!-- start js --><script src="/rxcomp/js/test.pipes.min.js"></script><!-- end js --></body></html>
+--><!-- end analytics.html--><!-- start main --><style>.item {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 1px;
+		width: 40px;
+		height: 40px;
+		border: 1px solid #eee;
+		cursor: pointer;
+	}
+	.item:hover,
+	.item.active {
+		background: red;
+		color: white;
+	}
+	.item.red {
+		color: red;
+	}</style><main root-component [count]="10" style="overflow-x: hidden; overflow-y: auto;"><strong>RxComp</strong><div>count <span [innerhtml]="count"></span></div><div>index <span [innerhtml]="index"></span></div><div class="item" item-component [item]="item" (click)="setIndex(item)" *for="let item of items"></div><!-- div.item[item-component][item=1]*100 --><!-- <div item-component (mouseover)="$event.target.style.background = 'red'" (mouseout)="$event.target.style.background = 'none'" [item]="item" *for="let item of items"></div> --><!--
+	<div item-component (mouseover)="$event.target.style.background = 'red'" (mouseout)="$event.target.style.background = 'none'" [item]="1"></div>
+	--></main><!-- end main --><!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CObject.assign%2Cfetch" crossorigin="anonymous" SameSite="none Secure"></script> --><!-- <script src="https://unpkg.com/rxjs@6.6.2/bundles/rxjs.umd.min.js" crossorigin="anonymous" SameSite="none Secure"></script> --><script src="/rxcomp/js/vendors.min.js"></script><!-- start js --><script src="/rxcomp/js/test.performance.js"></script><!-- end js --></body></html>

@@ -22,44 +22,47 @@ export default class ForStructure extends Structure {
 		const context: IContext = getContext(this);
 		const module: Module = context.module;
 		const node: IElement = context.node;
+		const selector: string = context.selector;
+		const parentInstance: Factory | Window = context.parentInstance;
+		const forend = this.forend;
 		const tokens: IForExpressionTokens = this.tokens!;
-		let result = this.for || [];
-		const isArray = Array.isArray(result);
-		const array: any[] = isArray ? result : Object.keys(result);
-		const total: number = array.length;
-		const previous: number = this.instances.length;
+		let data = this.for || [];
+		const isArray = Array.isArray(data);
+		const items: any[] = isArray ? data : Object.keys(data);
+		const total: number = items.length;
+		const instances = this.instances;
+		const previous: number = instances.length;
 		for (let i: number = 0; i < Math.max(previous, total); i++) {
 			if (i < total) {
-				const key: number | string = isArray ? i : array[i];
-				const value: any = isArray ? array[key as number] : result[key];
+				const key: number | string = isArray ? i : items[i];
+				const value: any = isArray ? items[key as number] : data[key];
 				if (i < previous) {
 					// update
-					const instance: Factory = this.instances[i];
+					const instance: Factory = instances[i];
 					instance[tokens.key] = key;
 					instance[tokens.value] = value;
 				} else {
 					// create
 					const clonedNode: IElement = node.cloneNode(true) as IElement;
-					delete clonedNode.rxcompId;
-					this.forend.parentNode!.insertBefore(clonedNode, this.forend);
-					const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
-					const skipSubscription = true;
-					const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
+					forend.parentNode!.insertBefore(clonedNode, forend);
+					const args = [tokens.key, key, tokens.value, value, i, total, parentInstance];
+					const skipSubscription = false;
+					const instance = module.makeInstance(clonedNode, ForItem, selector, parentInstance, args, undefined, skipSubscription);
 					if (instance) {
 						module.compile(clonedNode, instance);
-						module.makeInstanceSubscription(instance, context.parentInstance);
-						this.instances.push(instance);
+						// module.makeInstanceSubscription(instance, parentInstance);
+						instances.push(instance);
 					}
 				}
 			} else {
 				// remove
-				const instance: Factory = this.instances[i];
+				const instance: Factory = instances[i];
 				const { node } = getContext(instance);
 				node.parentNode!.removeChild(node);
 				module.remove(node);
 			}
 		}
-		this.instances.length = array.length;
+		instances.length = total;
 	}
 	static getInputsTokens(instance: ForStructure, node: IElement, module: Module): { [key: string]: string } {
 		const inputs: { [key: string]: string } = {};
