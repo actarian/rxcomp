@@ -1,6 +1,10 @@
 <!-- @@master = ./templates/layout.html { "class": "page--test", "title": "RxComp" } -->
 <!-- @@block = main-->
 <style>
+	[root-component] {
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
 	.item {
 		display: flex;
 		justify-content: center;
@@ -20,7 +24,7 @@
 		color: red;
 	}
 </style>
-<main root-component [count]="10" style="overflow-x: hidden; overflow-y: auto;">
+<main root-component>
 	<strong>RxComp</strong>
 	<div>count <span [innerHTML]="count"></span></div>
 	<div>index <span [innerHTML]="index"></span></div>

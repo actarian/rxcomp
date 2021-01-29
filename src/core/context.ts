@@ -2,7 +2,7 @@
 import Component from './component';
 import Factory, { getContext } from './factory';
 
-const RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
+const RESERVED_PROPERTIES = ['constructor', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
 export default class Context extends Component {
 	constructor(parentInstance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}) {
@@ -14,7 +14,14 @@ export default class Context extends Component {
 	pushChanges(): void {
 		const context = getContext(this);
 		if (!context.keys) {
-			context.keys = Object.keys(context.parentInstance).filter(key => RESERVED_PROPERTIES.indexOf(key) === -1);
+			context.keys = [];
+			// context.keys = Object.keys(context.parentInstance).filter(key => RESERVED_PROPERTIES.indexOf(key) === -1);
+			for (let i:number = 0, keys = Object.keys(context.parentInstance), len = keys.length; i < len; i++) {
+				const key = keys[i];
+				if (RESERVED_PROPERTIES.indexOf(key) === -1) {
+					context.keys.push(key);
+				}
+			}
 			// console.log(context.keys.join(','));
 		}
 		if (context.module.instances) {

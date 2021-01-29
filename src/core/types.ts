@@ -68,10 +68,8 @@ export interface ISelectorResult {
 	selector: string;
 }
 export interface IElement extends HTMLElement {
-	rxcompId?: number;
 }
 export interface IComment extends Comment {
-	rxcompId?: number;
 }
 export interface IText extends Text {
 	nodeExpressions?: (ExpressionFunction | string)[];

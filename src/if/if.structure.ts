@@ -3,31 +3,27 @@ import Structure from '../core/structure';
 import { IComment, IElement, IFactoryMeta } from '../core/types';
 
 export default class IfStructure extends Structure {
-	ifbegin?: IComment;
-	ifend?: IComment;
+	nodeRef?: IComment;
 	clonedNode?: IElement;
 	element?: IElement;
 	onInit() {
 		const { node } = getContext(this);
-		const ifbegin: IComment = this.ifbegin = document.createComment(`*if begin`);
-		ifbegin.rxcompId = node.rxcompId;
-		node.parentNode!.replaceChild(ifbegin, node);
-		const ifend: IComment = this.ifend = document.createComment(`*if end`);
-		ifbegin.parentNode!.insertBefore(ifend, ifbegin.nextSibling);
+		const nodeRef: IComment = this.nodeRef = document.createComment(`*if`);
+		node.parentNode!.replaceChild(nodeRef, node);
 		const clonedNode = node.cloneNode(true) as IElement;
 		clonedNode.removeAttribute('*if');
 		this.clonedNode = clonedNode;
 		this.element = clonedNode.cloneNode(true) as IElement;
 	}
 	onChanges() {
-		const { module } = getContext(this);
+		const { module, parentInstance } = getContext(this);
 		const element: IElement = this.element!;
 		// console.log('IfStructure.onChanges.if', this.if);
 		if (Boolean(this.if)) { // !!! keep == loose equality
 			if (!element.parentNode) {
-				const ifend = this.ifend!;
-				ifend.parentNode!.insertBefore(element, ifend);
-				module.compile(element);
+				const nodeRef = this.nodeRef!;
+				nodeRef.parentNode!.insertBefore(element, nodeRef);
+				module.compile(element, parentInstance);
 				// console.log('IfStructure.onChanges.add', element);
 			}
 		} else {

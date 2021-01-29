@@ -39,14 +39,18 @@ export default class Browser extends Platform {
 			clonedNode.innerHTML = meta.nodeInnerHTML = WINDOW.rxcomp_hydrate_.innerHTML;
 			const instances = module.compile(clonedNode, WINDOW);
 			module.instances = instances;
+			/*
 			const root = instances[0];
 			root.pushChanges();
+			*/
 			meta.node.parentNode?.replaceChild(clonedNode, meta.node);
 		} else {
 			const instances = module.compile(meta.node, WINDOW);
 			module.instances = instances;
+			/*
 			const root = instances[0];
 			root.pushChanges();
+			*/
 		}
 		return module;
 	}

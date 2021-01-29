@@ -1,21 +1,34 @@
 import { Browser, Component, CoreModule, getContext, Module } from '../../../src/rxcomp';
 
 class RootComponent extends Component {
+	get count() {
+		return this.count_;
+	}
+	set count(count:number) {
+		this.count_ = count;
+		this.items = new Array(count).fill(0).map((x, i) => i + 1);
+	}
 	onInit() {
 		this.index = -1;
 		let params = new URLSearchParams(document.location.search.substring(1));
 		let paramCount = params.get('count');
-		const count = this.count = (paramCount ? parseInt(paramCount) : (this.count || 500));
-		this.items = new Array(count).fill(0).map((x, i) => i + 1);
+		this.count = (paramCount ? parseInt(paramCount) : 10);
+		// this.runTask();
 	}
 	setIndex(index:number) {
 		this.index = index;
 		this.pushChanges();
 	}
+	runTask() {
+		setTimeout(() => {
+			this.count = Math.floor(1 + Math.random() * 1000);
+			this.pushChanges();
+			this.runTask();
+		}, 2000);
+	}
 }
 RootComponent.meta = {
 	selector: '[root-component]',
-	inputs: ['count'],
 };
 
 class ItemComponent extends Component {

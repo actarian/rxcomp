@@ -1,6 +1,8 @@
 # Dist
 # dist/
 
+reports/*
+
 # Logs
 logs
 *.log

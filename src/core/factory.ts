@@ -1,13 +1,17 @@
 import { Subject } from 'rxjs';
-import Module from '../module/module';
-import { IContext, IElement, IFactoryMeta } from './types';
+import { ExpressionFunction, IContext, IElement, IFactoryMeta } from './types';
 
 export const CONTEXTS: { [key: number]: IContext } = {};
 export const NODES: { [key: number]: IContext[] } = {};
 
+export const CONTEXT_MAP:Map<Factory, IContext> = new Map<Factory, IContext>();
+export const NODE_MAP:Map<IElement, IContext[]> = new Map<IElement, IContext[]>();
+export const EXPRESSION_MAP:Map<string, ExpressionFunction> = new Map<string, ExpressionFunction>();
+
+// console.log(CONTEXT_MAP, NODE_MAP, EXPRESSION_MAP);
+
 export default class Factory {
 	static meta: IFactoryMeta;
-	rxcompId: number = -1;
 	unsubscribe$: Subject<void> = new Subject();
 	changes$: Subject<Factory> = new Subject();
 	// changes$: ReplaySubject<Factory> = new ReplaySubject(1);
@@ -49,46 +53,10 @@ export default class Factory {
 		console.log('proxy', proxy);
 		*/
 	}
-	static getInputsTokens(instance: Factory, node: IElement, module: Module): { [key: string]: string } {
-		const inputs: { [key: string]: string } = {};
-		this.meta.inputs?.forEach(key => {
-			const expression: string | null = module.resolveAttribute(key, node);
-			/*
-			let expression: string | null = null;
-			if (node.hasAttribute(`[${key}]`)) {
-				expression = node.getAttribute(`[${key}]`);
-				// console.log('Factory.getInputsTokens.expression.1', expression);
-			} else if (node.hasAttribute(`*${key}`)) {
-				expression = node.getAttribute(`*${key}`);
-				// console.log('Factory.getInputsTokens.expression.2', expression);
-			} else if (node.hasAttribute(key)) {
-				expression = node.getAttribute(key);
-				if (expression) {
-					const attribute: string = expression.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
-						if (a) {
-							return '"+';
-						}
-						if (b) {
-							return '+"';
-						}
-						if (c) {
-							return '\"';
-						}
-						return '';
-					});
-					expression = `"${attribute}"`;
-					// console.log('Factory.getInputsTokens.expression.3', expression);
-				}
-			}
-			*/
-			if (expression) {
-				inputs[key] = expression;
-			}
-		});
-		return inputs;
-		// return this.meta.inputs || [];
-	}
+    static mapExpression(key:string, expression:string) {
+        return expression;
+    }
 }
 export function getContext(instance: Factory): IContext {
-	return CONTEXTS[instance.rxcompId];
+	return CONTEXT_MAP.get(instance) as IContext;
 }

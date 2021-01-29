@@ -30,7 +30,8 @@
   "scripts": {
     "start": "gulp",
     "build": "gulp build --target dist",
-    "docs": "typedoc --options typedoc.json"
+    "docs": "typedoc --options typedoc.json",
+    "perf": "lighthouse http://localhost:40999/rxcomp/test.performance.html?count=1000 --only-categories=performance --output html --output-path ./reports/report.html --view --chrome-flags=\"--headless --window-size=412,660\" "
   },
   "dependencies": {
     "rxjs": "6.6.3",
