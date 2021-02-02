@@ -121,18 +121,47 @@ export default class Module {
 		if (cachedExpressionFunction) {
 			return cachedExpressionFunction;
 		} else {
+			(this.meta as any).context = Context; // !!!
 			expression = Module.parseExpression(expression);
 			const text: string = `
 			return (function (${params.join(',')}, $$module) {
+				var $$pipes = $$module.meta.pipes;
+				try {
+					if (this.parentInstance) {
+						with(this.parentInstance) {
+							with(this) {
+								return ${expression};
+							}
+						}
+					} else {
+						with(this) {
+							return ${expression};
+						}
+					}
+				} catch(error) {
+					$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
+				}
+			}.bind(this)).apply(this, arguments);`;
+			/*
+			const text: string = `
+			return (function (${params.join(',')}, $$module) {
+				var $$pipes = $$module.meta.pipes;
+				return ${expression};
+			}.bind(this)).apply(this, arguments);`;
+			*/
+			/*
+			const text: string = `
+			return (function (${params.join(',')}, $$module) {
+				var $$pipes = $$module.meta.pipes;
 				try {
 					with(this) {
-						const $$pipes = $$module.meta.pipes;
 						return ${expression};
 					}
 				} catch(error) {
 					$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
 				}
 			}.bind(this)).apply(this, arguments);`;
+			*/
 			const expressionFunction = new Function(text) as ExpressionFunction;
 			(expressionFunction as any).expression = expression;
 			EXPRESSION_MAP.set(name, expressionFunction);
@@ -358,36 +387,107 @@ export default class Module {
 		CONTEXT_MAP.set(instance, context);
 		return context;
 	}
-	protected static parseExpression(expression: string): string {
+
+
+	protected static parseExpression(expression:string):string {
+		expression = Module.parseGroup(expression);
+		expression = Module.parseOptionalChaining(expression);
+		// expression = Module.parseThis(expression);
+		return expression;
+	}
+	protected static parseGroup(expression:string):string {
+		const l = '┌';
+		const r = '┘';
+		const rx1 = /(\()([^\(\)]*)(\))/;
+		while (rx1.test(expression)) {
+			expression = expression.replace(rx1, function (m, ...args) {
+				return `${l}${Module.parsePipes(args[1])}${r}`;
+			});
+		}
+		expression = Module.parsePipes(expression);
+		const rx2 = /(┌)|(┘)/g;
+		expression = expression.replace(rx2, function (m, ...args) {
+			return args[0] ? '(' : ')';
+		});
+		return expression;
+	}
+	protected static parsePipes(expression:string):string {
+		const rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
+		while (rx.test(expression)) {
+			expression = expression.replace(rx, function(m,value,name,expression) {
+				const params = Module.parsePipeParams(expression);
+				return `$$pipes.${name}.transform(${[value, ...params]})`;
+			});
+		}
+		return expression;
+	}
+	protected static parsePipeParams(expression:string):string[] {
+		const params = [];
+		// const rx = /:\s*(\[.+\]|\{.+\}|\(.+\)|\'.+\'|[^:\s]+)/g;
+		const rx = /:\s*(\{.+\}|\(.+\)|[^:]+)/g;
+		let match;
+		while(match = rx.exec(expression)) {
+			params.push(match[1]);
+		}
+		return params;
+	}
+	protected static parseOptionalChaining(expression:string):string {
+		const rx = /([\w|\.]+)(?:\?\.)+([\.|\w]+)/;
+		while (rx.test(expression)) {
+			expression = expression.replace(rx, function(m,a,b) {
+				return `${a} && ${a}.${b}`;
+			});
+		}
+		return expression;
+	}
+	protected static parseThis(expression:string):string {
+		const rx = /(\'.+\'|\[.+\]|\{.+\}|\$\$pipes)|([^\w.])([^\W\d])|^([^\W\d])/g;
+		expression = expression.replace(rx, function(m,g1,g2,g3,g4) {
+			if (g4) {
+				return `this.${g4}`;
+			} else if(g3) {
+				return `${g2}this.${g3}`;
+			} else {
+				return g1;
+			}
+		});
+		return expression;
+	}
+
+	protected static parseExpression__(expression: string): string {
+		expression = Module.parseGroup__(expression);
+		return Module.parseOptionalChaining__(expression);
+	}
+	protected static parseGroup__(expression: string): string {
 		const l: string = '┌';
 		const r: string = '┘';
 		const rx1: RegExp = /(\()([^\(\)]*)(\))/;
 		while (expression.match(rx1)) {
 			expression = expression.replace(rx1, function (substring: string, ...args: any[]) {
-				return `${l}${Module.parsePipes(args[1])}${r}`;
+				return `${l}${Module.parsePipes__(args[1])}${r}`;
 			});
 		}
-		expression = Module.parsePipes(expression);
+		expression = Module.parsePipes__(expression);
 		expression = expression.replace(/(┌)|(┘)/g, function (substring: string, ...args) {
 			return args[0] ? '(' : ')';
 		});
-		return Module.parseOptionalChaining(expression);
+		return expression;
 	}
-	protected static parsePipes(expression: string): string {
+	protected static parsePipes__(expression: string): string {
 		const l: string = '┌';
 		const r: string = '┘';
 		const rx1: RegExp = /(.*?[^\|])\|([^\|]+)/;
 		while (expression.match(rx1)) {
 			expression = expression.replace(rx1, function (substring: string, ...args: any[]) {
 				const value: string = args[0].trim();
-				const params: string[] = Module.parsePipeParams(args[1]);
+				const params: string[] = Module.parsePipeParams__(args[1]);
 				const func: string = params.shift()!.trim();
 				return `$$pipes.${func}.transform${l}${[value, ...params]}${r}`;
 			});
 		}
 		return expression;
 	}
-	protected static parsePipeParams(expression: string): string[] {
+	protected static parsePipeParams__(expression: string): string[] {
 		const segments: string[] = [];
 		let i: number = 0,
 			word: string = '',
@@ -416,7 +516,7 @@ export default class Module {
 		}
 		return segments;
 	}
-	protected static parseOptionalChaining(expression: string): string {
+	protected static parseOptionalChaining__(expression: string): string {
 		const regex: RegExp = /(\w+(\?\.))+([\.|\w]+)/g;
 		let previous: string;
 		expression = expression.replace(regex, function (substring: string, ...args: any[]) {
@@ -430,6 +530,8 @@ export default class Module {
 		});
 		return expression;
 	}
+
+
 	protected static deleteContext(node: IElement, keepContext: IContext | undefined): IContext[] {
 		const keepContexts: IContext[] = [];
 		const nodeContexts: IContext[] | undefined = NODE_MAP.get(node);

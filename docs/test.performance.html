@@ -1,6 +1,21 @@
-<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head><meta charset="utf-8"><base href="/rxcomp/"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1"><meta name="Content-Language" content="en"><meta name="robots" content="noindex,nofollow"><title>RxComp</title><meta name="description" content=""><meta name="apple-mobile-web-app-title" content="RxComp"><meta name="application-name" content="RxComp"><link rel="apple-touch-icon" sizes="180x180" href="/rxcomp/img/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/rxcomp/img/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/rxcomp/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" href="/rxcomp/img/favicon.ico"><link rel="manifest" href="/rxcomp/img/site.webmanifest"><link rel="mask-icon" href="/rxcomp/img/safari-pinned-tab.svg" color="#5bbad5"><meta name="msapplication-TileColor" content="#212121"><meta name="theme-color" content="#ffffff"><!--
-	<link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
-	--><link rel="stylesheet" href="/rxcomp/css/rxcomp-light.min.css"><link rel="stylesheet" href="/rxcomp/css/main.min.css"><!-- start css --><!-- end css --></head><body class="page--test"><!-- start analytics.html--><!--
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head><meta charset="utf-8"><base href="/rxcomp/"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1"><meta name="Content-Language" content="en"><meta name="robots" content="noindex,nofollow"><title>RxComp</title><meta name="description" content=""><meta name="apple-mobile-web-app-title" content="RxComp"><meta name="application-name" content="RxComp"><link rel="apple-touch-icon" sizes="180x180" href="/rxcomp/img/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/rxcomp/img/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/rxcomp/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" href="/rxcomp/img/favicon.ico"><link rel="manifest" href="/rxcomp/img/site.webmanifest"><link rel="mask-icon" href="/rxcomp/img/safari-pinned-tab.svg" color="#5bbad5"><meta name="msapplication-TileColor" content="#212121"><meta name="theme-color" content="#ffffff"><!-- start css --><style>.item {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 1px;
+		width: 40px;
+		height: 40px;
+		border: 1px solid #eee;
+		cursor: pointer;
+	}
+	.item:hover,
+	.item.active {
+		background: red;
+		color: white;
+	}
+	.item.red {
+		color: red;
+	}</style><!-- end css --></head><body class="page--test"><!-- start analytics.html--><!--
 <script>
 	(function(w, d, s, l, i) {
 		w[l] = w[l] || [];
@@ -19,30 +34,6 @@
 
 </script>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<-@@var=code->" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
---><!-- end analytics.html--><!-- start main --><style>[root-component] {
-		overflow-x: hidden;
-		overflow-y: auto;
-	}
-	.item {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		margin: 1px;
-		width: 40px;
-		height: 40px;
-		border: 1px solid #eee;
-		cursor: pointer;
-	}
-	.item:hover,
-	.item.active {
-		background: red;
-		color: white;
-	}
-	.item.red {
-		color: red;
-	}</style><main root-component><strong>RxComp</strong><div>count <span [innerhtml]="count"></span></div><div>index <span [innerhtml]="index"></span></div><div class="item" item-component [item]="item" (click)="setIndex(item)" *for="let item of items"></div><!-- div.item[item-component][item=1]*100 --><!-- <div item-component (mouseover)="$event.target.style.background = 'red'" (mouseout)="$event.target.style.background = 'none'" [item]="item" *for="let item of items"></div> --><!--
+--><!-- end analytics.html--><!-- start main --><main root-component><strong>RxComp</strong><div>count <span [innerhtml]="count"></span></div><div>index <span [innerhtml]="index"></span></div><div class="item" item-component [item]="item" (click)="setIndex(item)" *for="let item of items"></div><!-- div.item[item-component][item=1]*100 --><!-- <div item-component (mouseover)="$event.target.style.background = 'red'" (mouseout)="$event.target.style.background = 'none'" [item]="item" *for="let item of items"></div> --><!--
 	<div item-component (mouseover)="$event.target.style.background = 'red'" (mouseout)="$event.target.style.background = 'none'" [item]="1"></div>
-	--></main><!-- end main -->
-	<script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CArray.prototype.fill%2CObject.assign%2Cfetch%2CURLSearchParams" crossorigin="anonymous" SameSite="none Secure"></script>
-	<!-- <script src="https://unpkg.com/rxjs@6.6.2/bundles/rxjs.umd.min.js" crossorigin="anonymous" SameSite="none Secure"></script> -->
-	<script src="/rxcomp/js/vendors.min.js"></script><!-- start js --><script src="/rxcomp/js/test.performance.js"></script><!-- end js --></body></html>
+	--></main><!-- end main --><!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es5%2CArray.prototype.find%2CArray.prototype.fill%2CObject.assign%2Cfetch%2CURLSearchParams" crossorigin="anonymous" SameSite="none Secure"></script> --><!-- <script src="https://unpkg.com/rxjs@6.6.2/bundles/rxjs.umd.min.js" crossorigin="anonymous" SameSite="none Secure"></script> --><script src="/rxcomp/js/vendors.min.js"></script><!-- start js --><script src="/rxcomp/js/test.performance.js"></script><!-- end js --></body></html>

@@ -1,16 +1,21 @@
 // import { BehaviorSubject, Subject } from 'rxjs';
 import Component from './component';
-import Factory, { getContext } from './factory';
+import Factory from './factory';
 
 const RESERVED_PROPERTIES = ['constructor', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
 export default class Context extends Component {
+	parentInstance: Factory;
 	constructor(parentInstance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}) {
 		super();
+		this.parentInstance = parentInstance;
+		/*
 		descriptors = Context.mergeDescriptors(parentInstance, parentInstance, descriptors);
 		descriptors = Context.mergeDescriptors(Object.getPrototypeOf(parentInstance), parentInstance, descriptors);
 		Object.defineProperties(this, descriptors);
+		*/
 	}
+	/*
 	pushChanges(): void {
 		const context = getContext(this);
 		if (!context.keys) {
@@ -32,6 +37,7 @@ export default class Context extends Component {
 		}
 		super.pushChanges();
 	}
+	*/
 	onParentDidChange(changes: Factory | Window): void {
 		this.onChanges(changes);
 		this.pushChanges();

@@ -108,14 +108,6 @@ function _wrapNativeSuper(Class) {
   };
 
   return _wrapNativeSuper(Class);
-}
-
-function _assertThisInitialized(self) {
-  if (self === void 0) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return self;
 }var CONTEXT_MAP = new Map();
 var NODE_MAP = new Map();
 var EXPRESSION_MAP = new Map();
@@ -363,44 +355,12 @@ var Context = function (_Component) {
   function Context(parentInstance, descriptors) {
     var _this;
 
-    if (descriptors === void 0) {
-      descriptors = {};
-    }
-
     _this = _Component.call(this) || this;
-    descriptors = Context.mergeDescriptors(parentInstance, parentInstance, descriptors);
-    descriptors = Context.mergeDescriptors(Object.getPrototypeOf(parentInstance), parentInstance, descriptors);
-    Object.defineProperties(_assertThisInitialized(_this), descriptors);
+    _this.parentInstance = parentInstance;
     return _this;
   }
 
   var _proto = Context.prototype;
-
-  _proto.pushChanges = function pushChanges() {
-    var _this2 = this;
-
-    var context = getContext(this);
-
-    if (!context.keys) {
-      context.keys = [];
-
-      for (var i = 0, keys = Object.keys(context.parentInstance), len = keys.length; i < len; i++) {
-        var key = keys[i];
-
-        if (RESERVED_PROPERTIES.indexOf(key) === -1) {
-          context.keys.push(key);
-        }
-      }
-    }
-
-    if (context.module.instances) {
-      context.keys.forEach(function (key) {
-        _this2[key] = context.parentInstance[key];
-      });
-    }
-
-    _Component.prototype.pushChanges.call(this);
-  };
 
   _proto.onParentDidChange = function onParentDidChange(changes) {
     this.onChanges(changes);
@@ -1215,8 +1175,9 @@ JsonPipe.meta = {
     if (cachedExpressionFunction) {
       return cachedExpressionFunction;
     } else {
+      this.meta.context = Context;
       expression = Module.parseExpression(expression);
-      var text = "\n\t\t\treturn (function (" + params.join(',') + ", $$module) {\n\t\t\t\ttry {\n\t\t\t\t\twith(this) {\n\t\t\t\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t}\n\t\t\t\t} catch(error) {\n\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t}\n\t\t\t}.bind(this)).apply(this, arguments);";
+      var text = "\n\t\t\treturn (function (" + params.join(',') + ", $$module) {\n\t\t\t\tvar $$pipes = $$module.meta.pipes;\n\t\t\t\ttry {\n\t\t\t\t\tif (this.parentInstance) {\n\t\t\t\t\t\twith(this.parentInstance) {\n\t\t\t\t\t\t\twith(this) {\n\t\t\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\twith(this) {\n\t\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch(error) {\n\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t}\n\t\t\t}.bind(this)).apply(this, arguments);";
       var expressionFunction = new Function(text);
       expressionFunction.expression = expression;
       EXPRESSION_MAP.set(name, expressionFunction);
@@ -1481,24 +1442,105 @@ JsonPipe.meta = {
   };
 
   Module.parseExpression = function parseExpression(expression) {
+    expression = Module.parseGroup(expression);
+    expression = Module.parseOptionalChaining(expression);
+    return expression;
+  };
+
+  Module.parseGroup = function parseGroup(expression) {
+    var l = '┌';
+    var r = '┘';
+    var rx1 = /(\()([^\(\)]*)(\))/;
+
+    while (rx1.test(expression)) {
+      expression = expression.replace(rx1, function (m) {
+        return "" + l + Module.parsePipes(arguments.length <= 2 ? undefined : arguments[2]) + r;
+      });
+    }
+
+    expression = Module.parsePipes(expression);
+    var rx2 = /(┌)|(┘)/g;
+    expression = expression.replace(rx2, function (m) {
+      return (arguments.length <= 1 ? undefined : arguments[1]) ? '(' : ')';
+    });
+    return expression;
+  };
+
+  Module.parsePipes = function parsePipes(expression) {
+    var rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
+
+    while (rx.test(expression)) {
+      expression = expression.replace(rx, function (m, value, name, expression) {
+        var params = Module.parsePipeParams(expression);
+        return "$$pipes." + name + ".transform(" + [value].concat(params) + ")";
+      });
+    }
+
+    return expression;
+  };
+
+  Module.parsePipeParams = function parsePipeParams(expression) {
+    var params = [];
+    var rx = /:\s*(\{.+\}|\(.+\)|[^:]+)/g;
+    var match;
+
+    while (match = rx.exec(expression)) {
+      params.push(match[1]);
+    }
+
+    return params;
+  };
+
+  Module.parseOptionalChaining = function parseOptionalChaining(expression) {
+    var rx = /([\w|\.]+)(?:\?\.)+([\.|\w]+)/;
+
+    while (rx.test(expression)) {
+      expression = expression.replace(rx, function (m, a, b) {
+        return a + " && " + a + "." + b;
+      });
+    }
+
+    return expression;
+  };
+
+  Module.parseThis = function parseThis(expression) {
+    var rx = /(\'.+\'|\[.+\]|\{.+\}|\$\$pipes)|([^\w.])([^\W\d])|^([^\W\d])/g;
+    expression = expression.replace(rx, function (m, g1, g2, g3, g4) {
+      if (g4) {
+        return "this." + g4;
+      } else if (g3) {
+        return g2 + "this." + g3;
+      } else {
+        return g1;
+      }
+    });
+    return expression;
+  };
+
+  Module.parseExpression__ = function parseExpression__(expression) {
+    expression = Module.parseGroup__(expression);
+    return Module.parseOptionalChaining__(expression);
+  };
+
+  Module.parseGroup__ = function parseGroup__(expression) {
     var l = '┌';
     var r = '┘';
     var rx1 = /(\()([^\(\)]*)(\))/;
 
     while (expression.match(rx1)) {
       expression = expression.replace(rx1, function (substring) {
-        return "" + l + Module.parsePipes(arguments.length <= 2 ? undefined : arguments[2]) + r;
+        return "" + l + Module.parsePipes__(arguments.length <= 2 ? undefined : arguments[2]) + r;
       });
     }
 
-    expression = Module.parsePipes(expression);
+    expression = Module.parsePipes__(expression);
     expression = expression.replace(/(┌)|(┘)/g, function (substring) {
       return (arguments.length <= 1 ? undefined : arguments[1]) ? '(' : ')';
     });
-    return Module.parseOptionalChaining(expression);
+    return expression;
   };
 
-  Module.parsePipes = function parsePipes(expression) {
+  Module.parsePipes__ = function parsePipes__(expression) {
     var l = '┌';
     var r = '┘';
     var rx1 = /(.*?[^\|])\|([^\|]+)/;
@@ -1510,7 +1552,7 @@ JsonPipe.meta = {
         }
 
         var value = args[0].trim();
-        var params = Module.parsePipeParams(args[1]);
+        var params = Module.parsePipeParams__(args[1]);
         var func = params.shift().trim();
         return "$$pipes." + func + ".transform" + l + [value].concat(params) + r;
       });
@@ -1519,7 +1561,7 @@ JsonPipe.meta = {
     return expression;
   };
 
-  Module.parsePipeParams = function parsePipeParams(expression) {
+  Module.parsePipeParams__ = function parsePipeParams__(expression) {
     var segments = [];
     var i = 0,
         word = '',
@@ -1557,7 +1599,7 @@ JsonPipe.meta = {
     return segments;
   };
 
-  Module.parseOptionalChaining = function parseOptionalChaining(expression) {
+  Module.parseOptionalChaining__ = function parseOptionalChaining__(expression) {
     var regex = /(\w+(\?\.))+([\.|\w]+)/g;
     var previous;
     expression = expression.replace(regex, function (substring) {
