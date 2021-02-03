@@ -2,123 +2,218 @@ import { Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
-import Factory, { CONTEXTS, getContext, NODES } from '../core/factory';
+import Factory, { CONTEXT_MAP, EXPRESSION_MAP, getContext, NODE_MAP } from '../core/factory';
 import Structure from '../core/structure';
 import { ExpressionError, nextError$ } from '../error/error';
-import { WINDOW } from '../platform/common/window/window';
-let ID = 0;
 export default class Module {
     constructor() {
         this.unsubscribe$ = new Subject();
     }
-    compile(node, parentInstance) {
-        let componentNode;
-        const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map((match) => {
-            if (componentNode && componentNode !== match.node) {
-                parentInstance = undefined;
+    compile(node, parentInstance, instances = []) {
+        if (node.nodeType === 1) {
+            const selectors = this.meta.selectors;
+            const matches = [];
+            // const childNodes: NodeListOf<ChildNode> = node.childNodes;
+            // copying array to avoid multiple compilation
+            const childNodes = Array.prototype.slice.call(node.childNodes);
+            // const foundStructure : boolean = Module.matchSelectors(node as HTMLElement, selectors, matches);
+            let foundStructure = false;
+            for (let i = 0, len = selectors.length; i < len; i++) {
+                const selectorResult = selectors[i](node);
+                if (selectorResult) { // !== false
+                    // match found
+                    matches.push(selectorResult);
+                    const factory = selectorResult.factory;
+                    // structure found
+                    if (factory.prototype instanceof Structure) {
+                        foundStructure = true;
+                        break;
+                    }
+                    // injecting template
+                    if (factory.prototype instanceof Component && factory.meta.template) {
+                        node.innerHTML = factory.meta.template;
+                    }
+                }
             }
-            const instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
-            if (match.factory.prototype instanceof Component) {
-                componentNode = match.node;
+            let nextParentInstance = parentInstance;
+            for (let i = 0, len = matches.length; i < len; i++) {
+                const match = matches[i];
+                // console.log('makeInstance', parentInstance.constructor.name, match.factory.name);
+                // make instance
+                const instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+                if (instance) {
+                    instances.push(instance);
+                    // updating parentInstance
+                    if (match.factory.prototype instanceof Component) {
+                        nextParentInstance = instance;
+                    }
+                }
             }
-            return instance;
-        }).filter((x) => x !== undefined);
-        // instances.forEach(x => x.onInit());
-        // console.log('compile', instances, node, parentInstance);
+            /*
+            matches.forEach((match: ISelectorResult) => {
+                // console.log('makeInstance', parentInstance.constructor.name, match.factory.name);
+                // make instance
+                const instance: Factory | undefined = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+                if (instance) {
+                    instances.push(instance);
+                    // updating parentInstance
+                    if (match.factory.prototype instanceof Component) {
+                        nextParentInstance = instance;
+                    }
+                }
+            });
+            */
+            if (!foundStructure) {
+                // compiling childNodes
+                for (let i = 0, len = childNodes.length; i < len; i++) {
+                    this.compile(childNodes[i], nextParentInstance, instances);
+                }
+            }
+        }
         return instances;
     }
-    makeInstance(node, factory, selector, parentInstance, args, inject, skipSubscription = false) {
-        if (parentInstance || node.parentNode) {
-            const meta = factory.meta;
-            // collect parentInstance scope
-            parentInstance = parentInstance || this.getParentInstance(node.parentNode);
-            if (!parentInstance) {
-                return undefined;
-            }
-            // creating factory instance
-            const instance = new factory(...(args || []));
-            // injecting custom properties
-            if (inject) {
-                Object.keys(inject).forEach(key => {
-                    // console.log('Module.makeInstance', key, inject[key]);
-                    Object.defineProperty(instance, key, {
-                        value: inject[key],
-                        configurable: false,
-                        enumerable: false,
-                        writable: true,
-                    });
+    makeInstance(node, factory, selector, parentInstance, args, inject) {
+        const meta = factory.meta;
+        // creating factory instance
+        const instance = new factory(...(args || []));
+        // console.log(instance.constructor.name, parentInstance.constructor.name);
+        // injecting custom properties
+        if (inject != null) {
+            for (let i = 0, keys = Object.keys(inject), len = keys.length; i < len; i++) {
+                const key = keys[i];
+                Object.defineProperty(instance, key, {
+                    value: inject[key],
+                    configurable: false,
+                    enumerable: false,
+                    writable: true,
                 });
             }
-            // creating instance context
-            const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
-            // creating component input and outputs
-            if (!(instance instanceof Context)) {
-                this.makeHosts(meta, instance, node);
-                context.inputs = this.makeInputs(meta, instance, node, factory);
-                context.outputs = this.makeOutputs(meta, instance);
-                // if (parentInstance instanceof Factory) {
-                this.resolveInputsOutputs(instance, parentInstance);
-                // }
-            }
-            // calling onInit event
-            instance.onInit();
-            // subscribe to parent changes
-            if (!skipSubscription) {
-                this.makeInstanceSubscription(instance, parentInstance);
-            }
-            return instance;
+            /*
+            Object.keys(inject).forEach((key: string) => {
+                // console.log('Module.makeInstance', key, inject[key]);
+                Object.defineProperty(instance, key, {
+                    value: inject[key],
+                    configurable: false,
+                    enumerable: false,
+                    writable: true,
+                });
+            });
+            */
+        }
+        // creating instance context
+        const context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
+        // creating component input and outputs
+        if (instance instanceof Context) {
+            // skipping hosts, inputs & outputs
         }
         else {
-            return undefined;
+            this.makeHosts(meta, instance, node);
+            context.inputs = this.makeInputs(meta, node, factory);
+            context.outputs = this.makeOutputs(meta, instance);
+            // if (parentInstance instanceof Factory) {
+            this.resolveInputsOutputs(instance, parentInstance);
+            // }
         }
-    }
-    makeInstanceSubscription(instance, parentInstance) {
+        // calling onInit event
+        instance.onInit();
+        // subscribe to parent changes
         if (parentInstance instanceof Factory) {
+            const { childInstances } = getContext(parentInstance);
+            childInstances.push(instance);
+            instance.onParentDidChange(parentInstance);
+            /*
             parentInstance.changes$.pipe(
-            // distinctUntilChanged(deepEqual),
-            takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+                // distinctUntilChanged(deepEqual),
+                startWith(parentInstance),
+                takeUntil(instance.unsubscribe$)
+            ).subscribe(function (changes: Factory | Window) {
                 instance.onParentDidChange(changes);
             });
+            */
         }
+        return instance;
     }
     makeFunction(expression, params = ['$instance']) {
-        expression = Module.parseExpression(expression);
-        const expressionFunction = `with(this) {
-	return (function (${params.join(',')}, $$module) {
-		try {
-			const $$pipes = $$module.meta.pipes;
-			return ${expression};
-		} catch(error) {
-			$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
-		}
-	}.bind(this)).apply(this, arguments);
-}`;
-        // console.log('Module.makeFunction.expressionFunction', expressionFunction);
-        const callback = new Function(expressionFunction);
-        // return () => { return null; };
-        callback.expression = expression;
-        return callback;
+        const name = expression + '_' + params.join(',');
+        const cachedExpressionFunction = EXPRESSION_MAP.get(name);
+        if (cachedExpressionFunction) {
+            return cachedExpressionFunction;
+        }
+        else {
+            this.meta.context = Context; // !!!
+            expression = Module.parseExpression(expression);
+            const text = `
+			return (function (${params.join(',')}, $$module) {
+				var $$pipes = $$module.meta.pipes;
+				try {
+					if (this.parentInstance) {
+						with(this.parentInstance) {
+							with(this) {
+								return ${expression};
+							}
+						}
+					} else {
+						with(this) {
+							return ${expression};
+						}
+					}
+				} catch(error) {
+					$$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
+				}
+			}.bind(this)).apply(this, arguments);`;
+            /*
+            const text: string = `
+            return (function (${params.join(',')}, $$module) {
+                var $$pipes = $$module.meta.pipes;
+                return ${expression};
+            }.bind(this)).apply(this, arguments);`;
+            */
+            /*
+            const text: string = `
+            return (function (${params.join(',')}, $$module) {
+                var $$pipes = $$module.meta.pipes;
+                try {
+                    with(this) {
+                        return ${expression};
+                    }
+                } catch(error) {
+                    $$module.nextError(error, this, ${JSON.stringify(expression)}, arguments);
+                }
+            }.bind(this)).apply(this, arguments);`;
+            */
+            const expressionFunction = new Function(text);
+            expressionFunction.expression = expression;
+            EXPRESSION_MAP.set(name, expressionFunction);
+            return expressionFunction;
+        }
     }
     resolveInputsOutputs(instance, changes) {
         const context = getContext(instance);
         const parentInstance = context.parentInstance;
         const inputs = context.inputs;
-        for (let key in inputs) {
-            const inputFunction = inputs[key];
-            const value = this.resolve(inputFunction, parentInstance, instance);
-            // console.log('Module.resolveInputsOutputs', 'key', key, 'inputFunction', inputFunction, 'value', value, 'parentInstance', parentInstance, 'instance', instance);
+        for (let i = 0, keys = Object.keys(inputs), len = keys.length; i < len; i++) {
+            const key = keys[i];
+            const expression = inputs[key];
+            const value = this.resolve(expression, parentInstance, instance);
             instance[key] = value;
         }
+        /*
+        Object.keys(inputs).forEach(key => {
+            const expression: ExpressionFunction = inputs[key];
+            const value: any = this.resolve(expression, parentInstance, instance);
+            instance[key] = value;
+        });
+        */
     }
-    resolveAttribute(key, node) {
+    getInputAttributeExpression(key, node) {
         let expression = null;
         if (node.hasAttribute(`[${key}]`)) {
             expression = node.getAttribute(`[${key}]`);
-            // console.log('Module.resolveAttribute.expression.1', expression);
+            // console.log('Module.getInputAttributeExpression.expression.1', expression);
         }
         else if (node.hasAttribute(`*${key}`)) {
             expression = node.getAttribute(`*${key}`);
-            // console.log('Module.resolveAttribute.expression.2', expression);
+            // console.log('Module.getInputAttributeExpression.expression.2', expression);
         }
         else if (node.hasAttribute(key)) {
             expression = node.getAttribute(key);
@@ -136,10 +231,10 @@ export default class Module {
                     return '';
                 });
                 expression = `"${attribute}"`;
-                // console.log('Module.resolveAttribute.expression.3', expression);
+                // console.log('Module.getInputAttributeExpression.expression.3', expression);
             }
         }
-        // console.log('Module.resolveAttribute.expression', expression);
+        // console.log('Module.getInputAttributeExpression.expression', expression);
         return expression;
     }
     resolve(expression, parentInstance, payload) {
@@ -147,7 +242,7 @@ export default class Module {
         return expression.apply(parentInstance, [payload, this]);
     }
     parse(node, instance) {
-        for (let i = 0; i < node.childNodes.length; i++) {
+        for (let i = 0, len = node.childNodes.length; i < len; i++) {
             const child = node.childNodes[i];
             if (child.nodeType === 1) {
                 const element = child;
@@ -165,13 +260,7 @@ export default class Module {
     remove(node, keepInstance) {
         const keepContext = keepInstance ? getContext(keepInstance) : undefined;
         Module.traverseDown(node, (node) => {
-            const rxcompId = node.rxcompId;
-            if (rxcompId) {
-                const keepContexts = Module.deleteContext(rxcompId, keepContext);
-                if (keepContexts.length === 0) {
-                    delete node.rxcompId;
-                }
-            }
+            Module.deleteContext(node, keepContext);
         });
         return node;
     }
@@ -192,42 +281,40 @@ export default class Module {
     }
     makeHosts(meta, instance, node) {
         if (meta.hosts) {
-            Object.keys(meta.hosts).forEach((key) => {
+            for (let i = 0, keys = Object.keys(meta.hosts), len = keys.length; i < len; i++) {
+                const key = keys[i];
                 const factory = meta.hosts[key];
                 instance[key] = getHost(instance, factory, node);
-            });
-        }
-    }
-    /*
-    protected makeInput(instance: Factory, key: string): ExpressionFunction | null {
-        // console.log('Module.makeInput', 'key', key, 'instance', instance);
-        const { node } = getContext(instance);
-        let input: ExpressionFunction | null = null;
-        const expression: string | null = this.resolveAttribute(key, node);
-        if (expression) {
-            instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
-            input = this.makeFunction(expression);
-        }
-        // console.log('Module.makeInput', key, expression);
-        return input;
-    }
-    */
-    makeInputs(meta, instance, node, factory) {
-        const inputs = {};
-        const inputsTokens = factory.getInputsTokens(instance, node, this);
-        Object.keys(inputsTokens).forEach(key => {
-            // !!! removed cause it throws error on instance setters
-            // instance[key] = typeof instance[key] === 'undefined' ? null : instance[key]; // !!! avoid throError undefined key
-            inputs[key] = this.makeFunction(inputsTokens[key]);
-        });
-        /*
-        factory.getInputsTokens(instance, node).forEach((key: string) => {
-            const input = this.makeInput(instance, key);
-            if (input) {
-                inputs[key] = input;
             }
-        });
-        */
+            /*
+            Object.keys(meta.hosts).forEach((key: string) => {
+                const factory: typeof Factory = meta.hosts![key];
+                instance[key] = getHost(instance, factory, node);
+            });
+            */
+        }
+    }
+    makeInputs(meta, node, factory) {
+        const inputs = {};
+        if (meta.inputs) {
+            for (let i = 0, len = meta.inputs.length; i < len; i++) {
+                const key = meta.inputs[i];
+                let expression = this.getInputAttributeExpression(key, node);
+                if (expression) {
+                    expression = factory.mapExpression(key, expression);
+                    inputs[key] = this.makeFunction(expression);
+                }
+            }
+            /*
+            meta.inputs.forEach(key => {
+                let expression: string | null = this.getInputAttributeExpression(key, node);
+                if (expression) {
+                    expression = factory.mapExpression(key, expression);
+                    inputs[key] = this.makeFunction(expression);
+                }
+            });
+            */
+        }
         return inputs;
     }
     makeOutput(instance, key) {
@@ -257,23 +344,6 @@ export default class Module {
             });
         }
         return outputs;
-    }
-    getInstance(node) {
-        if (node === document) {
-            return WINDOW; // (isPlatformBrowser ? window : global) as Window;
-        }
-        const context = getContextByNode(node);
-        if (context) {
-            return context.instance;
-        }
-        else {
-            return undefined;
-        }
-    }
-    getParentInstance(node) {
-        return Module.traverseUp(node, (node) => {
-            return this.getInstance(node);
-        });
     }
     parseTextNode(node, instance) {
         let expressions = node.nodeExpressions;
@@ -337,49 +407,124 @@ export default class Module {
         }
     }
     static makeContext(module, instance, parentInstance, node, factory, selector) {
-        instance.rxcompId = ++ID;
-        const context = { module, instance, parentInstance, node, factory, selector };
-        const rxcompNodeId = node.rxcompId = (node.rxcompId || instance.rxcompId);
-        const nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+        const context = { module, instance, parentInstance, childInstances: [], node, factory, selector };
+        let nodeContexts = NODE_MAP.get(node);
+        if (!nodeContexts) {
+            nodeContexts = [];
+            NODE_MAP.set(node, nodeContexts);
+        }
         nodeContexts.push(context);
-        CONTEXTS[instance.rxcompId] = context;
+        CONTEXT_MAP.set(instance, context);
         return context;
     }
     static parseExpression(expression) {
+        expression = Module.parseGroup(expression);
+        expression = Module.parseOptionalChaining(expression);
+        // expression = Module.parseThis(expression);
+        return expression;
+    }
+    static parseGroup(expression) {
         const l = '┌';
         const r = '┘';
         const rx1 = /(\()([^\(\)]*)(\))/;
-        while (expression.match(rx1)) {
-            expression = expression.replace(rx1, function (substring, ...args) {
+        while (rx1.test(expression)) {
+            expression = expression.replace(rx1, function (m, ...args) {
                 return `${l}${Module.parsePipes(args[1])}${r}`;
             });
         }
         expression = Module.parsePipes(expression);
-        expression = expression.replace(/(┌)|(┘)/g, function (substring, ...args) {
+        const rx2 = /(┌)|(┘)/g;
+        expression = expression.replace(rx2, function (m, ...args) {
             return args[0] ? '(' : ')';
         });
-        return Module.parseOptionalChaining(expression);
+        return expression;
     }
     static parsePipes(expression) {
-        const l = '┌';
-        const r = '┘';
-        const rx1 = /(.*?[^\|])\|([^\|]+)/;
-        while (expression.match(rx1)) {
-            expression = expression.replace(rx1, function (substring, ...args) {
-                const value = args[0].trim();
-                const params = Module.parsePipeParams(args[1]);
-                const func = params.shift().trim();
-                return `$$pipes.${func}.transform${l}${[value, ...params]}${r}`;
+        const rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
+        while (rx.test(expression)) {
+            expression = expression.replace(rx, function (m, value, name, expression) {
+                const params = Module.parsePipeParams(expression);
+                return `$$pipes.${name}.transform(${[value, ...params]})`;
             });
         }
         return expression;
     }
     static parsePipeParams(expression) {
-        const segments = [];
-        let i = 0, word = '', block = 0;
-        const t = expression.length;
+        const params = [];
+        // const rx = /:\s*(\[.+\]|\{.+\}|\(.+\)|\'.+\'|[^:\s]+)/g;
+        const rx = /:\s*(\{.+\}|\(.+\)|[^:]+)/g;
+        let match;
+        while (match = rx.exec(expression)) {
+            params.push(match[1]);
+        }
+        return params;
+    }
+    static parseOptionalChaining(expression) {
+        const rx = /([\w|\.]+)(?:\?\.)+([\.|\w]+)/;
+        while (rx.test(expression)) {
+            expression = expression.replace(rx, function (m, a, b) {
+                return `${a} && ${a}.${b}`;
+            });
+        }
+        return expression;
+    }
+    static parseThis(expression) {
+        const rx = /(\'.+\'|\[.+\]|\{.+\}|\$\$pipes)|([^\w.])([^\W\d])|^([^\W\d])/g;
+        expression = expression.replace(rx, function (m, g1, g2, g3, g4) {
+            if (g4) {
+                return `this.${g4}`;
+            }
+            else if (g3) {
+                return `${g2}this.${g3}`;
+            }
+            else {
+                return g1;
+            }
+        });
+        return expression;
+    }
+    /*
+    protected static parseExpression__(expression: string): string {
+        expression = Module.parseGroup__(expression);
+        return Module.parseOptionalChaining__(expression);
+    }
+    protected static parseGroup__(expression: string): string {
+        const l: string = '┌';
+        const r: string = '┘';
+        const rx1: RegExp = /(\()([^\(\)]*)(\))/;
+        while (expression.match(rx1)) {
+            expression = expression.replace(rx1, function (substring: string, ...args: any[]) {
+                return `${l}${Module.parsePipes__(args[1])}${r}`;
+            });
+        }
+        expression = Module.parsePipes__(expression);
+        expression = expression.replace(/(┌)|(┘)/g, function (substring: string, ...args) {
+            return args[0] ? '(' : ')';
+        });
+        return expression;
+    }
+    protected static parsePipes__(expression: string): string {
+        const l: string = '┌';
+        const r: string = '┘';
+        const rx1: RegExp = /(.*?[^\|])\|([^\|]+)/;
+        while (expression.match(rx1)) {
+            expression = expression.replace(rx1, function (substring: string, ...args: any[]) {
+                const value: string = args[0].trim();
+                const params: string[] = Module.parsePipeParams__(args[1]);
+                const func: string = params.shift()!.trim();
+                return `$$pipes.${func}.transform${l}${[value, ...params]}${r}`;
+            });
+        }
+        return expression;
+    }
+    protected static parsePipeParams__(expression: string): string[] {
+        const segments: string[] = [];
+        let i: number = 0,
+            word: string = '',
+            block: number = 0;
+        const t: number = expression.length;
         while (i < t) {
-            const c = expression.substr(i, 1);
+            const c: string = expression.substr(i, 1);
             if (c === '{' || c === '(' || c === '[') {
                 block++;
             }
@@ -391,8 +536,7 @@ export default class Module {
                     segments.push(word.trim());
                 }
                 word = '';
-            }
-            else {
+            } else {
                 word += c;
             }
             i++;
@@ -402,23 +546,24 @@ export default class Module {
         }
         return segments;
     }
-    static parseOptionalChaining(expression) {
-        const regex = /(\w+(\?\.))+([\.|\w]+)/g;
-        let previous;
-        expression = expression.replace(regex, function (substring, ...args) {
-            const tokens = substring.split('?.');
-            for (let i = 0; i < tokens.length - 1; i++) {
-                const a = i > 0 ? `(${tokens[i]} = ${previous})` : tokens[i];
-                const b = tokens[i + 1];
+    protected static parseOptionalChaining__(expression: string): string {
+        const regex: RegExp = /(\w+(\?\.))+([\.|\w]+)/g;
+        let previous: string;
+        expression = expression.replace(regex, function (substring: string, ...args: any[]) {
+            const tokens: string[] = substring.split('?.');
+            for (let i: number = 0, len: number = tokens.length - 1; i < len; i++) {
+                const a: string = i > 0 ? `(${tokens[i]} = ${previous})` : tokens[i];
+                const b: string = tokens[i + 1];
                 previous = i > 0 ? `${a}.${b}` : `(${a} ? ${a}.${b} : void 0)`;
             }
             return previous || '';
         });
         return expression;
     }
-    static deleteContext(id, keepContext) {
+    */
+    static deleteContext(node, keepContext) {
         const keepContexts = [];
-        const nodeContexts = NODES[id];
+        const nodeContexts = NODE_MAP.get(node);
         if (nodeContexts) {
             nodeContexts.forEach((context) => {
                 if (context === keepContext) {
@@ -426,52 +571,32 @@ export default class Module {
                 }
                 else {
                     const instance = context.instance;
+                    // !!!
+                    const parentInstance = context.parentInstance;
+                    if (parentInstance instanceof Factory) {
+                        const parentContext = getContext(parentInstance);
+                        if (parentContext) {
+                            const i = parentContext.childInstances.indexOf(instance);
+                            if (i !== -1) {
+                                parentContext.childInstances.splice(i, 1);
+                            }
+                        }
+                    }
+                    // !!!
                     instance.unsubscribe$.next();
                     instance.unsubscribe$.complete();
                     instance.onDestroy();
-                    delete CONTEXTS[instance.rxcompId];
+                    CONTEXT_MAP.delete(instance);
                 }
             });
             if (keepContexts.length) {
-                NODES[id] = keepContexts;
+                NODE_MAP.set(node, keepContexts);
             }
             else {
-                delete NODES[id];
+                NODE_MAP.delete(node);
             }
         }
         return keepContexts;
-    }
-    static matchSelectors(node, selectors, results) {
-        for (let i = 0; i < selectors.length; i++) {
-            const selectorResult = selectors[i](node);
-            if (selectorResult) {
-                const factory = selectorResult.factory;
-                if (factory.prototype instanceof Component && factory.meta.template) {
-                    node.innerHTML = factory.meta.template;
-                }
-                results.push(selectorResult);
-                if (factory.prototype instanceof Structure) {
-                    // console.log('Structure', node);
-                    break;
-                }
-            }
-        }
-        return results;
-    }
-    static querySelectorsAll(node, selectors, results) {
-        if (node.nodeType === 1) {
-            const selectorResults = this.matchSelectors(node, selectors, []);
-            results = results.concat(selectorResults);
-            const structure = selectorResults.find(x => x.factory.prototype instanceof Structure);
-            if (structure) {
-                return results;
-            }
-            const childNodes = node.childNodes;
-            for (let i = 0; i < childNodes.length; i++) {
-                results = this.querySelectorsAll(childNodes[i], selectors, results);
-            }
-        }
-        return results;
     }
     static traverseUp(node, callback, i = 0) {
         if (!node) {
@@ -523,24 +648,21 @@ export default class Module {
 }
 export function getParsableContextByElement(element) {
     let context;
-    const rxcompId = element.rxcompId;
-    if (rxcompId) {
-        const contexts = NODES[rxcompId];
-        if (contexts) {
-            context = contexts.reduce((previous, current) => {
-                if (current.instance instanceof Context) {
-                    return previous ? previous : current;
-                }
-                else if (current.instance instanceof Component) {
-                    return current;
-                }
-                else {
-                    return previous;
-                }
-            }, undefined);
-        }
-        // context = contexts ? contexts.find(x => x.instance instanceof Component) : undefined;
+    const contexts = NODE_MAP.get(element);
+    if (contexts) {
+        context = contexts.reduce((previous, current) => {
+            if (current.instance instanceof Context) {
+                return previous ? previous : current;
+            }
+            else if (current.instance instanceof Component) {
+                return current;
+            }
+            else {
+                return previous;
+            }
+        }, undefined);
     }
+    // context = contexts ? contexts.find(x => x.instance instanceof Component) : undefined;
     return context;
 }
 export function getContextByNode(element) {
@@ -554,17 +676,15 @@ export function getHost(instance, factory, node) {
     if (!node) {
         node = getContext(instance).node;
     }
-    if (node.rxcompId) {
-        const nodeContexts = NODES[node.rxcompId];
-        if (nodeContexts) {
-            // console.log(nodeContexts);
-            for (let i = 0; i < nodeContexts.length; i++) {
-                const context = nodeContexts[i];
-                if (context.instance !== instance) {
-                    // console.log(context.instance, instance);
-                    if (context.instance instanceof factory) {
-                        return context.instance;
-                    }
+    const nodeContexts = NODE_MAP.get(node);
+    if (nodeContexts) {
+        // console.log(nodeContexts);
+        for (let i = 0, len = nodeContexts.length; i < len; i++) {
+            const context = nodeContexts[i];
+            if (context.instance !== instance) {
+                // console.log(context.instance, instance);
+                if (context.instance instanceof factory) {
+                    return context.instance;
                 }
             }
         }

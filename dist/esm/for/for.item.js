@@ -2,28 +2,7 @@ import Context from '../core/context';
 export default class ForItem extends Context {
     // !!! todo: payload options { key, $key, value, $value, index, count }
     constructor(key, $key, value, $value, index, count, parentInstance) {
-        // console.log('ForItem', arguments);
         super(parentInstance);
-        /*
-        super(parentInstance, {
-            [key]: {
-                get: function() {
-                    return this.$key;
-                },
-                set: function(key) {
-                    this.$key = key;
-                }
-            },
-            [value]: {
-                get: function() {
-                    return this.$value;
-                },
-                set: function(value) {
-                    this.$value = value;
-                }
-            }
-        });
-        */
         this[key] = $key;
         this[value] = $value;
         this.index = index;

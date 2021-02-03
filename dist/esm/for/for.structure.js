@@ -8,70 +8,64 @@ export default class ForStructure extends Structure {
     }
     onInit() {
         const { node } = getContext(this);
-        const forbegin = this.forbegin = document.createComment(`*for begin`);
-        forbegin.rxcompId = node.rxcompId;
-        node.parentNode.replaceChild(forbegin, node);
-        const forend = this.forend = document.createComment(`*for end`);
-        forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
+        const expression = node.getAttribute('*for');
+        this.tokens = ForStructure.getForExpressionTokens(expression);
+        const nodeRef = this.nodeRef = document.createComment(`*for`);
+        node.parentNode.replaceChild(nodeRef, node);
         node.removeAttribute('*for');
     }
     onChanges() {
         const context = getContext(this);
         const module = context.module;
         const node = context.node;
+        const selector = context.selector;
+        const parentInstance = context.parentInstance;
+        const nodeRef = this.nodeRef;
         const tokens = this.tokens;
-        let result = this.for || [];
-        const isArray = Array.isArray(result);
-        const array = isArray ? result : Object.keys(result);
-        const total = array.length;
-        const previous = this.instances.length;
-        for (let i = 0; i < Math.max(previous, total); i++) {
+        let data = this.for || [];
+        const isArray = Array.isArray(data);
+        const items = isArray ? data : Object.keys(data);
+        const total = items.length;
+        const instances = this.instances;
+        const previous = instances.length;
+        for (let i = 0, len = Math.max(previous, total); i < len; i++) {
             if (i < total) {
-                const key = isArray ? i : array[i];
-                const value = isArray ? array[key] : result[key];
+                const key = isArray ? i : items[i];
+                const value = isArray ? items[key] : data[key];
                 if (i < previous) {
                     // update
-                    const instance = this.instances[i];
+                    const instance = instances[i];
                     instance[tokens.key] = key;
                     instance[tokens.value] = value;
                 }
                 else {
                     // create
                     const clonedNode = node.cloneNode(true);
-                    delete clonedNode.rxcompId;
-                    this.forend.parentNode.insertBefore(clonedNode, this.forend);
-                    const args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
-                    const skipSubscription = true;
-                    const instance = module.makeInstance(clonedNode, ForItem, context.selector, context.parentInstance, args, undefined, skipSubscription);
+                    nodeRef.parentNode.insertBefore(clonedNode, nodeRef);
+                    const args = [tokens.key, key, tokens.value, value, i, total, parentInstance];
+                    const instance = module.makeInstance(clonedNode, ForItem, selector, parentInstance, args);
                     if (instance) {
                         module.compile(clonedNode, instance);
-                        module.makeInstanceSubscription(instance, context.parentInstance);
-                        this.instances.push(instance);
+                        instances.push(instance);
                     }
                 }
             }
             else {
                 // remove
-                const instance = this.instances[i];
+                const instance = instances[i];
                 const { node } = getContext(instance);
                 node.parentNode.removeChild(node);
                 module.remove(node);
             }
         }
-        this.instances.length = array.length;
+        instances.length = total;
     }
-    static getInputsTokens(instance, node, module) {
-        const inputs = {};
-        const expression = node.getAttribute('*for');
-        if (expression) {
-            const tokens = ForStructure.getForExpressionTokens(expression);
-            instance.tokens = tokens;
-            inputs.for = tokens.iterable;
-        }
-        return inputs;
+    static mapExpression(key, expression) {
+        const tokens = this.getForExpressionTokens(expression);
+        return tokens.iterable;
     }
-    static getForExpressionTokens(expression) {
-        if (expression === null) {
+    static getForExpressionTokens(expression = null) {
+        if (expression == null) {
             throw new Error('invalid for');
         }
         if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {

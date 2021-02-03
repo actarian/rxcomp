@@ -17,6 +17,7 @@ var ClassDirective = /** @class */ (function (_super) {
         Array.prototype.slice.call(node.classList).forEach(function (value) {
             _this.keys.push(value);
         });
+        // console.log('ClassDirective.onInit');
     };
     ClassDirective.prototype.onChanges = function () {
         var node = factory_1.getContext(this).node;

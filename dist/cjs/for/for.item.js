@@ -6,29 +6,7 @@ var ForItem = /** @class */ (function (_super) {
     tslib_1.__extends(ForItem, _super);
     // !!! todo: payload options { key, $key, value, $value, index, count }
     function ForItem(key, $key, value, $value, index, count, parentInstance) {
-        var _this = 
-        // console.log('ForItem', arguments);
-        _super.call(this, parentInstance) || this;
-        /*
-        super(parentInstance, {
-            [key]: {
-                get: function() {
-                    return this.$key;
-                },
-                set: function(key) {
-                    this.$key = key;
-                }
-            },
-            [value]: {
-                get: function() {
-                    return this.$value;
-                },
-                set: function(value) {
-                    this.$value = value;
-                }
-            }
-        });
-        */
+        var _this = _super.call(this, parentInstance) || this;
         _this[key] = $key;
         _this[value] = $value;
         _this.index = index;

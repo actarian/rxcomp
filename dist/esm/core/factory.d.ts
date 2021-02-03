@@ -1,17 +1,18 @@
-import { ReplaySubject, Subject } from 'rxjs';
-import Module from '../module/module';
-import { IContext, IElement, IFactoryMeta } from './types';
+import { Subject } from 'rxjs';
+import { ExpressionFunction, IContext, IElement, IFactoryMeta } from './types';
 export declare const CONTEXTS: {
     [key: number]: IContext;
 };
 export declare const NODES: {
     [key: number]: IContext[];
 };
+export declare const CONTEXT_MAP: Map<Factory, IContext>;
+export declare const NODE_MAP: Map<IElement, IContext[]>;
+export declare const EXPRESSION_MAP: Map<string, ExpressionFunction>;
 export default class Factory {
     static meta: IFactoryMeta;
-    rxcompId: number;
-    unsubscribe$: Subject<void>;
-    changes$: ReplaySubject<Factory>;
+    unsubscribe$_: Subject<void> | undefined;
+    get unsubscribe$(): Subject<void>;
     onInit(): void;
     onChanges(changes: Factory | Window): void;
     onView(): void;
@@ -20,8 +21,6 @@ export default class Factory {
     onParentDidChange(changes: Factory | Window): void;
     [key: string]: any;
     constructor(...args: any[]);
-    static getInputsTokens(instance: Factory, node: IElement, module: Module): {
-        [key: string]: string;
-    };
+    static mapExpression(key: string, expression: string): string;
 }
 export declare function getContext(instance: Factory): IContext;

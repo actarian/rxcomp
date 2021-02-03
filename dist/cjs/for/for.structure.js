@@ -13,70 +13,65 @@ var ForStructure = /** @class */ (function (_super) {
     }
     ForStructure.prototype.onInit = function () {
         var node = factory_1.getContext(this).node;
-        var forbegin = this.forbegin = document.createComment("*for begin");
-        forbegin.rxcompId = node.rxcompId;
-        node.parentNode.replaceChild(forbegin, node);
-        var forend = this.forend = document.createComment("*for end");
-        forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
+        var expression = node.getAttribute('*for');
+        this.tokens = ForStructure.getForExpressionTokens(expression);
+        var nodeRef = this.nodeRef = document.createComment("*for");
+        node.parentNode.replaceChild(nodeRef, node);
         node.removeAttribute('*for');
     };
     ForStructure.prototype.onChanges = function () {
         var context = factory_1.getContext(this);
         var module = context.module;
         var node = context.node;
+        var selector = context.selector;
+        var parentInstance = context.parentInstance;
+        var nodeRef = this.nodeRef;
         var tokens = this.tokens;
-        var result = this.for || [];
-        var isArray = Array.isArray(result);
-        var array = isArray ? result : Object.keys(result);
-        var total = array.length;
-        var previous = this.instances.length;
-        for (var i = 0; i < Math.max(previous, total); i++) {
+        var data = this.for || [];
+        var isArray = Array.isArray(data);
+        var items = isArray ? data : Object.keys(data);
+        var total = items.length;
+        var instances = this.instances;
+        var previous = instances.length;
+        for (var i = 0, len = Math.max(previous, total); i < len; i++) {
             if (i < total) {
-                var key = isArray ? i : array[i];
-                var value = isArray ? array[key] : result[key];
+                var key = isArray ? i : items[i];
+                var value = isArray ? items[key] : data[key];
                 if (i < previous) {
                     // update
-                    var instance = this.instances[i];
+                    var instance = instances[i];
                     instance[tokens.key] = key;
                     instance[tokens.value] = value;
                 }
                 else {
                     // create
                     var clonedNode = node.cloneNode(true);
-                    delete clonedNode.rxcompId;
-                    this.forend.parentNode.insertBefore(clonedNode, this.forend);
-                    var args = [tokens.key, key, tokens.value, value, i, total, context.parentInstance];
-                    var skipSubscription = true;
-                    var instance = module.makeInstance(clonedNode, for_item_1.default, context.selector, context.parentInstance, args, undefined, skipSubscription);
+                    nodeRef.parentNode.insertBefore(clonedNode, nodeRef);
+                    var args = [tokens.key, key, tokens.value, value, i, total, parentInstance];
+                    var instance = module.makeInstance(clonedNode, for_item_1.default, selector, parentInstance, args);
                     if (instance) {
                         module.compile(clonedNode, instance);
-                        module.makeInstanceSubscription(instance, context.parentInstance);
-                        this.instances.push(instance);
+                        instances.push(instance);
                     }
                 }
             }
             else {
                 // remove
-                var instance = this.instances[i];
+                var instance = instances[i];
                 var node_1 = factory_1.getContext(instance).node;
                 node_1.parentNode.removeChild(node_1);
                 module.remove(node_1);
             }
         }
-        this.instances.length = array.length;
+        instances.length = total;
     };
-    ForStructure.getInputsTokens = function (instance, node, module) {
-        var inputs = {};
-        var expression = node.getAttribute('*for');
-        if (expression) {
-            var tokens = ForStructure.getForExpressionTokens(expression);
-            instance.tokens = tokens;
-            inputs.for = tokens.iterable;
-        }
-        return inputs;
+    ForStructure.mapExpression = function (key, expression) {
+        var tokens = this.getForExpressionTokens(expression);
+        return tokens.iterable;
     };
     ForStructure.getForExpressionTokens = function (expression) {
-        if (expression === null) {
+        if (expression === void 0) { expression = null; }
+        if (expression == null) {
             throw new Error('invalid for');
         }
         if (expression.trim().indexOf('let ') === -1 || expression.trim().indexOf(' of ') === -1) {

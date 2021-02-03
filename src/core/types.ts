@@ -19,6 +19,7 @@ export interface IContext {
 	module: Module;
 	instance: Factory;
 	parentInstance: Factory | Window;
+	childInstances: Factory[];
 	node: IElement;
 	factory: typeof Factory;
 	selector: string;

@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs';
-import { startWith, takeUntil, tap } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
 import Component from '../core/component';
 import Context from '../core/context';
 import Factory, { CONTEXT_MAP, EXPRESSION_MAP, getContext, NODE_MAP } from '../core/factory';
@@ -39,6 +39,20 @@ export default class Module {
 				}
 			}
 			let nextParentInstance = parentInstance;
+			for (let i: number = 0, len: number = matches.length; i < len; i++) {
+				const match: ISelectorResult = matches[i];
+				// console.log('makeInstance', parentInstance.constructor.name, match.factory.name);
+				// make instance
+				const instance: Factory | undefined = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+				if (instance) {
+					instances.push(instance);
+					// updating parentInstance
+					if (match.factory.prototype instanceof Component) {
+						nextParentInstance = instance;
+					}
+				}
+			}
+			/*
 			matches.forEach((match: ISelectorResult) => {
 				// console.log('makeInstance', parentInstance.constructor.name, match.factory.name);
 				// make instance
@@ -51,6 +65,7 @@ export default class Module {
 					}
 				}
 			});
+			*/
 			if (!foundStructure) {
 				// compiling childNodes
 				for (let i: number = 0, len: number = childNodes.length; i < len; i++) {
@@ -105,6 +120,10 @@ export default class Module {
 		instance.onInit();
 		// subscribe to parent changes
 		if (parentInstance instanceof Factory) {
+			const { childInstances } = getContext(parentInstance);
+			childInstances.push(instance);
+			instance.onParentDidChange(parentInstance);
+			/*
 			parentInstance.changes$.pipe(
 				// distinctUntilChanged(deepEqual),
 				startWith(parentInstance),
@@ -112,6 +131,7 @@ export default class Module {
 			).subscribe(function (changes: Factory | Window) {
 				instance.onParentDidChange(changes);
 			});
+			*/
 		}
 		return instance;
 	}
@@ -275,6 +295,15 @@ export default class Module {
 	protected makeInputs(meta: IFactoryMeta, node: IElement, factory: typeof Factory): { [key: string]: ExpressionFunction } {
 		const inputs: { [key: string]: ExpressionFunction } = {};
 		if (meta.inputs) {
+			for (let i: number = 0, len: number = meta.inputs.length; i < len; i++) {
+				const key:string = meta.inputs[i];
+				let expression: string | null = this.getInputAttributeExpression(key, node);
+				if (expression) {
+					expression = factory.mapExpression(key, expression);
+					inputs[key] = this.makeFunction(expression);
+				}
+			}
+			/*
 			meta.inputs.forEach(key => {
 				let expression: string | null = this.getInputAttributeExpression(key, node);
 				if (expression) {
@@ -282,6 +311,7 @@ export default class Module {
 					inputs[key] = this.makeFunction(expression);
 				}
 			});
+			*/
 		}
 		return inputs;
 	}
@@ -377,7 +407,7 @@ export default class Module {
 		}
 	}
 	protected static makeContext(module: Module, instance: Factory, parentInstance: Factory | Window, node: IElement, factory: typeof Factory, selector: string): IContext {
-		const context: IContext = { module, instance, parentInstance, node, factory, selector };
+		const context: IContext = { module, instance, parentInstance, childInstances: [], node, factory, selector };
 		let nodeContexts = NODE_MAP.get(node);
 		if (!nodeContexts) {
 			nodeContexts = [];
@@ -387,7 +417,6 @@ export default class Module {
 		CONTEXT_MAP.set(instance, context);
 		return context;
 	}
-
 
 	protected static parseExpression(expression:string):string {
 		expression = Module.parseGroup(expression);
@@ -454,6 +483,7 @@ export default class Module {
 		return expression;
 	}
 
+	/*
 	protected static parseExpression__(expression: string): string {
 		expression = Module.parseGroup__(expression);
 		return Module.parseOptionalChaining__(expression);
@@ -530,7 +560,7 @@ export default class Module {
 		});
 		return expression;
 	}
-
+	*/
 
 	protected static deleteContext(node: IElement, keepContext: IContext | undefined): IContext[] {
 		const keepContexts: IContext[] = [];
@@ -541,6 +571,18 @@ export default class Module {
 					keepContexts.push(keepContext);
 				} else {
 					const instance: Factory = context.instance;
+					// !!!
+					const parentInstance: Factory | Window = context.parentInstance;
+					if (parentInstance instanceof Factory) {
+						const parentContext:IContext = getContext(parentInstance);
+						if (parentContext) {
+							const i = parentContext.childInstances.indexOf(instance);
+							if (i !== -1) {
+								parentContext.childInstances.splice(i, 1);
+							}
+						}
+					}
+					// !!!
 					instance.unsubscribe$.next();
 					instance.unsubscribe$.complete();
 					instance.onDestroy();

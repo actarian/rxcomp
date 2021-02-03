@@ -1,11 +1,12 @@
-import { ReplaySubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 export const CONTEXTS = {};
 export const NODES = {};
+export const CONTEXT_MAP = new Map();
+export const NODE_MAP = new Map();
+export const EXPRESSION_MAP = new Map();
+// console.log(CONTEXT_MAP, NODE_MAP, EXPRESSION_MAP);
 export default class Factory {
     constructor(...args) {
-        this.rxcompId = -1;
-        this.unsubscribe$ = new Subject();
-        this.changes$ = new ReplaySubject(1);
         /*
         // !!! PROXY
         const store: { [key: string]: any } = {};
@@ -24,16 +25,29 @@ export default class Factory {
         console.log('proxy', proxy);
         */
     }
+    get unsubscribe$() {
+        if (!this.unsubscribe$_) {
+            this.unsubscribe$_ = new Subject();
+        }
+        return this.unsubscribe$_;
+    }
+    // unsubscribe$: Subject<void> = new Subject();
+    // changes$: Subject<Factory> = new Subject();
+    // changes$: ReplaySubject<Factory> = new ReplaySubject(1);
     onInit() { }
     onChanges(changes) { }
     onView() { }
     onDestroy() { }
     pushChanges() {
-        const { module } = getContext(this);
-        if (module.instances) {
-            this.changes$.next(this);
-            this.onView();
+        // const { module } = getContext(this);
+        // if (module.instances) {
+        const { childInstances } = getContext(this);
+        for (let i = 0, len = childInstances.length; i < len; i++) {
+            childInstances[i].onParentDidChange(this);
         }
+        // 	this.changes$.next(this);
+        this.onView();
+        // }
     }
     onParentDidChange(changes) {
         const { module } = getContext(this);
@@ -42,47 +56,10 @@ export default class Factory {
         this.onChanges(changes);
         this.pushChanges();
     }
-    static getInputsTokens(instance, node, module) {
-        var _a;
-        const inputs = {};
-        (_a = this.meta.inputs) === null || _a === void 0 ? void 0 : _a.forEach(key => {
-            const expression = module.resolveAttribute(key, node);
-            /*
-            let expression: string | null = null;
-            if (node.hasAttribute(`[${key}]`)) {
-                expression = node.getAttribute(`[${key}]`);
-                // console.log('Factory.getInputsTokens.expression.1', expression);
-            } else if (node.hasAttribute(`*${key}`)) {
-                expression = node.getAttribute(`*${key}`);
-                // console.log('Factory.getInputsTokens.expression.2', expression);
-            } else if (node.hasAttribute(key)) {
-                expression = node.getAttribute(key);
-                if (expression) {
-                    const attribute: string = expression.replace(/({{)|(}})|(")/g, function (substring: string, a, b, c) {
-                        if (a) {
-                            return '"+';
-                        }
-                        if (b) {
-                            return '+"';
-                        }
-                        if (c) {
-                            return '\"';
-                        }
-                        return '';
-                    });
-                    expression = `"${attribute}"`;
-                    // console.log('Factory.getInputsTokens.expression.3', expression);
-                }
-            }
-            */
-            if (expression) {
-                inputs[key] = expression;
-            }
-        });
-        return inputs;
-        // return this.meta.inputs || [];
+    static mapExpression(key, expression) {
+        return expression;
     }
 }
 export function getContext(instance) {
-    return CONTEXTS[instance.rxcompId];
+    return CONTEXT_MAP.get(instance);
 }

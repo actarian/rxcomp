@@ -2,11 +2,12 @@
 import Component from './component';
 import Factory from './factory';
 
-const RESERVED_PROPERTIES = ['constructor', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
+// const RESERVED_PROPERTIES = ['constructor', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
 
 export default class Context extends Component {
 	parentInstance: Factory;
-	constructor(parentInstance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}) {
+	// constructor(parentInstance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}) {
+	constructor(parentInstance: Factory) {
 		super();
 		this.parentInstance = parentInstance;
 		/*
@@ -42,6 +43,7 @@ export default class Context extends Component {
 		this.onChanges(changes);
 		this.pushChanges();
 	}
+	/*
 	static mergeDescriptors(source: Object, instance: Factory, descriptors: { [key: string]: PropertyDescriptor } = {}): { [key: string]: PropertyDescriptor } {
 		const properties: string[] = Object.getOwnPropertyNames(source);
 		while (properties.length) {
@@ -58,4 +60,5 @@ export default class Context extends Component {
 		}
 		return descriptors;
 	}
+	*/
 }

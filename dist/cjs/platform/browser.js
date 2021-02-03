@@ -44,15 +44,19 @@ var Browser = /** @class */ (function (_super) {
             clonedNode.innerHTML = meta.nodeInnerHTML = window_1.WINDOW.rxcomp_hydrate_.innerHTML;
             var instances = module.compile(clonedNode, window_1.WINDOW);
             module.instances = instances;
-            var root = instances[0];
+            /*
+            const root = instances[0];
             root.pushChanges();
+            */
             (_a = meta.node.parentNode) === null || _a === void 0 ? void 0 : _a.replaceChild(clonedNode, meta.node);
         }
         else {
             var instances = module.compile(meta.node, window_1.WINDOW);
             module.instances = instances;
-            var root = instances[0];
+            /*
+            const root = instances[0];
             root.pushChanges();
+            */
         }
         return module;
     };

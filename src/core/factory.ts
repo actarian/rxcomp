@@ -12,8 +12,15 @@ export const EXPRESSION_MAP:Map<string, ExpressionFunction> = new Map<string, Ex
 
 export default class Factory {
 	static meta: IFactoryMeta;
-	unsubscribe$: Subject<void> = new Subject();
-	changes$: Subject<Factory> = new Subject();
+	unsubscribe$_: Subject<void> | undefined;
+	get unsubscribe$(): Subject<void> {
+		if (!this.unsubscribe$_) {
+			this.unsubscribe$_ = new Subject();
+		}
+		return this.unsubscribe$_;
+	}
+	// unsubscribe$: Subject<void> = new Subject();
+	// changes$: Subject<Factory> = new Subject();
 	// changes$: ReplaySubject<Factory> = new ReplaySubject(1);
 	onInit(): void { }
 	onChanges(changes: Factory | Window): void { }
@@ -22,7 +29,11 @@ export default class Factory {
 	pushChanges(): void {
 		// const { module } = getContext(this);
 		// if (module.instances) {
-			this.changes$.next(this);
+		const  { childInstances } = getContext(this);
+		for (let i:number = 0, len:number = childInstances.length; i < len; i++) {
+			childInstances[i].onParentDidChange(this);
+		}
+		// 	this.changes$.next(this);
 			this.onView();
 		// }
 	}

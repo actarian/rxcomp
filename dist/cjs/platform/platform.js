@@ -100,6 +100,7 @@ var Platform = /** @class */ (function () {
         var matchers = [];
         selector.replace(/\.([\w\-\_]+)|\[(.+?\]*)(\=)(.*?)\]|\[(.+?\]*)\]|([\w\-\_]+)/g, function (value, c1, a2, u3, v4, a5, e6) {
             if (c1) {
+                // className
                 matchers.push(function (node) {
                     return node.classList.contains(c1);
                 });
@@ -111,11 +112,13 @@ var Platform = /** @class */ (function () {
                 });
             }
             if (a5) {
+                // attribute
                 matchers.push(function (node) {
                     return node.hasAttribute(a5) || node.hasAttribute("[" + a5 + "]");
                 });
             }
             if (e6) {
+                // nodeName
                 matchers.push(function (node) {
                     return node.nodeName.toLowerCase() === e6.toLowerCase();
                 });
@@ -141,11 +144,16 @@ var Platform = /** @class */ (function () {
                         var included = includes.reduce(function (p, match) {
                             return p && match(node);
                         }, true);
-                        var excluded = excludes.reduce(function (p, match) {
-                            return p || match(node);
-                        }, false);
-                        if (included && !excluded) {
-                            return { node: node, factory: factory, selector: selector };
+                        if (included) {
+                            var excluded = excludes.length && excludes.reduce(function (p, match) {
+                                return p || match(node);
+                            }, false);
+                            if (!excluded) {
+                                return { node: node, factory: factory, selector: selector };
+                            }
+                            else {
+                                return false;
+                            }
                         }
                         else {
                             return false;

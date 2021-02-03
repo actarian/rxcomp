@@ -113,10 +113,7 @@ var NODE_MAP = new Map();
 var EXPRESSION_MAP = new Map();
 
 var Factory = function () {
-  function Factory() {
-    this.unsubscribe$ = new rxjs.Subject();
-    this.changes$ = new rxjs.Subject();
-  }
+  function Factory() {}
 
   var _proto = Factory.prototype;
 
@@ -129,13 +126,19 @@ var Factory = function () {
   _proto.onDestroy = function onDestroy() {};
 
   _proto.pushChanges = function pushChanges() {
-    this.changes$.next(this);
+    var _getContext = getContext(this),
+        childInstances = _getContext.childInstances;
+
+    for (var i = 0, len = childInstances.length; i < len; i++) {
+      childInstances[i].onParentDidChange(this);
+    }
+
     this.onView();
   };
 
   _proto.onParentDidChange = function onParentDidChange(changes) {
-    var _getContext = getContext(this),
-        module = _getContext.module;
+    var _getContext2 = getContext(this),
+        module = _getContext2.module;
 
     module.resolveInputsOutputs(this, changes);
     this.onChanges(changes);
@@ -145,6 +148,17 @@ var Factory = function () {
   Factory.mapExpression = function mapExpression(key, expression) {
     return expression;
   };
+
+  _createClass(Factory, [{
+    key: "unsubscribe$",
+    get: function get() {
+      if (!this.unsubscribe$_) {
+        this.unsubscribe$_ = new rxjs.Subject();
+      }
+
+      return this.unsubscribe$_;
+    }
+  }]);
 
   return Factory;
 }();
@@ -337,22 +351,24 @@ EventDirective.meta = {
   _proto.pushChanges = function pushChanges() {
     var _getContext = getContext(this),
         module = _getContext.module,
-        node = _getContext.node;
+        node = _getContext.node,
+        childInstances = _getContext.childInstances;
 
     if (module.instances) {
-      this.changes$.next(this);
+      for (var i = 0, len = childInstances.length; i < len; i++) {
+        childInstances[i].onParentDidChange(this);
+      }
+
       module.parse(node, this);
       this.onView();
     }
   };
 
   return Component;
-}(Factory);var RESERVED_PROPERTIES = ['constructor', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
-
-var Context = function (_Component) {
+}(Factory);var Context = function (_Component) {
   _inheritsLoose(Context, _Component);
 
-  function Context(parentInstance, descriptors) {
+  function Context(parentInstance) {
     var _this;
 
     _this = _Component.call(this) || this;
@@ -365,40 +381,6 @@ var Context = function (_Component) {
   _proto.onParentDidChange = function onParentDidChange(changes) {
     this.onChanges(changes);
     this.pushChanges();
-  };
-
-  Context.mergeDescriptors = function mergeDescriptors(source, instance, descriptors) {
-    if (descriptors === void 0) {
-      descriptors = {};
-    }
-
-    var properties = Object.getOwnPropertyNames(source);
-
-    var _loop = function _loop() {
-      var key = properties.shift();
-
-      if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
-        var descriptor = Object.getOwnPropertyDescriptor(source, key);
-
-        if (typeof descriptor.value == 'function') {
-          descriptor.value = function () {
-            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
-            }
-
-            return instance[key].apply(instance, args);
-          };
-        }
-
-        descriptors[key] = descriptor;
-      }
-    };
-
-    while (properties.length) {
-      _loop();
-    }
-
-    return descriptors;
   };
 
   return Context;
@@ -1074,8 +1056,6 @@ JsonPipe.meta = {
   var _proto = Module.prototype;
 
   _proto.compile = function compile(node, parentInstance, instances) {
-    var _this = this;
-
     if (instances === void 0) {
       instances = [];
     }
@@ -1105,8 +1085,10 @@ JsonPipe.meta = {
       }
 
       var nextParentInstance = parentInstance;
-      matches.forEach(function (match) {
-        var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+
+      for (var _i = 0, _len = matches.length; _i < _len; _i++) {
+        var match = matches[_i];
+        var instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
 
         if (instance) {
           instances.push(instance);
@@ -1115,11 +1097,11 @@ JsonPipe.meta = {
             nextParentInstance = instance;
           }
         }
-      });
+      }
 
       if (!foundStructure) {
-        for (var _i = 0, _len = childNodes.length; _i < _len; _i++) {
-          this.compile(childNodes[_i], nextParentInstance, instances);
+        for (var _i2 = 0, _len2 = childNodes.length; _i2 < _len2; _i2++) {
+          this.compile(childNodes[_i2], nextParentInstance, instances);
         }
       }
     }
@@ -1156,9 +1138,11 @@ JsonPipe.meta = {
     instance.onInit();
 
     if (parentInstance instanceof Factory) {
-      parentInstance.changes$.pipe(operators.startWith(parentInstance), operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
-        instance.onParentDidChange(changes);
-      });
+      var _getContext = getContext(parentInstance),
+          childInstances = _getContext.childInstances;
+
+      childInstances.push(instance);
+      instance.onParentDidChange(parentInstance);
     }
 
     return instance;
@@ -1289,26 +1273,25 @@ JsonPipe.meta = {
   };
 
   _proto.makeInputs = function makeInputs(meta, node, factory) {
-    var _this2 = this;
-
     var inputs = {};
 
     if (meta.inputs) {
-      meta.inputs.forEach(function (key) {
-        var expression = _this2.getInputAttributeExpression(key, node);
+      for (var i = 0, len = meta.inputs.length; i < len; i++) {
+        var key = meta.inputs[i];
+        var expression = this.getInputAttributeExpression(key, node);
 
         if (expression) {
           expression = factory.mapExpression(key, expression);
-          inputs[key] = _this2.makeFunction(expression);
+          inputs[key] = this.makeFunction(expression);
         }
-      });
+      }
     }
 
     return inputs;
   };
 
   _proto.makeOutput = function makeOutput(instance, key) {
-    var _this3 = this;
+    var _this = this;
 
     var context = getContext(instance);
     var node = context.node;
@@ -1317,7 +1300,7 @@ JsonPipe.meta = {
     var outputExpression = expression ? this.makeFunction(expression, ['$event']) : null;
     var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
       if (outputExpression) {
-        _this3.resolve(outputExpression, parentInstance, event);
+        _this.resolve(outputExpression, parentInstance, event);
       }
     }));
     output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
@@ -1326,13 +1309,13 @@ JsonPipe.meta = {
   };
 
   _proto.makeOutputs = function makeOutputs(meta, instance) {
-    var _this4 = this;
+    var _this2 = this;
 
     var outputs = {};
 
     if (meta.outputs) {
       meta.outputs.forEach(function (key) {
-        var output = _this4.makeOutput(instance, key);
+        var output = _this2.makeOutput(instance, key);
 
         if (output) {
           outputs[key] = output;
@@ -1344,7 +1327,7 @@ JsonPipe.meta = {
   };
 
   _proto.parseTextNode = function parseTextNode(node, instance) {
-    var _this5 = this;
+    var _this3 = this;
 
     var expressions = node.nodeExpressions;
 
@@ -1357,7 +1340,7 @@ JsonPipe.meta = {
         var text;
 
         if (typeof c === 'function') {
-          text = _this5.resolve(c, instance, instance);
+          text = _this3.resolve(c, instance, instance);
 
           if (text == undefined) {
             text = '';
@@ -1425,6 +1408,7 @@ JsonPipe.meta = {
       module: module,
       instance: instance,
       parentInstance: parentInstance,
+      childInstances: [],
       node: node,
       factory: factory,
       selector: selector
@@ -1517,105 +1501,6 @@ JsonPipe.meta = {
     return expression;
   };
 
-  Module.parseExpression__ = function parseExpression__(expression) {
-    expression = Module.parseGroup__(expression);
-    return Module.parseOptionalChaining__(expression);
-  };
-
-  Module.parseGroup__ = function parseGroup__(expression) {
-    var l = '┌';
-    var r = '┘';
-    var rx1 = /(\()([^\(\)]*)(\))/;
-
-    while (expression.match(rx1)) {
-      expression = expression.replace(rx1, function (substring) {
-        return "" + l + Module.parsePipes__(arguments.length <= 2 ? undefined : arguments[2]) + r;
-      });
-    }
-
-    expression = Module.parsePipes__(expression);
-    expression = expression.replace(/(┌)|(┘)/g, function (substring) {
-      return (arguments.length <= 1 ? undefined : arguments[1]) ? '(' : ')';
-    });
-    return expression;
-  };
-
-  Module.parsePipes__ = function parsePipes__(expression) {
-    var l = '┌';
-    var r = '┘';
-    var rx1 = /(.*?[^\|])\|([^\|]+)/;
-
-    while (expression.match(rx1)) {
-      expression = expression.replace(rx1, function (substring) {
-        for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key = 1; _key < _len2; _key++) {
-          args[_key - 1] = arguments[_key];
-        }
-
-        var value = args[0].trim();
-        var params = Module.parsePipeParams__(args[1]);
-        var func = params.shift().trim();
-        return "$$pipes." + func + ".transform" + l + [value].concat(params) + r;
-      });
-    }
-
-    return expression;
-  };
-
-  Module.parsePipeParams__ = function parsePipeParams__(expression) {
-    var segments = [];
-    var i = 0,
-        word = '',
-        block = 0;
-    var t = expression.length;
-
-    while (i < t) {
-      var c = expression.substr(i, 1);
-
-      if (c === '{' || c === '(' || c === '[') {
-        block++;
-      }
-
-      if (c === '}' || c === ')' || c === ']') {
-        block--;
-      }
-
-      if (c === ':' && block === 0) {
-        if (word.length) {
-          segments.push(word.trim());
-        }
-
-        word = '';
-      } else {
-        word += c;
-      }
-
-      i++;
-    }
-
-    if (word.length) {
-      segments.push(word.trim());
-    }
-
-    return segments;
-  };
-
-  Module.parseOptionalChaining__ = function parseOptionalChaining__(expression) {
-    var regex = /(\w+(\?\.))+([\.|\w]+)/g;
-    var previous;
-    expression = expression.replace(regex, function (substring) {
-      var tokens = substring.split('?.');
-
-      for (var i = 0, len = tokens.length - 1; i < len; i++) {
-        var a = i > 0 ? "(" + tokens[i] + " = " + previous + ")" : tokens[i];
-        var b = tokens[i + 1];
-        previous = i > 0 ? a + "." + b : "(" + a + " ? " + a + "." + b + " : void 0)";
-      }
-
-      return previous || '';
-    });
-    return expression;
-  };
-
   Module.deleteContext = function deleteContext(node, keepContext) {
     var keepContexts = [];
     var nodeContexts = NODE_MAP.get(node);
@@ -1626,6 +1511,20 @@ JsonPipe.meta = {
           keepContexts.push(keepContext);
         } else {
           var instance = context.instance;
+          var parentInstance = context.parentInstance;
+
+          if (parentInstance instanceof Factory) {
+            var parentContext = getContext(parentInstance);
+
+            if (parentContext) {
+              var i = parentContext.childInstances.indexOf(instance);
+
+              if (i !== -1) {
+                parentContext.childInstances.splice(i, 1);
+              }
+            }
+          }
+
           instance.unsubscribe$.next();
           instance.unsubscribe$.complete();
           instance.onDestroy();

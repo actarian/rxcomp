@@ -1,8 +1,7 @@
 import Structure from '../core/structure';
 import { IComment, IElement, IFactoryMeta } from '../core/types';
 export default class IfStructure extends Structure {
-    ifbegin?: IComment;
-    ifend?: IComment;
+    nodeRef?: IComment;
     clonedNode?: IElement;
     element?: IElement;
     onInit(): void;

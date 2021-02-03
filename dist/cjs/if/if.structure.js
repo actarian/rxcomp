@@ -10,25 +10,22 @@ var IfStructure = /** @class */ (function (_super) {
     }
     IfStructure.prototype.onInit = function () {
         var node = factory_1.getContext(this).node;
-        var ifbegin = this.ifbegin = document.createComment("*if begin");
-        ifbegin.rxcompId = node.rxcompId;
-        node.parentNode.replaceChild(ifbegin, node);
-        var ifend = this.ifend = document.createComment("*if end");
-        ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
+        var nodeRef = this.nodeRef = document.createComment("*if");
+        node.parentNode.replaceChild(nodeRef, node);
         var clonedNode = node.cloneNode(true);
         clonedNode.removeAttribute('*if');
         this.clonedNode = clonedNode;
         this.element = clonedNode.cloneNode(true);
     };
     IfStructure.prototype.onChanges = function () {
-        var module = factory_1.getContext(this).module;
+        var _a = factory_1.getContext(this), module = _a.module, parentInstance = _a.parentInstance;
         var element = this.element;
         // console.log('IfStructure.onChanges.if', this.if);
         if (Boolean(this.if)) { // !!! keep == loose equality
             if (!element.parentNode) {
-                var ifend = this.ifend;
-                ifend.parentNode.insertBefore(element, ifend);
-                module.compile(element);
+                var nodeRef = this.nodeRef;
+                nodeRef.parentNode.insertBefore(element, nodeRef);
+                module.compile(element, parentInstance);
                 // console.log('IfStructure.onChanges.add', element);
             }
         }
