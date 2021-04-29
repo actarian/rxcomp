@@ -561,6 +561,20 @@ export default class Module {
         return expression;
     }
     */
+    static removeFromParentInstance(instance, parentInstance) {
+        // console.log('Module.removeFromParentInstance', instance);
+        if (parentInstance instanceof Factory) {
+            const parentContext = getContext(parentInstance);
+            if (parentContext) {
+                const i = parentContext.childInstances.indexOf(instance);
+                if (i !== -1) {
+                    parentContext.childInstances.splice(i, 1);
+                } /* else {
+                    console.log('not found', instance, 'in', parentInstance);
+                }*/
+            }
+        }
+    }
     static deleteContext(node, keepContext) {
         const keepContexts = [];
         const nodeContexts = NODE_MAP.get(node);
@@ -572,16 +586,7 @@ export default class Module {
                 else {
                     const instance = context.instance;
                     // !!!
-                    const parentInstance = context.parentInstance;
-                    if (parentInstance instanceof Factory) {
-                        const parentContext = getContext(parentInstance);
-                        if (parentContext) {
-                            const i = parentContext.childInstances.indexOf(instance);
-                            if (i !== -1) {
-                                parentContext.childInstances.splice(i, 1);
-                            }
-                        }
-                    }
+                    Module.removeFromParentInstance(instance, context.parentInstance);
                     // !!!
                     instance.unsubscribe$.next();
                     instance.unsubscribe$.complete();

@@ -134,12 +134,12 @@ export default class Platform {
 						return '';
 					});
 					const includes: MatchFunction[] = this.getExpressions(matchSelector);
-					selectors.push(function(node) {
-						const included = includes.reduce(function(p, match) {
+					selectors.push(function (node) {
+						const included = includes.reduce(function (p, match) {
 							return p && match(node);
 						}, true);
 						if (included) {
-							const excluded = excludes.length && excludes.reduce(function(p, match) {
+							const excluded = excludes.length && excludes.reduce(function (p, match) {
 								return p || match(node);
 							}, false);
 							if (!excluded) {

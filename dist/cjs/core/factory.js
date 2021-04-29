@@ -50,15 +50,17 @@ var Factory = /** @class */ (function () {
     Factory.prototype.onView = function () { };
     Factory.prototype.onDestroy = function () { };
     Factory.prototype.pushChanges = function () {
-        // const { module } = getContext(this);
-        // if (module.instances) {
         var childInstances = getContext(this).childInstances;
-        for (var i = 0, len = childInstances.length; i < len; i++) {
-            childInstances[i].onParentDidChange(this);
+        var instances = childInstances.slice();
+        var instance;
+        for (var i = 0, len = instances.length; i < len; i++) {
+            instance = instances[i];
+            if (childInstances.indexOf(instance) !== -1) {
+                instances[i].onParentDidChange(this);
+            }
         }
         // 	this.changes$.next(this);
         this.onView();
-        // }
     };
     Factory.prototype.onParentDidChange = function (changes) {
         var module = getContext(this).module;

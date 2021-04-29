@@ -37,6 +37,7 @@ export default class Module {
     protected static parsePipeParams(expression: string): string[];
     protected static parseOptionalChaining(expression: string): string;
     protected static parseThis(expression: string): string;
+    protected static removeFromParentInstance(instance: Factory, parentInstance: Factory | Window): void;
     protected static deleteContext(node: IElement, keepContext: IContext | undefined): IContext[];
     protected static traverseUp(node: Node | null, callback: (node: Node, i: number) => any, i?: number): any;
     protected static traverseDown(node: Node | null, callback: (node: Node, i: number) => any, i?: number): any;

@@ -9,14 +9,22 @@ var Component = /** @class */ (function (_super) {
     }
     Component.prototype.pushChanges = function () {
         var _a = factory_1.getContext(this), module = _a.module, node = _a.node, childInstances = _a.childInstances;
-        if (module.instances) {
-            for (var i = 0, len = childInstances.length; i < len; i++) {
-                childInstances[i].onParentDidChange(this);
+        var instances = childInstances.slice();
+        // try {
+        var instance;
+        for (var i = 0, len = instances.length; i < len; i++) {
+            instance = instances[i];
+            if (childInstances.indexOf(instance) !== -1) {
+                instances[i].onParentDidChange(this);
             }
-            // this.changes$.next(this);
-            module.parse(node, this);
-            this.onView();
         }
+        // this.changes$.next(this);
+        module.parse(node, this);
+        this.onView();
+        // } catch (error) {
+        //	console.log('Component.error', error, this);
+        //	throw error;
+        // }
     };
     return Component;
 }(factory_1.default));

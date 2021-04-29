@@ -147,17 +147,22 @@ var Factory = /*#__PURE__*/function () {
   _proto.onDestroy = function onDestroy() {};
 
   _proto.pushChanges = function pushChanges() {
-    // const { module } = getContext(this);
-    // if (module.instances) {
     var _getContext = getContext(this),
         childInstances = _getContext.childInstances;
 
-    for (var i = 0, len = childInstances.length; i < len; i++) {
-      childInstances[i].onParentDidChange(this);
+    var instances = childInstances.slice();
+    var instance;
+
+    for (var i = 0, len = instances.length; i < len; i++) {
+      instance = instances[i];
+
+      if (childInstances.indexOf(instance) !== -1) {
+        instances[i].onParentDidChange(this);
+      }
     } // 	this.changes$.next(this);
 
 
-    this.onView(); // }
+    this.onView();
   };
 
   _proto.onParentDidChange = function onParentDidChange(changes) {
@@ -382,15 +387,24 @@ EventDirective.meta = {
         node = _getContext.node,
         childInstances = _getContext.childInstances;
 
-    if (module.instances) {
-      for (var i = 0, len = childInstances.length; i < len; i++) {
-        childInstances[i].onParentDidChange(this);
-      } // this.changes$.next(this);
+    var instances = childInstances.slice(); // try {
+
+    var instance;
+
+    for (var i = 0, len = instances.length; i < len; i++) {
+      instance = instances[i];
+
+      if (childInstances.indexOf(instance) !== -1) {
+        instances[i].onParentDidChange(this);
+      }
+    } // this.changes$.next(this);
 
 
-      module.parse(node, this);
-      this.onView();
-    }
+    module.parse(node, this);
+    this.onView(); // } catch (error) {
+    //	console.log('Component.error', error, this);
+    //	throw error;
+    // }
   };
 
   return Component;
@@ -1782,6 +1796,25 @@ JsonPipe.meta = {
   */
   ;
 
+  Module.removeFromParentInstance = function removeFromParentInstance(instance, parentInstance) {
+    // console.log('Module.removeFromParentInstance', instance);
+    if (parentInstance instanceof Factory) {
+      var parentContext = getContext(parentInstance);
+
+      if (parentContext) {
+        var i = parentContext.childInstances.indexOf(instance);
+
+        if (i !== -1) {
+          parentContext.childInstances.splice(i, 1);
+        }
+        /* else {
+          console.log('not found', instance, 'in', parentInstance);
+        }*/
+
+      }
+    }
+  };
+
   Module.deleteContext = function deleteContext(node, keepContext) {
     var keepContexts = [];
     var nodeContexts = NODE_MAP.get(node);
@@ -1793,20 +1826,7 @@ JsonPipe.meta = {
         } else {
           var instance = context.instance; // !!!
 
-          var parentInstance = context.parentInstance;
-
-          if (parentInstance instanceof Factory) {
-            var parentContext = getContext(parentInstance);
-
-            if (parentContext) {
-              var i = parentContext.childInstances.indexOf(instance);
-
-              if (i !== -1) {
-                parentContext.childInstances.splice(i, 1);
-              }
-            }
-          } // !!!
-
+          Module.removeFromParentInstance(instance, context.parentInstance); // !!!
 
           instance.unsubscribe$.next();
           instance.unsubscribe$.complete();

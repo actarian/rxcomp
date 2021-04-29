@@ -4,9 +4,9 @@ import { ExpressionFunction, IContext, IElement, IFactoryMeta } from './types';
 export const CONTEXTS: { [key: number]: IContext } = {};
 export const NODES: { [key: number]: IContext[] } = {};
 
-export const CONTEXT_MAP:Map<Factory, IContext> = new Map<Factory, IContext>();
-export const NODE_MAP:Map<IElement, IContext[]> = new Map<IElement, IContext[]>();
-export const EXPRESSION_MAP:Map<string, ExpressionFunction> = new Map<string, ExpressionFunction>();
+export const CONTEXT_MAP: Map<Factory, IContext> = new Map<Factory, IContext>();
+export const NODE_MAP: Map<IElement, IContext[]> = new Map<IElement, IContext[]>();
+export const EXPRESSION_MAP: Map<string, ExpressionFunction> = new Map<string, ExpressionFunction>();
 
 // console.log(CONTEXT_MAP, NODE_MAP, EXPRESSION_MAP);
 
@@ -27,15 +27,17 @@ export default class Factory {
 	onView(): void { }
 	onDestroy(): void { }
 	pushChanges(): void {
-		// const { module } = getContext(this);
-		// if (module.instances) {
-		const  { childInstances } = getContext(this);
-		for (let i:number = 0, len:number = childInstances.length; i < len; i++) {
-			childInstances[i].onParentDidChange(this);
+		const { childInstances } = getContext(this);
+		const instances = childInstances.slice();
+		let instance;
+		for (let i: number = 0, len: number = instances.length; i < len; i++) {
+			instance = instances[i];
+			if (childInstances.indexOf(instance) !== -1) {
+				instances[i].onParentDidChange(this);
+			}
 		}
 		// 	this.changes$.next(this);
-			this.onView();
-		// }
+		this.onView();
 	}
 	onParentDidChange(changes: Factory | Window): void {
 		const { module } = getContext(this);
@@ -64,9 +66,9 @@ export default class Factory {
 		console.log('proxy', proxy);
 		*/
 	}
-    static mapExpression(key:string, expression:string) {
-        return expression;
-    }
+	static mapExpression(key: string, expression: string) {
+		return expression;
+	}
 }
 export function getContext(instance: Factory): IContext {
 	return CONTEXT_MAP.get(instance) as IContext;

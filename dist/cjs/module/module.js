@@ -560,6 +560,20 @@ var Module = /** @class */ (function () {
         return expression;
     }
     */
+    Module.removeFromParentInstance = function (instance, parentInstance) {
+        // console.log('Module.removeFromParentInstance', instance);
+        if (parentInstance instanceof factory_1.default) {
+            var parentContext = factory_1.getContext(parentInstance);
+            if (parentContext) {
+                var i = parentContext.childInstances.indexOf(instance);
+                if (i !== -1) {
+                    parentContext.childInstances.splice(i, 1);
+                } /* else {
+                    console.log('not found', instance, 'in', parentInstance);
+                }*/
+            }
+        }
+    };
     Module.deleteContext = function (node, keepContext) {
         var keepContexts = [];
         var nodeContexts = factory_1.NODE_MAP.get(node);
@@ -571,16 +585,7 @@ var Module = /** @class */ (function () {
                 else {
                     var instance = context.instance;
                     // !!!
-                    var parentInstance = context.parentInstance;
-                    if (parentInstance instanceof factory_1.default) {
-                        var parentContext = factory_1.getContext(parentInstance);
-                        if (parentContext) {
-                            var i = parentContext.childInstances.indexOf(instance);
-                            if (i !== -1) {
-                                parentContext.childInstances.splice(i, 1);
-                            }
-                        }
-                    }
+                    Module.removeFromParentInstance(instance, context.parentInstance);
                     // !!!
                     instance.unsubscribe$.next();
                     instance.unsubscribe$.complete();

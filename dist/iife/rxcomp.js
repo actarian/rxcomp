@@ -129,8 +129,15 @@ var Factory = function () {
     var _getContext = getContext(this),
         childInstances = _getContext.childInstances;
 
-    for (var i = 0, len = childInstances.length; i < len; i++) {
-      childInstances[i].onParentDidChange(this);
+    var instances = childInstances.slice();
+    var instance;
+
+    for (var i = 0, len = instances.length; i < len; i++) {
+      instance = instances[i];
+
+      if (childInstances.indexOf(instance) !== -1) {
+        instances[i].onParentDidChange(this);
+      }
     }
 
     this.onView();
@@ -354,14 +361,19 @@ EventDirective.meta = {
         node = _getContext.node,
         childInstances = _getContext.childInstances;
 
-    if (module.instances) {
-      for (var i = 0, len = childInstances.length; i < len; i++) {
-        childInstances[i].onParentDidChange(this);
-      }
+    var instances = childInstances.slice();
+    var instance;
 
-      module.parse(node, this);
-      this.onView();
+    for (var i = 0, len = instances.length; i < len; i++) {
+      instance = instances[i];
+
+      if (childInstances.indexOf(instance) !== -1) {
+        instances[i].onParentDidChange(this);
+      }
     }
+
+    module.parse(node, this);
+    this.onView();
   };
 
   return Component;
@@ -1504,6 +1516,20 @@ JsonPipe.meta = {
     return expression;
   };
 
+  Module.removeFromParentInstance = function removeFromParentInstance(instance, parentInstance) {
+    if (parentInstance instanceof Factory) {
+      var parentContext = getContext(parentInstance);
+
+      if (parentContext) {
+        var i = parentContext.childInstances.indexOf(instance);
+
+        if (i !== -1) {
+          parentContext.childInstances.splice(i, 1);
+        }
+      }
+    }
+  };
+
   Module.deleteContext = function deleteContext(node, keepContext) {
     var keepContexts = [];
     var nodeContexts = NODE_MAP.get(node);
@@ -1514,20 +1540,7 @@ JsonPipe.meta = {
           keepContexts.push(keepContext);
         } else {
           var instance = context.instance;
-          var parentInstance = context.parentInstance;
-
-          if (parentInstance instanceof Factory) {
-            var parentContext = getContext(parentInstance);
-
-            if (parentContext) {
-              var i = parentContext.childInstances.indexOf(instance);
-
-              if (i !== -1) {
-                parentContext.childInstances.splice(i, 1);
-              }
-            }
-          }
-
+          Module.removeFromParentInstance(instance, context.parentInstance);
           instance.unsubscribe$.next();
           instance.unsubscribe$.complete();
           instance.onDestroy();

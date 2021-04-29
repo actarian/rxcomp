@@ -82,7 +82,7 @@ export default class Module {
 		// console.log(instance.constructor.name, parentInstance.constructor.name);
 		// injecting custom properties
 		if (inject != null) {
-			for (let i:number = 0, keys = Object.keys(inject), len = keys.length; i < len; i++) {
+			for (let i: number = 0, keys = Object.keys(inject), len = keys.length; i < len; i++) {
 				const key = keys[i];
 				Object.defineProperty(instance, key, {
 					value: inject[key],
@@ -192,7 +192,7 @@ export default class Module {
 		const context: IContext = getContext(instance);
 		const parentInstance: Factory | Window = context.parentInstance;
 		const inputs: { [key: string]: ExpressionFunction } = context.inputs!;
-		for (let i:number = 0, keys = Object.keys(inputs), len = keys.length; i < len; i++) {
+		for (let i: number = 0, keys = Object.keys(inputs), len = keys.length; i < len; i++) {
 			const key = keys[i];
 			const expression: ExpressionFunction = inputs[key];
 			const value: any = this.resolve(expression, parentInstance, instance);
@@ -279,7 +279,7 @@ export default class Module {
 	}
 	protected makeHosts(meta: IFactoryMeta, instance: Factory, node: IElement): void {
 		if (meta.hosts) {
-			for (let i:number = 0, keys = Object.keys(meta.hosts), len = keys.length; i < len; i++) {
+			for (let i: number = 0, keys = Object.keys(meta.hosts), len = keys.length; i < len; i++) {
 				const key = keys[i];
 				const factory: typeof Factory = meta.hosts![key];
 				instance[key] = getHost(instance, factory, node);
@@ -296,7 +296,7 @@ export default class Module {
 		const inputs: { [key: string]: ExpressionFunction } = {};
 		if (meta.inputs) {
 			for (let i: number = 0, len: number = meta.inputs.length; i < len; i++) {
-				const key:string = meta.inputs[i];
+				const key: string = meta.inputs[i];
 				let expression: string | null = this.getInputAttributeExpression(key, node);
 				if (expression) {
 					expression = factory.mapExpression(key, expression);
@@ -418,13 +418,13 @@ export default class Module {
 		return context;
 	}
 
-	protected static parseExpression(expression:string):string {
+	protected static parseExpression(expression: string): string {
 		expression = Module.parseGroup(expression);
 		expression = Module.parseOptionalChaining(expression);
 		// expression = Module.parseThis(expression);
 		return expression;
 	}
-	protected static parseGroup(expression:string):string {
+	protected static parseGroup(expression: string): string {
 		const l = '┌';
 		const r = '┘';
 		const rx1 = /(\()([^\(\)]*)(\))/;
@@ -440,41 +440,41 @@ export default class Module {
 		});
 		return expression;
 	}
-	protected static parsePipes(expression:string):string {
+	protected static parsePipes(expression: string): string {
 		const rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
 		while (rx.test(expression)) {
-			expression = expression.replace(rx, function(m,value,name,expression) {
+			expression = expression.replace(rx, function (m, value, name, expression) {
 				const params = Module.parsePipeParams(expression);
 				return `$$pipes.${name}.transform(${[value, ...params]})`;
 			});
 		}
 		return expression;
 	}
-	protected static parsePipeParams(expression:string):string[] {
+	protected static parsePipeParams(expression: string): string[] {
 		const params = [];
 		// const rx = /:\s*(\[.+\]|\{.+\}|\(.+\)|\'.+\'|[^:\s]+)/g;
 		const rx = /:\s*(\{.+\}|\(.+\)|[^:]+)/g;
 		let match;
-		while(match = rx.exec(expression)) {
+		while (match = rx.exec(expression)) {
 			params.push(match[1]);
 		}
 		return params;
 	}
-	protected static parseOptionalChaining(expression:string):string {
+	protected static parseOptionalChaining(expression: string): string {
 		const rx = /([\w|\.]+)(?:\?\.)+([\.|\w]+)/;
 		while (rx.test(expression)) {
-			expression = expression.replace(rx, function(m,a,b) {
+			expression = expression.replace(rx, function (m, a, b) {
 				return `${a} && ${a}.${b}`;
 			});
 		}
 		return expression;
 	}
-	protected static parseThis(expression:string):string {
+	protected static parseThis(expression: string): string {
 		const rx = /(\'.+\'|\[.+\]|\{.+\}|\$\$pipes)|([^\w.])([^\W\d])|^([^\W\d])/g;
-		expression = expression.replace(rx, function(m,g1,g2,g3,g4) {
+		expression = expression.replace(rx, function (m, g1, g2, g3, g4) {
 			if (g4) {
 				return `this.${g4}`;
-			} else if(g3) {
+			} else if (g3) {
 				return `${g2}this.${g3}`;
 			} else {
 				return g1;
@@ -562,6 +562,21 @@ export default class Module {
 	}
 	*/
 
+	protected static removeFromParentInstance(instance: Factory, parentInstance: Factory | Window): void {
+		// console.log('Module.removeFromParentInstance', instance);
+		if (parentInstance instanceof Factory) {
+			const parentContext: IContext = getContext(parentInstance);
+			if (parentContext) {
+				const i = parentContext.childInstances.indexOf(instance);
+				if (i !== -1) {
+					parentContext.childInstances.splice(i, 1);
+				}/* else {
+					console.log('not found', instance, 'in', parentInstance);
+				}*/
+			}
+		}
+	}
+
 	protected static deleteContext(node: IElement, keepContext: IContext | undefined): IContext[] {
 		const keepContexts: IContext[] = [];
 		const nodeContexts: IContext[] | undefined = NODE_MAP.get(node);
@@ -572,16 +587,7 @@ export default class Module {
 				} else {
 					const instance: Factory = context.instance;
 					// !!!
-					const parentInstance: Factory | Window = context.parentInstance;
-					if (parentInstance instanceof Factory) {
-						const parentContext:IContext = getContext(parentInstance);
-						if (parentContext) {
-							const i = parentContext.childInstances.indexOf(instance);
-							if (i !== -1) {
-								parentContext.childInstances.splice(i, 1);
-							}
-						}
-					}
+					Module.removeFromParentInstance(instance, context.parentInstance);
 					// !!!
 					instance.unsubscribe$.next();
 					instance.unsubscribe$.complete();

@@ -39,15 +39,17 @@ export default class Factory {
     onView() { }
     onDestroy() { }
     pushChanges() {
-        // const { module } = getContext(this);
-        // if (module.instances) {
         const { childInstances } = getContext(this);
-        for (let i = 0, len = childInstances.length; i < len; i++) {
-            childInstances[i].onParentDidChange(this);
+        const instances = childInstances.slice();
+        let instance;
+        for (let i = 0, len = instances.length; i < len; i++) {
+            instance = instances[i];
+            if (childInstances.indexOf(instance) !== -1) {
+                instances[i].onParentDidChange(this);
+            }
         }
         // 	this.changes$.next(this);
         this.onView();
-        // }
     }
     onParentDidChange(changes) {
         const { module } = getContext(this);

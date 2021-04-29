@@ -4,7 +4,7 @@ class RootComponent extends Component {
 	get count() {
 		return this.count_;
 	}
-	set count(count:number) {
+	set count(count: number) {
 		this.count_ = count;
 		this.items = new Array(count).fill(0).map((x, i) => i + 1);
 	}
@@ -14,8 +14,12 @@ class RootComponent extends Component {
 		let paramCount = params.get('count');
 		this.count = (paramCount ? parseInt(paramCount) : 10);
 		// this.runTask();
+		setTimeout(() => {
+			this.count = this.count - 1;
+			this.pushChanges();
+		}, 2000);
 	}
-	setIndex(index:number) {
+	setIndex(index: number) {
 		this.index = index;
 		this.pushChanges();
 	}
@@ -39,6 +43,11 @@ class ItemComponent extends Component {
 	/*
 	onInit() {
 		console.log('ItemComponent.onInit', this.item);
+	}
+	*/
+	/*
+	onDestroy() {
+		console.log('ItemComponent.onDestroy', this.item);
 	}
 	*/
 }
