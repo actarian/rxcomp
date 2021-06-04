@@ -34,13 +34,13 @@
     "perf": "lighthouse http://localhost:40999/rxcomp/test.performance.html?count=1000 --only-categories=performance --output html --output-path ./reports/report.html --view --chrome-flags=\"--headless --window-size=412,660\" "
   },
   "dependencies": {
-    "rxjs": "6.6.3",
-    "tslib": "2.0.1"
+    "rxjs": "^6.6.7",
+    "tslib": "^2.2.0"
   },
   "devDependencies": {
-    "@types/node": "14.6.4",
+    "@types/node": "15.12.0",
     "gulpfile-config": "1.0.0-alpha.14",
-    "typedoc": "0.19.0",
-    "typescript": "4.0.2"
+    "typedoc": "0.20.36",
+    "typescript": "4.2.2"
   }
 }

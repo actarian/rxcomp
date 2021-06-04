@@ -108,23 +108,12 @@ function _wrapNativeSuper(Class) {
   };
 
   return _wrapNativeSuper(Class);
-}
-
-function _assertThisInitialized(self) {
-  if (self === void 0) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return self;
-}var CONTEXTS = {};
-var NODES = {};
+}var CONTEXT_MAP = new Map();
+var NODE_MAP = new Map();
+var EXPRESSION_MAP = new Map();
 
 var Factory = function () {
-  function Factory() {
-    this.rxcompId = -1;
-    this.unsubscribe$ = new rxjs.Subject();
-    this.changes$ = new rxjs.Subject();
-  }
+  function Factory() {}
 
   var _proto = Factory.prototype;
 
@@ -138,12 +127,20 @@ var Factory = function () {
 
   _proto.pushChanges = function pushChanges() {
     var _getContext = getContext(this),
-        module = _getContext.module;
+        childInstances = _getContext.childInstances;
 
-    if (module.instances) {
-      this.changes$.next(this);
-      this.onView();
+    var instances = childInstances.slice();
+    var instance;
+
+    for (var i = 0, len = instances.length; i < len; i++) {
+      instance = instances[i];
+
+      if (childInstances.indexOf(instance) !== -1) {
+        instances[i].onParentDidChange(this);
+      }
     }
+
+    this.onView();
   };
 
   _proto.onParentDidChange = function onParentDidChange(changes) {
@@ -155,24 +152,25 @@ var Factory = function () {
     this.pushChanges();
   };
 
-  Factory.getInputsTokens = function getInputsTokens(instance, node, module) {
-    var _this$meta$inputs;
-
-    var inputs = {};
-    (_this$meta$inputs = this.meta.inputs) == null ? void 0 : _this$meta$inputs.forEach(function (key) {
-      var expression = module.resolveAttribute(key, node);
-
-      if (expression) {
-        inputs[key] = expression;
-      }
-    });
-    return inputs;
+  Factory.mapExpression = function mapExpression(key, expression) {
+    return expression;
   };
+
+  _createClass(Factory, [{
+    key: "unsubscribe$",
+    get: function get() {
+      if (!this.unsubscribe$_) {
+        this.unsubscribe$_ = new rxjs.Subject();
+      }
+
+      return this.unsubscribe$_;
+    }
+  }]);
 
   return Factory;
 }();
 function getContext(instance) {
-  return CONTEXTS[instance.rxcompId];
+  return CONTEXT_MAP.get(instance);
 }var Directive = function (_Factory) {
   _inheritsLoose(Directive, _Factory);
 
@@ -360,94 +358,41 @@ EventDirective.meta = {
   _proto.pushChanges = function pushChanges() {
     var _getContext = getContext(this),
         module = _getContext.module,
-        node = _getContext.node;
+        node = _getContext.node,
+        childInstances = _getContext.childInstances;
 
-    if (module.instances) {
-      this.changes$.next(this);
-      module.parse(node, this);
-      this.onView();
+    var instances = childInstances.slice();
+    var instance;
+
+    for (var i = 0, len = instances.length; i < len; i++) {
+      instance = instances[i];
+
+      if (childInstances.indexOf(instance) !== -1) {
+        instances[i].onParentDidChange(this);
+      }
     }
+
+    module.parse(node, this);
+    this.onView();
   };
 
   return Component;
-}(Factory);var RESERVED_PROPERTIES = ['constructor', 'rxcompId', 'onInit', 'onChanges', 'onDestroy', 'pushChanges', 'changes$', 'unsubscribe$'];
-
-var Context = function (_Component) {
+}(Factory);var Context = function (_Component) {
   _inheritsLoose(Context, _Component);
 
-  function Context(parentInstance, descriptors) {
+  function Context(parentInstance) {
     var _this;
 
-    if (descriptors === void 0) {
-      descriptors = {};
-    }
-
     _this = _Component.call(this) || this;
-    descriptors = Context.mergeDescriptors(parentInstance, parentInstance, descriptors);
-    descriptors = Context.mergeDescriptors(Object.getPrototypeOf(parentInstance), parentInstance, descriptors);
-    Object.defineProperties(_assertThisInitialized(_this), descriptors);
+    _this.parentInstance = parentInstance;
     return _this;
   }
 
   var _proto = Context.prototype;
 
-  _proto.pushChanges = function pushChanges() {
-    var _this2 = this;
-
-    var context = getContext(this);
-
-    if (!context.keys) {
-      context.keys = Object.keys(context.parentInstance).filter(function (key) {
-        return RESERVED_PROPERTIES.indexOf(key) === -1;
-      });
-    }
-
-    if (context.module.instances) {
-      context.keys.forEach(function (key) {
-        _this2[key] = context.parentInstance[key];
-      });
-    }
-
-    _Component.prototype.pushChanges.call(this);
-  };
-
   _proto.onParentDidChange = function onParentDidChange(changes) {
     this.onChanges(changes);
     this.pushChanges();
-  };
-
-  Context.mergeDescriptors = function mergeDescriptors(source, instance, descriptors) {
-    if (descriptors === void 0) {
-      descriptors = {};
-    }
-
-    var properties = Object.getOwnPropertyNames(source);
-
-    var _loop = function _loop() {
-      var key = properties.shift();
-
-      if (RESERVED_PROPERTIES.indexOf(key) === -1 && !descriptors.hasOwnProperty(key)) {
-        var descriptor = Object.getOwnPropertyDescriptor(source, key);
-
-        if (typeof descriptor.value == 'function') {
-          descriptor.value = function () {
-            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
-            }
-
-            return instance[key].apply(instance, args);
-          };
-        }
-
-        descriptors[key] = descriptor;
-      }
-    };
-
-    while (properties.length) {
-      _loop();
-    }
-
-    return descriptors;
   };
 
   return Context;
@@ -505,11 +450,10 @@ var Context = function (_Component) {
     var _getContext = getContext(this),
         node = _getContext.node;
 
-    var forbegin = this.forbegin = document.createComment("*for begin");
-    forbegin.rxcompId = node.rxcompId;
-    node.parentNode.replaceChild(forbegin, node);
-    var forend = this.forend = document.createComment("*for end");
-    forbegin.parentNode.insertBefore(forend, forbegin.nextSibling);
+    var expression = node.getAttribute('*for');
+    this.tokens = ForStructure.getForExpressionTokens(expression);
+    var nodeRef = this.nodeRef = document.createComment("*for");
+    node.parentNode.replaceChild(nodeRef, node);
     node.removeAttribute('*for');
   };
 
@@ -519,7 +463,7 @@ var Context = function (_Component) {
     var node = context.node;
     var selector = context.selector;
     var parentInstance = context.parentInstance;
-    var forend = this.forend;
+    var nodeRef = this.nodeRef;
     var tokens = this.tokens;
     var data = this.for || [];
     var isArray = Array.isArray(data);
@@ -528,7 +472,7 @@ var Context = function (_Component) {
     var instances = this.instances;
     var previous = instances.length;
 
-    for (var i = 0; i < Math.max(previous, total); i++) {
+    for (var i = 0, len = Math.max(previous, total); i < len; i++) {
       if (i < total) {
         var key = isArray ? i : items[i];
         var value = isArray ? items[key] : data[key];
@@ -539,11 +483,10 @@ var Context = function (_Component) {
           instance[tokens.value] = value;
         } else {
           var clonedNode = node.cloneNode(true);
-          forend.parentNode.insertBefore(clonedNode, forend);
+          nodeRef.parentNode.insertBefore(clonedNode, nodeRef);
           var args = [tokens.key, key, tokens.value, value, i, total, parentInstance];
-          var skipSubscription = false;
 
-          var _instance = module.makeInstance(clonedNode, ForItem, selector, parentInstance, args, undefined, skipSubscription);
+          var _instance = module.makeInstance(clonedNode, ForItem, selector, parentInstance, args);
 
           if (_instance) {
             module.compile(clonedNode, _instance);
@@ -565,21 +508,17 @@ var Context = function (_Component) {
     instances.length = total;
   };
 
-  ForStructure.getInputsTokens = function getInputsTokens(instance, node, module) {
-    var inputs = {};
-    var expression = node.getAttribute('*for');
-
-    if (expression) {
-      var tokens = ForStructure.getForExpressionTokens(expression);
-      instance.tokens = tokens;
-      inputs.for = tokens.iterable;
-    }
-
-    return inputs;
+  ForStructure.mapExpression = function mapExpression(key, expression) {
+    var tokens = this.getForExpressionTokens(expression);
+    return tokens.iterable;
   };
 
   ForStructure.getForExpressionTokens = function getForExpressionTokens(expression) {
-    if (expression === null) {
+    if (expression === void 0) {
+      expression = null;
+    }
+
+    if (expression == null) {
       throw new Error('invalid for');
     }
 
@@ -698,11 +637,8 @@ HrefDirective.meta = {
     var _getContext = getContext(this),
         node = _getContext.node;
 
-    var ifbegin = this.ifbegin = document.createComment("*if begin");
-    ifbegin.rxcompId = node.rxcompId;
-    node.parentNode.replaceChild(ifbegin, node);
-    var ifend = this.ifend = document.createComment("*if end");
-    ifbegin.parentNode.insertBefore(ifend, ifbegin.nextSibling);
+    var nodeRef = this.nodeRef = document.createComment("*if");
+    node.parentNode.replaceChild(nodeRef, node);
     var clonedNode = node.cloneNode(true);
     clonedNode.removeAttribute('*if');
     this.clonedNode = clonedNode;
@@ -711,15 +647,16 @@ HrefDirective.meta = {
 
   _proto.onChanges = function onChanges() {
     var _getContext2 = getContext(this),
-        module = _getContext2.module;
+        module = _getContext2.module,
+        parentInstance = _getContext2.parentInstance;
 
     var element = this.element;
 
     if (Boolean(this.if)) {
       if (!element.parentNode) {
-        var ifend = this.ifend;
-        ifend.parentNode.insertBefore(element, ifend);
-        module.compile(element);
+        var nodeRef = this.nodeRef;
+        nodeRef.parentNode.insertBefore(element, nodeRef);
+        module.compile(element, parentInstance);
       }
     } else {
       if (element.parentNode) {
@@ -1123,90 +1060,104 @@ function _decodeBase(value) {
 }(Pipe);
 JsonPipe.meta = {
   name: 'json'
-};var WINDOW = typeof self === 'object' && self.self === self && self || typeof global === 'object' && global.global === global && global || undefined;var ID = 0;
-
-var Module = function () {
+};var Module = function () {
   function Module() {
     this.unsubscribe$ = new rxjs.Subject();
   }
 
   var _proto = Module.prototype;
 
-  _proto.compile = function compile(node, parentInstance) {
-    var _this = this;
+  _proto.compile = function compile(node, parentInstance, instances) {
+    if (instances === void 0) {
+      instances = [];
+    }
 
-    var componentNode;
-    var instances = Module.querySelectorsAll(node, this.meta.selectors, []).map(function (match) {
-      if (componentNode && componentNode !== match.node) {
-        parentInstance = undefined;
+    if (node.nodeType === 1) {
+      var selectors = this.meta.selectors;
+      var matches = [];
+      var childNodes = Array.prototype.slice.call(node.childNodes);
+      var foundStructure = false;
+
+      for (var i = 0, len = selectors.length; i < len; i++) {
+        var selectorResult = selectors[i](node);
+
+        if (selectorResult) {
+          matches.push(selectorResult);
+          var factory = selectorResult.factory;
+
+          if (factory.prototype instanceof Structure) {
+            foundStructure = true;
+            break;
+          }
+
+          if (factory.prototype instanceof Component && factory.meta.template) {
+            node.innerHTML = factory.meta.template;
+          }
+        }
       }
 
-      var instance = _this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+      var nextParentInstance = parentInstance;
 
-      if (match.factory.prototype instanceof Component) {
-        componentNode = match.node;
+      for (var _i = 0, _len = matches.length; _i < _len; _i++) {
+        var match = matches[_i];
+        var instance = this.makeInstance(match.node, match.factory, match.selector, parentInstance);
+
+        if (instance) {
+          instances.push(instance);
+
+          if (match.factory.prototype instanceof Component) {
+            nextParentInstance = instance;
+          }
+        }
       }
 
-      return instance;
-    }).filter(function (x) {
-      return x !== undefined;
-    });
+      if (!foundStructure) {
+        for (var _i2 = 0, _len2 = childNodes.length; _i2 < _len2; _i2++) {
+          this.compile(childNodes[_i2], nextParentInstance, instances);
+        }
+      }
+    }
+
     return instances;
   };
 
-  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args, inject, skipSubscription) {
-    if (skipSubscription === void 0) {
-      skipSubscription = false;
-    }
+  _proto.makeInstance = function makeInstance(node, factory, selector, parentInstance, args, inject) {
+    var meta = factory.meta;
 
-    if (parentInstance || node.parentNode) {
-      var meta = factory.meta;
-      parentInstance = parentInstance || this.getParentInstance(node.parentNode);
+    var instance = _construct(factory, args || []);
 
-      if (!parentInstance) {
-        return undefined;
-      }
-
-      var instance = _construct(factory, args || []);
-
-      if (inject) {
-        Object.keys(inject).forEach(function (key) {
-          Object.defineProperty(instance, key, {
-            value: inject[key],
-            configurable: false,
-            enumerable: false,
-            writable: true
-          });
+    if (inject != null) {
+      for (var i = 0, keys = Object.keys(inject), len = keys.length; i < len; i++) {
+        var key = keys[i];
+        Object.defineProperty(instance, key, {
+          value: inject[key],
+          configurable: false,
+          enumerable: false,
+          writable: true
         });
       }
-
-      var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
-
-      if (!(instance instanceof Context)) {
-        this.makeHosts(meta, instance, node);
-        context.inputs = this.makeInputs(meta, instance, node, factory);
-        context.outputs = this.makeOutputs(meta, instance);
-        this.resolveInputsOutputs(instance, parentInstance);
-      }
-
-      instance.onInit();
-
-      if (!skipSubscription) {
-        this.makeInstanceSubscription(instance, parentInstance);
-      }
-
-      return instance;
-    } else {
-      return undefined;
     }
-  };
 
-  _proto.makeInstanceSubscription = function makeInstanceSubscription(instance, parentInstance) {
+    var context = Module.makeContext(this, instance, parentInstance, node, factory, selector);
+
+    if (instance instanceof Context) ; else {
+      this.makeHosts(meta, instance, node);
+      context.inputs = this.makeInputs(meta, node, factory);
+      context.outputs = this.makeOutputs(meta, instance);
+      this.resolveInputsOutputs(instance, parentInstance);
+    }
+
+    instance.onInit();
+
     if (parentInstance instanceof Factory) {
-      parentInstance.changes$.pipe(operators.startWith(parentInstance), operators.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
-        instance.onParentDidChange(changes);
-      });
+      var _getContext = getContext(parentInstance),
+          childInstances = _getContext.childInstances;
+
+      childInstances.push(instance);
+      instance.onParentDidChange(parentInstance);
     }
+
+    return instance;
   };
 
   _proto.makeFunction = function makeFunction(expression, params) {
@@ -1214,11 +1165,20 @@ var Module = function () {
       params = ['$instance'];
     }
 
-    expression = Module.parseExpression(expression);
-    var expressionFunction = "with(this) {\n\treturn (function (" + params.join(',') + ", $$module) {\n\t\ttry {\n\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\treturn " + expression + ";\n\t\t} catch(error) {\n\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t}\n\t}.bind(this)).apply(this, arguments);\n}";
-    var callback = new Function(expressionFunction);
-    callback.expression = expression;
-    return callback;
+    var name = expression + '_' + params.join(',');
+    var cachedExpressionFunction = EXPRESSION_MAP.get(name);
+
+    if (cachedExpressionFunction) {
+      return cachedExpressionFunction;
+    } else {
+      this.meta.context = Context;
+      expression = Module.parseExpression(expression);
+      var text = "\n\t\t\treturn (function (" + params.join(',') + ", $$module) {\n\t\t\t\tvar $$pipes = $$module.meta.pipes;\n\t\t\t\ttry {\n\t\t\t\t\tif (this.parentInstance) {\n\t\t\t\t\t\twith(this.parentInstance) {\n\t\t\t\t\t\t\twith(this) {\n\t\t\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\twith(this) {\n\t\t\t\t\t\t\treturn " + expression + ";\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch(error) {\n\t\t\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t\t\t}\n\t\t\t}.bind(this)).apply(this, arguments);";
+      var expressionFunction = new Function(text);
+      expressionFunction.expression = expression;
+      EXPRESSION_MAP.set(name, expressionFunction);
+      return expressionFunction;
+    }
   };
 
   _proto.resolveInputsOutputs = function resolveInputsOutputs(instance, changes) {
@@ -1226,14 +1186,15 @@ var Module = function () {
     var parentInstance = context.parentInstance;
     var inputs = context.inputs;
 
-    for (var key in inputs) {
-      var inputFunction = inputs[key];
-      var value = this.resolve(inputFunction, parentInstance, instance);
+    for (var i = 0, keys = Object.keys(inputs), len = keys.length; i < len; i++) {
+      var key = keys[i];
+      var expression = inputs[key];
+      var value = this.resolve(expression, parentInstance, instance);
       instance[key] = value;
     }
   };
 
-  _proto.resolveAttribute = function resolveAttribute(key, node) {
+  _proto.getInputAttributeExpression = function getInputAttributeExpression(key, node) {
     var expression = null;
 
     if (node.hasAttribute("[" + key + "]")) {
@@ -1271,7 +1232,7 @@ var Module = function () {
   };
 
   _proto.parse = function parse(node, instance) {
-    for (var i = 0; i < node.childNodes.length; i++) {
+    for (var i = 0, len = node.childNodes.length; i < len; i++) {
       var child = node.childNodes[i];
 
       if (child.nodeType === 1) {
@@ -1291,15 +1252,7 @@ var Module = function () {
   _proto.remove = function remove(node, keepInstance) {
     var keepContext = keepInstance ? getContext(keepInstance) : undefined;
     Module.traverseDown(node, function (node) {
-      var rxcompId = node.rxcompId;
-
-      if (rxcompId) {
-        var keepContexts = Module.deleteContext(rxcompId, keepContext);
-
-        if (keepContexts.length === 0) {
-          delete node.rxcompId;
-        }
-      }
+      Module.deleteContext(node, keepContext);
     });
     return node;
   };
@@ -1323,26 +1276,34 @@ var Module = function () {
 
   _proto.makeHosts = function makeHosts(meta, instance, node) {
     if (meta.hosts) {
-      Object.keys(meta.hosts).forEach(function (key) {
+      for (var i = 0, keys = Object.keys(meta.hosts), len = keys.length; i < len; i++) {
+        var key = keys[i];
         var factory = meta.hosts[key];
         instance[key] = getHost(instance, factory, node);
-      });
+      }
     }
   };
 
-  _proto.makeInputs = function makeInputs(meta, instance, node, factory) {
-    var _this2 = this;
-
+  _proto.makeInputs = function makeInputs(meta, node, factory) {
     var inputs = {};
-    var inputsTokens = factory.getInputsTokens(instance, node, this);
-    Object.keys(inputsTokens).forEach(function (key) {
-      inputs[key] = _this2.makeFunction(inputsTokens[key]);
-    });
+
+    if (meta.inputs) {
+      for (var i = 0, len = meta.inputs.length; i < len; i++) {
+        var key = meta.inputs[i];
+        var expression = this.getInputAttributeExpression(key, node);
+
+        if (expression) {
+          expression = factory.mapExpression(key, expression);
+          inputs[key] = this.makeFunction(expression);
+        }
+      }
+    }
+
     return inputs;
   };
 
   _proto.makeOutput = function makeOutput(instance, key) {
-    var _this3 = this;
+    var _this = this;
 
     var context = getContext(instance);
     var node = context.node;
@@ -1351,7 +1312,7 @@ var Module = function () {
     var outputExpression = expression ? this.makeFunction(expression, ['$event']) : null;
     var output$ = new rxjs.Subject().pipe(operators.tap(function (event) {
       if (outputExpression) {
-        _this3.resolve(outputExpression, parentInstance, event);
+        _this.resolve(outputExpression, parentInstance, event);
       }
     }));
     output$.pipe(operators.takeUntil(instance.unsubscribe$)).subscribe();
@@ -1360,13 +1321,13 @@ var Module = function () {
   };
 
   _proto.makeOutputs = function makeOutputs(meta, instance) {
-    var _this4 = this;
+    var _this2 = this;
 
     var outputs = {};
 
     if (meta.outputs) {
       meta.outputs.forEach(function (key) {
-        var output = _this4.makeOutput(instance, key);
+        var output = _this2.makeOutput(instance, key);
 
         if (output) {
           outputs[key] = output;
@@ -1377,30 +1338,8 @@ var Module = function () {
     return outputs;
   };
 
-  _proto.getInstance = function getInstance(node) {
-    if (node === document) {
-      return WINDOW;
-    }
-
-    var context = getContextByNode(node);
-
-    if (context) {
-      return context.instance;
-    } else {
-      return undefined;
-    }
-  };
-
-  _proto.getParentInstance = function getParentInstance(node) {
-    var _this5 = this;
-
-    return Module.traverseUp(node, function (node) {
-      return _this5.getInstance(node);
-    });
-  };
-
   _proto.parseTextNode = function parseTextNode(node, instance) {
-    var _this6 = this;
+    var _this3 = this;
 
     var expressions = node.nodeExpressions;
 
@@ -1413,7 +1352,7 @@ var Module = function () {
         var text;
 
         if (typeof c === 'function') {
-          text = _this6.resolve(c, instance, instance);
+          text = _this3.resolve(c, instance, instance);
 
           if (text == undefined) {
             text = '';
@@ -1477,55 +1416,59 @@ var Module = function () {
   };
 
   Module.makeContext = function makeContext(module, instance, parentInstance, node, factory, selector) {
-    instance.rxcompId = ++ID;
     var context = {
       module: module,
       instance: instance,
       parentInstance: parentInstance,
+      childInstances: [],
       node: node,
       factory: factory,
       selector: selector
     };
-    var rxcompNodeId = node.rxcompId = node.rxcompId || instance.rxcompId;
-    var nodeContexts = NODES[rxcompNodeId] || (NODES[rxcompNodeId] = []);
+    var nodeContexts = NODE_MAP.get(node);
+
+    if (!nodeContexts) {
+      nodeContexts = [];
+      NODE_MAP.set(node, nodeContexts);
+    }
+
     nodeContexts.push(context);
-    CONTEXTS[instance.rxcompId] = context;
+    CONTEXT_MAP.set(instance, context);
     return context;
   };
 
   Module.parseExpression = function parseExpression(expression) {
+    expression = Module.parseGroup(expression);
+    expression = Module.parseOptionalChaining(expression);
+    return expression;
+  };
+
+  Module.parseGroup = function parseGroup(expression) {
     var l = '┌';
     var r = '┘';
     var rx1 = /(\()([^\(\)]*)(\))/;
 
-    while (expression.match(rx1)) {
-      expression = expression.replace(rx1, function (substring) {
+    while (rx1.test(expression)) {
+      expression = expression.replace(rx1, function (m) {
         return "" + l + Module.parsePipes(arguments.length <= 2 ? undefined : arguments[2]) + r;
       });
     }
 
     expression = Module.parsePipes(expression);
-    expression = expression.replace(/(┌)|(┘)/g, function (substring) {
+    var rx2 = /(┌)|(┘)/g;
+    expression = expression.replace(rx2, function (m) {
       return (arguments.length <= 1 ? undefined : arguments[1]) ? '(' : ')';
     });
-    return Module.parseOptionalChaining(expression);
+    return expression;
   };
 
   Module.parsePipes = function parsePipes(expression) {
-    var l = '┌';
-    var r = '┘';
-    var rx1 = /(.*?[^\|])\|([^\|]+)/;
+    var rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
 
-    while (expression.match(rx1)) {
-      expression = expression.replace(rx1, function (substring) {
-        for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          args[_key - 1] = arguments[_key];
-        }
-
-        var value = args[0].trim();
-        var params = Module.parsePipeParams(args[1]);
-        var func = params.shift().trim();
-        return "$$pipes." + func + ".transform" + l + [value].concat(params) + r;
+    while (rx.test(expression)) {
+      expression = expression.replace(rx, function (m, value, name, expression) {
+        var params = Module.parsePipeParams(expression);
+        return "$$pipes." + name + ".transform(" + [value].concat(params) + ")";
       });
     }
 
@@ -1533,63 +1476,60 @@ var Module = function () {
   };
 
   Module.parsePipeParams = function parsePipeParams(expression) {
-    var segments = [];
-    var i = 0,
-        word = '',
-        block = 0;
-    var t = expression.length;
+    var params = [];
+    var rx = /:\s*(\{.+\}|\(.+\)|[^:]+)/g;
+    var match;
 
-    while (i < t) {
-      var c = expression.substr(i, 1);
-
-      if (c === '{' || c === '(' || c === '[') {
-        block++;
-      }
-
-      if (c === '}' || c === ')' || c === ']') {
-        block--;
-      }
-
-      if (c === ':' && block === 0) {
-        if (word.length) {
-          segments.push(word.trim());
-        }
-
-        word = '';
-      } else {
-        word += c;
-      }
-
-      i++;
+    while (match = rx.exec(expression)) {
+      params.push(match[1]);
     }
 
-    if (word.length) {
-      segments.push(word.trim());
-    }
-
-    return segments;
+    return params;
   };
 
   Module.parseOptionalChaining = function parseOptionalChaining(expression) {
-    var regex = /(\w+(\?\.))+([\.|\w]+)/g;
-    var previous;
-    expression = expression.replace(regex, function (substring) {
-      var tokens = substring.split('?.');
+    var rx = /([\w|\.]+)(?:\?\.)+([\.|\w]+)/;
 
-      for (var i = 0; i < tokens.length - 1; i++) {
-        var a = i > 0 ? "(" + tokens[i] + " = " + previous + ")" : tokens[i];
-        var b = tokens[i + 1];
-        previous = i > 0 ? a + "." + b : "(" + a + " ? " + a + "." + b + " : void 0)";
+    while (rx.test(expression)) {
+      expression = expression.replace(rx, function (m, a, b) {
+        return a + " && " + a + "." + b;
+      });
+    }
+
+    return expression;
+  };
+
+  Module.parseThis = function parseThis(expression) {
+    var rx = /(\'.+\'|\[.+\]|\{.+\}|\$\$pipes)|([^\w.])([^\W\d])|^([^\W\d])/g;
+    expression = expression.replace(rx, function (m, g1, g2, g3, g4) {
+      if (g4) {
+        return "this." + g4;
+      } else if (g3) {
+        return g2 + "this." + g3;
+      } else {
+        return g1;
       }
-
-      return previous || '';
     });
     return expression;
   };
 
-  Module.deleteContext = function deleteContext(id, keepContext) {
+  Module.removeFromParentInstance = function removeFromParentInstance(instance, parentInstance) {
+    if (parentInstance instanceof Factory) {
+      var parentContext = getContext(parentInstance);
+
+      if (parentContext) {
+        var i = parentContext.childInstances.indexOf(instance);
+
+        if (i !== -1) {
+          parentContext.childInstances.splice(i, 1);
+        }
+      }
+    }
+  };
+
+  Module.deleteContext = function deleteContext(node, keepContext) {
     var keepContexts = [];
-    var nodeContexts = NODES[id];
+    var nodeContexts = NODE_MAP.get(node);
 
     if (nodeContexts) {
       nodeContexts.forEach(function (context) {
@@ -1597,61 +1537,22 @@ var Module = function () {
           keepContexts.push(keepContext);
         } else {
           var instance = context.instance;
+          Module.removeFromParentInstance(instance, context.parentInstance);
           instance.unsubscribe$.next();
           instance.unsubscribe$.complete();
           instance.onDestroy();
-          delete CONTEXTS[instance.rxcompId];
+          CONTEXT_MAP.delete(instance);
         }
       });
 
       if (keepContexts.length) {
-        NODES[id] = keepContexts;
+        NODE_MAP.set(node, keepContexts);
       } else {
-        delete NODES[id];
+        NODE_MAP.delete(node);
       }
     }
 
     return keepContexts;
-  };
-
-  Module.matchSelectors = function matchSelectors(node, selectors, results) {
-    var foundStructure = false;
-
-    for (var i = 0; i < selectors.length; i++) {
-      var selectorResult = selectors[i](node);
-
-      if (selectorResult) {
-        results.push(selectorResult);
-        var factory = selectorResult.factory;
-
-        if (factory.prototype instanceof Component && factory.meta.template) {
-          node.innerHTML = factory.meta.template;
-        }
-
-        if (factory.prototype instanceof Structure) {
-          foundStructure = true;
-          break;
-        }
-      }
-    }
-
-    return foundStructure;
-  };
-
-  Module.querySelectorsAll = function querySelectorsAll(node, selectors, results) {
-    if (node.nodeType === 1) {
-      var foundStructure = this.matchSelectors(node, selectors, results);
-
-      if (!foundStructure) {
-        var childNodes = node.childNodes;
-
-        for (var i = 0; i < childNodes.length; i++) {
-          results = this.querySelectorsAll(childNodes[i], selectors, results);
-        }
-      }
-    }
-
-    return results;
   };
 
   Module.traverseUp = function traverseUp(node, callback, i) {
@@ -1740,31 +1641,18 @@ var Module = function () {
 }();
 function getParsableContextByElement(element) {
   var context;
-  var rxcompId = element.rxcompId;
+  var contexts = NODE_MAP.get(element);
 
-  if (rxcompId) {
-    var contexts = NODES[rxcompId];
-
-    if (contexts) {
-      context = contexts.reduce(function (previous, current) {
-        if (current.instance instanceof Context) {
-          return previous ? previous : current;
-        } else if (current.instance instanceof Component) {
-          return current;
-        } else {
-          return previous;
-        }
-      }, undefined);
-    }
-  }
-
-  return context;
-}
-function getContextByNode(element) {
-  var context = getParsableContextByElement(element);
-
-  if (context && context.factory.prototype instanceof Structure) {
-    return undefined;
+  if (contexts) {
+    context = contexts.reduce(function (previous, current) {
+      if (current.instance instanceof Context) {
+        return previous ? previous : current;
+      } else if (current.instance instanceof Component) {
+        return current;
+      } else {
+        return previous;
+      }
+    }, undefined);
   }
 
   return context;
@@ -1774,17 +1662,15 @@ function getHost(instance, factory, node) {
     node = getContext(instance).node;
   }
 
-  if (node.rxcompId) {
-    var nodeContexts = NODES[node.rxcompId];
+  var nodeContexts = NODE_MAP.get(node);
 
-    if (nodeContexts) {
-      for (var i = 0; i < nodeContexts.length; i++) {
-        var context = nodeContexts[i];
+  if (nodeContexts) {
+    for (var i = 0, len = nodeContexts.length; i < len; i++) {
+      var context = nodeContexts[i];
 
-        if (context.instance !== instance) {
-          if (context.instance instanceof factory) {
-            return context.instance;
-          }
+      if (context.instance !== instance) {
+        if (context.instance instanceof factory) {
+          return context.instance;
         }
       }
     }
@@ -1890,7 +1776,7 @@ var CoreModule = function (_Module) {
 CoreModule.meta = {
   declarations: [].concat(factories, pipes),
   exports: [].concat(factories, pipes)
-};var Browser = function (_Platform) {
+};var WINDOW = typeof self === 'object' && self.self === self && self || typeof global === 'object' && global.global === global && global || undefined;var Browser = function (_Platform) {
   _inheritsLoose(Browser, _Platform);
 
   function Browser() {
@@ -1936,16 +1822,11 @@ CoreModule.meta = {
       clonedNode.innerHTML = meta.nodeInnerHTML = WINDOW.rxcomp_hydrate_.innerHTML;
       var instances = module.compile(clonedNode, WINDOW);
       module.instances = instances;
-      var root = instances[0];
-      root.pushChanges();
       (_meta$node$parentNode = meta.node.parentNode) == null ? void 0 : _meta$node$parentNode.replaceChild(clonedNode, meta.node);
     } else {
       var _instances = module.compile(meta.node, WINDOW);
 
       module.instances = _instances;
-      var _root = _instances[0];
-
-      _root.pushChanges();
     }
 
     return module;
