@@ -441,7 +441,7 @@ export default class Module {
 		return expression;
 	}
 	protected static parsePipes(expression: string): string {
-		const rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
+		const rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)?/;
 		while (rx.test(expression)) {
 			expression = expression.replace(rx, function (m, value, name, expression) {
 				const params = Module.parsePipeParams(expression);

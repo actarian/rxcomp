@@ -439,7 +439,7 @@ var Module = /** @class */ (function () {
         return expression;
     };
     Module.parsePipes = function (expression) {
-        var rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
+        var rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)?/;
         while (rx.test(expression)) {
             expression = expression.replace(rx, function (m, value, name, expression) {
                 var params = Module.parsePipeParams(expression);

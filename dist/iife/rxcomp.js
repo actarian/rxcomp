@@ -1466,7 +1466,7 @@ JsonPipe.meta = {
   };
 
   Module.parsePipes = function parsePipes(expression) {
-    var rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)/;
+    var rx = /(.*?[^\|])\|\s*(\w+)\s*([^\|]+)?/;
 
     while (rx.test(expression)) {
       expression = expression.replace(rx, function (m, value, name, expression) {
