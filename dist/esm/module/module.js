@@ -11,6 +11,7 @@ export default class Module {
     constructor() {
         this.unsubscribe$ = new Subject();
     }
+    onInit() { }
     compile(node, parentInstance) {
         let componentNode;
         const instances = Module.querySelectorsAll(node, this.meta.selectors, []).map((match) => {

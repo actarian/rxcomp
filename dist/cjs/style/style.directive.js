@@ -9,7 +9,7 @@ var StyleDirective = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     StyleDirective.prototype.onChanges = function () {
-        var node = factory_1.getContext(this).node;
+        var node = (0, factory_1.getContext)(this).node;
         var style = this.style;
         var previousStyle = this.previousStyle;
         if (previousStyle) {

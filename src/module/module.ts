@@ -14,6 +14,7 @@ export default class Module {
 	meta!: IModuleParsedMeta; // !!!
 	instances?: Factory[];
 	unsubscribe$: Subject<void> = new Subject();
+	onInit(): void { }
 	static forRoot?: (...args: any[]) => typeof Module;
 	public compile(node: IElement, parentInstance?: Factory | Window): Factory[] {
 		let componentNode: IElement;

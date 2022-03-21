@@ -13,13 +13,13 @@ var ClassDirective = /** @class */ (function (_super) {
     }
     ClassDirective.prototype.onInit = function () {
         var _this = this;
-        var node = factory_1.getContext(this).node;
+        var node = (0, factory_1.getContext)(this).node;
         Array.prototype.slice.call(node.classList).forEach(function (value) {
             _this.keys.push(value);
         });
     };
     ClassDirective.prototype.onChanges = function () {
-        var node = factory_1.getContext(this).node;
+        var node = (0, factory_1.getContext)(this).node;
         var keys = [];
         var object = this.class;
         if (typeof object === 'object') {

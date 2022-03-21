@@ -1,10 +1,10 @@
 /**
- * @license rxcomp v1.0.0-beta.20
- * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
+ * @license rxcomp v1.0.0-beta.21
+ * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
 
-(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports,require('rxjs'),require('rxjs/operators')):typeof define==='function'&&define.amd?define(['exports','rxjs','rxjs/operators'],f):(g=typeof globalThis!=='undefined'?globalThis:g||self,f(g.rxcomp={},g.rxjs,g.rxjs.operators));}(this,(function(exports, rxjs, operators){'use strict';function _defineProperties(target, props) {
+(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports,require('rxjs'),require('rxjs/operators')):typeof define==='function'&&define.amd?define(['exports','rxjs','rxjs/operators'],f):(g=typeof globalThis!=='undefined'?globalThis:g||self,f(g.rxcomp={},g.rxjs,g.rxjs.operators));})(this,(function(exports,rxjs,operators){'use strict';function _defineProperties(target, props) {
   for (var i = 0; i < props.length; i++) {
     var descriptor = props[i];
     descriptor.enumerable = descriptor.enumerable || false;
@@ -17,13 +17,17 @@
 function _createClass(Constructor, protoProps, staticProps) {
   if (protoProps) _defineProperties(Constructor.prototype, protoProps);
   if (staticProps) _defineProperties(Constructor, staticProps);
+  Object.defineProperty(Constructor, "prototype", {
+    writable: false
+  });
   return Constructor;
 }
 
 function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
-  subClass.__proto__ = superClass;
+
+  _setPrototypeOf(subClass, superClass);
 }
 
 function _getPrototypeOf(o) {
@@ -48,7 +52,7 @@ function _isNativeReflectConstruct() {
   if (typeof Proxy === "function") return true;
 
   try {
-    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
     return true;
   } catch (e) {
     return false;
@@ -120,29 +124,6 @@ function _assertThisInitialized(self) {
 var NODES = {};
 
 var Factory = /*#__PURE__*/function () {
-  function Factory() {
-    this.rxcompId = -1;
-    this.unsubscribe$ = new rxjs.Subject();
-    this.changes$ = new rxjs.ReplaySubject(1);
-    /*
-    // !!! PROXY
-    const store: { [key: string]: any } = {};
-    const handler: ProxyHandler<Factory> = {
-        get: function (target: Factory, prop: string, receiver: any) {
-            return target[prop];
-        },
-        set: function (target: Factory, prop: string | number | Symbol, value: any, receiver: any) {
-            store[prop as string] = value;
-            console.log('Factory updating store', prop, value, store);
-            target[prop as string] = value;
-            return true;
-        }
-    }
-    const proxy = new Proxy(this, handler);
-    console.log('proxy', proxy);
-    */
-  }
-
   var _proto = Factory.prototype;
 
   _proto.onInit = function onInit() {};
@@ -172,6 +153,30 @@ var Factory = /*#__PURE__*/function () {
     this.onChanges(changes);
     this.pushChanges();
   };
+
+  function Factory() {
+    /*
+    // !!! PROXY
+    const store: { [key: string]: any } = {};
+    const handler: ProxyHandler<Factory> = {
+        get: function (target: Factory, prop: string, receiver: any) {
+            return target[prop];
+        },
+        set: function (target: Factory, prop: string | number | Symbol, value: any, receiver: any) {
+            store[prop as string] = value;
+            console.log('Factory updating store', prop, value, store);
+            target[prop as string] = value;
+            return true;
+        }
+    }
+    const proxy = new Proxy(this, handler);
+    console.log('proxy', proxy);
+    */
+
+    this.rxcompId = -1;
+    this.unsubscribe$ = new rxjs.Subject();
+    this.changes$ = new rxjs.ReplaySubject(1);
+  }
 
   Factory.getInputsTokens = function getInputsTokens(instance, node, module) {
     var _this$meta$inputs;
@@ -217,6 +222,8 @@ var Factory = /*#__PURE__*/function () {
 
   return Factory;
 }();
+
+Factory.meta = void 0;
 function getContext(instance) {
   return CONTEXTS[instance.rxcompId];
 }var Directive = /*#__PURE__*/function (_Factory) {
@@ -233,7 +240,11 @@ function getContext(instance) {
   function ClassDirective() {
     var _this;
 
-    _this = _Directive.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Directive.call.apply(_Directive, [this].concat(args)) || this;
     _this.class = '';
     _this.keys = [];
     return _this;
@@ -276,6 +287,7 @@ function getContext(instance) {
 
   return ClassDirective;
 }(Directive);
+
 ClassDirective.meta = {
   selector: "[[class]]",
   inputs: ['class']
@@ -296,6 +308,11 @@ var ExpressionError = /*#__PURE__*/function (_Error2) {
 
     var message = "ExpressionError in " + instance.constructor.name + " \"" + expression + "\"\n\t\t" + error.message;
     _this = _Error2.call(this, message) || this;
+    _this.module = void 0;
+    _this.instance = void 0;
+    _this.expression = void 0;
+    _this.params = void 0;
+    _this.template = void 0;
     _this.name = error.name; // this.stack = error.stack;
 
     _this.module = module;
@@ -314,6 +331,8 @@ var ExpressionError = /*#__PURE__*/function (_Error2) {
 }( /*#__PURE__*/_wrapNativeSuper(Error));
 var ErrorInterceptorHandler = /*#__PURE__*/function () {
   function ErrorInterceptorHandler(next, interceptor) {
+    this.next = void 0;
+    this.interceptor = void 0;
     this.next = next;
     this.interceptor = interceptor;
   }
@@ -356,7 +375,11 @@ var EventDirective = /*#__PURE__*/function (_Directive) {
   function EventDirective() {
     var _this;
 
-    _this = _Directive.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Directive.call.apply(_Directive, [this].concat(args)) || this;
     _this.event = '';
     return _this;
   }
@@ -387,6 +410,7 @@ var EventDirective = /*#__PURE__*/function (_Directive) {
 
   return EventDirective;
 }(Directive);
+
 EventDirective.meta = {
   selector: "[(" + EVENTS.join(')],[(') + ")]"
 };var Structure = /*#__PURE__*/function (_Factory) {
@@ -531,6 +555,8 @@ var Context = /*#__PURE__*/function (_Component) {
     });
     */
 
+    _this.index = void 0;
+    _this.count = void 0;
     _this[key] = $key;
     _this[value] = $value;
     _this.index = index;
@@ -567,8 +593,15 @@ var Context = /*#__PURE__*/function (_Component) {
   function ForStructure() {
     var _this;
 
-    _this = _Structure.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Structure.call.apply(_Structure, [this].concat(args)) || this;
     _this.instances = [];
+    _this.forbegin = void 0;
+    _this.forend = void 0;
+    _this.tokens = void 0;
     return _this;
   }
 
@@ -698,6 +731,7 @@ var Context = /*#__PURE__*/function (_Component) {
 
   return ForStructure;
 }(Structure);
+
 ForStructure.meta = {
   selector: '[*for]',
   inputs: ['for']
@@ -710,6 +744,9 @@ ForStructure.meta = {
 
   _createClass(HrefTargetDirective, [{
     key: "target",
+    get: function get() {
+      return this.target_;
+    },
     set: function set(target) {
       if (this.target_ !== target) {
         this.target_ = target;
@@ -719,14 +756,12 @@ ForStructure.meta = {
 
         target ? node.setAttribute('target', target) : node.removeAttribute('target');
       }
-    },
-    get: function get() {
-      return this.target_;
     }
   }]);
 
   return HrefTargetDirective;
 }(Directive);
+
 HrefTargetDirective.meta = {
   selector: '[[target]]',
   inputs: ['target']
@@ -739,6 +774,9 @@ HrefTargetDirective.meta = {
 
   _createClass(HrefDirective, [{
     key: "href",
+    get: function get() {
+      return this.href_;
+    },
     set: function set(href) {
       if (this.href_ !== href) {
         this.href_ = href;
@@ -748,14 +786,12 @@ HrefTargetDirective.meta = {
 
         href ? node.setAttribute('href', href) : node.removeAttribute('href');
       }
-    },
-    get: function get() {
-      return this.href_;
     }
   }]);
 
   return HrefDirective;
 }(Directive);
+
 HrefDirective.meta = {
   selector: '[[href]]',
   inputs: ['href']
@@ -763,7 +799,18 @@ HrefDirective.meta = {
   _inheritsLoose(IfStructure, _Structure);
 
   function IfStructure() {
-    return _Structure.apply(this, arguments) || this;
+    var _this;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Structure.call.apply(_Structure, [this].concat(args)) || this;
+    _this.ifbegin = void 0;
+    _this.ifend = void 0;
+    _this.clonedNode = void 0;
+    _this.element = void 0;
+    return _this;
   }
 
   var _proto = IfStructure.prototype;
@@ -807,6 +854,7 @@ HrefDirective.meta = {
 
   return IfStructure;
 }(Structure);
+
 IfStructure.meta = {
   selector: '[*if]',
   inputs: ['if']
@@ -819,6 +867,9 @@ IfStructure.meta = {
 
   _createClass(InnerHtmlDirective, [{
     key: "innerHTML",
+    get: function get() {
+      return this.innerHTML_;
+    },
     set: function set(innerHTML) {
       if (this.innerHTML_ !== innerHTML) {
         this.innerHTML_ = innerHTML;
@@ -828,14 +879,12 @@ IfStructure.meta = {
 
         node.innerHTML = innerHTML == undefined ? '' : innerHTML; // !!! keep == loose equality
       }
-    },
-    get: function get() {
-      return this.innerHTML_;
     }
   }]);
 
   return InnerHtmlDirective;
 }(Directive);
+
 InnerHtmlDirective.meta = {
   selector: "[innerHTML]",
   inputs: ['innerHTML']
@@ -845,7 +894,11 @@ InnerHtmlDirective.meta = {
   function JsonComponent() {
     var _this;
 
-    _this = _Component.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Component.call.apply(_Component, [this].concat(args)) || this;
     _this.active = false;
     return _this;
   }
@@ -859,6 +912,7 @@ InnerHtmlDirective.meta = {
 
   return JsonComponent;
 }(Component);
+
 JsonComponent.meta = {
   selector: 'json-component',
   inputs: ['item'],
@@ -873,7 +927,9 @@ JsonComponent.meta = {
   };
 
   return Pipe;
-}();var ORDER = [Structure, Component, Directive];
+}();
+
+Pipe.meta = void 0;var ORDER = [Structure, Component, Directive];
 
 var Platform = /*#__PURE__*/function () {
   function Platform() {}
@@ -907,7 +963,7 @@ var Platform = /*#__PURE__*/function () {
     var module = new moduleFactory();
     module.meta = meta;
     meta.imports.forEach(function (moduleFactory) {
-      moduleFactory.prototype.constructor.call(module);
+      moduleFactory.prototype.onInit.call(module);
     });
     return module;
   };
@@ -1217,16 +1273,21 @@ function _decodeBase(value) {
 
   return JsonPipe;
 }(Pipe);
+
 JsonPipe.meta = {
   name: 'json'
 };var WINDOW = typeof self === 'object' && self.self === self && self || typeof global === 'object' && global.global === global && global || undefined;var ID = 0;
 
 var Module = /*#__PURE__*/function () {
   function Module() {
+    this.meta = void 0;
+    this.instances = void 0;
     this.unsubscribe$ = new rxjs.Subject();
   }
 
   var _proto = Module.prototype;
+
+  _proto.onInit = function onInit() {};
 
   _proto.compile = function compile(node, parentInstance) {
     var _this = this;
@@ -1886,6 +1947,9 @@ var Module = /*#__PURE__*/function () {
 
   return Module;
 }();
+
+Module.forRoot = void 0;
+Module.meta = void 0;
 function getParsableContextByElement(element) {
   var context;
   var rxcompId = element.rxcompId;
@@ -1992,6 +2056,9 @@ export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
 
   _createClass(SrcDirective, [{
     key: "src",
+    get: function get() {
+      return this.src_;
+    },
     set: function set(src) {
       if (this.src_ !== src) {
         this.src_ = src;
@@ -2001,14 +2068,12 @@ export function deepEqual(prev: any, curr: any, pool: any[] = []): boolean {
 
         src ? node.setAttribute('src', src) : node.removeAttribute('src');
       }
-    },
-    get: function get() {
-      return this.src_;
     }
   }]);
 
   return SrcDirective;
 }(Directive);
+
 SrcDirective.meta = {
   selector: '[[src]]',
   inputs: ['src']
@@ -2016,7 +2081,16 @@ SrcDirective.meta = {
   _inheritsLoose(StyleDirective, _Directive);
 
   function StyleDirective() {
-    return _Directive.apply(this, arguments) || this;
+    var _this;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Directive.call.apply(_Directive, [this].concat(args)) || this;
+    _this.style = void 0;
+    _this.previousStyle = void 0;
+    return _this;
   }
 
   var _proto = StyleDirective.prototype;
@@ -2039,13 +2113,13 @@ SrcDirective.meta = {
     }
 
     if (style) {
-      for (var _key in style) {
-        if (!previousStyle || previousStyle[_key] !== style[_key]) {
-          var _splitted = _key.split('.');
+      for (var _key2 in style) {
+        if (!previousStyle || previousStyle[_key2] !== style[_key2]) {
+          var _splitted = _key2.split('.');
 
           var _propertyName = _splitted.shift();
 
-          var value = style[_key] + (_splitted.length ? _splitted[0] : ''); // console.log(propertyName, value, style, key, style[key]);
+          var value = style[_key2] + (_splitted.length ? _splitted[0] : ''); // console.log(propertyName, value, style, key, style[key]);
 
           node.style.setProperty(_propertyName, value);
         }
@@ -2057,6 +2131,7 @@ SrcDirective.meta = {
 
   return StyleDirective;
 }(Directive);
+
 StyleDirective.meta = {
   selector: "[[style]]",
   inputs: ['style']
@@ -2077,6 +2152,7 @@ var CoreModule = /*#__PURE__*/function (_Module) {
 
   return CoreModule;
 }(Module);
+
 CoreModule.meta = {
   declarations: [].concat(factories, pipes),
   exports: [].concat(factories, pipes)
@@ -2120,7 +2196,7 @@ CoreModule.meta = {
     var module = new moduleFactory();
     module.meta = meta;
     meta.imports.forEach(function (moduleFactory) {
-      moduleFactory.prototype.constructor.call(module);
+      moduleFactory.prototype.onInit.call(module);
     });
 
     if (WINDOW.rxcomp_hydrate_) {
@@ -2264,4 +2340,4 @@ function optionsToKey(v, s) {
   }
 
   return s;
-}exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.HrefTargetDirective=HrefTargetDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.WINDOW=WINDOW;exports.decodeBase64=_decodeBase;exports.decodeJson=_decodeJson;exports.encodeBase64=_encodeBase;exports.encodeJson=_encodeJson;exports.encodeJsonWithOptions=encodeJsonWithOptions;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByElement=getParsableContextByElement;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;Object.defineProperty(exports,'__esModule',{value:true});})));
+}exports.Browser=Browser;exports.ClassDirective=ClassDirective;exports.Component=Component;exports.Context=Context;exports.CoreModule=CoreModule;exports.DefaultErrorHandler=DefaultErrorHandler;exports.Directive=Directive;exports.ErrorInterceptorHandler=ErrorInterceptorHandler;exports.ErrorInterceptors=ErrorInterceptors;exports.EventDirective=EventDirective;exports.ExpressionError=ExpressionError;exports.Factory=Factory;exports.ForItem=ForItem;exports.ForStructure=ForStructure;exports.HrefDirective=HrefDirective;exports.HrefTargetDirective=HrefTargetDirective;exports.IfStructure=IfStructure;exports.InnerHtmlDirective=InnerHtmlDirective;exports.JsonComponent=JsonComponent;exports.JsonPipe=JsonPipe;exports.Module=Module;exports.ModuleError=ModuleError;exports.PLATFORM_BROWSER=PLATFORM_BROWSER;exports.PLATFORM_JS_DOM=PLATFORM_JS_DOM;exports.PLATFORM_NODE=PLATFORM_NODE;exports.PLATFORM_WEB_WORKER=PLATFORM_WEB_WORKER;exports.Pipe=Pipe;exports.Platform=Platform;exports.Serializer=Serializer;exports.SrcDirective=SrcDirective;exports.Structure=Structure;exports.StyleDirective=StyleDirective;exports.TransferService=TransferService;exports.WINDOW=WINDOW;exports.decodeBase64=_decodeBase;exports.decodeJson=_decodeJson;exports.encodeBase64=_encodeBase;exports.encodeJson=_encodeJson;exports.encodeJsonWithOptions=encodeJsonWithOptions;exports.errors$=errors$;exports.getContext=getContext;exports.getContextByNode=getContextByNode;exports.getHost=getHost;exports.getLocationComponents=getLocationComponents;exports.getParsableContextByElement=getParsableContextByElement;exports.isPlatformBrowser=isPlatformBrowser;exports.isPlatformServer=isPlatformServer;exports.isPlatformWorker=isPlatformWorker;exports.nextError$=nextError$;exports.optionsToKey=optionsToKey;Object.defineProperty(exports,'__esModule',{value:true});}));

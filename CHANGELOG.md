@@ -3,6 +3,12 @@ All notable changes to the "rxcomp" library will be documented in this file.
 
 ---
 
+## [1.0.0-beta.21] - 2022-03-21
+### Fixing
+- ES6 calling module constructor without new
+
+---
+
 ## [1.0.0-beta.20] - 2020-11-25
 ### Fixing
 - IE11 DomTokenList

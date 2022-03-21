@@ -17,7 +17,7 @@ var Context = /** @class */ (function (_super) {
     }
     Context.prototype.pushChanges = function () {
         var _this = this;
-        var context = factory_1.getContext(this);
+        var context = (0, factory_1.getContext)(this);
         if (!context.keys) {
             context.keys = Object.keys(context.parentInstance).filter(function (key) { return RESERVED_PROPERTIES.indexOf(key) === -1; });
             // console.log(context.keys.join(','));

@@ -37,7 +37,7 @@ var Browser = /** @class */ (function (_super) {
         var module = new moduleFactory();
         module.meta = meta;
         meta.imports.forEach(function (moduleFactory) {
-            moduleFactory.prototype.constructor.call(module);
+            moduleFactory.prototype.onInit.call(module);
         });
         if (window_1.WINDOW.rxcomp_hydrate_) {
             var clonedNode = meta.node.cloneNode();

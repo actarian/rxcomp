@@ -15,6 +15,7 @@ var Module = /** @class */ (function () {
     function Module() {
         this.unsubscribe$ = new rxjs_1.Subject();
     }
+    Module.prototype.onInit = function () { };
     Module.prototype.compile = function (node, parentInstance) {
         var _this = this;
         var componentNode;
@@ -42,7 +43,7 @@ var Module = /** @class */ (function () {
                 return undefined;
             }
             // creating factory instance
-            var instance_1 = new (factory.bind.apply(factory, tslib_1.__spread([void 0], (args || []))))();
+            var instance_1 = new (factory.bind.apply(factory, tslib_1.__spreadArray([void 0], tslib_1.__read((args || [])), false)))();
             // injecting custom properties
             if (inject) {
                 Object.keys(inject).forEach(function (key) {
@@ -82,7 +83,7 @@ var Module = /** @class */ (function () {
         if (parentInstance instanceof factory_1.default) {
             parentInstance.changes$.pipe(
             // distinctUntilChanged(deepEqual),
-            operators_1.takeUntil(instance.unsubscribe$)).subscribe(function (changes) {
+            (0, operators_1.takeUntil)(instance.unsubscribe$)).subscribe(function (changes) {
                 instance.onParentDidChange(changes);
             });
         }
@@ -90,7 +91,7 @@ var Module = /** @class */ (function () {
     Module.prototype.makeFunction = function (expression, params) {
         if (params === void 0) { params = ['$instance']; }
         expression = Module.parseExpression(expression);
-        var expressionFunction = "with(this) {\n\treturn (function (" + params.join(',') + ", $$module) {\n\t\ttry {\n\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\treturn " + expression + ";\n\t\t} catch(error) {\n\t\t\t$$module.nextError(error, this, " + JSON.stringify(expression) + ", arguments);\n\t\t}\n\t}.bind(this)).apply(this, arguments);\n}";
+        var expressionFunction = "with(this) {\n\treturn (function (".concat(params.join(','), ", $$module) {\n\t\ttry {\n\t\t\tconst $$pipes = $$module.meta.pipes;\n\t\t\treturn ").concat(expression, ";\n\t\t} catch(error) {\n\t\t\t$$module.nextError(error, this, ").concat(JSON.stringify(expression), ", arguments);\n\t\t}\n\t}.bind(this)).apply(this, arguments);\n}");
         // console.log('Module.makeFunction.expressionFunction', expressionFunction);
         var callback = new Function(expressionFunction);
         // return () => { return null; };
@@ -98,7 +99,7 @@ var Module = /** @class */ (function () {
         return callback;
     };
     Module.prototype.resolveInputsOutputs = function (instance, changes) {
-        var context = factory_1.getContext(instance);
+        var context = (0, factory_1.getContext)(instance);
         var parentInstance = context.parentInstance;
         var inputs = context.inputs;
         for (var key in inputs) {
@@ -110,12 +111,12 @@ var Module = /** @class */ (function () {
     };
     Module.prototype.resolveAttribute = function (key, node) {
         var expression = null;
-        if (node.hasAttribute("[" + key + "]")) {
-            expression = node.getAttribute("[" + key + "]");
+        if (node.hasAttribute("[".concat(key, "]"))) {
+            expression = node.getAttribute("[".concat(key, "]"));
             // console.log('Module.resolveAttribute.expression.1', expression);
         }
-        else if (node.hasAttribute("*" + key)) {
-            expression = node.getAttribute("*" + key);
+        else if (node.hasAttribute("*".concat(key))) {
+            expression = node.getAttribute("*".concat(key));
             // console.log('Module.resolveAttribute.expression.2', expression);
         }
         else if (node.hasAttribute(key)) {
@@ -133,7 +134,7 @@ var Module = /** @class */ (function () {
                     }
                     return '';
                 });
-                expression = "\"" + attribute + "\"";
+                expression = "\"".concat(attribute, "\"");
                 // console.log('Module.resolveAttribute.expression.3', expression);
             }
         }
@@ -161,7 +162,7 @@ var Module = /** @class */ (function () {
         }
     };
     Module.prototype.remove = function (node, keepInstance) {
-        var keepContext = keepInstance ? factory_1.getContext(keepInstance) : undefined;
+        var keepContext = keepInstance ? (0, factory_1.getContext)(keepInstance) : undefined;
         Module.traverseDown(node, function (node) {
             var rxcompId = node.rxcompId;
             if (rxcompId) {
@@ -231,18 +232,18 @@ var Module = /** @class */ (function () {
     };
     Module.prototype.makeOutput = function (instance, key) {
         var _this = this;
-        var context = factory_1.getContext(instance);
+        var context = (0, factory_1.getContext)(instance);
         var node = context.node;
         var parentInstance = context.parentInstance;
-        var expression = node.getAttribute("(" + key + ")");
+        var expression = node.getAttribute("(".concat(key, ")"));
         var outputExpression = expression ? this.makeFunction(expression, ['$event']) : null;
-        var output$ = new rxjs_1.Subject().pipe(operators_1.tap(function (event) {
+        var output$ = new rxjs_1.Subject().pipe((0, operators_1.tap)(function (event) {
             if (outputExpression) {
                 // console.log(expression, parentInstance);
                 _this.resolve(outputExpression, parentInstance, event);
             }
         }));
-        output$.pipe(operators_1.takeUntil(instance.unsubscribe$)).subscribe();
+        output$.pipe((0, operators_1.takeUntil)(instance.unsubscribe$)).subscribe();
         instance[key] = output$;
         return output$;
     };
@@ -358,7 +359,7 @@ var Module = /** @class */ (function () {
                 for (var _i = 1; _i < arguments.length; _i++) {
                     args[_i - 1] = arguments[_i];
                 }
-                return "" + l + Module.parsePipes(args[1]) + r;
+                return "".concat(l).concat(Module.parsePipes(args[1])).concat(r);
             });
         }
         expression = Module.parsePipes(expression);
@@ -384,7 +385,7 @@ var Module = /** @class */ (function () {
                 var value = args[0].trim();
                 var params = Module.parsePipeParams(args[1]);
                 var func = params.shift().trim();
-                return "$$pipes." + func + ".transform" + l + tslib_1.__spread([value], params) + r;
+                return "$$pipes.".concat(func, ".transform").concat(l).concat(tslib_1.__spreadArray([value], tslib_1.__read(params), false)).concat(r);
             });
         }
         return expression;
@@ -427,9 +428,9 @@ var Module = /** @class */ (function () {
             }
             var tokens = substring.split('?.');
             for (var i = 0; i < tokens.length - 1; i++) {
-                var a = i > 0 ? "(" + tokens[i] + " = " + previous + ")" : tokens[i];
+                var a = i > 0 ? "(".concat(tokens[i], " = ").concat(previous, ")") : tokens[i];
                 var b = tokens[i + 1];
-                previous = i > 0 ? a + "." + b : "(" + a + " ? " + a + "." + b + " : void 0)";
+                previous = i > 0 ? "".concat(a, ".").concat(b) : "(".concat(a, " ? ").concat(a, ".").concat(b, " : void 0)");
             }
             return previous || '';
         });
@@ -579,7 +580,7 @@ function getContextByNode(element) {
 exports.getContextByNode = getContextByNode;
 function getHost(instance, factory, node) {
     if (!node) {
-        node = factory_1.getContext(instance).node;
+        node = (0, factory_1.getContext)(instance).node;
     }
     if (node.rxcompId) {
         var nodeContexts = factory_1.NODES[node.rxcompId];

@@ -15,7 +15,7 @@ var SrcDirective = /** @class */ (function (_super) {
         set: function (src) {
             if (this.src_ !== src) {
                 this.src_ = src;
-                var node = factory_1.getContext(this).node;
+                var node = (0, factory_1.getContext)(this).node;
                 src ? node.setAttribute('src', src) : node.removeAttribute('src');
             }
         },

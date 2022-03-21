@@ -12,7 +12,7 @@ var ForStructure = /** @class */ (function (_super) {
         return _this;
     }
     ForStructure.prototype.onInit = function () {
-        var node = factory_1.getContext(this).node;
+        var node = (0, factory_1.getContext)(this).node;
         var forbegin = this.forbegin = document.createComment("*for begin");
         forbegin.rxcompId = node.rxcompId;
         node.parentNode.replaceChild(forbegin, node);
@@ -21,7 +21,7 @@ var ForStructure = /** @class */ (function (_super) {
         node.removeAttribute('*for');
     };
     ForStructure.prototype.onChanges = function () {
-        var context = factory_1.getContext(this);
+        var context = (0, factory_1.getContext)(this);
         var module = context.module;
         var node = context.node;
         var tokens = this.tokens;
@@ -58,7 +58,7 @@ var ForStructure = /** @class */ (function (_super) {
             else {
                 // remove
                 var instance = this.instances[i];
-                var node_1 = factory_1.getContext(instance).node;
+                var node_1 = (0, factory_1.getContext)(instance).node;
                 node_1.parentNode.removeChild(node_1);
                 module.remove(node_1);
             }

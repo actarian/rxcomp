@@ -14,23 +14,23 @@ var EventDirective = /** @class */ (function (_super) {
         return _this;
     }
     EventDirective.prototype.onInit = function () {
-        var _a = factory_1.getContext(this), module = _a.module, node = _a.node, parentInstance = _a.parentInstance, selector = _a.selector;
+        var _a = (0, factory_1.getContext)(this), module = _a.module, node = _a.node, parentInstance = _a.parentInstance, selector = _a.selector;
         var event = this.event = selector.replace(/\[|\]|\(|\)/g, '');
-        var event$ = rxjs_1.fromEvent(node, event).pipe(operators_1.shareReplay(1));
-        var expression = node.getAttribute("(" + event + ")");
+        var event$ = (0, rxjs_1.fromEvent)(node, event).pipe((0, operators_1.shareReplay)(1));
+        var expression = node.getAttribute("(".concat(event, ")"));
         if (expression) {
             var outputFunction_1 = module.makeFunction(expression, ['$event']);
-            event$.pipe(operators_1.takeUntil(this.unsubscribe$)).subscribe(function (event) {
+            event$.pipe((0, operators_1.takeUntil)(this.unsubscribe$)).subscribe(function (event) {
                 module.resolve(outputFunction_1, parentInstance, event);
             });
         }
         else {
-            parentInstance[event + "$"] = event$;
+            parentInstance["".concat(event, "$")] = event$;
         }
         // console.log('EventDirective.onInit', 'selector', selector, 'event', event);
     };
     EventDirective.meta = {
-        selector: "[(" + EVENTS.join(')],[(') + ")]",
+        selector: "[(".concat(EVENTS.join(')],[('), ")]"),
     };
     return EventDirective;
 }(directive_1.default));

@@ -8,7 +8,7 @@ var TransferService = /** @class */ (function () {
     }
     TransferService.makeKey = function (base, params) {
         var paramsKey = params ? optionsToKey(params) : '';
-        var key = "rxcomp-hydrate-" + base + "-" + paramsKey;
+        var key = "rxcomp-hydrate-".concat(base, "-").concat(paramsKey);
         key = key.replace(/(\s+)|(\W+)/g, function () {
             var matches = [];
             for (var _i = 0; _i < arguments.length; _i++) {
@@ -20,11 +20,11 @@ var TransferService = /** @class */ (function () {
         return key;
     };
     TransferService.has = function (key) {
-        var script = document.querySelector("#" + key);
+        var script = document.querySelector("#".concat(key));
         return script !== null;
     };
     TransferService.get = function (key) {
-        var node = document.querySelector("#" + key);
+        var node = document.querySelector("#".concat(key));
         if (node && node.firstChild) {
             var json = node.firstChild.nodeValue;
             return json ? serializer_1.default.decode(json, [serializer_1.decodeJson]) : undefined;
@@ -40,7 +40,7 @@ var TransferService = /** @class */ (function () {
             return;
         }
         var text = document.createTextNode(json);
-        var node = document.querySelector("#" + key);
+        var node = document.querySelector("#".concat(key));
         if (!node) {
             node = document.createElement('script');
             node.setAttribute('id', key);
@@ -54,7 +54,7 @@ var TransferService = /** @class */ (function () {
         }
     };
     TransferService.remove = function (key) {
-        var node = document.querySelector("#" + key);
+        var node = document.querySelector("#".concat(key));
         if (node && node.parentNode) {
             node.parentNode.removeChild(node);
         }

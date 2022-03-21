@@ -30,7 +30,7 @@ export default class Browser extends Platform {
         const module = new moduleFactory();
         module.meta = meta;
         meta.imports.forEach((moduleFactory) => {
-            moduleFactory.prototype.constructor.call(module);
+            moduleFactory.prototype.onInit.call(module);
         });
         if (WINDOW.rxcomp_hydrate_) {
             const clonedNode = meta.node.cloneNode();

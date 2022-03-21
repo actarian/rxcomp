@@ -1,6 +1,6 @@
 /**
- * @license rxcomp v1.0.0-beta.20
- * (c) 2020 Luca Zampetti <lzampetti@gmail.com>
+ * @license rxcomp v1.0.0-beta.21
+ * (c) 2022 Luca Zampetti <lzampetti@gmail.com>
  * License: MIT
  */
 
@@ -17,13 +17,17 @@
 function _createClass(Constructor, protoProps, staticProps) {
   if (protoProps) _defineProperties(Constructor.prototype, protoProps);
   if (staticProps) _defineProperties(Constructor, staticProps);
+  Object.defineProperty(Constructor, "prototype", {
+    writable: false
+  });
   return Constructor;
 }
 
 function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
-  subClass.__proto__ = superClass;
+
+  _setPrototypeOf(subClass, superClass);
 }
 
 function _getPrototypeOf(o) {
@@ -48,7 +52,7 @@ function _isNativeReflectConstruct() {
   if (typeof Proxy === "function") return true;
 
   try {
-    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
     return true;
   } catch (e) {
     return false;
@@ -120,12 +124,6 @@ function _assertThisInitialized(self) {
 var NODES = {};
 
 var Factory = function () {
-  function Factory() {
-    this.rxcompId = -1;
-    this.unsubscribe$ = new rxjs.Subject();
-    this.changes$ = new rxjs.ReplaySubject(1);
-  }
-
   var _proto = Factory.prototype;
 
   _proto.onInit = function onInit() {};
@@ -155,6 +153,12 @@ var Factory = function () {
     this.pushChanges();
   };
 
+  function Factory() {
+    this.rxcompId = -1;
+    this.unsubscribe$ = new rxjs.Subject();
+    this.changes$ = new rxjs.ReplaySubject(1);
+  }
+
   Factory.getInputsTokens = function getInputsTokens(instance, node, module) {
     var _this$meta$inputs;
 
@@ -171,6 +175,8 @@ var Factory = function () {
 
   return Factory;
 }();
+
+Factory.meta = void 0;
 function getContext(instance) {
   return CONTEXTS[instance.rxcompId];
 }var Directive = function (_Factory) {
@@ -187,7 +193,11 @@ function getContext(instance) {
   function ClassDirective() {
     var _this;
 
-    _this = _Directive.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Directive.call.apply(_Directive, [this].concat(args)) || this;
     _this.class = '';
     _this.keys = [];
     return _this;
@@ -229,6 +239,7 @@ function getContext(instance) {
 
   return ClassDirective;
 }(Directive);
+
 ClassDirective.meta = {
   selector: "[[class]]",
   inputs: ['class']
@@ -249,6 +260,11 @@ var ExpressionError = function (_Error2) {
 
     var message = "ExpressionError in " + instance.constructor.name + " \"" + expression + "\"\n\t\t" + error.message;
     _this = _Error2.call(this, message) || this;
+    _this.module = void 0;
+    _this.instance = void 0;
+    _this.expression = void 0;
+    _this.params = void 0;
+    _this.template = void 0;
     _this.name = error.name;
     _this.module = module;
     _this.instance = instance;
@@ -266,6 +282,8 @@ var ExpressionError = function (_Error2) {
 }(_wrapNativeSuper(Error));
 var ErrorInterceptorHandler = function () {
   function ErrorInterceptorHandler(next, interceptor) {
+    this.next = void 0;
+    this.interceptor = void 0;
     this.next = next;
     this.interceptor = interceptor;
   }
@@ -308,7 +326,11 @@ var EventDirective = function (_Directive) {
   function EventDirective() {
     var _this;
 
-    _this = _Directive.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Directive.call.apply(_Directive, [this].concat(args)) || this;
     _this.event = '';
     return _this;
   }
@@ -338,6 +360,7 @@ var EventDirective = function (_Directive) {
 
   return EventDirective;
 }(Directive);
+
 EventDirective.meta = {
   selector: "[(" + EVENTS.join(')],[(') + ")]"
 };var Structure = function (_Factory) {
@@ -458,6 +481,8 @@ var Context = function (_Component) {
     var _this;
 
     _this = _Context.call(this, parentInstance) || this;
+    _this.index = void 0;
+    _this.count = void 0;
     _this[key] = $key;
     _this[value] = $value;
     _this.index = index;
@@ -494,8 +519,15 @@ var Context = function (_Component) {
   function ForStructure() {
     var _this;
 
-    _this = _Structure.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Structure.call.apply(_Structure, [this].concat(args)) || this;
     _this.instances = [];
+    _this.forbegin = void 0;
+    _this.forend = void 0;
+    _this.tokens = void 0;
     return _this;
   }
 
@@ -622,6 +654,7 @@ var Context = function (_Component) {
 
   return ForStructure;
 }(Structure);
+
 ForStructure.meta = {
   selector: '[*for]',
   inputs: ['for']
@@ -634,6 +667,9 @@ ForStructure.meta = {
 
   _createClass(HrefTargetDirective, [{
     key: "target",
+    get: function get() {
+      return this.target_;
+    },
     set: function set(target) {
       if (this.target_ !== target) {
         this.target_ = target;
@@ -643,14 +679,12 @@ ForStructure.meta = {
 
         target ? node.setAttribute('target', target) : node.removeAttribute('target');
       }
-    },
-    get: function get() {
-      return this.target_;
     }
   }]);
 
   return HrefTargetDirective;
 }(Directive);
+
 HrefTargetDirective.meta = {
   selector: '[[target]]',
   inputs: ['target']
@@ -663,6 +697,9 @@ HrefTargetDirective.meta = {
 
   _createClass(HrefDirective, [{
     key: "href",
+    get: function get() {
+      return this.href_;
+    },
     set: function set(href) {
       if (this.href_ !== href) {
         this.href_ = href;
@@ -672,14 +709,12 @@ HrefTargetDirective.meta = {
 
         href ? node.setAttribute('href', href) : node.removeAttribute('href');
       }
-    },
-    get: function get() {
-      return this.href_;
     }
   }]);
 
   return HrefDirective;
 }(Directive);
+
 HrefDirective.meta = {
   selector: '[[href]]',
   inputs: ['href']
@@ -687,7 +722,18 @@ HrefDirective.meta = {
   _inheritsLoose(IfStructure, _Structure);
 
   function IfStructure() {
-    return _Structure.apply(this, arguments) || this;
+    var _this;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Structure.call.apply(_Structure, [this].concat(args)) || this;
+    _this.ifbegin = void 0;
+    _this.ifend = void 0;
+    _this.clonedNode = void 0;
+    _this.element = void 0;
+    return _this;
   }
 
   var _proto = IfStructure.prototype;
@@ -730,6 +776,7 @@ HrefDirective.meta = {
 
   return IfStructure;
 }(Structure);
+
 IfStructure.meta = {
   selector: '[*if]',
   inputs: ['if']
@@ -742,6 +789,9 @@ IfStructure.meta = {
 
   _createClass(InnerHtmlDirective, [{
     key: "innerHTML",
+    get: function get() {
+      return this.innerHTML_;
+    },
     set: function set(innerHTML) {
       if (this.innerHTML_ !== innerHTML) {
         this.innerHTML_ = innerHTML;
@@ -751,14 +801,12 @@ IfStructure.meta = {
 
         node.innerHTML = innerHTML == undefined ? '' : innerHTML;
       }
-    },
-    get: function get() {
-      return this.innerHTML_;
     }
   }]);
 
   return InnerHtmlDirective;
 }(Directive);
+
 InnerHtmlDirective.meta = {
   selector: "[innerHTML]",
   inputs: ['innerHTML']
@@ -768,7 +816,11 @@ InnerHtmlDirective.meta = {
   function JsonComponent() {
     var _this;
 
-    _this = _Component.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Component.call.apply(_Component, [this].concat(args)) || this;
     _this.active = false;
     return _this;
   }
@@ -782,6 +834,7 @@ InnerHtmlDirective.meta = {
 
   return JsonComponent;
 }(Component);
+
 JsonComponent.meta = {
   selector: 'json-component',
   inputs: ['item'],
@@ -794,7 +847,9 @@ JsonComponent.meta = {
   };
 
   return Pipe;
-}();var ORDER = [Structure, Component, Directive];
+}();
+
+Pipe.meta = void 0;var ORDER = [Structure, Component, Directive];
 
 var Platform = function () {
   function Platform() {}
@@ -824,7 +879,7 @@ var Platform = function () {
     var module = new moduleFactory();
     module.meta = meta;
     meta.imports.forEach(function (moduleFactory) {
-      moduleFactory.prototype.constructor.call(module);
+      moduleFactory.prototype.onInit.call(module);
     });
     return module;
   };
@@ -996,7 +1051,7 @@ var Platform = function () {
   return Platform;
 }();
 var PLATFORM_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
-var PLATFORM_JS_DOM = typeof window !== 'undefined' && window.name === 'nodejs' || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Node.js') !== -1 || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('jsdom') !== -1;
+typeof window !== 'undefined' && window.name === 'nodejs' || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Node.js') !== -1 || typeof navigator !== 'undefined' && navigator.userAgent.indexOf('jsdom') !== -1;
 var PLATFORM_NODE = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 var isPlatformBrowser = !PLATFORM_NODE && PLATFORM_BROWSER;var Serializer = function () {
   function Serializer() {}
@@ -1114,16 +1169,21 @@ function _decodeBase(value) {
 
   return JsonPipe;
 }(Pipe);
+
 JsonPipe.meta = {
   name: 'json'
 };var WINDOW = typeof self === 'object' && self.self === self && self || typeof global === 'object' && global.global === global && global || undefined;var ID = 0;
 
 var Module = function () {
   function Module() {
+    this.meta = void 0;
+    this.instances = void 0;
     this.unsubscribe$ = new rxjs.Subject();
   }
 
   var _proto = Module.prototype;
+
+  _proto.onInit = function onInit() {};
 
   _proto.compile = function compile(node, parentInstance) {
     var _this = this;
@@ -1735,6 +1795,9 @@ var Module = function () {
 
   return Module;
 }();
+
+Module.forRoot = void 0;
+Module.meta = void 0;
 function getParsableContextByElement(element) {
   var context;
   var rxcompId = element.rxcompId;
@@ -1801,6 +1864,9 @@ function getHost(instance, factory, node) {
 
   _createClass(SrcDirective, [{
     key: "src",
+    get: function get() {
+      return this.src_;
+    },
     set: function set(src) {
       if (this.src_ !== src) {
         this.src_ = src;
@@ -1810,14 +1876,12 @@ function getHost(instance, factory, node) {
 
         src ? node.setAttribute('src', src) : node.removeAttribute('src');
       }
-    },
-    get: function get() {
-      return this.src_;
     }
   }]);
 
   return SrcDirective;
 }(Directive);
+
 SrcDirective.meta = {
   selector: '[[src]]',
   inputs: ['src']
@@ -1825,7 +1889,16 @@ SrcDirective.meta = {
   _inheritsLoose(StyleDirective, _Directive);
 
   function StyleDirective() {
-    return _Directive.apply(this, arguments) || this;
+    var _this;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Directive.call.apply(_Directive, [this].concat(args)) || this;
+    _this.style = void 0;
+    _this.previousStyle = void 0;
+    return _this;
   }
 
   var _proto = StyleDirective.prototype;
@@ -1848,13 +1921,13 @@ SrcDirective.meta = {
     }
 
     if (style) {
-      for (var _key in style) {
-        if (!previousStyle || previousStyle[_key] !== style[_key]) {
-          var _splitted = _key.split('.');
+      for (var _key2 in style) {
+        if (!previousStyle || previousStyle[_key2] !== style[_key2]) {
+          var _splitted = _key2.split('.');
 
           var _propertyName = _splitted.shift();
 
-          var value = style[_key] + (_splitted.length ? _splitted[0] : '');
+          var value = style[_key2] + (_splitted.length ? _splitted[0] : '');
           node.style.setProperty(_propertyName, value);
         }
       }
@@ -1865,6 +1938,7 @@ SrcDirective.meta = {
 
   return StyleDirective;
 }(Directive);
+
 StyleDirective.meta = {
   selector: "[[style]]",
   inputs: ['style']
@@ -1884,6 +1958,7 @@ var CoreModule = function (_Module) {
 
   return CoreModule;
 }(Module);
+
 CoreModule.meta = {
   declarations: [].concat(factories, pipes),
   exports: [].concat(factories, pipes)
@@ -1923,7 +1998,7 @@ CoreModule.meta = {
     var module = new moduleFactory();
     module.meta = meta;
     meta.imports.forEach(function (moduleFactory) {
-      moduleFactory.prototype.constructor.call(module);
+      moduleFactory.prototype.onInit.call(module);
     });
 
     if (WINDOW.rxcomp_hydrate_) {
@@ -1955,7 +2030,11 @@ CoreModule.meta = {
   function RootComponent() {
     var _this;
 
-    _this = _Component.apply(this, arguments) || this;
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _Component.call.apply(_Component, [this].concat(args)) || this;
     _this.flag = false;
     _this.red = false;
     _this.notred = true;
@@ -2040,4 +2119,4 @@ AppModule.meta = {
   declarations: [ExamplePipe],
   bootstrap: RootComponent
 };
-Browser.bootstrap(AppModule);}(rxjs,rxjs.operators));
+Browser.bootstrap(AppModule);})(rxjs,rxjs.operators);

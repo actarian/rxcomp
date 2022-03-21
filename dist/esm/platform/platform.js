@@ -30,7 +30,7 @@ export default class Platform {
         const module = new moduleFactory();
         module.meta = meta;
         meta.imports.forEach((moduleFactory) => {
-            moduleFactory.prototype.constructor.call(module);
+            moduleFactory.prototype.onInit.call(module);
         });
         return module;
     }

@@ -15,7 +15,7 @@ var HrefDirective = /** @class */ (function (_super) {
         set: function (href) {
             if (this.href_ !== href) {
                 this.href_ = href;
-                var node = factory_1.getContext(this).node;
+                var node = (0, factory_1.getContext)(this).node;
                 href ? node.setAttribute('href', href) : node.removeAttribute('href');
             }
         },

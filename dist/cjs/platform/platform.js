@@ -36,7 +36,7 @@ var Platform = /** @class */ (function () {
         var module = new moduleFactory();
         module.meta = meta;
         meta.imports.forEach(function (moduleFactory) {
-            moduleFactory.prototype.constructor.call(module);
+            moduleFactory.prototype.onInit.call(module);
         });
         return module;
     };
@@ -48,7 +48,7 @@ var Platform = /** @class */ (function () {
         var bootstrap = moduleFactory.meta.bootstrap;
         var node = this.querySelector(bootstrap.meta.selector);
         if (!node) {
-            throw new error_1.ModuleError("missing node " + bootstrap.meta.selector);
+            throw new error_1.ModuleError("missing node ".concat(bootstrap.meta.selector));
         }
         var nodeInnerHTML = node.innerHTML;
         var pipes = this.resolvePipes(meta);
@@ -75,14 +75,14 @@ var Platform = /** @class */ (function () {
         var pipes = {};
         var pipeList = (exported ? meta.exports : meta.declarations).filter(function (x) { return x.prototype instanceof pipe_1.default; });
         pipeList.forEach(function (pipeFactory) { return pipes[pipeFactory.meta.name] = pipeFactory; });
-        return Object.assign.apply(Object, tslib_1.__spread([{}], importedPipes, [pipes]));
+        return Object.assign.apply(Object, tslib_1.__spreadArray(tslib_1.__spreadArray([{}], tslib_1.__read(importedPipes), false), [pipes], false));
     };
     Platform.resolveFactories = function (meta, exported) {
         var _a;
         var _this = this;
         var importedFactories = meta.imports.map(function (importMeta) { return _this.resolveFactories(importMeta, true); });
         var factoryList = (exported ? meta.exports : meta.declarations).filter(function (x) { return x.prototype instanceof factory_1.default; });
-        return (_a = Array.prototype.concat).call.apply(_a, tslib_1.__spread([factoryList], importedFactories));
+        return (_a = Array.prototype.concat).call.apply(_a, tslib_1.__spreadArray([factoryList], tslib_1.__read(importedFactories), false));
     };
     Platform.sortFactories = function (factories) {
         factories.sort(function (a, b) {
@@ -107,12 +107,12 @@ var Platform = /** @class */ (function () {
             if (a2) {
                 matchers.push(function (node) {
                     return (node.hasAttribute(a2) && node.getAttribute(a2) === v4) ||
-                        (node.hasAttribute("[" + a2 + "]") && node.getAttribute("[" + a2 + "]") === v4);
+                        (node.hasAttribute("[".concat(a2, "]")) && node.getAttribute("[".concat(a2, "]")) === v4);
                 });
             }
             if (a5) {
                 matchers.push(function (node) {
-                    return node.hasAttribute(a5) || node.hasAttribute("[" + a5 + "]");
+                    return node.hasAttribute(a5) || node.hasAttribute("[".concat(a5, "]"));
                 });
             }
             if (e6) {

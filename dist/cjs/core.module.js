@@ -35,12 +35,12 @@ var CoreModule = /** @class */ (function (_super) {
     function CoreModule() {
         var _this = _super.call(this) || this;
         // console.log('CoreModule');
-        error_1.errors$.pipe(operators_1.takeUntil(_this.unsubscribe$)).subscribe();
+        error_1.errors$.pipe((0, operators_1.takeUntil)(_this.unsubscribe$)).subscribe();
         return _this;
     }
     CoreModule.meta = {
-        declarations: tslib_1.__spread(factories, pipes),
-        exports: tslib_1.__spread(factories, pipes)
+        declarations: tslib_1.__spreadArray(tslib_1.__spreadArray([], tslib_1.__read(factories), false), tslib_1.__read(pipes), false),
+        exports: tslib_1.__spreadArray(tslib_1.__spreadArray([], tslib_1.__read(factories), false), tslib_1.__read(pipes), false)
     };
     return CoreModule;
 }(module_1.default));

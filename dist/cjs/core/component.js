@@ -8,7 +8,7 @@ var Component = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     Component.prototype.pushChanges = function () {
-        var _a = factory_1.getContext(this), module = _a.module, node = _a.node;
+        var _a = (0, factory_1.getContext)(this), module = _a.module, node = _a.node;
         if (module.instances) {
             this.changes$.next(this);
             module.parse(node, this);

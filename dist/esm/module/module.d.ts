@@ -5,6 +5,7 @@ export default class Module {
     meta: IModuleParsedMeta;
     instances?: Factory[];
     unsubscribe$: Subject<void>;
+    onInit(): void;
     static forRoot?: (...args: any[]) => typeof Module;
     compile(node: IElement, parentInstance?: Factory | Window): Factory[];
     makeInstance(node: IElement, factory: typeof Factory, selector: string, parentInstance?: Factory | Window, args?: any[], inject?: {

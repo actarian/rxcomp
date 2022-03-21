@@ -9,7 +9,7 @@ var IfStructure = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     IfStructure.prototype.onInit = function () {
-        var node = factory_1.getContext(this).node;
+        var node = (0, factory_1.getContext)(this).node;
         var ifbegin = this.ifbegin = document.createComment("*if begin");
         ifbegin.rxcompId = node.rxcompId;
         node.parentNode.replaceChild(ifbegin, node);
@@ -21,7 +21,7 @@ var IfStructure = /** @class */ (function (_super) {
         this.element = clonedNode.cloneNode(true);
     };
     IfStructure.prototype.onChanges = function () {
-        var module = factory_1.getContext(this).module;
+        var module = (0, factory_1.getContext)(this).module;
         var element = this.element;
         // console.log('IfStructure.onChanges.if', this.if);
         if (Boolean(this.if)) { // !!! keep == loose equality

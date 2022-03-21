@@ -15,7 +15,7 @@ var InnerHtmlDirective = /** @class */ (function (_super) {
         set: function (innerHTML) {
             if (this.innerHTML_ !== innerHTML) {
                 this.innerHTML_ = innerHTML;
-                var node = factory_1.getContext(this).node;
+                var node = (0, factory_1.getContext)(this).node;
                 node.innerHTML = innerHTML == undefined ? '' : innerHTML; // !!! keep == loose equality
             }
         },
